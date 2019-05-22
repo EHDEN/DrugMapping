@@ -224,7 +224,11 @@ public class InputFile extends JPanel {
 	
 	public List<String> getSettings() {
 		List<String> settings = new ArrayList<String>();
-		
+
+		settings.add("#");
+		settings.add("# " + getLabelText());
+		settings.add("#");
+		settings.add("");
 		settings.add(labelText + ".filename=" + fileName);
 		settings.add(labelText + ".fieldDelimiter=" + fieldDelimiter);
 		settings.add(labelText + ".textQualifier=" + textQualifier);
@@ -238,7 +242,7 @@ public class InputFile extends JPanel {
 	
 	public void putSettings(List<String> settings) {
 		for (String setting : settings) {
-			if (!setting.trim().equals("")) {
+			if ((!setting.trim().equals("")) && (!setting.substring(0, 1).equals("#"))) {
 				int equalSignIndex = setting.indexOf("=");
 				String settingPath = setting.substring(0, equalSignIndex);
 				String value = setting.substring(equalSignIndex + 1);

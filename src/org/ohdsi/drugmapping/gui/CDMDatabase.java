@@ -106,6 +106,10 @@ public class CDMDatabase extends JPanel {
 		List<String> settings = null;
 		if (dbSettings != null) {
 			settings = new ArrayList<String>();
+			settings.add("#");
+			settings.add("# " + dbSettings.name);
+			settings.add("#");
+			settings.add("");
 			settings.add("name=" + dbSettings.name);
 			settings.add("dbtype=" + dbSettings.dbType.toString());
 			settings.add("server=" + dbSettings.server);
@@ -119,15 +123,17 @@ public class CDMDatabase extends JPanel {
 	public void putSettings(List<String> settings) {
 		dbSettings = new DBSettings();
 		for (String setting : settings) {
-			int equalSignIndex = setting.indexOf("=");
-			String settingVariable = setting.substring(0, equalSignIndex);
-			String value = setting.substring(equalSignIndex + 1);
-			if (settingVariable.equals("name")) dbSettings.name = value;
-			if (settingVariable.equals("dbtype")) dbSettings.dbType = new DbType(value);
-			if (settingVariable.equals("server")) dbSettings.server = value;
-			if (settingVariable.equals("user")) dbSettings.user = value;
-			if (settingVariable.equals("password")) dbSettings.password = value;
-			if (settingVariable.equals("database")) dbSettings.database = value;
+			if ((!setting.trim().equals("")) && (!setting.substring(0, 1).equals("#"))) {
+				int equalSignIndex = setting.indexOf("=");
+				String settingVariable = setting.substring(0, equalSignIndex);
+				String value = setting.substring(equalSignIndex + 1);
+				if (settingVariable.equals("name")) dbSettings.name = value;
+				if (settingVariable.equals("dbtype")) dbSettings.dbType = new DbType(value);
+				if (settingVariable.equals("server")) dbSettings.server = value;
+				if (settingVariable.equals("user")) dbSettings.user = value;
+				if (settingVariable.equals("password")) dbSettings.password = value;
+				if (settingVariable.equals("database")) dbSettings.database = value;
+			}
 		}
 		if (dbSettings.password == null) {
 			defineDatabase(this);

@@ -15,7 +15,6 @@ import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.vocabulary.Vocabulary;
-import org.ohdsi.utilities.files.Row;
 
 public class DrugMapping {
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
@@ -25,6 +24,7 @@ public class DrugMapping {
 	
 	private MainFrame mainFrame;
 	private Vocabulary vocabulary;
+	private String special = "";
 	
 	
 	public static String getCurrentDate() {
@@ -44,48 +44,36 @@ public class DrugMapping {
 	}
 	
 	
+	public static String getCurrentPath() {
+		return currentPath;
+	}
+	
+	
 	public static void disableWhenRunning(JComponent component) {
 		componentsToDisableWhenRunning.add(component);
 	}
 	
 	
-	public DrugMapping() {
-		mainFrame = new MainFrame(this);
-	}
-	
-	
-	private void setParameters(String[] args) {
+	public DrugMapping(Map<String, String> parameters) {
 		List<String> dbSettings = null;
 		String password = null;
 		List<String> fileSettings = null;
 		String logFileName = null;
+		special = parameters.get("special");
 		
-		for (int i = 0; i < args.length; i++) {
-			int equalSignIndex = args[i].indexOf("=");
-			String argVariable = args[i].substring(0, equalSignIndex);
-			String value = args[i].substring(equalSignIndex + 1);
-			
-			if (argVariable.toLowerCase().equals("databasesettings")) {
-				dbSettings = mainFrame.readSettingsFromFile(value);
-			}
-			if (argVariable.toLowerCase().equals("password")) {
-				password = value;
-			}
-			if (argVariable.toLowerCase().equals("filesettings")) {
-				fileSettings = mainFrame.readSettingsFromFile(value);
-			}
-			if (argVariable.toLowerCase().equals("logfile")) {
-				logFileName = value;
-			}
+		mainFrame = new MainFrame(this, parameters.get("special"));
+		
+		if (parameters.containsKey("databasesettings")) {
+			dbSettings = mainFrame.readSettingsFromFile(parameters.get("databasesettings"));
 		}
-		if (fileSettings != null) {
-			mainFrame.loadFileSettingsFile(fileSettings);
+		if (parameters.containsKey("password")) {
+			password = parameters.get("password");
 		}
-		if (dbSettings != null) {
-			if (password != null) {
-				dbSettings.add("password=" + password);
-			}
-			mainFrame.getDatabase().putSettings(dbSettings);
+		if (parameters.containsKey("filesettings")) {
+			fileSettings = mainFrame.readSettingsFromFile(parameters.get("filesettings"));
+		}
+		if (parameters.containsKey("logfile")) {
+			logFileName = parameters.get("logfile");
 		}
 
 		File logFile;
@@ -116,6 +104,16 @@ public class DrugMapping {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		
+		if (fileSettings != null) {
+			mainFrame.loadFileSettingsFile(fileSettings);
+		}
+		if (dbSettings != null) {
+			if (password != null) {
+				dbSettings.add("password=" + password);
+			}
+			mainFrame.getDatabase().putSettings(dbSettings);
 		}
 		
 		if (logFileName != null) {
@@ -151,10 +149,16 @@ public class DrugMapping {
 		public void run() {
 			for (JComponent component : componentsToDisableWhenRunning)
 				component.setEnabled(false);
-
-			//Mapping.loadReplacements(getFile("Replacements File"));
-			new MapATC(getDatabase(), getFile("ATC File"));
-			//new MapIngredients(getDatabase(), getFile("Ingredients File"));
+			
+			if (special.toUpperCase().equals("ZINDEX")) {
+				new IPCIZIndexConversion(getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"));
+			}
+			else {
+				//Mapping.loadReplacements(getFile("Replacements File"));
+				//new MapATC(getDatabase(), getFile("ATC File"));
+				//new MapIngredients(getDatabase(), getFile("Ingredients File"));
+				new MapGenericDrugs(getDatabase(), getFile("Generic Drugs File"));
+			}
 
 			for (JComponent component : componentsToDisableWhenRunning)
 				component.setEnabled(true);
@@ -164,8 +168,17 @@ public class DrugMapping {
 	
 	
 	public static void main(String[] args) {
-		DrugMapping drugMapping = new DrugMapping();
-		drugMapping.setParameters(args);
+		Map<String, String> parameters = new HashMap<String, String>();
+
+		parameters.put("special", "");
+		for (int i = 0; i < args.length; i++) {
+			int equalSignIndex = args[i].indexOf("=");
+			String argVariable = args[i].substring(0, equalSignIndex).toLowerCase();
+			String value = args[i].substring(equalSignIndex + 1);
+			parameters.put(argVariable, value);
+		}
+		
+		DrugMapping drugMapping = new DrugMapping(parameters);
 		drugMapping.Show();
 	}
 

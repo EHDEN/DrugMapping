@@ -7,100 +7,26 @@ import java.util.List;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
 
-public class DrugMappingDefinitions {
+public class IPCIZIndexMappingDefinitions {
 	
 	public static final List<FileDefinition> FILES = new ArrayList<FileDefinition>(
 			Arrays.asList(
-/*
 					new FileDefinition(
-							"Replacements File",
+							"ZIndex GPK File",
 							new String[] {
-									"This file should contain textual replacements for searching on source texts."
+									"This file should contain ZIndex GPK drug definitions."
 					  		},
 							new FileColumnDefinition[] {
 									new FileColumnDefinition(
-											"Replace",
-											new String[] {
-													"This is the string to be replaced.",
-													"May contain ^ for beginning and $ for ending."
-											}
-									),
-									new FileColumnDefinition(
-											"By",
-											new String[] {
-													"This is the replacement string."
-											}
-									)
-							}
-					),
-					new FileDefinition(
-							"ATC File",
-							new String[] {
-									"This file should contain the ATC-codes from the source database."
-					  		},
-							new FileColumnDefinition[] {
-									new FileColumnDefinition(
-											"ATC",
-											new String[] {
-													"This is the ATC-code in the source database."
-											}
-									),
-									new FileColumnDefinition(
-											"ATCText",
-											new String[] {
-													"This is the name of the ATC-code",
-													"the source database."
-											}
-									),
-									new FileColumnDefinition(
-											"ATCTextEnglish",
-											new String[] {
-													"This is the English translation of the name",
-													"of the ATC-code in the source database."
-											}
-									)
-							}
-					),
-					new FileDefinition(
-							"Ingredients File",
-							new String[] {
-									"This file should contain the ingredients from the source database."
-					  		},
-							new FileColumnDefinition[] {
-									new FileColumnDefinition(
-											"IngredientID",
-											new String[] {
-													"This is the ID of the ingredient in the",
-													"source database."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientText",
-											new String[] {
-													"This is the name of the ingredient in",
-													"the source database."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientTextEnglish",
-											new String[] {
-													"This is the English translation of the name",
-													"of the ingredient in the source database."
-											}
-									)
-							}
-					),
-*/
-					new FileDefinition(
-							"Generic Drugs File",
-							new String[] {
-									"This file should contain the genric drugs from the source database."
-					  		},
-							new FileColumnDefinition[] {
-									new FileColumnDefinition(
-											"GenericDrugCode",
+											"GPKCode",
 											new String[] {
 													"This is the GPK-code of the drug."
+											}
+									),
+									new FileColumnDefinition(
+											"MemoCode",
+											new String[] {
+													"This is the memo code of the drug."
 											}
 									),
 									new FileColumnDefinition(
@@ -128,7 +54,13 @@ public class DrugMappingDefinitions {
 											}
 									),
 									new FileColumnDefinition(
-											"DDDPerUnit",
+											"GSKCode",
+											new String[] {
+													"This is the GSK-code of the drug."
+											}
+									),
+									new FileColumnDefinition(
+											"DDDPerHPKUnit",
 											new String[] {
 													"This is the DDD per HPK unit of the drug."
 											}
@@ -141,86 +73,108 @@ public class DrugMappingDefinitions {
 											}
 									),
 									new FileColumnDefinition(
-											"Dosage",
+											"HPKMG",
 											new String[] {
 													"This is the dosage in mg of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"DosageUnit",
+											"HPKMGUnit",
 											new String[] {
 													"This is the mg unit of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"PharmaceuticalForm",
+											"PharmForm",
 											new String[] {
 													"This is the pharmaceutical form of the drug."
 											}
-									),
+									)
+							}
+					),
+					new FileDefinition(
+							"ZIndex GSK File",
+							new String[] {
+									"This file should contain the ZIndex GSK (component) definitions."
+					  		},
+							new FileColumnDefinition[] {
 									new FileColumnDefinition(
-											"ComponentCode",
+											"GSKCode",
 											new String[] {
-													"This is the GSK-code of the drug."
+													"This is the GSK-code of the combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentPartNumber",
+											"PartNumber",
 											new String[] {
 													"This is the part number of the component",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentType",
+											"Type",
 											new String[] {
 													"This is the type of the component",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentAmount",
+											"Amount",
 											new String[] {
 													"This is the amount of the component",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentAmountUnit",
+											"AmountUnit",
 											new String[] {
 													"This is the unit of the amount of the",
 													"component in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentGenericName",
-											new String[] {
-													"This is the generic name of the",
-													"component in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"ComponentCASNumber",
-											new String[] {
-													"This is the CAS number of the",
-													"component in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"SubstanceCode",
+											"GNKCode",
 											new String[] {
 													"This is the GNKCode of the component",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"SubstanceDescription",
+											"GenericName",
+											new String[] {
+													"This is the generic name of the",
+													"component in this combination."
+											}
+									),
+									new FileColumnDefinition(
+											"CASNumber",
+											new String[] {
+													"This is the CAS number of the",
+													"component in this combination."
+											}
+									)
+							}
+					),
+					new FileDefinition(
+							"ZIndex GNK File",
+							new String[] {
+									"This file should contain the substances of the drug components."
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"GNKCode",
+											new String[] {
+													"This is the GNK-code of the substance."
+											}
+									),
+									new FileColumnDefinition(
+											"Description",
 											new String[] {
 													"This is the description of the substance."
 											}
 									),
 									new FileColumnDefinition(
-											"SubstanceCASNumber",
+											"CASCode",
 											new String[] {
 													"This is the CAS number of the substance."
 											}
