@@ -53,18 +53,20 @@ public class IPCIZIndexConversion extends Mapping {
 				record[GenericName]   = gskFile.get(row, "GenericName");
 				record[CASNumber]     = gskFile.get(row, "CASNumber");
 				
-				String unit = gpkFile.get(row, "AmountUnit").trim();
+				String unit = gskFile.get(row, "AmountUnit").trim();
 				if (unit.contains("/")) {
 					String[] unitSplit = unit.split("/");
 					for (String subUnit : unitSplit) {
 						subUnit = subUnit.trim().toLowerCase();
-						if (!subUnit.equals("")) {
+						if (!subUnit.trim().equals("")) {
 							units.add(subUnit);
 						}
 					}
 				}
 				else {
-					units.add(unit);
+					if (!unit.trim().equals("")) {
+						units.add(unit);
+					}
 				}
 
 				int gskCode = Integer.valueOf(record[GSKCode]); 
@@ -145,13 +147,15 @@ public class IPCIZIndexConversion extends Mapping {
 								String[] unitSplit = unit.split("/");
 								for (String subUnit : unitSplit) {
 									subUnit = subUnit.trim().toLowerCase();
-									if (!subUnit.equals("")) {
+									if (!subUnit.trim().equals("")) {
 										units.add(subUnit);
 									}
 								}
 							}
 							else {
-								units.add(unit);
+								if (!unit.trim().equals("")) {
+									units.add(unit);
+								}
 							}
 							
 							if (!gpkFile.get(row, "GSKCode").equals("")) {
