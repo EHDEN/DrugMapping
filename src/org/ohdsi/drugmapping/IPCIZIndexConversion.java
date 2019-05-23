@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
@@ -29,6 +31,7 @@ public class IPCIZIndexConversion extends Mapping {
 
 	private Map<Integer, List<String[]>> gskMap = new HashMap<Integer, List<String[]>>();
 	private Map<Integer, String[]> gnkMap = new HashMap<Integer, String[]>();
+	private Set<String> units = new HashSet<String>();
 
 	
 	public IPCIZIndexConversion(InputFile gpkFile, InputFile gskFile, InputFile gnkFile) {
@@ -49,6 +52,20 @@ public class IPCIZIndexConversion extends Mapping {
 				record[GSK_GNKCode]   = gskFile.get(row, "GNKCode");
 				record[GenericName]   = gskFile.get(row, "GenericName");
 				record[CASNumber]     = gskFile.get(row, "CASNumber");
+				
+				String unit = gpkFile.get(row, "AmountUnit").trim();
+				if (unit.contains("/")) {
+					String[] unitSplit = unit.split("/");
+					for (String subUnit : unitSplit) {
+						subUnit = subUnit.trim().toLowerCase();
+						if (!subUnit.equals("")) {
+							units.add(subUnit);
+						}
+					}
+				}
+				else {
+					units.add(unit);
+				}
 
 				int gskCode = Integer.valueOf(record[GSKCode]); 
 				List<String[]> gskList = gskMap.get(gskCode);
@@ -123,6 +140,20 @@ public class IPCIZIndexConversion extends Mapping {
 							gpkRecord += "," + "\"" + gpkFile.get(row, "PharmForm").replaceAll("\"", "\"\"") + "\"";
 							gpkRecord += "," + gpkFile.get(row, "GSKCode");
 							
+							String unit = gpkFile.get(row, "HPKMGUnit").trim();
+							if (unit.contains("/")) {
+								String[] unitSplit = unit.split("/");
+								for (String subUnit : unitSplit) {
+									subUnit = subUnit.trim().toLowerCase();
+									if (!subUnit.equals("")) {
+										units.add(subUnit);
+									}
+								}
+							}
+							else {
+								units.add(unit);
+							}
+							
 							if (!gpkFile.get(row, "GSKCode").equals("")) {
 								int gskCode = Integer.valueOf(gpkFile.get(row, "GSKCode"));
 								
@@ -135,39 +166,57 @@ public class IPCIZIndexConversion extends Mapping {
 									gpkFullFile.println(gpkRecord);
 								}
 								else {
+									// Remove non-active ingredients
+									List<String[]> remove = new ArrayList<String[]>();
 									for (String[] gskObject : gskList) {
-										String gpkGskGnkRecord = gpkRecord;
-										gpkGskGnkRecord += "," + gskObject[PartNumber];
-										gpkGskGnkRecord += "," + gskObject[Type];
-										gpkGskGnkRecord += "," + gskObject[Amount];
-										gpkGskGnkRecord += "," + gskObject[AmountUnit];
-										gpkGskGnkRecord += "," + "\"" + gskObject[GenericName].replaceAll("\"", "\"\"") + "\"";
-										gpkGskGnkRecord += "," + gskObject[CASNumber];
-										gpkGskGnkRecord += "," + gskObject[GNKCode];
-										
-										if (!gskObject[GNKCode].equals("")) {
-											int gnkCode = Integer.valueOf(gskObject[GNKCode]);
+										if (!gskObject[Type].equals("W")) {
+											remove.add(gskObject);
+										}
+									}
+									gskList.removeAll(remove);
+
+									if (gskList.size() == 0) {
+										System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gpkFile.get(row, "GSKCode") + " found for GPK " + gpkFile.get(row, "GPKCode"));
+										for (int cellCount = 0; cellCount < (GSKColumnCount + GNKColumnCount - 2); cellCount++) {
+											gpkRecord += ",";
+										}
+										gpkFullFile.println(gpkRecord);
+									}
+									else {
+										for (String[] gskObject : gskList) {
+											String gpkGskGnkRecord = gpkRecord;
+											gpkGskGnkRecord += "," + gskObject[PartNumber];
+											gpkGskGnkRecord += "," + gskObject[Type];
+											gpkGskGnkRecord += "," + gskObject[Amount];
+											gpkGskGnkRecord += "," + gskObject[AmountUnit];
+											gpkGskGnkRecord += "," + "\"" + gskObject[GenericName].replaceAll("\"", "\"\"") + "\"";
+											gpkGskGnkRecord += "," + gskObject[CASNumber];
+											gpkGskGnkRecord += "," + gskObject[GNKCode];
 											
-											String[] gnkObject = gnkMap.get(gnkCode);
-											if (gnkObject == null) {
-												System.out.println("    WARNING: No GNK record (GNKCode = " + gskObject[GNKCode] + " found for GSK " + gskObject[GSKCode] + " of GPK " + gpkFile.get(row, "GPKCode"));
+											if (!gskObject[GNKCode].equals("")) {
+												int gnkCode = Integer.valueOf(gskObject[GNKCode]);
+												
+												String[] gnkObject = gnkMap.get(gnkCode);
+												if (gnkObject == null) {
+													System.out.println("    WARNING: No GNK record (GNKCode = " + gskObject[GNKCode] + " found for GSK " + gskObject[GSKCode] + " of GPK " + gpkFile.get(row, "GPKCode"));
+													for (int cellCount = 0; cellCount < (GNKColumnCount - 1); cellCount++) {
+														gpkGskGnkRecord += ",";
+													}
+													gpkFullFile.println(gpkGskGnkRecord);
+												}
+												else {
+													gpkGskGnkRecord += "," + "\"" + gnkObject[Description].replaceAll("\"", "\"\"") + "\"";
+													gpkGskGnkRecord += "," + gnkObject[CASCode];
+													gpkFullFile.println(gpkGskGnkRecord);
+												}
+											}
+											else {
+												System.out.println("    WARNING: No GNK code found for GSK " + gskObject[GSKCode] + " of GPK " + gpkFile.get(row, "GPKCode"));
 												for (int cellCount = 0; cellCount < (GNKColumnCount - 1); cellCount++) {
 													gpkGskGnkRecord += ",";
 												}
 												gpkFullFile.println(gpkGskGnkRecord);
 											}
-											else {
-												gpkGskGnkRecord += "," + "\"" + gnkObject[Description].replaceAll("\"", "\"\"") + "\"";
-												gpkGskGnkRecord += "," + gnkObject[CASCode];
-												gpkFullFile.println(gpkGskGnkRecord);
-											}
-										}
-										else {
-											System.out.println("    WARNING: No GNK code found for GSK " + gskObject[GSKCode] + " of GPK " + gpkFile.get(row, "GPKCode"));
-											for (int cellCount = 0; cellCount < (GNKColumnCount - 1); cellCount++) {
-												gpkGskGnkRecord += ",";
-											}
-											gpkFullFile.println(gpkGskGnkRecord);
 										}
 									}
 								}
@@ -181,6 +230,8 @@ public class IPCIZIndexConversion extends Mapping {
 							}
 						}
 						gpkFullFile.close();
+						
+						
 						System.out.println("  Done");
 					}
 					else {
@@ -198,6 +249,25 @@ public class IPCIZIndexConversion extends Mapping {
 		}
 		else {
 			System.out.println("  ERROR: Cannot load GSK file '" + gskFile.getFileName() + "'");
+		}
+		
+		String gpkUnitsFileName = DrugMapping.getCurrentPath() + "/ZIndex - Units.csv";
+		try {
+			PrintWriter gpkUnitsFile = new PrintWriter(new File(gpkUnitsFileName));
+			
+			String header = "ZIndexUnit";
+			header += "," + "CDMUnit";
+			
+			gpkUnitsFile.println(header);
+			
+			for (String unit : units) {
+				gpkUnitsFile.println(unit + ",");
+			}
+			
+			gpkUnitsFile.close();
+			
+		} catch (FileNotFoundException e) {
+			System.out.println("  ERROR: Cannot create output file '" + gpkUnitsFileName + "'");
 		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");

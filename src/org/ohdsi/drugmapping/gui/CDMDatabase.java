@@ -214,6 +214,7 @@ public class CDMDatabase extends JPanel {
 		databaseDialog.setLayout(new BorderLayout());
 		databaseDialog.setModal(true);
 		databaseDialog.setSize(500, 270);
+		MainFrame.setIcon(databaseDialog);
 		databaseDialog.setLocationRelativeTo(null);
 		databaseDialog.setTitle("CDM Database Definition");
 		databaseDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

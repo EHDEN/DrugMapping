@@ -39,7 +39,7 @@ public class MapATC extends Mapping {
 				query += " " + "from " + database.getVocabSchema() + ".concept"; 
 				query += " " + "where upper(concept_code) = '" + atc + "'"; 
 				query += " " + "and domain_id = 'Drug'"; 
-				query += " " + "and vocabulary_id like 'ATC'"; 
+				query += " " + "and vocabulary_id = 'ATC'"; 
 				query += " " + "and concept_class_id = 'ATC " + (atc.length() == 1 ? "1st": (atc.length() == 3 ? "2nd" : (atc.length() == 4 ? "3rd" : (atc.length() == 5 ? "4th" : "5th")))) + "'";
 				
 				if (database.excuteQuery(query)) {

@@ -16,7 +16,7 @@ public class MapGenericDrugs extends Mapping {
 	
 	
 	public MapGenericDrugs(CDMDatabase database, InputFile genericDrugsFile) {
-		
+				
 		String fileName = "";
 		try {
 			// Create all output files
@@ -39,6 +39,62 @@ public class MapGenericDrugs extends Mapping {
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
+
+			String query = null;
+			
+			
+			// Collect ATC ingredients
+			System.out.println(DrugMapping.getCurrentTime() + " Collecting ATC ingredients ...");
+			Map<String, Map<String, String>> atcIngredientsMap = new HashMap<String,Map<String, String>>();
+			
+			query  = "select atc.concept_code as atc";
+			query += "," + "ingredient.concept_id as ingredient_concept_id";
+			query += "," + "ingredient.concept_name as ingredient_concept_name";
+			query += "," + "ingredient.domain_id as ingredient_domain_id";
+			query += "," + "ingredient.vocabulary_id as ingredient_vocabulary_id";
+			query += "," + "ingredient.concept_class_id as ingredient_concept_class_id";
+			query += "," + "ingredient.standard_concept as ingredient_standard_concept";
+			query += "," + "ingredient.concept_code as ingredient_concept_code";
+			query += " " + "from cdm.concept_ancestor atc_to_ingredient";
+			query += " " + "inner join cdm.concept atc";
+			query += " " + "on atc_to_ingredient.ancestor_concept_id = atc.concept_id";
+			query += " " + "inner join cdm.concept ingredient";
+			query += " " + "on atc_to_ingredient.descendant_concept_id = ingredient.concept_id";
+			query += " " + "where atc.vocabulary_id = 'ATC'";
+			query += " " + "and ingredient.vocabulary_id = 'RxNorm'";
+			query += " " + "and ingredient.concept_class_id = 'Ingredient'";
+			query += " " + "and atc.concept_name = ingredient.concept_name";
+			
+			if (database.excuteQuery(query)) {
+				if (database.hasNext()) {
+					while (database.hasNext()) {
+						Row queryRow = database.next();
+
+						String atc = queryRow.get("atc");
+						
+						Map<String, String>ingredientConcept = new HashMap<String, String>();
+						
+						ingredientConcept.put("concept_id"      , queryRow.get("ingredient_concept_id"));
+						ingredientConcept.put("concept_name"    , queryRow.get("ingredient_concept_name"));
+						ingredientConcept.put("domain_id"       , queryRow.get("ingredient_domain_id"));
+						ingredientConcept.put("vocabulary_id"   , queryRow.get("ingredient_vocabulary_id"));
+						ingredientConcept.put("concept_class_id", queryRow.get("ingredient_concept_class_id"));
+						ingredientConcept.put("standard_concept", queryRow.get("ingredient_standard_concept"));
+						ingredientConcept.put("concept_code"    , queryRow.get("ingredient_concept_code"));
+						
+						atcIngredientsMap.put(atc, ingredientConcept);
+
+						System.out.println("        ATC Ingredient: " + atc + " -> " + getConceptDescription(ingredientConcept));
+					}
+				}
+			}
+			
+			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+			
+
+			Map<String, Map<String, String>> atcConceptMap = new HashMap<String, Map<String, String>>();
+			Map<String, String> conceptATCMap = new HashMap<String, String>();
+			Map<String, List<Map<String, String>>> atcRxNormMap = new HashMap<String, List<Map<String, String>>>();
 			
 			// Do the mapping
 			System.out.println(DrugMapping.getCurrentTime() + " Mapping Generic Drugs ...");
@@ -47,6 +103,7 @@ public class MapGenericDrugs extends Mapping {
 			int ignoredMissingDataCounter = 0; // Counter of generic drugs that are ignored due to missing data
 			int missingATCCounter         = 0; // Counter of generic drugs that have no ATC
 			int noATCConceptFoundCounter  = 0; // Counter of generic drugs for which no ATC concept could be found
+			int noRxNormForATCCounter     = 0; // Counter of ATC for which no RxNorm drugs could be found
 			
 			if (genericDrugsFile.openFile()) {
 				Map<String, String> genericDrugLine = null;
@@ -102,10 +159,7 @@ public class MapGenericDrugs extends Mapping {
 						genericDrugCounter++;
 						
 						// Map containing atc to CDM concept mapping
-						Map<String, Map<String, String>> atcConceptMap = new HashMap<String, Map<String, String>>();
-						
 						if ((!genericDrug.get(0).get("GenericDrugCode").isEmpty()) && (!genericDrug.get(0).get("FullName").isEmpty())) {
-							String query = null;
 							
 							// Get ATC concepts of components
 							String atc = genericDrug.get(0).get("ATCCode");
@@ -145,6 +199,7 @@ public class MapGenericDrugs extends Mapping {
 												atcConcept.put("match"           , atc);
 												
 												atcConceptMap.put(atc, atcConcept);
+												conceptATCMap.put(queryRow.get("concept_id"), atc);
 											}
 										}
 									}
@@ -156,18 +211,64 @@ public class MapGenericDrugs extends Mapping {
 									noATCConceptFoundCounter++;
 								}
 								else {
-									System.out.println("        ATC Concept: " + atcConcept.get("match") +
-													   " -> "     + atcConcept.get("concept_id") +
-											           ","        + atcConcept.get("concept_name") +
-											           ","        + atcConcept.get("domain_id") +
-											           ","        + atcConcept.get("vocabulary_id") +
-											           ","        + atcConcept.get("concept_class_id") +
-											           ","        + atcConcept.get("standard_concept") +
-											           ","        + atcConcept.get("concept_code")
-											);
-									
-									// TODO
+									System.out.println("        ATC Concept: " + atcConcept.get("match") + " -> " + getConceptDescription(atcConcept));
 								}
+								
+								// Get RxNorm drugs for the ATC
+								List<Map<String, String>> atcRxNormConcepts = atcRxNormMap.get(atc);
+								
+								if (atcRxNormConcepts == null) {
+									query  = "select concept_id";
+									query += "," + "concept_name"; 
+									query += "," + "domain_id";
+									query += "," + "vocabulary_id";
+									query += "," + "concept_class_id";  
+									query += "," + "standard_concept"; 
+									query += "," + "concept_code"; 
+									query += " " + "from " + database.getVocabSchema() + ".concept_relationship";
+									query += " " + "left outer join " + database.getVocabSchema() + ".concept";
+									query += " " + "on concept_id_1 = concept_id";
+									query += " " + "where concept_id_2 in ("; 
+									query += " " + "    select concept_id"; 
+									query += " " + "    from " + database.getVocabSchema() + ".concept";
+									query += " " + "    where concept_code = '" + atc + "'";
+									query += " " + "    and vocabulary_id = 'ATC'";
+									query += " " + "    )"; 
+									query += " " + "and relationship_id = 'RxNorm - ATC'";
+									
+									if (database.excuteQuery(query)) {
+										if (database.hasNext()) {
+											atcRxNormConcepts = new ArrayList<Map<String, String>>();
+											atcRxNormMap.put(atc, atcRxNormConcepts);
+											
+											while (database.hasNext()) {
+												Row queryRow = database.next();
+												
+												Map<String, String> rxNormConcept = new HashMap<String, String>();
+												rxNormConcept.put("concept_id"      , queryRow.get("concept_id"));
+												rxNormConcept.put("concept_name"    , queryRow.get("concept_name"));
+												rxNormConcept.put("domain_id"       , queryRow.get("domain_id"));
+												rxNormConcept.put("vocabulary_id"   , queryRow.get("vocabulary_id"));
+												rxNormConcept.put("concept_class_id", queryRow.get("concept_class_id"));
+												rxNormConcept.put("standard_concept", queryRow.get("standard_concept"));
+												rxNormConcept.put("concept_code"    , queryRow.get("concept_code"));
+												atcRxNormConcepts.add(rxNormConcept);
+											}
+										}
+									}
+								}
+
+								int rxNormConceptCount = atcRxNormConcepts == null ? 0 : atcRxNormConcepts.size();
+								System.out.println("        RxNorm Concepts found for atc '" + atc + "' (" + Integer.toString(rxNormConceptCount) + "):");
+								if (atcRxNormConcepts != null) {
+									for (Map<String, String> rxNormConcept : atcRxNormConcepts) {
+										System.out.println("            " + getConceptDescription(rxNormConcept));
+									}
+								}
+								else {
+									noRxNormForATCCounter++;
+								}
+								
 							}
 							else {
 								System.out.println("        NO ATC");
@@ -192,6 +293,7 @@ public class MapGenericDrugs extends Mapping {
 			System.out.println("    Ignored: " + Integer.toString(ignoredMissingDataCounter));
 			System.out.println("    No ATC: " + Integer.toString(missingATCCounter));
 			System.out.println("    No ATC Concept: " + Integer.toString(noATCConceptFoundCounter));
+			System.out.println("    No RxNorm for ATC: " + Integer.toString(noRxNormForATCCounter));
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
 			
@@ -203,6 +305,18 @@ public class MapGenericDrugs extends Mapping {
 		} catch (FileNotFoundException e) {
 			System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
 		}
+	}
+	
+	
+	private String getConceptDescription(Map<String, String> concept) {
+		String description = (concept.get("concept_id") == null ? "null" : concept.get("concept_id"));
+		description += "," + (concept.get("concept_name") == null ? "null" : concept.get("concept_name"));
+		description += "," + (concept.get("domain_id") == null ? "null" : concept.get("domain_id"));
+		description += "," + (concept.get("vocabulary_id") == null ? "null" : concept.get("vocabulary_id"));
+		description += "," + (concept.get("concept_class_id") == null ? "null" : concept.get("concept_class_id"));
+		description += "," + (concept.get("standard_concept") == null ? "null" : concept.get("standard_concept"));
+		description += "," + (concept.get("concept_code") == null ? "null" : concept.get("concept_code"));
+		return description;
 	}
 	
 	

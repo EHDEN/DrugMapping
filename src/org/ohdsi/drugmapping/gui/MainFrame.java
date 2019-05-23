@@ -3,6 +3,8 @@ package org.ohdsi.drugmapping.gui;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -11,11 +13,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -35,6 +39,8 @@ import org.ohdsi.drugmapping.files.FileDefinition;
 
 public class MainFrame {
 	
+	private static final String ICON = "/org/ohdsi/drugmapping/gui/OHDSI Icon Picture 048x048.gif"; 
+	
 	private DrugMapping drugMapping;
 	private JFrame frame;
 	private Console console;
@@ -42,6 +48,24 @@ public class MainFrame {
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
 	private String logFile = null;
 	private String special = "";
+	
+
+	/**
+	 * Sets an icon on a JFrame or a JDialog.
+	 * @param container - the GUI component on which the icon is to be put
+	 */
+	public static void setIcon(Object container){
+		URL url = DrugMapping.class.getResource(ICON);
+		Image img = Toolkit.getDefaultToolkit().getImage(url);
+		if (container.getClass() == JFrame.class ||
+				JFrame.class.isAssignableFrom(container.getClass()))
+			((JFrame)container).setIconImage(img);
+		else if (container.getClass() == JDialog.class  ||
+				JDialog.class.isAssignableFrom(container.getClass()))
+			((JDialog)container).setIconImage(img);
+		else
+			((JFrame)container).setIconImage(img);
+	}
 	
 	
 	public MainFrame(DrugMapping drugMapping, String special) {
@@ -61,6 +85,7 @@ public class MainFrame {
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setSize(800, 600);
 		frame.setTitle("OHDSI Drug Mapping Tool");
+		MainFrame.setIcon(frame);
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(new BorderLayout());
 		

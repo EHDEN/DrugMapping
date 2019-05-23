@@ -272,6 +272,7 @@ public class InputFile extends JPanel {
 		fileDialog.setLayout(new BorderLayout());
 		fileDialog.setModal(true);
 		fileDialog.setSize(500, 400);
+		MainFrame.setIcon(fileDialog);
 		fileDialog.setLocationRelativeTo(null);
 		fileDialog.setTitle("Input File Definition");
 		fileDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -332,6 +333,7 @@ public class InputFile extends JPanel {
 
 		JTextField otherDelimiter = new JTextField("");
 		Dimension dimension = new Dimension(30, 20);
+		otherDelimiter.setDocument(new JTextFieldLimit(1));
 		otherDelimiter.setMinimumSize(dimension);
 		otherDelimiter.setMaximumSize(dimension);
 		otherDelimiter.setPreferredSize(dimension);
@@ -352,12 +354,7 @@ public class InputFile extends JPanel {
 			fileTextQualifierSubPanel.add(radioButton);
 		}
 		fileTextQualifierPanel.add(fileTextQualifierSubPanel, BorderLayout.WEST);
-/*		
-		fileSectionPanel.add(fileChooserPanel, BorderLayout.NORTH);
-		fileSectionPanel.add(fileSectionSubPanel, BorderLayout.SOUTH);
-		fileSectionSubPanel.add(fileDelimiterPanel, BorderLayout.NORTH);
-		fileSectionSubPanel.add(fileTextQualifierPanel, BorderLayout.SOUTH);
-*/				
+
 		fileSectionPanel.add(fileDescriptionPanel, BorderLayout.NORTH);
 		fileDescriptionPanel.add(fileChooserPanel, BorderLayout.SOUTH);
 		fileSectionPanel.add(fileSectionSubPanel, BorderLayout.SOUTH);
