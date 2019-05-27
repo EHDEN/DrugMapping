@@ -48,6 +48,7 @@ public class MapGenericDrugs extends Mapping {
 			Map<String, Map<String, String>> atcIngredientsMap = new HashMap<String,Map<String, String>>();
 			
 			query  = "select atc.concept_code as atc";
+			query += "," + "atc.concept_name as atc_concept_name";
 			query += "," + "ingredient.concept_id as ingredient_concept_id";
 			query += "," + "ingredient.concept_name as ingredient_concept_name";
 			query += "," + "ingredient.domain_id as ingredient_domain_id";
@@ -55,10 +56,10 @@ public class MapGenericDrugs extends Mapping {
 			query += "," + "ingredient.concept_class_id as ingredient_concept_class_id";
 			query += "," + "ingredient.standard_concept as ingredient_standard_concept";
 			query += "," + "ingredient.concept_code as ingredient_concept_code";
-			query += " " + "from cdm.concept_ancestor atc_to_ingredient";
-			query += " " + "inner join cdm.concept atc";
+			query += " " + "from " + database.getVocabSchema() + ".concept_ancestor atc_to_ingredient";
+			query += " " + "inner join " + database.getVocabSchema() + ".concept atc";
 			query += " " + "on atc_to_ingredient.ancestor_concept_id = atc.concept_id";
-			query += " " + "inner join cdm.concept ingredient";
+			query += " " + "inner join " + database.getVocabSchema() + ".concept ingredient";
 			query += " " + "on atc_to_ingredient.descendant_concept_id = ingredient.concept_id";
 			query += " " + "where atc.vocabulary_id = 'ATC'";
 			query += " " + "and ingredient.vocabulary_id = 'RxNorm'";

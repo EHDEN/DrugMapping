@@ -151,7 +151,7 @@ public class DrugMapping {
 				component.setEnabled(false);
 			
 			if (special.toUpperCase().equals("ZINDEX")) {
-				new IPCIZIndexConversion(getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"));
+				new IPCIZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"));
 			}
 			else {
 				//Mapping.loadReplacements(getFile("Replacements File"));

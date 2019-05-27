@@ -4,13 +4,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
 public class IPCIZIndexConversion extends Mapping {
@@ -34,7 +38,7 @@ public class IPCIZIndexConversion extends Mapping {
 	private Set<String> units = new HashSet<String>();
 
 	
-	public IPCIZIndexConversion(InputFile gpkFile, InputFile gskFile, InputFile gnkFile) {
+	public IPCIZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile) {
 
 		System.out.println(DrugMapping.getCurrentTime() + " Converting ZIndex Files ...");
 
@@ -59,13 +63,13 @@ public class IPCIZIndexConversion extends Mapping {
 					for (String subUnit : unitSplit) {
 						subUnit = subUnit.trim().toLowerCase();
 						if (!subUnit.trim().equals("")) {
-							units.add(subUnit);
+							units.add(subUnit.trim().toLowerCase());
 						}
 					}
 				}
 				else {
 					if (!unit.trim().equals("")) {
-						units.add(unit);
+						units.add(unit.trim().toLowerCase());
 					}
 				}
 
@@ -148,13 +152,13 @@ public class IPCIZIndexConversion extends Mapping {
 								for (String subUnit : unitSplit) {
 									subUnit = subUnit.trim().toLowerCase();
 									if (!subUnit.trim().equals("")) {
-										units.add(subUnit);
+										units.add(subUnit.trim().toLowerCase());
 									}
 								}
 							}
 							else {
 								if (!unit.trim().equals("")) {
-									units.add(unit);
+									units.add(unit.trim().toLowerCase());
 								}
 							}
 							
@@ -255,17 +259,113 @@ public class IPCIZIndexConversion extends Mapping {
 			System.out.println("  ERROR: Cannot load GSK file '" + gskFile.getFileName() + "'");
 		}
 		
-		String gpkUnitsFileName = DrugMapping.getCurrentPath() + "/ZIndex - Units.csv";
+		System.out.println(DrugMapping.getCurrentTime() + " Finished");
+		
+		
+		// Write CDM units to file
+		String cdmUnitsFileNameShort = "CDM - Units.csv";
+		System.out.println(DrugMapping.getCurrentTime() + " Write CDM units to file '" + cdmUnitsFileNameShort + "' ...");
+
+		String query = null;
+		
+		query  = "select distinct * from (";
+		query += " " + "select distinct amount_unit.*";
+		query += " " + "from " + database.getVocabSchema() + ".drug_strength";
+		query += " " + "left outer join " + database.getVocabSchema() + ".concept amount_unit";
+		query += " " + "on amount_unit_concept_id = concept_id";
+		query += " " + "union all";
+		query += " " + "select distinct numerator_unit.*";
+		query += " " + "from " + database.getVocabSchema() + ".drug_strength";
+		query += " " + "left outer join " + database.getVocabSchema() + ".concept numerator_unit";
+		query += " " + "on numerator_unit_concept_id = concept_id";
+		query += " " + "union all";
+		query += " " + "select distinct denominator_unit.*";
+		query += " " + "from " + database.getVocabSchema() + ".drug_strength";
+		query += " " + "left outer join " + database.getVocabSchema() + ".concept denominator_unit";
+		query += " " + "on denominator_unit_concept_id = concept_id";
+		query += " " + ") units";
+		query += " " + "where domain_id = 'Unit'";
+		query += " " + "and   concept_class_id = 'Unit'";
+		query += " " + "and   standard_concept = 'S'";
+		query += " " + "and   invalid_reason is null";
+		query += " " + "order by concept_name";
+		
+		if (database.excuteQuery(query)) {
+			if (database.hasNext()) {
+				String cdmUnitsFileName = DrugMapping.getCurrentPath() + "/" + cdmUnitsFileNameShort;
+				try {
+					PrintWriter cdmUnitsFile = new PrintWriter(new File(cdmUnitsFileName));
+					
+					String header = "concept_id";
+					header += "," + "concept_name";
+					
+					cdmUnitsFile.println(header);
+					
+					while (database.hasNext()) {
+						Row queryRow = database.next();
+						
+						String concept_id   = queryRow.get("concept_id");
+						String concept_name = queryRow.get("concept_name");
+						
+						String record = concept_id;
+						record += "," + concept_name;
+						
+						cdmUnitsFile.println(record);
+						
+						concept_name = concept_name.trim().toLowerCase();
+					}
+					
+					cdmUnitsFile.close();
+				} catch (FileNotFoundException e) {
+					System.out.println("  ERROR: Cannot create output file '" + cdmUnitsFileName + "'");
+				}
+			}
+		}
+		
+		System.out.println(DrugMapping.getCurrentTime() + " Finished");
+		
+		String gpkUnitsFileNameShort = "ZIndex - Units.csv";
+		System.out.println(DrugMapping.getCurrentTime() + " Write ZIndex units to file '" + gpkUnitsFileNameShort + "' ...");
+		String gpkUnitsFileName = DrugMapping.getCurrentPath() + "/" + gpkUnitsFileNameShort;
+
+		System.out.println("    Get existing concept mapping ...");
+		Map<String, String> unitConceptsMap = new HashMap<String, String>();
+
+		File conceptsFile = new File(gpkUnitsFileName);
+		if (conceptsFile.exists()) {
+			ReadCSVFileWithHeader unitConceptsFile = new ReadCSVFileWithHeader(gpkUnitsFileName, ',', '"');
+			Iterator<Row> unitConceptsFileIterator = unitConceptsFile.iterator();
+			
+			while (unitConceptsFileIterator.hasNext()) {
+				Row row = unitConceptsFileIterator.next();
+				String unit       = row.get("ZIndexUnit");
+				String concept_id = row.get("concept_id");
+				
+				if ((!unit.trim().equals("")) && (!concept_id.trim().equals(""))) {
+					unitConceptsMap.put(unit, concept_id);
+				}
+			}
+		}
+		else {
+			System.out.println("        No existing mapping found.");
+		}
+		System.out.println("    Done");
+
+		System.out.println("    Writing file '" + gpkUnitsFileNameShort + "' ...");
 		try {
 			PrintWriter gpkUnitsFile = new PrintWriter(new File(gpkUnitsFileName));
 			
 			String header = "ZIndexUnit";
-			header += "," + "CDMUnit";
+			header += "," + "concept_id";
 			
 			gpkUnitsFile.println(header);
 			
-			for (String unit : units) {
-				gpkUnitsFile.println(unit + ",");
+			List<String> unitsList = new ArrayList<String>(units);
+			Collections.sort(unitsList);
+			for (String unit : unitsList) {
+				String record = unit;
+				record += "," + (unitConceptsMap.containsKey(unit) ? unitConceptsMap.get(unit) : "");
+				gpkUnitsFile.println(record);
 			}
 			
 			gpkUnitsFile.close();
@@ -273,6 +373,7 @@ public class IPCIZIndexConversion extends Mapping {
 		} catch (FileNotFoundException e) {
 			System.out.println("  ERROR: Cannot create output file '" + gpkUnitsFileName + "'");
 		}
+		System.out.println("    Done");
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
 	}
