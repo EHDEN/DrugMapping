@@ -47,24 +47,24 @@ public class MapGenericDrugs extends Mapping {
 			System.out.println(DrugMapping.getCurrentTime() + " Collecting ATC ingredients ...");
 			Map<String, Map<String, String>> atcIngredientsMap = new HashMap<String,Map<String, String>>();
 			
-			query  = "select atc.concept_code as atc";
-			query += "," + "atc.concept_name as atc_concept_name";
-			query += "," + "ingredient.concept_id as ingredient_concept_id";
-			query += "," + "ingredient.concept_name as ingredient_concept_name";
-			query += "," + "ingredient.domain_id as ingredient_domain_id";
-			query += "," + "ingredient.vocabulary_id as ingredient_vocabulary_id";
-			query += "," + "ingredient.concept_class_id as ingredient_concept_class_id";
-			query += "," + "ingredient.standard_concept as ingredient_standard_concept";
-			query += "," + "ingredient.concept_code as ingredient_concept_code";
-			query += " " + "from " + database.getVocabSchema() + ".concept_ancestor atc_to_ingredient";
-			query += " " + "inner join " + database.getVocabSchema() + ".concept atc";
-			query += " " + "on atc_to_ingredient.ancestor_concept_id = atc.concept_id";
-			query += " " + "inner join " + database.getVocabSchema() + ".concept ingredient";
-			query += " " + "on atc_to_ingredient.descendant_concept_id = ingredient.concept_id";
-			query += " " + "where atc.vocabulary_id = 'ATC'";
-			query += " " + "and ingredient.vocabulary_id = 'RxNorm'";
-			query += " " + "and ingredient.concept_class_id = 'Ingredient'";
-			query += " " + "and atc.concept_name = ingredient.concept_name";
+			query  = "SELECT atc.concept_code AS atc";
+			query += "," + "atc.concept_name AS atc_concept_name";
+			query += "," + "ingredient.concept_id AS ingredient_concept_id";
+			query += "," + "ingredient.concept_name AS ingredient_concept_name";
+			query += "," + "ingredient.domain_id AS ingredient_domain_id";
+			query += "," + "ingredient.vocabulary_id AS ingredient_vocabulary_id";
+			query += "," + "ingredient.concept_class_id AS ingredient_concept_class_id";
+			query += "," + "ingredient.standard_concept AS ingredient_standard_concept";
+			query += "," + "ingredient.concept_code AS ingredient_concept_code";
+			query += " " + "FROM " + database.getVocabSchema() + ".concept_ancestor atc_to_ingredient";
+			query += " " + "INNER JOIN " + database.getVocabSchema() + ".concept atc";
+			query += " " + "ON atc_to_ingredient.ancestor_concept_id = atc.concept_id";
+			query += " " + "INNER JOIN " + database.getVocabSchema() + ".concept ingredient";
+			query += " " + "ON atc_to_ingredient.descendant_concept_id = ingredient.concept_id";
+			query += " " + "WHERE atc.vocabulary_id = 'ATC'";
+			query += " " + "AND ingredient.vocabulary_id = 'RxNorm'";
+			query += " " + "AND ingredient.concept_class_id = 'Ingredient'";
+			query += " " + "AND atc.concept_name = ingredient.concept_name";
 			
 			if (database.excuteQuery(query)) {
 				if (database.hasNext()) {
@@ -169,17 +169,17 @@ public class MapGenericDrugs extends Mapping {
 								atcConcept = atcConceptMap.get(atc);
 								
 								if (atcConcept == null) {
-									query  = "select concept_id";
+									query  = "SELECT concept_id";
 									query += "," + "concept_name"; 
 									query += "," + "vocabulary_id";  
 									query += "," + "standard_concept";
 									query += "," + "concept_class_id"; 
 									query += "," + "concept_code"; 
-									query += " " + "from " + database.getVocabSchema() + ".concept"; 
-									query += " " + "where upper(concept_code) = '" + atc + "'"; 
-									query += " " + "and domain_id = 'Drug'"; 
-									query += " " + "and vocabulary_id = 'ATC'"; 
-									query += " " + "and concept_class_id = 'ATC " + (atc.length() == 1 ? "1st": (atc.length() == 3 ? "2nd" : (atc.length() == 4 ? "3rd" : (atc.length() == 5 ? "4th" : "5th")))) + "'";
+									query += " " + "FROM " + database.getVocabSchema() + ".concept"; 
+									query += " " + "WHERE upper(concept_code) = '" + atc + "'"; 
+									query += " " + "AND domain_id = 'Drug'"; 
+									query += " " + "AND vocabulary_id = 'ATC'"; 
+									query += " " + "AND concept_class_id = 'ATC " + (atc.length() == 1 ? "1st": (atc.length() == 3 ? "2nd" : (atc.length() == 4 ? "3rd" : (atc.length() == 5 ? "4th" : "5th")))) + "'";
 									
 									if (database.excuteQuery(query)) {
 										if (database.hasNext()) {
@@ -219,23 +219,23 @@ public class MapGenericDrugs extends Mapping {
 								List<Map<String, String>> atcRxNormConcepts = atcRxNormMap.get(atc);
 								
 								if (atcRxNormConcepts == null) {
-									query  = "select concept_id";
+									query  = "SELECT concept_id";
 									query += "," + "concept_name"; 
 									query += "," + "domain_id";
 									query += "," + "vocabulary_id";
 									query += "," + "concept_class_id";  
 									query += "," + "standard_concept"; 
 									query += "," + "concept_code"; 
-									query += " " + "from " + database.getVocabSchema() + ".concept_relationship";
-									query += " " + "left outer join " + database.getVocabSchema() + ".concept";
-									query += " " + "on concept_id_1 = concept_id";
-									query += " " + "where concept_id_2 in ("; 
-									query += " " + "    select concept_id"; 
-									query += " " + "    from " + database.getVocabSchema() + ".concept";
-									query += " " + "    where concept_code = '" + atc + "'";
-									query += " " + "    and vocabulary_id = 'ATC'";
+									query += " " + "FRO " + database.getVocabSchema() + ".concept_relationship";
+									query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept";
+									query += " " + "ON concept_id_1 = concept_id";
+									query += " " + "WHERE concept_id_2 in ("; 
+									query += " " + "    SELECT concept_id"; 
+									query += " " + "    FRO " + database.getVocabSchema() + ".concept";
+									query += " " + "    WHERE concept_code = '" + atc + "'";
+									query += " " + "    AND vocabulary_id = 'ATC'";
 									query += " " + "    )"; 
-									query += " " + "and relationship_id = 'RxNorm - ATC'";
+									query += " " + "AND relationship_id = 'RxNorm - ATC'";
 									
 									if (database.excuteQuery(query)) {
 										if (database.hasNext()) {

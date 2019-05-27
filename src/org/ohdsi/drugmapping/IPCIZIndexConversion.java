@@ -268,27 +268,27 @@ public class IPCIZIndexConversion extends Mapping {
 
 		String query = null;
 		
-		query  = "select distinct * from (";
-		query += " " + "select distinct amount_unit.*";
-		query += " " + "from " + database.getVocabSchema() + ".drug_strength";
-		query += " " + "left outer join " + database.getVocabSchema() + ".concept amount_unit";
-		query += " " + "on amount_unit_concept_id = concept_id";
-		query += " " + "union all";
-		query += " " + "select distinct numerator_unit.*";
-		query += " " + "from " + database.getVocabSchema() + ".drug_strength";
-		query += " " + "left outer join " + database.getVocabSchema() + ".concept numerator_unit";
-		query += " " + "on numerator_unit_concept_id = concept_id";
-		query += " " + "union all";
-		query += " " + "select distinct denominator_unit.*";
-		query += " " + "from " + database.getVocabSchema() + ".drug_strength";
-		query += " " + "left outer join " + database.getVocabSchema() + ".concept denominator_unit";
-		query += " " + "on denominator_unit_concept_id = concept_id";
+		query  = "SELECT DISTINCT * FROM (";
+		query += " " + "SELECT DISTINCT amount_unit.*";
+		query += " " + "FROM " + database.getVocabSchema() + ".drug_strength";
+		query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept amount_unit";
+		query += " " + "ON amount_unit_concept_id = concept_id";
+		query += " " + "UNION ALL";
+		query += " " + "SELECT DISTINCT numerator_unit.*";
+		query += " " + "FROM " + database.getVocabSchema() + ".drug_strength";
+		query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept numerator_unit";
+		query += " " + "ON numerator_unit_concept_id = concept_id";
+		query += " " + "UNION ALL";
+		query += " " + "SELECT DISTINCT denominator_unit.*";
+		query += " " + "FROM " + database.getVocabSchema() + ".drug_strength";
+		query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept denominator_unit";
+		query += " " + "ON denominator_unit_concept_id = concept_id";
 		query += " " + ") units";
-		query += " " + "where domain_id = 'Unit'";
-		query += " " + "and   concept_class_id = 'Unit'";
-		query += " " + "and   standard_concept = 'S'";
-		query += " " + "and   invalid_reason is null";
-		query += " " + "order by concept_name";
+		query += " " + "WHERE domain_id = 'Unit'";
+		query += " " + "AND   concept_class_id = 'Unit'";
+		query += " " + "AND   standard_concept = 'S'";
+		query += " " + "AND   invalid_reason is null";
+		query += " " + "ORDER BY concept_name";
 		
 		if (database.excuteQuery(query)) {
 			if (database.hasNext()) {
