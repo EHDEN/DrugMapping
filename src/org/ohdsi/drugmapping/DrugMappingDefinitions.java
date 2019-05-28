@@ -130,7 +130,7 @@ public class DrugMappingDefinitions {
 									new FileColumnDefinition(
 											"DDDPerUnit",
 											new String[] {
-													"This is the DDD per HPK unit of the drug."
+													"This is the DDD per unit of the drug."
 											}
 									),
 									new FileColumnDefinition(
@@ -159,70 +159,57 @@ public class DrugMappingDefinitions {
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentCode",
+											"IngredientCode",
 											new String[] {
-													"This is the GSK-code of the drug."
+													"This is the ID of the ingredient of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentPartNumber",
+											"IngredientPartNumber",
 											new String[] {
-													"This is the part number of the component",
+													"This is the part number of the ingredient",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentType",
+											"IngredientAmount",
 											new String[] {
-													"This is the type of the component",
+													"This is the amount of the ingredient",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentAmount",
-											new String[] {
-													"This is the amount of the component",
-													"in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"ComponentAmountUnit",
+											"IngredientAmountUnit",
 											new String[] {
 													"This is the unit of the amount of the",
-													"component in this combination."
+													"ingredient in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentGenericName",
+											"IngredientGenericName",
 											new String[] {
 													"This is the generic name of the",
-													"component in this combination."
+													"ingredient in this combination."
 											}
 									),
 									new FileColumnDefinition(
-											"ComponentCASNumber",
+											"IngredientCASNumber",
 											new String[] {
 													"This is the CAS number of the",
-													"component in this combination."
+													"ingredient in this combination."
 											}
 									),
 									new FileColumnDefinition(
 											"SubstanceCode",
 											new String[] {
-													"This is the GNKCode of the component",
+													"This is the ID of the ingredient substance",
 													"in this combination."
 											}
 									),
 									new FileColumnDefinition(
 											"SubstanceDescription",
 											new String[] {
-													"This is the description of the substance."
-											}
-									),
-									new FileColumnDefinition(
-											"SubstanceCASNumber",
-											new String[] {
-													"This is the CAS number of the substance."
+													"This is the description of the ingredient substance."
 											}
 									)
 							}

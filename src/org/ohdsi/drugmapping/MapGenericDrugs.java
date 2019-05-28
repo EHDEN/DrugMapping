@@ -41,8 +41,76 @@ public class MapGenericDrugs extends Mapping {
 			
 
 			String query = null;
+
+			int genericDrugCounter        = 0; // Counter of generic drugs
 			
+			// Read the generic drugs file
+			List<List<Map<String, String>>> genericDrugs = new ArrayList<List<Map<String, String>>>();
+			List<List<Map<String, String>>> singleIngredientGenericDrugs = new ArrayList<List<Map<String, String>>>();
 			
+			if (genericDrugsFile.openFile()) {
+				Map<String, String> genericDrugLine = null;
+				Map<String, String> lastGenericDrugLine = null;
+				List<Map<String, String>> genericDrug = new ArrayList<Map<String, String>>();
+				while ((lastGenericDrugLine != null) || genericDrugsFile.hasNext() || (genericDrug.size() > 0)) {
+					if (lastGenericDrugLine != null) {
+						genericDrugLine = lastGenericDrugLine;
+						lastGenericDrugLine = null;
+					}
+					else if (genericDrugsFile.hasNext()) {
+						Row row = genericDrugsFile.next();
+						
+						genericDrugLine = new HashMap<String, String>();
+						genericDrugLine.put("GenericDrugCode",      genericDrugsFile.get(row, "GenericDrugCode").trim());
+						genericDrugLine.put("LabelName",            genericDrugsFile.get(row, "LabelName").trim());
+						genericDrugLine.put("ShortName",            genericDrugsFile.get(row, "ShortName").trim());
+						genericDrugLine.put("FullName",             genericDrugsFile.get(row, "FullName").trim());
+						genericDrugLine.put("ATCCode",              genericDrugsFile.get(row, "ATCCode").trim());
+						genericDrugLine.put("DDDPerUnit",           genericDrugsFile.get(row, "DDDPerUnit").trim());
+						genericDrugLine.put("PrescriptionDays",     genericDrugsFile.get(row, "PrescriptionDays").trim());
+						genericDrugLine.put("Dosage",               genericDrugsFile.get(row, "Dosage").trim());
+						genericDrugLine.put("DosageUnit",           genericDrugsFile.get(row, "DosageUnit").trim());
+						genericDrugLine.put("PharmaceuticalForm",   genericDrugsFile.get(row, "PharmaceuticalForm").trim());
+						
+						genericDrugLine.put("IngredientCode",        genericDrugsFile.get(row, "IngredientCode").trim());
+						genericDrugLine.put("IngredientPartNumber",  genericDrugsFile.get(row, "IngredientPartNumber").trim());
+						genericDrugLine.put("IngredientAmount",      genericDrugsFile.get(row, "IngredientAmount").trim());
+						genericDrugLine.put("IngredientAmountUnit",  genericDrugsFile.get(row, "IngredientAmountUnit").trim());
+						genericDrugLine.put("IngredientGenericName", genericDrugsFile.get(row, "IngredientGenericName").trim());
+						genericDrugLine.put("IngredientCASNumber",   genericDrugsFile.get(row, "IngredientCASNumber").trim());
+						
+						genericDrugLine.put("SubstanceCode",        genericDrugsFile.get(row, "SubstanceCode").trim());
+						genericDrugLine.put("SubstanceDescription", genericDrugsFile.get(row, "SubstanceDescription").trim());
+					}
+					
+					if (genericDrugLine != null) {
+						if ((genericDrug.size() > 0) && (!genericDrugLine.get("GenericDrugCode").equals(genericDrug.get(genericDrug.size() -1).get("GenericDrugCode")))) {
+							lastGenericDrugLine = genericDrugLine;
+							genericDrugLine = null;
+						}
+						else {
+							genericDrug.add(genericDrugLine);
+							genericDrugLine = null;
+						}
+					}
+					
+					if ((genericDrug.size() > 0) && ((lastGenericDrugLine != null) || (!genericDrugsFile.hasNext()))) {
+						
+						System.out.println("    " + genericDrug.get(0).get("GenericDrugCode") + "," + genericDrug.get(0).get("ATCCode") + "," + genericDrug.get(0).get("FullName"));
+						genericDrugCounter++;
+						
+						genericDrugs.add(genericDrug);
+						if (genericDrug.size() == 1) {
+							singleIngredientGenericDrugs.add(genericDrug);
+						}
+						
+						genericDrug = new ArrayList<Map<String, String>>();
+					}
+				}
+			}
+			
+			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+/*			
 			// Collect ATC ingredients
 			System.out.println(DrugMapping.getCurrentTime() + " Collecting ATC ingredients ...");
 			Map<String, Map<String, String>> atcIngredientsMap = new HashMap<String,Map<String, String>>();
@@ -100,7 +168,6 @@ public class MapGenericDrugs extends Mapping {
 			// Do the mapping
 			System.out.println(DrugMapping.getCurrentTime() + " Mapping Generic Drugs ...");
 
-			int genericDrugCounter        = 0; // Counter of generic drugs
 			int ignoredMissingDataCounter = 0; // Counter of generic drugs that are ignored due to missing data
 			int missingATCCounter         = 0; // Counter of generic drugs that have no ATC
 			int noATCConceptFoundCounter  = 0; // Counter of generic drugs for which no ATC concept could be found
@@ -130,17 +197,15 @@ public class MapGenericDrugs extends Mapping {
 						genericDrugLine.put("DosageUnit",           genericDrugsFile.get(row, "DosageUnit").trim());
 						genericDrugLine.put("PharmaceuticalForm",   genericDrugsFile.get(row, "PharmaceuticalForm").trim());
 						
-						genericDrugLine.put("ComponentCode",        genericDrugsFile.get(row, "ComponentCode").trim());
-						genericDrugLine.put("ComponentPartNumber",  genericDrugsFile.get(row, "ComponentPartNumber").trim());
-						genericDrugLine.put("ComponentType",        genericDrugsFile.get(row, "ComponentType").trim());
-						genericDrugLine.put("ComponentAmount",      genericDrugsFile.get(row, "ComponentAmount").trim());
-						genericDrugLine.put("ComponentAmountUnit",  genericDrugsFile.get(row, "ComponentAmountUnit").trim());
-						genericDrugLine.put("ComponentGenericName", genericDrugsFile.get(row, "ComponentGenericName").trim());
-						genericDrugLine.put("ComponentCASNumber",   genericDrugsFile.get(row, "ComponentCASNumber").trim());
+						genericDrugLine.put("IngredientCode",        genericDrugsFile.get(row, "IngredientCode").trim());
+						genericDrugLine.put("IngredientPartNumber",  genericDrugsFile.get(row, "IngredientPartNumber").trim());
+						genericDrugLine.put("IngredientAmount",      genericDrugsFile.get(row, "IngredientAmount").trim());
+						genericDrugLine.put("IngredientAmountUnit",  genericDrugsFile.get(row, "IngredientAmountUnit").trim());
+						genericDrugLine.put("IngredientGenericName", genericDrugsFile.get(row, "IngredientGenericName").trim());
+						genericDrugLine.put("IngredientCASNumber",   genericDrugsFile.get(row, "IngredientCASNumber").trim());
 						
 						genericDrugLine.put("SubstanceCode",        genericDrugsFile.get(row, "SubstanceCode").trim());
 						genericDrugLine.put("SubstanceDescription", genericDrugsFile.get(row, "SubstanceDescription").trim());
-						genericDrugLine.put("SubstanceCASNumber",   genericDrugsFile.get(row, "SubstanceCASNumber").trim());
 					}
 					
 					if (genericDrugLine != null) {
@@ -302,6 +367,7 @@ public class MapGenericDrugs extends Mapping {
 			ignoredMissingDataFile.close();
 			missingATCFile.close();
 			noATCConceptFoundFile.close();
+*/
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
@@ -333,17 +399,15 @@ public class MapGenericDrugs extends Mapping {
 		header += "," + "DosageUnit";
 		header += "," + "PharmaceuticalForm";
 		
-		header += "," + "ComponentCode";
-		header += "," + "ComponentPartNumber";
-		header += "," + "ComponentType";
-		header += "," + "ComponentAmount";
-		header += "," + "ComponentAmountUnit";
-		header += "," + "ComponentGenericName";
-		header += "," + "ComponentCASNumber";
+		header += "," + "IngredientCode";
+		header += "," + "IngredientPartNumber";
+		header += "," + "IngredientAmount";
+		header += "," + "IngredientAmountUnit";
+		header += "," + "IngredientGenericName";
+		header += "," + "IngredientCASNumber";
 		
 		header += "," + "SubstanceCode";
 		header += "," + "SubstanceDescription";
-		header += "," + "SubstanceCASNumber";
 
 		file.println(header);
 	}
@@ -364,15 +428,13 @@ public class MapGenericDrugs extends Mapping {
 					
 					"," + record.get("ComponentCode") +
 					"," + record.get("ComponentPartNumber") +
-					"," + record.get("ComponentType") +
 					"," + record.get("ComponentAmount") +
 					"," + record.get("ComponentAmountUnit") +
 					"," + record.get("ComponentGenericName") +
 					"," + record.get("ComponentCASNumber") +
 					
 					"," + record.get("SubstanceCode") +
-					"," + record.get("SubstanceDescription") +
-					"," + record.get("SubstanceCASNumber");
+					"," + record.get("SubstanceDescription");
 			file.println(line);
 		}
 	}

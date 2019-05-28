@@ -103,7 +103,7 @@ public class IPCIZIndexConversion extends Mapping {
 					PrintWriter gpkFullFile = new PrintWriter(new File(gpkFullFileName));
 					
 					String header = "GPKCode";
-					header += "," + "MemoCode";
+					//header += "," + "MemoCode";
 					header += "," + "LabelName";
 					header += "," + "ShortName";
 					header += "," + "FullName";
@@ -116,7 +116,7 @@ public class IPCIZIndexConversion extends Mapping {
 					
 					header += "," + "GSKCode";
 					header += "," + "PartNumber";
-					header += "," + "Type";
+					//header += "," + "Type";
 					header += "," + "Amount";
 					header += "," + "AmountUnit";
 					header += "," + "GenericName";
@@ -124,7 +124,7 @@ public class IPCIZIndexConversion extends Mapping {
 					
 					header += "," + "GNKCode";
 					header += "," + "Description";
-					header += "," + "CASCode";
+					//header += "," + "CASCode";
 					
 					gpkFullFile.println(header);
 
@@ -134,7 +134,7 @@ public class IPCIZIndexConversion extends Mapping {
 							Row row = gpkFile.next();
 							
 							String gpkRecord = gpkFile.get(row, "GPKCode");
-							gpkRecord += "," + "\"" + gpkFile.get(row, "MemoCode").replaceAll("\"", "\"\"") + "\"";
+							//gpkRecord += "," + "\"" + gpkFile.get(row, "MemoCode").replaceAll("\"", "\"\"") + "\"";
 							gpkRecord += "," + "\"" + gpkFile.get(row, "LabelName").replaceAll("\"", "\"\"") + "\"";
 							gpkRecord += "," + "\"" + gpkFile.get(row, "ShortName").replaceAll("\"", "\"\"") + "\"";
 							gpkRecord += "," + "\"" + gpkFile.get(row, "FullName").replaceAll("\"", "\"\"") + "\"";
@@ -194,7 +194,7 @@ public class IPCIZIndexConversion extends Mapping {
 										for (String[] gskObject : gskList) {
 											String gpkGskGnkRecord = gpkRecord;
 											gpkGskGnkRecord += "," + gskObject[PartNumber];
-											gpkGskGnkRecord += "," + gskObject[Type];
+											//gpkGskGnkRecord += "," + gskObject[Type];
 											gpkGskGnkRecord += "," + gskObject[Amount];
 											gpkGskGnkRecord += "," + gskObject[AmountUnit];
 											gpkGskGnkRecord += "," + "\"" + gskObject[GenericName].replaceAll("\"", "\"\"") + "\"";
@@ -207,20 +207,20 @@ public class IPCIZIndexConversion extends Mapping {
 												String[] gnkObject = gnkMap.get(gnkCode);
 												if (gnkObject == null) {
 													System.out.println("    WARNING: No GNK record (GNKCode = " + gskObject[GNKCode] + " found for GSK " + gskObject[GSKCode] + " of GPK " + gpkFile.get(row, "GPKCode"));
-													for (int cellCount = 0; cellCount < (GNKColumnCount - 1); cellCount++) {
+													for (int cellCount = 0; cellCount < (GNKColumnCount - 2); cellCount++) {
 														gpkGskGnkRecord += ",";
 													}
 													gpkFullFile.println(gpkGskGnkRecord);
 												}
 												else {
 													gpkGskGnkRecord += "," + "\"" + gnkObject[Description].replaceAll("\"", "\"\"") + "\"";
-													gpkGskGnkRecord += "," + gnkObject[CASCode];
+													//gpkGskGnkRecord += "," + gnkObject[CASCode];
 													gpkFullFile.println(gpkGskGnkRecord);
 												}
 											}
 											else {
 												System.out.println("    WARNING: No GNK code found for GSK " + gskObject[GSKCode] + " of GPK " + gpkFile.get(row, "GPKCode"));
-												for (int cellCount = 0; cellCount < (GNKColumnCount - 1); cellCount++) {
+												for (int cellCount = 0; cellCount < (GNKColumnCount - 2); cellCount++) {
 													gpkGskGnkRecord += ",";
 												}
 												gpkFullFile.println(gpkGskGnkRecord);
