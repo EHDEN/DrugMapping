@@ -216,6 +216,11 @@ public class InputFile extends JPanel {
 	}
 	
 	
+	public boolean hasField(String fieldName) {
+		return (columnMapping.get(fieldName) != null);
+	}
+	
+	
 	public String get(Row row, String fieldName) {
 		String mappedFieldName = columnMapping.get(fieldName);	
 		return row.get(mappedFieldName);

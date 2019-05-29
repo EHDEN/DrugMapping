@@ -92,6 +92,188 @@ public class DrugMappingDefinitions {
 					),
 */
 					new FileDefinition(
+							"Units Mapping File",
+							new String[] {
+									"This file should contain the mappings from the local units.",
+									"to CDM unit concepts with a multiplcation factor."
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"LocalUnit",
+											new String[] {
+													"This is name of the unit in the",
+													"source database."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_1",
+											new String[] {
+													"This is the first CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_1",
+											new String[] {
+													"This is the factor by which CDM values of",
+													"the first CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_2",
+											new String[] {
+													"This column is optional.",
+													"This is the second CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_2",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_2 is present.",
+													"This is the factor by which CDM values of",
+													"the second CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_3",
+											new String[] {
+													"This column is optional.",
+													"This is the third CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_3",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_3 is present.",
+													"This is the factor by which CDM values of",
+													"the third CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_4",
+											new String[] {
+													"This column is optional.",
+													"This is the fourth CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_4",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_4 is present.",
+													"This is the factor by which CDM values of",
+													"the fourth CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_5",
+											new String[] {
+													"This column is optional.",
+													"This is the fifth CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_5",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_5 is present.",
+													"This is the factor by which CDM values of",
+													"the fifth CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_6",
+											new String[] {
+													"This column is optional.",
+													"This is the sixth CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_6",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_6 is present.",
+													"This is the factor by which CDM values of",
+													"the sixth CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_7",
+											new String[] {
+													"This column is optional.",
+													"This is the seventh CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_7",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_7 is present.",
+													"This is the factor by which CDM values of",
+													"the seventh CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_8",
+											new String[] {
+													"This column is optional.",
+													"This is the eighth CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_8",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_8 is present.",
+													"This is the factor by which CDM values of",
+													"the eighth CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_9",
+											new String[] {
+													"This column is optional.",
+													"This is the ninth CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_9",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_9 is present.",
+													"This is the factor by which CDM values of",
+													"the ninth CDM unit should be multiplied."
+											}
+									),
+									new FileColumnDefinition(
+											"concept_id_10",
+											new String[] {
+													"This is the fifth CDM unit concept",
+													"the unit is mapped to."
+											}
+									),
+									new FileColumnDefinition(
+											"factor_10",
+											new String[] {
+													"This optional but should be present when",
+													"the column concept_id_10 is present.",
+													"This is the factor by which CDM values of",
+													"the fifth CDM unit should be multiplied."
+											}
+									)
+							}
+					),
+					new FileDefinition(
 							"Generic Drugs File",
 							new String[] {
 									"This file should contain the genric drugs from the source database."

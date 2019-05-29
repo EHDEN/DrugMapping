@@ -120,6 +120,10 @@ public class Row {
 		return fieldName2ColumnIndex;
 	}
 	
+	public boolean hasField(String fieldName) {
+		return fieldName2ColumnIndex.containsKey(fieldName);
+	}
+	
 	public String toString() {
 		List<String> data = new ArrayList<String>(cells);
 		for (String fieldName : fieldName2ColumnIndex.keySet()) {

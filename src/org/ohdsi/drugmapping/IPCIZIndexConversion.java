@@ -4,17 +4,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
-import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
 public class IPCIZIndexConversion extends Mapping {
@@ -63,13 +60,13 @@ public class IPCIZIndexConversion extends Mapping {
 					for (String subUnit : unitSplit) {
 						subUnit = subUnit.trim().toLowerCase();
 						if (!subUnit.trim().equals("")) {
-							units.add(subUnit.trim().toLowerCase());
+							units.add(subUnit.trim().toUpperCase());
 						}
 					}
 				}
 				else {
 					if (!unit.trim().equals("")) {
-						units.add(unit.trim().toLowerCase());
+						units.add(unit.trim().toUpperCase());
 					}
 				}
 
@@ -150,9 +147,9 @@ public class IPCIZIndexConversion extends Mapping {
 							if (unit.contains("/")) {
 								String[] unitSplit = unit.split("/");
 								for (String subUnit : unitSplit) {
-									subUnit = subUnit.trim().toLowerCase();
+									subUnit = subUnit.trim().toUpperCase();
 									if (!subUnit.trim().equals("")) {
-										units.add(subUnit.trim().toLowerCase());
+										units.add(subUnit.trim().toUpperCase());
 									}
 								}
 							}
@@ -323,54 +320,26 @@ public class IPCIZIndexConversion extends Mapping {
 		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
+
 		
 		String gpkUnitsFileNameShort = "ZIndex - Units.csv";
 		System.out.println(DrugMapping.getCurrentTime() + " Write ZIndex units to file '" + gpkUnitsFileNameShort + "' ...");
 		String gpkUnitsFileName = DrugMapping.getCurrentPath() + "/" + gpkUnitsFileNameShort;
 
 		System.out.println("    Get existing concept mapping ...");
-		Map<String, String> unitConceptsMap = new HashMap<String, String>();
-
-		File conceptsFile = new File(gpkUnitsFileName);
-		if (conceptsFile.exists()) {
-			ReadCSVFileWithHeader unitConceptsFile = new ReadCSVFileWithHeader(gpkUnitsFileName, ',', '"');
-			Iterator<Row> unitConceptsFileIterator = unitConceptsFile.iterator();
-			
-			while (unitConceptsFileIterator.hasNext()) {
-				Row row = unitConceptsFileIterator.next();
-				String unit       = row.get("ZIndexUnit");
-				String concept_id = row.get("concept_id");
-				
-				if ((!unit.trim().equals("")) && (!concept_id.trim().equals(""))) {
-					unitConceptsMap.put(unit, concept_id);
-				}
-			}
-		}
-		else {
+		Map<String, UnitConversion> unitConversionsMap = UnitConversion.readUnitConversionsFromFile(gpkUnitsFileName);
+		if (unitConversionsMap.size() == 0) {
 			System.out.println("        No existing mapping found.");
+		}
+		for (String unit : units) {
+			if (!unitConversionsMap.containsKey(unit)) {
+				unitConversionsMap.put(unit.trim().toUpperCase(), new UnitConversion(unit));
+			}
 		}
 		System.out.println("    Done");
 
 		System.out.println("    Writing file '" + gpkUnitsFileNameShort + "' ...");
-		try {
-			PrintWriter gpkUnitsFile = new PrintWriter(new File(gpkUnitsFileName));
-			
-			String header = "ZIndexUnit";
-			header += "," + "concept_id";
-			
-			gpkUnitsFile.println(header);
-			
-			List<String> unitsList = new ArrayList<String>(units);
-			Collections.sort(unitsList);
-			for (String unit : unitsList) {
-				String record = unit;
-				record += "," + (unitConceptsMap.containsKey(unit) ? unitConceptsMap.get(unit) : "");
-				gpkUnitsFile.println(record);
-			}
-			
-			gpkUnitsFile.close();
-			
-		} catch (FileNotFoundException e) {
+		if (!UnitConversion.writeUnitConversionsToFile(unitConversionsMap, gpkUnitsFileName)) {
 			System.out.println("  ERROR: Cannot create output file '" + gpkUnitsFileName + "'");
 		}
 		System.out.println("    Done");
