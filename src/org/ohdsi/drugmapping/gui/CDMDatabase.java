@@ -209,6 +209,13 @@ public class CDMDatabase extends JPanel {
 	}
 	
 	
+	public RichConnection getRichConnection(Class<?> context) {
+		RichConnection connection = new RichConnection(dbSettings.server, dbSettings.domain, dbSettings.user, dbSettings.password, dbSettings.dbType);
+		connection.setContext(context);
+		return connection;
+	}
+	
+	
 	private void defineDatabase(CDMDatabase database) {
 		JDialog databaseDialog = new JDialog();
 		databaseDialog.setLayout(new BorderLayout());

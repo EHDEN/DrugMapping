@@ -5,9 +5,13 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.ohdsi.databases.QueryParameters;
+import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
@@ -16,6 +20,9 @@ public class MapGenericDrugs extends Mapping {
 	
 	
 	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile genericDrugsFile) {
+		
+		QueryParameters queryParameters = new QueryParameters();
+		queryParameters.set("@vocab", database.getVocabSchema());
 				
 		String fileName = "";
 		try {
@@ -45,7 +52,9 @@ public class MapGenericDrugs extends Mapping {
 							if ((concept_id != null) && (factor != null)) {
 								concept_id = concept_id.trim();
 								factor     = factor.trim();
-								unitConversion.addConversion(concept_id, factor);
+								if ((!concept_id.equals("")) && (!factor.equals(""))) {
+									unitConversion.addConversion(concept_id, factor);
+								}
 							}
 						}
 					}
@@ -141,122 +150,74 @@ public class MapGenericDrugs extends Mapping {
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Get single ingredient drugs from CDM ...");
 
-			List<CDMDrug> cdmSingleIngredientDrugs = new ArrayList<CDMDrug>();
+			//List<CDMDrug> cdmSingleIngredientDrugs = new ArrayList<CDMDrug>();
 			
 			/* Collect all strengths of single ingredient drugs by ATC */
-			String query = "WITH atc_ingredient AS (";
-			query += " " + "	/* ATC to ingredient direct */";
-			query += " " + "	SELECT atc.concept_code AS atc";
-			query += " " + "	,      atc.concept_name AS atc_concept_name";
-			query += " " + "	,      ingredient.concept_id AS ingredient_concept_id";
-			query += " " + "	,      ingredient.concept_name AS ingredient_concept_name";
-			query += " " + "	FROM " + database.getVocabSchema() + ".concept_ancestor atc_to_ingredient";
-			query += " " + "	INNER JOIN " + database.getVocabSchema() + ".concept atc";
-			query += " " + "		ON atc_to_ingredient.ancestor_concept_id = atc.concept_id";
-			query += " " + "	INNER JOIN " + database.getVocabSchema() + ".concept ingredient";
-			query += " " + "		ON atc_to_ingredient.descendant_concept_id = ingredient.concept_id";
-			query += " " + "	WHERE atc.vocabulary_id = 'ATC'";
-			query += " " + "	AND   ingredient.vocabulary_id = 'RxNorm'";
-			query += " " + "	AND   ingredient.concept_class_id = 'Ingredient'";
-			query += " " + "	AND   UPPER(atc.concept_name) = UPPER(ingredient.concept_name)";
-			query += " " + ")";
-			query += " " + "SELECT atc_ingredient.atc AS atc";
 			
-			query += " " + ",      drug.concept_id AS drug_concept_id";
-			query += " " + ",      drug.concept_name AS drug_concept_name";
-			query += " " + ",      drug.domain_id AS drug_domain_id";
-			query += " " + ",      drug.vocabulary_id AS drug_vocabulary_id";
-			query += " " + ",      drug.concept_class_id AS drug_concept_class_id";
-			query += " " + ",      drug.standard_concept AS drug_standard_concept";
-			query += " " + ",      drug.concept_code AS drug_concept_code";
-
-			query += " " + ",      ingredient.concept_id AS ingredient_concept_id";
-			query += " " + ",      ingredient.concept_name AS ingredient_concept_name";
-			query += " " + ",      ingredient.domain_id AS ingredient_domain_id";
-			query += " " + ",      ingredient.vocabulary_id AS ingredient_vocabulary_id";
-			query += " " + ",      ingredient.concept_class_id AS ingredient_concept_class_id";
-			query += " " + ",      ingredient.standard_concept AS ingredient_standard_concept";
-			query += " " + ",      ingredient.concept_code AS ingredient_concept_code";
-
-			query += " " + ",      strength.amount_value AS ingredient_amount_value";
-			query += " " + ",      amount_unit.concept_id AS ingredient_amount_unit_concept_id";
-			query += " " + ",      amount_unit.concept_name AS ingredient_amount_unit_concept_name";
-			query += " " + ",      amount_unit.domain_id AS ingredient_amount_unit_domain_id";
-			query += " " + ",      amount_unit.vocabulary_id AS ingredient_amount_unit_vocabulary_id";
-			query += " " + ",      amount_unit.concept_class_id AS ingredient_amount_unit_concept_class_id";
-			query += " " + ",      amount_unit.standard_concept AS ingredient_amount_unit_standard_concept";
-			query += " " + ",      amount_unit.concept_code AS ingredient_amount_unit_concept_code";
-
-			query += " " + ",      strength.numerator_value AS ingredient_numerator_value";
-			query += " " + ",      numerator_unit.concept_id AS ingredient_numerator_unit_concept_id";
-			query += " " + ",      numerator_unit.concept_name AS ingredient_numerator_unit_concept_name";
-			query += " " + ",      numerator_unit.domain_id AS ingredient_numerator_unit_domain_id";
-			query += " " + ",      numerator_unit.vocabulary_id AS ingredient_numerator_unit_vocabulary_id";
-			query += " " + ",      numerator_unit.concept_class_id AS ingredient_numerator_unit_concept_class_id";
-			query += " " + ",      numerator_unit.standard_concept AS ingredient_numerator_unit_standard_concept";
-			query += " " + ",      numerator_unit.concept_code AS ingredient_numerator_unit_concept_code";
-
-			query += " " + ",      strength.denominator_value AS ingredient_denominator_value";
-			query += " " + ",      denominator_unit.concept_id AS ingredient_denominator_unit_concept_id";
-			query += " " + ",      denominator_unit.concept_name AS ingredient_denominator_unit_concept_name";
-			query += " " + ",      denominator_unit.domain_id AS ingredient_denominator_unit_domain_id";
-			query += " " + ",      denominator_unit.vocabulary_id AS ingredient_denominator_unit_vocabulary_id";
-			query += " " + ",      denominator_unit.concept_class_id AS ingredient_denominator_unit_concept_class_id";
-			query += " " + ",      denominator_unit.standard_concept AS ingredient_denominator_unit_standard_concept";
-			query += " " + ",      denominator_unit.concept_code AS ingredient_denominator_unit_concept_code";
-
-			query += " " + ",      strength.box_size AS ingredient_box_size";
-			query += " " + "FROM   atc_ingredient";
-			query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".drug_strength strength";
-			query += " " + "    ON strength.ingredient_concept_id = atc_ingredient.ingredient_concept_id";
-			query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept drug";
-			query += " " + "    ON strength.drug_concept_id = drug.concept_id";
-			query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept ingredient";
-			query += " " + "    ON strength.ingredient_concept_id = ingredient.concept_id";
-			query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept amount_unit";
-			query += " " + "    ON strength.amount_unit_concept_id = amount_unit.concept_id";
-			query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept numerator_unit";
-			query += " " + "    ON strength.numerator_unit_concept_id = numerator_unit.concept_id";
-			query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept denominator_unit";
-			query += " " + "    ON strength.denominator_unit_concept_id = denominator_unit.concept_id";
+			int singleIngredientCDMDrugCounter  = 0;
+			int matchedCDMDrugs = 0;
+			Set<List<Map<String, String>>> matchedGenericDrugs = new HashSet<List<Map<String, String>>>();
 			
-			if (database.excuteQuery(query)) {
-				if (database.hasNext()) {
-					while (database.hasNext()) {
-						Row queryRow = database.next();
+			RichConnection connection = database.getRichConnection(this.getClass());
+			
+			for (Row queryRow : connection.queryResource("SingleIngredients.sql", queryParameters)) {
 
-						String atc = queryRow.get("atc");
+				String atc = queryRow.get("atc");
+				
+				CDMDrug cdmDrug = new CDMDrug(queryRow, "");
+										
+				singleIngredientCDMDrugCounter++;
+				
+				Double cdmIngredientAmount     = null;
+				String cdmIngredientAmountUnit = queryRow.get("amount_unit_concept_id");
+
+				try {
+					cdmIngredientAmount = Double.parseDouble(queryRow.get("amount_value"));
+				}
+				catch (NumberFormatException e) {
+					cdmIngredientAmount = null;
+				}
+				
+				if (cdmIngredientAmount != null) {
+					for (List<Map<String, String>> genericDrug : singleIngredientGenericDrugs) {
+						Map<String, String> ingredient = genericDrug.get(0);
 						
-						CDMDrug cdmDrug = new CDMDrug(queryRow, "drug_");
-						cdmDrug.addIngredient(new CDMIngredient(queryRow, "ingredient_"));
-						
-						//cdmSingleIngredientDrugs.add(cdmDrug);
-						
-						CDMIngredient cdmIngredient = cdmDrug.getIngredients().get(0);
-						
-						for (List<Map<String, String>> genericDrug : singleIngredientGenericDrugs) {
-							Map<String, String> ingredient = genericDrug.get(0);
-							
-							if (ingredient.get("ATCCode").equals(atc)) {
-								if ((ingredient.get("IngredientAmount") != null) && (!(ingredient.get("IngredientAmount").trim().equals("")))) {
-									double genericDrugAmount = Double.parseDouble(ingredient.get("IngredientAmount"));
-									String genricDrugAmountUnitName = ingredient.get("IngredientAmountUnit").trim().toUpperCase();
+						if (ingredient.get("ATCCode").equals(atc)) {
+							if ((ingredient.get("Dosage") != null) && (!(ingredient.get("Dosage").trim().equals("")))) {
+								try {
+									double genericDrugAmount = Double.parseDouble(ingredient.get("Dosage"));
+									String genricDrugAmountUnitName = ingredient.get("DosageUnit").trim().toUpperCase();
 									if (unitConversionsMap.containsKey(genricDrugAmountUnitName)) {
-										String cdmDrugAmountString = cdmIngredient.getAmountValue();
-										String cdmDrugAmountUnit   = cdmIngredient.getAmountUnit().getConceptId();
-										//TODO
+										if (unitConversionsMap.get(genricDrugAmountUnitName).matches(genericDrugAmount, cdmIngredientAmountUnit, cdmIngredientAmount)) {
+											System.out.println("    " + cdmDrug);
+											//System.out.println("        Matching ingredient: " + cdmIngredient.toStringLong());
+											System.out.println("        Generic source drug: " + genericDrugDescription(genericDrug)); 
+											System.out.println("        Drug: " + cdmDrug);
+											
+											matchedCDMDrugs++;
+											matchedGenericDrugs.add(genericDrug);
+											//TODO
+										}
 									}
 								}
-							}  
-						}
-						
-						System.out.println("    " + cdmDrug);
-						for (CDMIngredient ingredient : cdmDrug.getIngredients()) {
-							System.out.println("        " + ingredient.toStringLong());
-						}
+								catch (NumberFormatException e) {
+									// Skip generic drug
+								}
+							}
+						}  
 					}
 				}
+				else {
+					// Skip CDM drug
+					//System.out.println("        No CDM ingredient amount available -> SKIP");
+				}
+				
+				//System.out.println("    " + cdmDrug);
+				//for (CDMIngredient ingredient : cdmDrug.getIngredients()) {
+				//	System.out.println("        " + ingredient.toStringLong());
+				//}
 			}
+			connection.close();
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
@@ -507,8 +468,12 @@ public class MapGenericDrugs extends Mapping {
 */
 			
 			System.out.println("");
-			System.out.println("    Generic drugs: " + Integer.toString(genericDrugs.size()));
+			System.out.println("    Generic source drugs: " + Integer.toString(genericDrugs.size()));
 			System.out.println("    No ATC: " + Integer.toString(missingATCGenericDrugs.size()));
+			System.out.println("    Single ingredient generic source drugs: " + Integer.toString(singleIngredientGenericDrugs.size()));
+			System.out.println("    Single ingredient CDM drugs: " + Integer.toString(singleIngredientCDMDrugCounter));
+			System.out.println("    Matched single ingredient generic source drugs: " + Integer.toString(matchedGenericDrugs.size()));
+			System.out.println("    Matched single ingredient CDM drugs: " + Integer.toString(matchedCDMDrugs));
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
 			
@@ -550,9 +515,9 @@ public class MapGenericDrugs extends Mapping {
 	private void writeGenericDrugToFile(List<Map<String, String>> genericDrug, PrintWriter file) {
 		for (Map<String, String> record : genericDrug) {
 			String line = record.get("GenericDrugCode") +
-					"," + record.get("LabelName") +
-					"," + record.get("ShortName") +
-					"," + record.get("FullName") +
+					"," + "\"" + record.get("LabelName") + "\"" +
+					"," + "\"" + record.get("ShortName") + "\"" +
+					"," + "\"" + record.get("FullName") + "\"" +
 					"," + record.get("ATCCode") +
 					"," + record.get("DDDPerUnit") +
 					"," + record.get("PrescriptionDays") +
@@ -564,11 +529,11 @@ public class MapGenericDrugs extends Mapping {
 					"," + record.get("IngredientPartNumber") +
 					"," + record.get("IngredientAmount") +
 					"," + record.get("IngredientAmountUnit") +
-					"," + record.get("IngredientGenericName") +
+					"," + "\"" + record.get("IngredientGenericName") + "\"" +
 					"," + record.get("IngredientCASNumber") +
 					
 					"," + record.get("SubstanceCode") +
-					"," + record.get("SubstanceDescription");
+					"," + "\"" + record.get("SubstanceDescription") + "\"";
 			file.println(line);
 		}
 	}

@@ -128,7 +128,7 @@ public class UnitConversion {
 	}
 	
 	
-	public boolean matches(double sourceValue, String cdmUnitConceptId, double cdmValue) {
+	public boolean matches(double sourceValue, String cdmUnitConceptId, Double cdmValue) {
 		boolean result = false;
 		
 		if (conversionTable.containsKey(cdmUnitConceptId)) {
