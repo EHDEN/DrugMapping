@@ -17,12 +17,17 @@ import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
 
 public class MapGenericDrugs extends Mapping {
+	private FormConversion formConversion = new FormConversion();
 	
 	
-	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile genericDrugsFile) {
+	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile formMappingsFile, InputFile genericDrugsFile) {
 		
 		QueryParameters queryParameters = new QueryParameters();
 		queryParameters.set("@vocab", database.getVocabSchema());
+		//queryParameters.set("@drugATCTest", "AND   atc.concept_code = 'C02CA01'");
+		//queryParameters.set("@drugNameTest", "AND LOWER(drug.concept_name) LIKE '%prazosin%'");
+		queryParameters.set("@drugATCTest", "");
+		queryParameters.set("@drugNameTest", "");
 				
 		String fileName = "";
 		try {
@@ -60,6 +65,17 @@ public class MapGenericDrugs extends Mapping {
 					}
 					
 					unitConversionsMap.put(localUnitName, unitConversion);
+				}
+			}
+			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+
+
+			System.out.println(DrugMapping.getCurrentTime() + " Loading form mappings ...");
+			if (formMappingsFile.openFile()) {
+				while (formMappingsFile.hasNext()) {
+					Row row = formMappingsFile.next();
+
+					formConversion.add(formMappingsFile.get(row, "LocalForm").toLowerCase(), formMappingsFile.get(row, "CDMForm").toLowerCase());
 				}
 			}
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
@@ -163,6 +179,7 @@ public class MapGenericDrugs extends Mapping {
 			for (Row queryRow : connection.queryResource("SingleIngredients.sql", queryParameters)) {
 
 				String atc = queryRow.get("atc");
+				String form = queryRow.get("form").toLowerCase();
 				
 				CDMDrug cdmDrug = new CDMDrug(queryRow, "");
 										
@@ -177,31 +194,34 @@ public class MapGenericDrugs extends Mapping {
 				catch (NumberFormatException e) {
 					cdmIngredientAmount = null;
 				}
-				
+								
 				if (cdmIngredientAmount != null) {
 					for (List<Map<String, String>> genericDrug : singleIngredientGenericDrugs) {
 						Map<String, String> ingredient = genericDrug.get(0);
 						
 						if (ingredient.get("ATCCode").equals(atc)) {
-							if ((ingredient.get("Dosage") != null) && (!(ingredient.get("Dosage").trim().equals("")))) {
-								try {
-									double genericDrugAmount = Double.parseDouble(ingredient.get("Dosage"));
-									String genricDrugAmountUnitName = ingredient.get("DosageUnit").trim().toUpperCase();
-									if (unitConversionsMap.containsKey(genricDrugAmountUnitName)) {
-										if (unitConversionsMap.get(genricDrugAmountUnitName).matches(genericDrugAmount, cdmIngredientAmountUnit, cdmIngredientAmount)) {
-											System.out.println("    " + cdmDrug);
-											//System.out.println("        Matching ingredient: " + cdmIngredient.toStringLong());
-											System.out.println("        Generic source drug: " + genericDrugDescription(genericDrug)); 
-											System.out.println("        Drug: " + cdmDrug);
-											
-											matchedCDMDrugs++;
-											matchedGenericDrugs.add(genericDrug);
-											//TODO
+							//System.out.println("    Forms: " + ingredient.get("PharmaceuticalForm").toLowerCase() + " <-> " + form);
+							if (formConversion.matchingPharmaceuticalForms(ingredient.get("PharmaceuticalForm").toLowerCase(), form)) {
+								if ((ingredient.get("Dosage") != null) && (!(ingredient.get("Dosage").trim().equals("")))) {
+									try {
+										double genericDrugAmount = Double.parseDouble(ingredient.get("Dosage"));
+										String genricDrugAmountUnitName = ingredient.get("DosageUnit").trim().toUpperCase();
+										if (unitConversionsMap.containsKey(genricDrugAmountUnitName)) {
+											if (unitConversionsMap.get(genricDrugAmountUnitName).matches(genericDrugAmount, cdmIngredientAmountUnit, cdmIngredientAmount)) {
+												System.out.println("    " + cdmDrug);
+												//System.out.println("        Matching ingredient: " + cdmIngredient.toStringLong());
+												System.out.println("        Generic source drug: " + genericDrugDescription(genericDrug)); 
+												System.out.println("        Drug: " + cdmDrug);
+												
+												matchedCDMDrugs++;
+												matchedGenericDrugs.add(genericDrug);
+												//TODO
+											}
 										}
 									}
-								}
-								catch (NumberFormatException e) {
-									// Skip generic drug
+									catch (NumberFormatException e) {
+										// Skip generic drug
+									}
 								}
 							}
 						}  
@@ -218,6 +238,9 @@ public class MapGenericDrugs extends Mapping {
 				//}
 			}
 			connection.close();
+			
+			// Write pharmaceutical form matching log file
+			formConversion.writeLogToFile(DrugMapping.getCurrentPath() + "/DrugMapping Pharmaceutical Form Matching.csv");
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			

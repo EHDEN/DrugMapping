@@ -12,6 +12,7 @@ WITH atc_ingredient AS (
 	AND   ingredient.vocabulary_id = 'RxNorm'
 	AND   ingredient.concept_class_id = 'Ingredient'
 	AND   UPPER(atc.concept_name) = UPPER(ingredient.concept_name)
+	@drugATCTest
 )
 SELECT DISTINCT atc_ingredient.atc AS atc,
        drug_strength.ingredient_concept_id,
@@ -60,6 +61,7 @@ WHERE drug_strength.drug_concept_id IN (
       AND drug.concept_class_id = 'Clinical Drug Comp'
       AND drug.standard_concept = 'S'
       AND drug.invalid_reason IS NULL
+      @drugNameTest
 UNION ALL
 SELECT atc_ingredient.atc AS atc,
        ingredient.concept_id AS ingredient_concept_id,
@@ -94,6 +96,7 @@ WHERE drug.concept_id IN (
       )
       AND cr1.relationship_id = 'RxNorm has dose form'
       AND cr2.relationship_id = 'RxNorm has ing'
+      @drugNameTest
 UNION ALL
 SELECT atc_ingredient.atc AS atc,
        drug_strength.ingredient_concept_id,
@@ -145,3 +148,4 @@ WHERE drug_strength.drug_concept_id IN (
       AND drug.concept_class_id = 'Clinical Drug'
       AND drug.standard_concept = 'S'
       AND drug.invalid_reason IS NULL
+      @drugNameTest

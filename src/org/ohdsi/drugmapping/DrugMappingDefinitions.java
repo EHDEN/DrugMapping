@@ -274,6 +274,29 @@ public class DrugMappingDefinitions {
 							}
 					),
 					new FileDefinition(
+							"Forms Mapping File",
+							new String[] {
+									"This file should contain the mappings from the local",
+									"pharmaceutical form to the CDM pharmaceutical form."
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"LocalForm",
+											new String[] {
+													"This is the text to match the PharmaceuticalForm",
+													"column in the generic drugs file."
+											}
+									),
+									new FileColumnDefinition(
+											"CDMForm",
+											new String[] {
+													"This is the text to match the concept_name",
+													"of the CDM pharmaceutical form."
+											}
+									)
+							}
+					),
+					new FileDefinition(
 							"Generic Drugs File",
 							new String[] {
 									"This file should contain the genric drugs from the source database."

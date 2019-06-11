@@ -157,7 +157,7 @@ public class DrugMapping {
 				//Mapping.loadReplacements(getFile("Replacements File"));
 				//new MapATC(getDatabase(), getFile("ATC File"));
 				//new MapIngredients(getDatabase(), getFile("Ingredients File"));
-				new MapGenericDrugs(getDatabase(), getFile("Units Mapping File"), getFile("Generic Drugs File"));
+				new MapGenericDrugs(getDatabase(), getFile("Units Mapping File"), getFile("Forms Mapping File"), getFile("Generic Drugs File"));
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)
