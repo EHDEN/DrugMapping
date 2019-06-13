@@ -18,6 +18,7 @@ import org.ohdsi.utilities.files.Row;
 
 public class MapGenericDrugs extends Mapping {
 	private FormConversion formConversion = new FormConversion();
+	private Set<String> units = new HashSet<String>();
 	
 	
 	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile formMappingsFile, InputFile genericDrugsFile) {
@@ -37,36 +38,6 @@ public class MapGenericDrugs extends Mapping {
 			System.out.println("    " + fileName);
 			PrintWriter missingATCFile = new PrintWriter(new File(fileName));
 			writeGenericDrugHeaderToFile(missingATCFile);
-			System.out.println(DrugMapping.getCurrentTime() + " Finished");
-
-
-			System.out.println(DrugMapping.getCurrentTime() + " Loading unit mappings ...");
-			Map<String, UnitConversion> unitConversionsMap = new HashMap<String, UnitConversion>();
-			if (unitMappingsFile.openFile()) {
-				while (unitMappingsFile.hasNext()) {
-					Row row = unitMappingsFile.next();
-
-					String localUnitName = unitMappingsFile.get(row, "LocalUnit").trim();
-					UnitConversion unitConversion = new UnitConversion(localUnitName);
-					
-					for (int conversionNr = 1; conversionNr <= 10; conversionNr++) {
-						if (unitMappingsFile.hasField("concept_id_" + Integer.toString(conversionNr)) && unitMappingsFile.hasField("factor_" + Integer.toString(conversionNr))) {
-							String concept_id = unitMappingsFile.get(row, "concept_id_" + Integer.toString(conversionNr));
-							String factor     = unitMappingsFile.get(row, "factor_" + Integer.toString(conversionNr));
-							
-							if ((concept_id != null) && (factor != null)) {
-								concept_id = concept_id.trim();
-								factor     = factor.trim();
-								if ((!concept_id.equals("")) && (!factor.equals(""))) {
-									unitConversion.addConversion(concept_id, factor);
-								}
-							}
-						}
-					}
-					
-					unitConversionsMap.put(localUnitName, unitConversion);
-				}
-			}
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 
 
@@ -104,30 +75,24 @@ public class MapGenericDrugs extends Mapping {
 						Row row = genericDrugsFile.next();
 						
 						genericDrugLine = new HashMap<String, String>();
-						genericDrugLine.put("GenericDrugCode",      genericDrugsFile.get(row, "GenericDrugCode").trim());
-						genericDrugLine.put("LabelName",            genericDrugsFile.get(row, "LabelName").trim().toUpperCase());
-						genericDrugLine.put("ShortName",            genericDrugsFile.get(row, "ShortName").trim().toUpperCase());
-						genericDrugLine.put("FullName",             genericDrugsFile.get(row, "FullName").trim().toUpperCase());
-						genericDrugLine.put("ATCCode",              genericDrugsFile.get(row, "ATCCode").trim().toUpperCase());
-						genericDrugLine.put("DDDPerUnit",           genericDrugsFile.get(row, "DDDPerUnit").trim());
-						genericDrugLine.put("PrescriptionDays",     genericDrugsFile.get(row, "PrescriptionDays").trim());
-						genericDrugLine.put("Dosage",               genericDrugsFile.get(row, "Dosage").trim());
-						genericDrugLine.put("DosageUnit",           genericDrugsFile.get(row, "DosageUnit").trim());
-						genericDrugLine.put("PharmaceuticalForm",   genericDrugsFile.get(row, "PharmaceuticalForm").trim().toUpperCase());
-						
-						genericDrugLine.put("IngredientCode",        genericDrugsFile.get(row, "IngredientCode").trim());
-						genericDrugLine.put("IngredientPartNumber",  genericDrugsFile.get(row, "IngredientPartNumber").trim());
-						genericDrugLine.put("IngredientAmount",      genericDrugsFile.get(row, "IngredientAmount").trim());
-						genericDrugLine.put("IngredientAmountUnit",  genericDrugsFile.get(row, "IngredientAmountUnit").trim().toUpperCase());
-						genericDrugLine.put("IngredientGenericName", genericDrugsFile.get(row, "IngredientGenericName").trim().toUpperCase());
-						genericDrugLine.put("IngredientCASNumber",   genericDrugsFile.get(row, "IngredientCASNumber").trim());
-						
-						genericDrugLine.put("SubstanceCode",        genericDrugsFile.get(row, "SubstanceCode").trim());
-						genericDrugLine.put("SubstanceDescription", genericDrugsFile.get(row, "SubstanceDescription").trim().toUpperCase());
+						genericDrugLine.put("SourceCode",            genericDrugsFile.get(row, "SourceCode").trim());
+						genericDrugLine.put("SourceName",            genericDrugsFile.get(row, "SourceName").trim().toUpperCase());
+						genericDrugLine.put("SourceATCCode",         genericDrugsFile.get(row, "SourceATCCode").trim().toUpperCase());
+						genericDrugLine.put("PharmaceuticalForm",    genericDrugsFile.get(row, "Formulation").trim().toUpperCase());
+
+						genericDrugLine.put("IngredientName",        genericDrugsFile.get(row, "IngredientName").trim().toUpperCase());
+						genericDrugLine.put("IngredientNameEnglish", genericDrugsFile.get(row, "IngredientNameEnglish").trim());
+						genericDrugLine.put("Dosage",                genericDrugsFile.get(row, "Dosage").trim());
+						genericDrugLine.put("DosageUnit",            genericDrugsFile.get(row, "DosageUnit").trim().toUpperCase());
+						genericDrugLine.put("CASNumber",             genericDrugsFile.get(row, "CASNumber").trim());
 					}
 					
 					if (genericDrugLine != null) {
-						if ((genericDrug.size() > 0) && (!genericDrugLine.get("GenericDrugCode").equals(genericDrug.get(genericDrug.size() -1).get("GenericDrugCode")))) {
+						if (!genericDrugLine.get("DosageUnit").equals("")) {
+							units.add(genericDrugLine.get("DosageUnit"));
+						}
+						
+						if ((genericDrug.size() > 0) && (!genericDrugLine.get("SourceCode").equals(genericDrug.get(genericDrug.size() -1).get("SourceCode")))) {
 							lastGenericDrugLine = genericDrugLine;
 							genericDrugLine = null;
 						}
@@ -151,7 +116,7 @@ public class MapGenericDrugs extends Mapping {
 						else {
 							multipleIngredientGenericDrugs.add(genericDrug);
 						}
-						if (genericDrug.get(0).get("ATCCode").equals("")) {
+						if (genericDrug.get(0).get("SourceATCCode").equals("")) {
 							missingATCGenericDrugs.add(genericDrug);
 							writeGenericDrugToFile(genericDrug, missingATCFile);
 						}
@@ -162,13 +127,21 @@ public class MapGenericDrugs extends Mapping {
 			}
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
-
 			
+			
+			// Create Units Map
+			UnitConversion unitConversionsMap = new UnitConversion(database, units);
+			
+			if (unitConversionsMap.getStatus() != UnitConversion.STATE_ERROR) {
+				
+			}
+//TODO
+/*			
 			System.out.println(DrugMapping.getCurrentTime() + " Get single ingredient drugs from CDM ...");
 
 			//List<CDMDrug> cdmSingleIngredientDrugs = new ArrayList<CDMDrug>();
 			
-			/* Collect all strengths of single ingredient drugs by ATC */
+			// Collect all strengths of single ingredient drugs by ATC
 			
 			int singleIngredientCDMDrugCounter  = 0;
 			int matchedCDMDrugs = 0;
@@ -243,7 +216,7 @@ public class MapGenericDrugs extends Mapping {
 			formConversion.writeLogToFile(DrugMapping.getCurrentPath() + "/DrugMapping Pharmaceutical Form Matching.csv");
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
-			
+*/			
 			
 /*			
 			// Collect ATC ingredients
@@ -494,9 +467,9 @@ public class MapGenericDrugs extends Mapping {
 			System.out.println("    Generic source drugs: " + Integer.toString(genericDrugs.size()));
 			System.out.println("    No ATC: " + Integer.toString(missingATCGenericDrugs.size()));
 			System.out.println("    Single ingredient generic source drugs: " + Integer.toString(singleIngredientGenericDrugs.size()));
-			System.out.println("    Single ingredient CDM drugs: " + Integer.toString(singleIngredientCDMDrugCounter));
-			System.out.println("    Matched single ingredient generic source drugs: " + Integer.toString(matchedGenericDrugs.size()));
-			System.out.println("    Matched single ingredient CDM drugs: " + Integer.toString(matchedCDMDrugs));
+			//System.out.println("    Single ingredient CDM drugs: " + Integer.toString(singleIngredientCDMDrugCounter));
+			//System.out.println("    Matched single ingredient generic source drugs: " + Integer.toString(matchedGenericDrugs.size()));
+			//System.out.println("    Matched single ingredient CDM drugs: " + Integer.toString(matchedCDMDrugs));
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
 			

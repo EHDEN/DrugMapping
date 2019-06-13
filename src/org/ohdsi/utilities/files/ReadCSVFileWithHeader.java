@@ -23,12 +23,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ReadCSVFileWithHeader implements Iterable<Row> {
 	private InputStream	inputstream = null;
 	private char		delimiter	= ',';
 	private char		textDelimiter = '"';
 	private String 		charSet = "ISO-8859-1";
+	
+	private RowIterator rowIterator = null;
 
 	public ReadCSVFileWithHeader(String filename, char delimiter) {
 		this(filename);
@@ -80,10 +83,19 @@ public class ReadCSVFileWithHeader implements Iterable<Row> {
 	public boolean isOpen() {
 		return (inputstream != null);
 	}
+	
+	public Set<String> getColumns() {
+		Set<String> columns = null;
+		if (rowIterator != null) {
+			columns = rowIterator.getColumns();
+		}
+		return columns;
+	}
 
 	@Override
 	public Iterator<Row> iterator() {
-		return new RowIterator();
+		rowIterator = new RowIterator();
+		return rowIterator;
 	}
 
 	public class RowIterator implements Iterator<Row> {
@@ -111,6 +123,10 @@ public class ReadCSVFileWithHeader implements Iterable<Row> {
 		@Override
 		public void remove() {
 			throw new RuntimeException("Remove not supported");
+		}
+		
+		public Set<String> getColumns() {
+			return fieldName2ColumnIndex.keySet();
 		}
 
 	}

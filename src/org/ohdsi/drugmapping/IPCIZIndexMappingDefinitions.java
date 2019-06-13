@@ -154,32 +154,6 @@ public class IPCIZIndexMappingDefinitions {
 											}
 									)
 							}
-					),
-					new FileDefinition(
-							"ZIndex GNK File",
-							new String[] {
-									"This file should contain the substances of the drug components."
-					  		},
-							new FileColumnDefinition[] {
-									new FileColumnDefinition(
-											"GNKCode",
-											new String[] {
-													"This is the GNK-code of the substance."
-											}
-									),
-									new FileColumnDefinition(
-											"Description",
-											new String[] {
-													"This is the description of the substance."
-											}
-									),
-									new FileColumnDefinition(
-											"CASCode",
-											new String[] {
-													"This is the CAS number of the substance."
-											}
-									)
-							}
 					)
 			)
 		);
