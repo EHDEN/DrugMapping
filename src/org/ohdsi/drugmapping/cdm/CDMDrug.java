@@ -1,4 +1,4 @@
-package org.ohdsi.drugmapping;
+package org.ohdsi.drugmapping.cdm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMDrug extends CDMConcept {
-	private List<CDMIngredient> ingredients = new ArrayList<CDMIngredient>(); 
+	private List<CDMStrength> ingredients = new ArrayList<CDMStrength>(); 
 	
 
 	public CDMDrug(Row queryRow, String prefix) {
@@ -14,12 +14,12 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public List<CDMIngredient> getIngredients() {
+	public List<CDMStrength> getIngredients() {
 		return ingredients;
 	}
 	
 	
-	public void addIngredient(CDMIngredient ingredient) {
+	public void addIngredient(CDMStrength ingredient) {
 		ingredients.add(ingredient);
 	}
 }

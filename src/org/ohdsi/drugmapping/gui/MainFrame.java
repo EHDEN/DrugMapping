@@ -34,8 +34,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.DrugMappingDefinitions;
-import org.ohdsi.drugmapping.IPCIZIndexMappingDefinitions;
 import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.zindex.IPCIZIndexMappingDefinitions;
 
 public class MainFrame {
 	

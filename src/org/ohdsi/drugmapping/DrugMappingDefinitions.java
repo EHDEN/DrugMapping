@@ -91,6 +91,7 @@ public class DrugMappingDefinitions {
 							}
 					),
 */
+/*
 					new FileDefinition(
 							"Units Mapping File",
 							new String[] {
@@ -296,6 +297,7 @@ public class DrugMappingDefinitions {
 									)
 							}
 					),
+*/
 					new FileDefinition(
 							"Generic Drugs File",
 							new String[] {
@@ -303,46 +305,39 @@ public class DrugMappingDefinitions {
 					  		},
 							new FileColumnDefinition[] {
 									new FileColumnDefinition(
-											"GenericDrugCode",
+											"SourceCode",
 											new String[] {
 													"This is the GPK-code of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"LabelName",
-											new String[] {
-													"This is the label of the drug."
-											}
-									),
-									new FileColumnDefinition(
-											"ShortName",
-											new String[] {
-													"This is the short name of the drug."
-											}
-									),
-									new FileColumnDefinition(
-											"FullName",
+											"SourceName",
 											new String[] {
 													"This is the full name of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"ATCCode",
+											"SourceATCCode",
 											new String[] {
 													"This is the ATC-code of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"DDDPerUnit",
+											"Formulation",
 											new String[] {
-													"This is the DDD per unit of the drug."
+													"This is the pharmaceutical form of the drug."
 											}
 									),
 									new FileColumnDefinition(
-											"PrescriptionDays",
+											"IngredientName",
 											new String[] {
-													"This is the normal prescription length (days)",
-													"of the drug."
+													"This is the name of the ingredient of the drug."
+											}
+									),
+									new FileColumnDefinition(
+											"IngredientNameEnglish",
+											new String[] {
+													"This is the English name of the ingredient of the drug."
 											}
 									),
 									new FileColumnDefinition(
@@ -358,63 +353,10 @@ public class DrugMappingDefinitions {
 											}
 									),
 									new FileColumnDefinition(
-											"PharmaceuticalForm",
-											new String[] {
-													"This is the pharmaceutical form of the drug."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientCode",
-											new String[] {
-													"This is the ID of the ingredient of the drug."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientPartNumber",
-											new String[] {
-													"This is the part number of the ingredient",
-													"in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientAmount",
-											new String[] {
-													"This is the amount of the ingredient",
-													"in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientAmountUnit",
-											new String[] {
-													"This is the unit of the amount of the",
-													"ingredient in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientGenericName",
-											new String[] {
-													"This is the generic name of the",
-													"ingredient in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"IngredientCASNumber",
+											"CASNumber",
 											new String[] {
 													"This is the CAS number of the",
 													"ingredient in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"SubstanceCode",
-											new String[] {
-													"This is the ID of the ingredient substance",
-													"in this combination."
-											}
-									),
-									new FileColumnDefinition(
-											"SubstanceDescription",
-											new String[] {
-													"This is the description of the ingredient substance."
 											}
 									)
 							}

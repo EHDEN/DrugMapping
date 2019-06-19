@@ -1,4 +1,4 @@
-package org.ohdsi.drugmapping;
+package org.ohdsi.drugmapping.zindex;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
@@ -62,7 +65,8 @@ public class IPCIZIndexConversion extends Mapping {
 				header += "," + "SourceName";
 				header += "," + "SourceATCCode";
 				header += "," + "Formulation";
-				
+
+				header += "," + "IngredientNameStatus";
 				header += "," + "IngredientName";
 				header += "," + "IngredientNameEnglish";
 				header += "," + "Dosage";
@@ -79,43 +83,86 @@ public class IPCIZIndexConversion extends Mapping {
 						if (name.equals("")) name = gpkFile.get(row, "LabelName").trim();
 						if (name.equals("")) name = gpkFile.get(row, "ShortName").trim();
 						
-						String gpkRecord = gpkFile.get(row, "GPKCode");
-						gpkRecord += "," + "\"" + name.replaceAll("\"", "\"\"") + "\"";
-						gpkRecord += "," + gpkFile.get(row, "ATCCode");
-						gpkRecord += "," + "\"" + gpkFile.get(row, "PharmForm").replaceAll("\"", "\"\"") + "\"";
-						
-						if (!gpkFile.get(row, "GSKCode").equals("")) {
-							int gskCode = Integer.valueOf(gpkFile.get(row, "GSKCode"));
+						// Ignore empty names and names that start with a '*'
+						if ((!name.equals("")) && (!name.substring(0, 1).equals("*"))) {
 							
-							List<String[]> gskList = gskMap.get(gskCode);
-							if (gskList == null) {
-								System.out.println("    WARNING: No GSK records (GSKCode = " + gpkFile.get(row, "GSKCode") + " found for GPK " + gpkFile.get(row, "GPKCode"));
-								for (int cellCount = 0; cellCount < (GSKColumnCount - 4 + 1); cellCount++) {
-									gpkRecord += ",";
+							String gpkRecord = gpkFile.get(row, "GPKCode");
+							gpkRecord += "," + "\"" + name.replaceAll("\"", "\"\"") + "\"";
+							gpkRecord += "," + gpkFile.get(row, "ATCCode");
+							gpkRecord += "," + "\"" + gpkFile.get(row, "PharmForm").replaceAll("\"", "\"\"") + "\"";
+							
+							List<String[]> gskList = null;
+							
+							if (!gpkFile.get(row, "GSKCode").equals("")) {
+								int gskCode = Integer.valueOf(gpkFile.get(row, "GSKCode"));
+								
+								gskList = gskMap.get(gskCode);
+								if (gskList != null) {
+									// Remove non-active ingredients
+									List<String[]> remove = new ArrayList<String[]>();
+									for (String[] gskObject : gskList) {
+										if (!gskObject[Type].equals("W")) {
+											remove.add(gskObject);
+										}
+									}
+									gskList.removeAll(remove);
+
+									if (gskList.size() == 0) {
+										gskList = null;
+										System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gpkFile.get(row, "GSKCode") + " found for GPK " + gpkFile.get(row, "GPKCode"));
+									}
 								}
-								gpkFullFile.println(gpkRecord);
+							}
+							
+							if (gskList == null) {
+								// Try to extract ingredients from name (separated by '/')
+								if (name.contains(" ")) {
+									name = name.substring(0, name.indexOf(" "));
+								}
+								if (!name.equals("")) {
+									if (name.substring(name.length() - 1).equals(",")) {
+										name = name.substring(0, name.length() - 1);
+									}
+									if (name.contains("/")) {
+										String[] nameSplit = name.split("/");
+										for (String ingredientName : nameSplit) {
+											String gpkGskRecord = gpkRecord;
+											gpkGskRecord += "," + "Extracted";
+											gpkGskRecord += "," + "\"" + ingredientName.trim() + "\"";
+											for (int cellCount = 0; cellCount < (GSKColumnCount - 4); cellCount++) {
+												gpkGskRecord += ",";
+											}
+											gpkFullFile.println(gpkGskRecord);
+										}
+									}
+									else {
+										String gpkGskRecord = gpkRecord;
+										gpkGskRecord += "," + "Extracted";
+										gpkGskRecord += "," + "\"" + name + "\"";
+										for (int cellCount = 0; cellCount < (GSKColumnCount - 4); cellCount++) {
+											gpkGskRecord += ",";
+										}
+										gpkFullFile.println(gpkGskRecord);
+									}
+								}
 							}
 							else {
-								// Remove non-active ingredients
-								List<String[]> remove = new ArrayList<String[]>();
 								for (String[] gskObject : gskList) {
-									if (!gskObject[Type].equals("W")) {
-										remove.add(gskObject);
-									}
-								}
-								gskList.removeAll(remove);
-
-								if (gskList.size() == 0) {
-									System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gpkFile.get(row, "GSKCode") + " found for GPK " + gpkFile.get(row, "GPKCode"));
-									for (int cellCount = 0; cellCount < (GSKColumnCount - 4 + 1); cellCount++) {
-										gpkRecord += ",";
-									}
-									gpkFullFile.println(gpkRecord);
-								}
-								else {
-									for (String[] gskObject : gskList) {
+									if (!gskObject[GenericName].substring(0, 1).equals("*")) {
 										String gpkGskRecord = gpkRecord;
+										gpkGskRecord += "," + "ZIndex";
 										gpkGskRecord += "," + "\"" + gskObject[GenericName].replaceAll("\"", "\"\"") + "\"";
+										gpkGskRecord += ",";
+										gpkGskRecord += "," + gskObject[Amount];
+										gpkGskRecord += "," + gskObject[AmountUnit];
+										gpkGskRecord += "," + gskObject[CASNumber];
+
+										gpkFullFile.println(gpkGskRecord);
+									}
+									else {
+										String gpkGskRecord = gpkRecord;
+										gpkGskRecord += "," + "ZIndex";
+										gpkGskRecord += ",";
 										gpkGskRecord += ",";
 										gpkGskRecord += "," + gskObject[Amount];
 										gpkGskRecord += "," + gskObject[AmountUnit];
@@ -125,13 +172,6 @@ public class IPCIZIndexConversion extends Mapping {
 									}
 								}
 							}
-						}
-						else {
-							System.out.println("    WARNING: No GSK code found for GPK " + gpkFile.get(row, "GPKCode"));
-							for (int cellCount = 0; cellCount < (GSKColumnCount - 4 + 1); cellCount++) {
-								gpkRecord += ",";
-							}
-							gpkFullFile.println(gpkRecord);
 						}
 					}
 					gpkFullFile.close();

@@ -1,8 +1,8 @@
-package org.ohdsi.drugmapping;
+package org.ohdsi.drugmapping.cdm;
 
 import org.ohdsi.utilities.files.Row;
 
-public class CDMIngredient extends CDMDrug {
+public class CDMStrength {
 	private String amount_value_string      = null;
 	private Double amount_value             = null;
 	private CDMConcept amount_unit          = null;
@@ -15,8 +15,7 @@ public class CDMIngredient extends CDMDrug {
 	private String box_size                 = null;
 	
 	
-	public CDMIngredient(Row queryRow, String prefix) {
-		super(queryRow, prefix);
+	public CDMStrength(Row queryRow, String prefix) {
 		amount_value_string      = queryRow.get(prefix + "amount_value");
 		amount_unit              = new CDMConcept(queryRow, prefix + "amount_unit_");
 		numerator_value_string   = queryRow.get(prefix + "numerator_value");

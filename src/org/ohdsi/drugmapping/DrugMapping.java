@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,9 @@ import javax.swing.JComponent;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.vocabulary.Vocabulary;
+import org.ohdsi.drugmapping.zindex.IPCIZIndexConversion;
 
 public class DrugMapping {
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();

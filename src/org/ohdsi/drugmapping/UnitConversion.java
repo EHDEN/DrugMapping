@@ -29,14 +29,14 @@ public class UnitConversion {
 	public static int STATE_OK        = 3;
 	public static int STATE_ERROR     = 4;
 	
-	private static String FILENAME = "DrugMapping - UnitConversionMap.csv";
+	public static String FILENAME = "DrugMapping - UnitConversionMap.csv";
 	
 	private String unitMapDate = null;
 	private Map<String, String> cdmUnitNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM unit concept_name to CDM unit concept_id
 	private Map<String, String> cdmUnitConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM unit concept_id to CDM unit concept_name
 	private List<String> cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting                   // Map from CDM unit concept_id to CDM unit concept_name
 	private List<String> sourceUnitNames = new ArrayList<String>();                                            // List of source unit names for sorting
-	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();   // Map from ZIndex unit to map from CDM unit concept_name to factor (CDM unit = ZIndex unit * factor)
+	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();   // Map from Source unit to map from CDM unit concept_name to factor (CDM unit = Source unit * factor)
 	
 	private int status = STATE_EMPTY;
 	
@@ -96,8 +96,11 @@ public class UnitConversion {
 		} 
 
 		readFromFile();
-		if (unitConversionMap != null) {
-			status = STATE_OK;
+		if (status == STATE_NOT_FOUND) {
+			System.out.println("    Creating empty unit conversion map ...");
+			writeUnitConversionsToFile();
+			status = STATE_EMPTY;
+			System.out.println("    Done");
 		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
@@ -124,12 +127,15 @@ public class UnitConversion {
 					
 					if (!conceptNamesRead) {
 						conceptNamesRead = true;
+						unitMapDate = row.get("Local unit").replace('/', '-');
 					}
 					else {
 						String sourceUnit = row.get("Local unit");
 						oldSourceUnits.add(sourceUnit);
 						
 						if (sourceUnitNames.contains(sourceUnit)) {
+							String mappingLine = "        " + sourceUnit;
+							
 							Map<String, Double> sourceUnitFactors = unitConversionMap.get(sourceUnit);
 							if (sourceUnitFactors == null) {
 								sourceUnitFactors = new HashMap<String, Double>();
@@ -137,28 +143,31 @@ public class UnitConversion {
 							}
 							for (String concept_id : unitConcepts) {
 								oldCDMUnits.add(concept_id);
-								
-								if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
-									String factorString = row.get(concept_id).trim();
-									if (!factorString.equals("")) {
-										try {
-											double factor = Double.parseDouble(factorString);
-											sourceUnitFactors.put(concept_id, factor);
-										}
-										catch (NumberFormatException e) {
-											System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
-											status = STATE_ERROR;
+								if (!concept_id.equals("Local unit")) {
+									if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
+										String factorString = row.get(concept_id).trim();
+										if (!factorString.equals("")) {
+											try {
+												double factor = Double.parseDouble(factorString);
+												sourceUnitFactors.put(concept_id, factor);
+												mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdmUnitConceptIdToNameMap.get(concept_id) + "\")";
+											}
+											catch (NumberFormatException e) {
+												System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
+												status = STATE_ERROR;
+											}
 										}
 									}
-								}
-								else {
-									System.out.println("    WARNING: Source unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exits!");
-									lostUnits = true;
+									else {
+										System.out.println("    WARNING: Source unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+										lostUnits = true;
+									}
 								}
 							}
+							System.out.println(mappingLine);
 						}
 						else {
-							System.out.println("    WARNING: Source unit '" + sourceUnit + "' no longer exits!");
+							System.out.println("    WARNING: Source unit '" + sourceUnit + "' no longer exists!");
 							lostUnits = true;
 						}
 					}
@@ -181,6 +190,9 @@ public class UnitConversion {
 				
 				if (newUnits) {
 					status = STATE_NEW_UNITS;
+				}
+				else {
+					status = STATE_OK;
 				}
 				
 				if (newUnits || lostUnits) {
@@ -232,19 +244,23 @@ public class UnitConversion {
 			try {
 				PrintWriter unitFileWriter = new PrintWriter(unitFile);
 
-				String header1 = "Local";
+				String header1 = "Local unit";
 				String header2 = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
 				for (String concept_name : cdmUnitConceptNames) {
 					header1 += "," + cdmUnitNameToConceptIdMap.get(concept_name);
-					header2 += "," + concept_name;
+					header2 += "," + "\"" + concept_name + "\"";
 				}
 				unitFileWriter.println(header1);
 				unitFileWriter.println(header2);
 				for (String sourceUnitName : sourceUnitNames) {
-					String record = sourceUnitName; 
+					String record = "\"" + sourceUnitName + "\""; 
 					for (String concept_name : cdmUnitConceptNames) {
 						String concept_id = cdmUnitNameToConceptIdMap.get(concept_name);
-						Double factor = unitConversionMap.get(sourceUnitName).get(concept_id);
+						Map<String, Double> sourceUnitMap = unitConversionMap.get(sourceUnitName);
+						Double factor = null;
+						if (sourceUnitMap != null) {
+							factor = sourceUnitMap.get(concept_id);
+						}
 						record += "," + (factor == null ? "" : factor);
 					}
 					unitFileWriter.println(record);
@@ -262,53 +278,43 @@ public class UnitConversion {
 		return status;
 	}
 	
-	/*
-	public Double getFactor(String concept_id) {
-		return conversionTable.get(concept_id);
+	
+	public boolean compatibleUnits(String sourceUnit, String cdmUnit) {
+		return (getFactor(sourceUnit, cdmUnit) != null);
 	}
 	
-
-	public void addConversion(String concept_id, String factor) {
-		try {
-			double conversionFactor = Double.parseDouble(factor);
-			if (!conversionTable.containsKey(concept_id)) {
-				conversionTable.put(concept_id, conversionFactor);
+	
+	private Double getFactor(String sourceUnit, String cdmUnit) {
+		if ((sourceUnit != null) && sourceUnitNames.contains(sourceUnit)) {
+			if (cdmUnit != null) {
+				if (!cdmUnitConceptNames.contains(cdmUnit)) {
+					if (cdmUnitConceptIdToNameMap.keySet().contains(cdmUnit)) {
+						cdmUnit = cdmUnitConceptIdToNameMap.get(cdmUnit);
+					}
+					else {
+						cdmUnit = null;
+					}
+				}
 			}
-			else {
-				System.out.println("ERROR: Duplicate conversion for unit '" + name + "' to concept " + concept_id + " factor = " + factor);
-			}
 		}
-		catch (NumberFormatException e) {
-			System.out.println("ERROR: Non-numeric conversion factor for unit '" + name + "' to concept " + concept_id + " factor = " + factor);
+		Double factor = null;
+		if ((sourceUnit == null) && (cdmUnit == null)) {
+			factor = 1.0;
 		}
+		if ((sourceUnit != null) && (cdmUnit != null)) {
+			factor = unitConversionMap.get(sourceUnit).get(cdmUnit);
+		}
+		return factor;
 	}
 	
 	
-	public boolean matches(double sourceValue, String cdmUnitConceptId, Double cdmValue) {
-		boolean result = false;
-		
-		if (conversionTable.containsKey(cdmUnitConceptId)) {
-			result = (sourceValue == (cdmValue * conversionTable.get(cdmUnitConceptId)));
+	public boolean matches(String sourceUnit, Double sourceValue, String cdmUnit, Double cdmValue) {
+		boolean matches = false;
+		Double factor = getFactor(sourceUnit, cdmUnit);
+		if (factor != null) {
+			matches = (cdmValue == (sourceValue * factor));
 		}
 		
-		return result;
+		return matches;
 	}
-	
-	
-	public String toString() {
-		String description;
-		
-		description = name;
-		for (String concept_id : conversionTable.keySet()) {
-	        DecimalFormat df = new DecimalFormat("#");
-	        df.setMaximumFractionDigits(8);
-	        String factor = df.format(conversionTable.get(concept_id));
-			
-			description += "," + concept_id;
-			description += "," + factor;
-		}
-		
-		return description;
-	}
-	*/
 }

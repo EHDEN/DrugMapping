@@ -1,4 +1,4 @@
-package org.ohdsi.drugmapping;
+package org.ohdsi.drugmapping.cdm;
 
 import org.ohdsi.utilities.files.Row;
 

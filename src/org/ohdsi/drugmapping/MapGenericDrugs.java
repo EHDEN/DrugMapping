@@ -12,23 +12,28 @@ import java.util.Set;
 
 import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
+import org.ohdsi.drugmapping.cdm.CDMIngredient;
+import org.ohdsi.drugmapping.cdm.CDMStrength;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.utilities.files.Row;
 
 public class MapGenericDrugs extends Mapping {
 	private FormConversion formConversion = new FormConversion();
 	private Set<String> units = new HashSet<String>();
 	
+	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
+	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
+	private Map<SourceIngredient, CDMIngredient> ingredientMap = new HashMap<SourceIngredient, CDMIngredient>();
 	
-	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile formMappingsFile, InputFile genericDrugsFile) {
+	private int noATCCounter = 0; // Counter of source drugs without ATC code.
 		
-		QueryParameters queryParameters = new QueryParameters();
-		queryParameters.set("@vocab", database.getVocabSchema());
-		//queryParameters.set("@drugATCTest", "AND   atc.concept_code = 'C02CA01'");
-		//queryParameters.set("@drugNameTest", "AND LOWER(drug.concept_name) LIKE '%prazosin%'");
-		queryParameters.set("@drugATCTest", "");
-		queryParameters.set("@drugNameTest", "");
+	
+	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile formMappingsFile, InputFile sourceDrugsFile) {
+		
+		QueryParameters queryParameters;
 				
 		String fileName = "";
 		try {
@@ -37,10 +42,10 @@ public class MapGenericDrugs extends Mapping {
 			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Missing ATC.csv";
 			System.out.println("    " + fileName);
 			PrintWriter missingATCFile = new PrintWriter(new File(fileName));
-			writeGenericDrugHeaderToFile(missingATCFile);
+			SourceDrug.writeHeaderToFile(missingATCFile);
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 
-
+/*
 			System.out.println(DrugMapping.getCurrentTime() + " Loading form mappings ...");
 			if (formMappingsFile.openFile()) {
 				while (formMappingsFile.hasNext()) {
@@ -50,78 +55,52 @@ public class MapGenericDrugs extends Mapping {
 				}
 			}
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+*/
 
 
-			System.out.println(DrugMapping.getCurrentTime() + " Loading generic drugs ...");
+			System.out.println(DrugMapping.getCurrentTime() + " Loading source drugs ...");
 			
 			// Read the generic drugs file
-			List<List<Map<String, String>>> genericDrugs = new ArrayList<List<Map<String, String>>>();
-			List<List<Map<String, String>>> noIngredientGenericDrugs = new ArrayList<List<Map<String, String>>>();
-			List<List<Map<String, String>>> singleIngredientGenericDrugs = new ArrayList<List<Map<String, String>>>();
-			List<List<Map<String, String>>> multipleIngredientGenericDrugs = new ArrayList<List<Map<String, String>>>();
-			
-			List<List<Map<String, String>>> missingATCGenericDrugs = new ArrayList<List<Map<String, String>>>();
-			
-			if (genericDrugsFile.openFile()) {
-				Map<String, String> genericDrugLine = null;
-				Map<String, String> lastGenericDrugLine = null;
-				List<Map<String, String>> genericDrug = new ArrayList<Map<String, String>>();
-				while ((lastGenericDrugLine != null) || genericDrugsFile.hasNext() || (genericDrug.size() > 0)) {
-					if (lastGenericDrugLine != null) {
-						genericDrugLine = lastGenericDrugLine;
-						lastGenericDrugLine = null;
-					}
-					else if (genericDrugsFile.hasNext()) {
-						Row row = genericDrugsFile.next();
+			if (sourceDrugsFile.openFile()) {
+				while (sourceDrugsFile.hasNext()) {
+					Row row = sourceDrugsFile.next();
+					String sourceCode = sourceDrugsFile.get(row, "SourceCode").trim();
+					
+					if (!sourceCode.equals("")) {
+						SourceDrug sourceDrug = sourceDrugMap.get(sourceCode);
 						
-						genericDrugLine = new HashMap<String, String>();
-						genericDrugLine.put("SourceCode",            genericDrugsFile.get(row, "SourceCode").trim());
-						genericDrugLine.put("SourceName",            genericDrugsFile.get(row, "SourceName").trim().toUpperCase());
-						genericDrugLine.put("SourceATCCode",         genericDrugsFile.get(row, "SourceATCCode").trim().toUpperCase());
-						genericDrugLine.put("PharmaceuticalForm",    genericDrugsFile.get(row, "Formulation").trim().toUpperCase());
+						if (sourceDrug == null) {
+							sourceDrug = new SourceDrug(
+												sourceCode, 
+												sourceDrugsFile.get(row, "SourceName").trim().toUpperCase(), 
+												sourceDrugsFile.get(row, "SourceATCCode").trim().toUpperCase(), 
+												sourceDrugsFile.get(row, "Formulation").trim().toUpperCase()
+												);
+							sourceDrugs.add(sourceDrug);
+							sourceDrugMap.put(sourceCode, sourceDrug);
+							
+							System.out.println("    " + sourceDrug);
+							
+							if (sourceDrug.getATCCode() == null) {
+								sourceDrug.writeDescriptionToFile("", missingATCFile);
+								noATCCounter++;
+							}
+						}
 
-						genericDrugLine.put("IngredientName",        genericDrugsFile.get(row, "IngredientName").trim().toUpperCase());
-						genericDrugLine.put("IngredientNameEnglish", genericDrugsFile.get(row, "IngredientNameEnglish").trim());
-						genericDrugLine.put("Dosage",                genericDrugsFile.get(row, "Dosage").trim());
-						genericDrugLine.put("DosageUnit",            genericDrugsFile.get(row, "DosageUnit").trim().toUpperCase());
-						genericDrugLine.put("CASNumber",             genericDrugsFile.get(row, "CASNumber").trim());
-					}
-					
-					if (genericDrugLine != null) {
-						if (!genericDrugLine.get("DosageUnit").equals("")) {
-							units.add(genericDrugLine.get("DosageUnit"));
-						}
+						String ingredientName        = sourceDrugsFile.get(row, "IngredientName").trim().toUpperCase(); 
+						String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish").trim();
+						String dosage                = sourceDrugsFile.get(row, "Dosage").trim(); 
+						String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit").trim().toUpperCase(); 
+						String casNumber             = sourceDrugsFile.get(row, "CASNumber").trim();
 						
-						if ((genericDrug.size() > 0) && (!genericDrugLine.get("SourceCode").equals(genericDrug.get(genericDrug.size() -1).get("SourceCode")))) {
-							lastGenericDrugLine = genericDrugLine;
-							genericDrugLine = null;
+						if (!ingredientName.equals("")) {
+							SourceIngredient sourceIngredient = sourceDrug.AddIngredient(ingredientName, ingredientNameEnglish, casNumber, dosage, dosageUnit);
+							
+							String unit = sourceDrug.getIngredientDosageUnit(sourceIngredient);
+							if (unit != null) {
+								units.add(unit);
+							}
 						}
-						else {
-							genericDrug.add(genericDrugLine);
-							genericDrugLine = null;
-						}
-					}
-					
-					if ((genericDrug.size() > 0) && ((lastGenericDrugLine != null) || (!genericDrugsFile.hasNext()))) {
-						
-						System.out.println("    " + genericDrugDescription(genericDrug));
-						
-						genericDrugs.add(genericDrug);
-						if (genericDrug.size() == 0) {
-							noIngredientGenericDrugs.add(genericDrug);
-						}
-						else if (genericDrug.size() == 1) {
-							singleIngredientGenericDrugs.add(genericDrug);
-						}
-						else {
-							multipleIngredientGenericDrugs.add(genericDrug);
-						}
-						if (genericDrug.get(0).get("SourceATCCode").equals("")) {
-							missingATCGenericDrugs.add(genericDrug);
-							writeGenericDrugToFile(genericDrug, missingATCFile);
-						}
-						
-						genericDrug = new ArrayList<Map<String, String>>();
 					}
 				}
 			}
@@ -131,11 +110,62 @@ public class MapGenericDrugs extends Mapping {
 			
 			// Create Units Map
 			UnitConversion unitConversionsMap = new UnitConversion(database, units);
-			
-			if (unitConversionsMap.getStatus() != UnitConversion.STATE_ERROR) {
-				
+
+			if (unitConversionsMap.getStatus() == UnitConversion.STATE_EMPTY) {
+				// If no unit conversion is specified then stop.
+				System.out.println("");
+				System.out.println("FIRST FILL THE UNIT CONVERSION MAP IN THE FILE:");
+				System.out.println("");
+				System.out.println(DrugMapping.getCurrentPath() + "/" + UnitConversion.FILENAME);
 			}
-//TODO
+			else if (unitConversionsMap.getStatus() != UnitConversion.STATE_ERROR) {
+				System.out.println(DrugMapping.getCurrentTime() + " Match ingredients by name ...");
+				
+				// Connect to the database
+				RichConnection connection = database.getRichConnection(this.getClass());
+				
+				// Match RxNorm Ingredients on IngredientNameEnglish 
+				for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+					queryParameters = new QueryParameters();
+					queryParameters.set("@vocab", database.getVocabSchema());
+					queryParameters.set("@name", sourceIngredient.getIngredientNameEnglish().toUpperCase().replaceAll("'", "''"));
+					
+					List<CDMIngredient> matchingCDMIngredients = new ArrayList<CDMIngredient>();
+					for (Row queryRow : connection.queryResource("FindRxNormIngredientsByName.sql", queryParameters)) {
+						matchingCDMIngredients.add(new CDMIngredient(queryRow, ""));
+					}
+					if (matchingCDMIngredients.size() == 1) {
+						ingredientMap.put(sourceIngredient, matchingCDMIngredients.get(0));
+						System.out.println("    " + sourceIngredient);
+						System.out.println("        " + matchingCDMIngredients.get(0));
+					}
+				}
+				
+				//TODO
+				
+				connection.close();
+				
+				int noIngredientsCount = 0;
+				int singleIngredientCount = 0;
+				for (SourceDrug sourceDrug : sourceDrugs) {
+					if (sourceDrug.getIngredients().size() == 0) {
+						noIngredientsCount++;
+					}
+					if (sourceDrug.getIngredients().size() == 1) {
+						singleIngredientCount++;
+					}
+				}
+				
+				System.out.println("");
+				System.out.println("    Source drugs: " + Integer.toString(sourceDrugs.size()));
+				System.out.println("    Source drugs without ATC: " + Integer.toString(noATCCounter));
+				System.out.println("    Source drugs without ingredients: " + Integer.toString(noIngredientsCount));
+				System.out.println("    Unique source ingredients: " + Integer.toString(SourceDrug.getAllIngredients().size()));
+				System.out.println("    Matched source ingredients: " + Integer.toString(ingredientMap.size()) + " (" + Long.toString(Math.round(((double) ingredientMap.size() / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
+				System.out.println("    Single ingredient generic source drugs: " + Integer.toString(singleIngredientCount));
+				System.out.println(DrugMapping.getCurrentTime() + " Finished");
+			}
+			
 /*			
 			System.out.println(DrugMapping.getCurrentTime() + " Get single ingredient drugs from CDM ...");
 
@@ -461,7 +491,6 @@ public class MapGenericDrugs extends Mapping {
 					}
 				}
 			}
-*/
 			
 			System.out.println("");
 			System.out.println("    Generic source drugs: " + Integer.toString(genericDrugs.size()));
@@ -471,6 +500,7 @@ public class MapGenericDrugs extends Mapping {
 			//System.out.println("    Matched single ingredient generic source drugs: " + Integer.toString(matchedGenericDrugs.size()));
 			//System.out.println("    Matched single ingredient CDM drugs: " + Integer.toString(matchedCDMDrugs));
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+*/
 			
 			
 			// Close all output files
@@ -479,67 +509,6 @@ public class MapGenericDrugs extends Mapping {
 		} catch (FileNotFoundException e) {
 			System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
 		}
-	}
-	
-	
-	private void writeGenericDrugHeaderToFile(PrintWriter file) {
-		String header = "GenericDrugCode";
-		header += "," + "LabelName";
-		header += "," + "ShortName";
-		header += "," + "FullName";
-		header += "," + "ATCCode";
-		header += "," + "DDDPerUnit";
-		header += "," + "PrescriptionDays";
-		header += "," + "Dosage";
-		header += "," + "DosageUnit";
-		header += "," + "PharmaceuticalForm";
-		
-		header += "," + "IngredientCode";
-		header += "," + "IngredientPartNumber";
-		header += "," + "IngredientAmount";
-		header += "," + "IngredientAmountUnit";
-		header += "," + "IngredientGenericName";
-		header += "," + "IngredientCASNumber";
-		
-		header += "," + "SubstanceCode";
-		header += "," + "SubstanceDescription";
-
-		file.println(header);
-	}
-	
-	
-	private void writeGenericDrugToFile(List<Map<String, String>> genericDrug, PrintWriter file) {
-		for (Map<String, String> record : genericDrug) {
-			String line = record.get("GenericDrugCode") +
-					"," + "\"" + record.get("LabelName") + "\"" +
-					"," + "\"" + record.get("ShortName") + "\"" +
-					"," + "\"" + record.get("FullName") + "\"" +
-					"," + record.get("ATCCode") +
-					"," + record.get("DDDPerUnit") +
-					"," + record.get("PrescriptionDays") +
-					"," + record.get("Dosage") +
-					"," + record.get("DosageUnit") +
-					"," + record.get("PharmaceuticalForm") +
-					
-					"," + record.get("IngredientCode") +
-					"," + record.get("IngredientPartNumber") +
-					"," + record.get("IngredientAmount") +
-					"," + record.get("IngredientAmountUnit") +
-					"," + "\"" + record.get("IngredientGenericName") + "\"" +
-					"," + record.get("IngredientCASNumber") +
-					
-					"," + record.get("SubstanceCode") +
-					"," + "\"" + record.get("SubstanceDescription") + "\"";
-			file.println(line);
-		}
-	}
-	
-	
-	private String genericDrugDescription(List<Map<String, String>> genericDrug) {
-		String description = genericDrug.get(0).get("GenericDrugCode");
-		description += "," + genericDrug.get(0).get("ATCCode");
-		description += "," + (genericDrug.get(0).get("FullName").equals("") ? (genericDrug.get(0).get("ShortName").equals("") ? genericDrug.get(0).get("LabelName") : genericDrug.get(0).get("ShortName")) : genericDrug.get(0).get("FullName"));
-		return description;
 	}
 
 }
