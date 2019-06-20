@@ -26,6 +26,8 @@ public class MapGenericDrugs extends Mapping {
 	
 	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
 	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
+	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
+	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
 	private Map<SourceIngredient, CDMIngredient> ingredientMap = new HashMap<SourceIngredient, CDMIngredient>();
 	
 	private int noATCCounter = 0; // Counter of source drugs without ATC code.
@@ -39,10 +41,17 @@ public class MapGenericDrugs extends Mapping {
 		try {
 			// Create all output files
 			System.out.println(DrugMapping.getCurrentTime() + " Creating output files ...");
+			
 			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Missing ATC.csv";
 			System.out.println("    " + fileName);
 			PrintWriter missingATCFile = new PrintWriter(new File(fileName));
 			SourceDrug.writeHeaderToFile(missingATCFile);
+
+			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Ingredient Mapping.csv";
+			System.out.println("    " + fileName);
+			PrintWriter ingredientMappingFile = new PrintWriter(new File(fileName));
+			ingredientMappingFile.println(SourceIngredient.getMatchHeader() + "," + CDMIngredient.getHeader());
+			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 
 /*
@@ -79,7 +88,7 @@ public class MapGenericDrugs extends Mapping {
 							sourceDrugs.add(sourceDrug);
 							sourceDrugMap.put(sourceCode, sourceDrug);
 							
-							System.out.println("    " + sourceDrug);
+							//System.out.println("    " + sourceDrug);
 							
 							if (sourceDrug.getATCCode() == null) {
 								sourceDrug.writeDescriptionToFile("", missingATCFile);
@@ -104,13 +113,39 @@ public class MapGenericDrugs extends Mapping {
 					}
 				}
 			}
-			
+
+			System.out.println("    Found " + Integer.toString(SourceDrug.getAllIngredients().size()) + " source ingredients");
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
 			
 			// Create Units Map
 			UnitConversion unitConversionsMap = new UnitConversion(database, units);
+			
+			
+			// Load CDM ingredients
+			System.out.println(DrugMapping.getCurrentTime() + " Get CDM ingredients ...");
+			
+			queryParameters = new QueryParameters();
+			queryParameters.set("@vocab", database.getVocabSchema());
+			
+			// Connect to the database
+			RichConnection connection = database.getRichConnection(this.getClass());
+			
+			// Get CDM ingredients
+			for (Row queryRow : connection.queryResource("cdm/GetCDMIngredients.sql", queryParameters)) {
+				CDMIngredient cdmIngredient = new CDMIngredient(queryRow, "");
+				cdmIngredients.put(cdmIngredient.getConceptId(), cdmIngredient);
+				cdmIngredientsList.add(cdmIngredient);
+			}
+			
+			// Close database connection
+			connection.close();
 
+			System.out.println("    Found " + Integer.toString(cdmIngredients.size()) + " CDM RxNorm ingredients");
+			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+			
+
+			// Match ingredients by name
 			if (unitConversionsMap.getStatus() == UnitConversion.STATE_EMPTY) {
 				// If no unit conversion is specified then stop.
 				System.out.println("");
@@ -122,27 +157,54 @@ public class MapGenericDrugs extends Mapping {
 				System.out.println(DrugMapping.getCurrentTime() + " Match ingredients by name ...");
 				
 				// Connect to the database
-				RichConnection connection = database.getRichConnection(this.getClass());
+				connection = database.getRichConnection(this.getClass());
 				
 				// Match RxNorm Ingredients on IngredientNameEnglish 
 				for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+
+					List<CDMIngredient> matchingCDMIngredients = new ArrayList<CDMIngredient>();
+					
+					for (CDMIngredient cdmIngredient : cdmIngredientsList) {
+						if (cdmIngredient.getConceptName().contains(sourceIngredient.getIngredientNameEnglish())) {
+							matchingCDMIngredients.add(cdmIngredient);
+						}
+					}
+					/*
 					queryParameters = new QueryParameters();
 					queryParameters.set("@vocab", database.getVocabSchema());
 					queryParameters.set("@name", sourceIngredient.getIngredientNameEnglish().toUpperCase().replaceAll("'", "''"));
 					
-					List<CDMIngredient> matchingCDMIngredients = new ArrayList<CDMIngredient>();
-					for (Row queryRow : connection.queryResource("FindRxNormIngredientsByName.sql", queryParameters)) {
+					for (Row queryRow : connection.queryResource("cdm/FindRxNormIngredientsByName.sql", queryParameters)) {
 						matchingCDMIngredients.add(new CDMIngredient(queryRow, ""));
 					}
+					*/
 					if (matchingCDMIngredients.size() == 1) {
 						ingredientMap.put(sourceIngredient, matchingCDMIngredients.get(0));
-						System.out.println("    " + sourceIngredient);
-						System.out.println("        " + matchingCDMIngredients.get(0));
+						sourceIngredient.setMatch(SourceIngredient.MATCH_SINGLE);
+					}
+					else if (matchingCDMIngredients.size() > 1) {
+						List<CDMIngredient> exactMatch = new ArrayList<CDMIngredient>();
+						for (CDMIngredient cdmIngredient : matchingCDMIngredients) {
+							if (cdmIngredient.getConceptName().equals(sourceIngredient.getIngredientNameEnglish())) {
+								exactMatch.add(cdmIngredient);
+							}
+						}
+						if (exactMatch.size() == 1) {
+							ingredientMap.put(sourceIngredient, exactMatch.get(0));
+							sourceIngredient.setMatch(SourceIngredient.MATCH_EXACT);
+						}
+					}
+					CDMIngredient cdmIngredient = ingredientMap.get(sourceIngredient);
+					if (cdmIngredient != null) {
+						//System.out.println("    " + sourceIngredient);
+						//System.out.println("        " + sourceIngredient.getMatch() + " " + cdmIngredient);
+						ingredientMappingFile.println(sourceIngredient + "," + sourceIngredient.getMatch() + "," + cdmIngredient);
 					}
 				}
 				
 				//TODO
 				
+				// Close database connection
 				connection.close();
 				
 				int noIngredientsCount = 0;
@@ -165,6 +227,7 @@ public class MapGenericDrugs extends Mapping {
 				System.out.println("    Single ingredient generic source drugs: " + Integer.toString(singleIngredientCount));
 				System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			}
+
 			
 /*			
 			System.out.println(DrugMapping.getCurrentTime() + " Get single ingredient drugs from CDM ...");
@@ -505,6 +568,7 @@ public class MapGenericDrugs extends Mapping {
 			
 			// Close all output files
 			missingATCFile.close();
+			ingredientMappingFile.close();
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("  ERROR: Cannot create output file '" + fileName + "'");

@@ -89,11 +89,11 @@ public class UnitConversion {
 			}
 		}
 		
-		System.out.println("    Done");
+		//for (String concept_name : cdmUnitConceptNames) {
+		//	System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
+		//} 
 		
-		for (String concept_name : cdmUnitConceptNames) {
-			System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
-		} 
+		System.out.println("    Done");
 
 		readFromFile();
 		if (status == STATE_NOT_FOUND) {

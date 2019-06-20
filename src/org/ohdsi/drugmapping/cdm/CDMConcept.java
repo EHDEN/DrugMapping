@@ -1,5 +1,7 @@
 package org.ohdsi.drugmapping.cdm;
 
+import java.io.PrintWriter;
+
 import org.ohdsi.utilities.files.Row;
 
 public class CDMConcept {
@@ -11,6 +13,24 @@ public class CDMConcept {
 	protected String standard_concept = null;
 	protected String concept_code     = null;
 	protected String invalid_reason   = null;
+	
+	
+	public static String getHeader() {
+		String header = "concept_id";
+		header += "," + "concept_name";
+		header += "," + "domain_id";
+		header += "," + "vocabulary_id";
+		header += "," + "concept_class_id";
+		header += "," + "standard_concept";
+		header += "," + "concept_code";
+		header += "," + "invalid_reason";
+		return header;
+	}
+	
+	
+	public static void writeHeaderToFile(PrintWriter file) {
+		file.println(getHeader());
+	}
 	
 	
 	
@@ -63,12 +83,12 @@ public class CDMConcept {
 	public String toString() {
 		
 		String description = (concept_id == null ? "null" : concept_id);
-		description += "," + (concept_name == null ? "null" : concept_name);
+		description += "," + "\"" + (concept_name == null ? "null" : concept_name) + "\"";
 		description += "," + (domain_id == null ? "null" : domain_id);
 		description += "," + (vocabulary_id == null ? "null" : vocabulary_id);
 		description += "," + (concept_class_id == null ? "null" : concept_class_id);
 		description += "," + (standard_concept == null ? "null" : standard_concept);
-		description += "," + (concept_code == null ? "null" : concept_code);
+		description += "," + "\"" + (concept_code == null ? "null" : concept_code) + "\"";
 		
 		return description;
 	}
