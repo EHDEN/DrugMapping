@@ -3,14 +3,23 @@ package org.ohdsi.drugmapping.source;
 import java.io.PrintWriter;
 
 public class SourceIngredient {
-	public static final String MATCH_SINGLE = "Single";
-	public static final String MATCH_EXACT  = "Exact";
+	public static final String NO_MATCH                    = "No Match";
+	
+	public static final String MATCH_SINGLE                = "Single";
+	public static final String MATCH_EXACT                 = "Exact";
+	public static final String MATCH_SINGLE_SYNONYM        = "Single Synonym";
+	public static final String MATCH_EXACT_SYNONYM         = "Exact Synonym";
+	
+	public static final String MATCH_MAPSTO_SINGLE         = "Maps To Single";
+	public static final String MATCH_MAPSTO_EXACT          = "Maps To Exact";
+	public static final String MATCH_MAPSTO_SINGLE_SYNONYM = "Maps To Single Synonym";
+	public static final String MATCH_MAPSTO_EXACT_SYNONYM  = "Maps To Exact Synonym";
 	
 	private String ingredientName = null;
 	private String ingredientNameEnglish = null;
 	private String casNumber = null;
 	
-	private String match = null;
+	private String match = NO_MATCH;
 	
 	
 	public static String getHeader() {

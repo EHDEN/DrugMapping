@@ -95,7 +95,7 @@ public class DrugMapping {
 					reUse = true;
 				}
 				String sequenceNrString = Integer.toString(sequenceNr);
-				logFileName = currentPath + "/" + getCurrentDate() + " " + ("00" + sequenceNrString).substring(sequenceNrString.length()) + " DrugMappingLog.txt";
+				logFileName = currentPath + "/" + getCurrentDate() + " " + ("00" + sequenceNrString).substring(sequenceNrString.length()) + " DrugMapping Log.txt";
 				logFile = new File(logFileName);
 			} while ((!reUse) && logFile.exists());
 		}

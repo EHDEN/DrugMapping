@@ -42,6 +42,8 @@ public class CDMConcept {
 		concept_class_id = queryRow.get(prefix + "concept_class_id").trim();
 		standard_concept = queryRow.get(prefix + "standard_concept").trim();
 		concept_code     = queryRow.get(prefix + "concept_code").trim().toUpperCase();
+		
+		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
 	}
 
 	
