@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ohdsi.databases.QueryParameters;
+import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
@@ -34,7 +36,7 @@ public class UnitConversion {
 	private String unitMapDate = null;
 	private Map<String, String> cdmUnitNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM unit concept_name to CDM unit concept_id
 	private Map<String, String> cdmUnitConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM unit concept_id to CDM unit concept_name
-	private List<String> cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting                   // Map from CDM unit concept_id to CDM unit concept_name
+	private List<String> cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting
 	private List<String> sourceUnitNames = new ArrayList<String>();                                            // List of source unit names for sorting
 	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();   // Map from Source unit to map from CDM unit concept_name to factor (CDM unit = Source unit * factor)
 	
@@ -46,48 +48,30 @@ public class UnitConversion {
 
 		System.out.println("    Get CDM units ...");
 		
-		String query = null;
-		
-		query  = "SELECT DISTINCT * FROM (";
-		query += " " + "SELECT DISTINCT amount_unit.*";
-		query += " " + "FROM " + database.getVocabSchema() + ".drug_strength";
-		query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept amount_unit";
-		query += " " + "ON amount_unit_concept_id = concept_id";
-		query += " " + "UNION ALL";
-		query += " " + "SELECT DISTINCT numerator_unit.*";
-		query += " " + "FROM " + database.getVocabSchema() + ".drug_strength";
-		query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept numerator_unit";
-		query += " " + "ON numerator_unit_concept_id = concept_id";
-		query += " " + "UNION ALL";
-		query += " " + "SELECT DISTINCT denominator_unit.*";
-		query += " " + "FROM " + database.getVocabSchema() + ".drug_strength";
-		query += " " + "LEFT OUTER JOIN " + database.getVocabSchema() + ".concept denominator_unit";
-		query += " " + "ON denominator_unit_concept_id = concept_id";
-		query += " " + ") units";
-		query += " " + "WHERE domain_id = 'Unit'";
-		query += " " + "AND   concept_class_id = 'Unit'";
-		query += " " + "AND   standard_concept = 'S'";
-		query += " " + "AND   invalid_reason is null";
-		query += " " + "ORDER BY concept_name";
-		
 		sourceUnitNames.addAll(sourceUnits);
 		Collections.sort(sourceUnitNames);
 		
-		if (database.excuteQuery(query)) {
-			if (database.hasNext()) {
-				while (database.hasNext()) {
-					Row queryRow = database.next();
-					
-					String concept_id   = queryRow.get("concept_id").trim();
-					String concept_name = queryRow.get("concept_name").trim();
-					
-					cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
-					cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
-					cdmUnitConceptNames.add(concept_name);
-				}
-				Collections.sort(cdmUnitConceptNames);
-			}
+		QueryParameters queryParameters = new QueryParameters();
+		queryParameters.set("@vocab", database.getVocabSchema());
+	
+		// Connect to the database
+		RichConnection connection = database.getRichConnection(this.getClass());
+		
+		// Get CDM Forms
+		for (Row queryRow : connection.queryResource("cdm/GetCDMUnits.sql", queryParameters)) {
+			
+			String concept_id   = queryRow.get("concept_id").trim();
+			String concept_name = queryRow.get("concept_name").trim();
+			
+			cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
+			cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
+			cdmUnitConceptNames.add(concept_name);
 		}
+		
+		// Close database connection
+		connection.close();
+		
+		Collections.sort(cdmUnitConceptNames);
 		
 		//for (String concept_name : cdmUnitConceptNames) {
 		//	System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
@@ -254,9 +238,9 @@ public class UnitConversion {
 				unitFileWriter.println(header2);
 				for (String sourceUnitName : sourceUnitNames) {
 					String record = "\"" + sourceUnitName + "\""; 
+					Map<String, Double> sourceUnitMap = unitConversionMap.get(sourceUnitName);
 					for (String concept_name : cdmUnitConceptNames) {
 						String concept_id = cdmUnitNameToConceptIdMap.get(concept_name);
-						Map<String, Double> sourceUnitMap = unitConversionMap.get(sourceUnitName);
 						Double factor = null;
 						if (sourceUnitMap != null) {
 							factor = sourceUnitMap.get(concept_id);
