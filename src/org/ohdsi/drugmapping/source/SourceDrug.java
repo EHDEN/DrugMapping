@@ -2,13 +2,17 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SourceDrug {
+	private static boolean error = false;
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
 	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
+	private static Map<String, SourceIngredient> ingredientNameIndex = new HashMap<String, SourceIngredient>();
 	
 	
 	private String code = null;
@@ -25,6 +29,47 @@ public class SourceDrug {
 	
 	public static Set<SourceIngredient> getAllIngredients() {
 		return allIngredients;
+	}
+	
+	
+	public static SourceIngredient findIngredient(String ingredientName, String ingredientNameEnglish, String casNumber) {
+		error = false;
+		SourceIngredient sourceIngredient = null;
+
+		String ingredientNameNoSpaces = ingredientName.replaceAll(" ", "").replaceAll("-", "");
+		String ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "");
+		sourceIngredient = ingredientNameIndex.get(ingredientNameNoSpaces);
+		if (sourceIngredient != null) {
+			if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals("")) {
+				sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
+			}
+			else if (!sourceIngredient.getIngredientNameEnglishNoSpaces().equals(ingredientNameEnglishNoSpaces)) {
+				if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals(sourceIngredient.getIngredientNameNoSpaces()) && (!sourceIngredient.getIngredientNameNoSpaces().equals(ingredientNameEnglishNoSpaces))) {
+					sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
+				}
+				else {
+					System.out.println("    NameEnglish conflict: '" + ingredientNameEnglish + "' <-> " + sourceIngredient);
+					error = true;
+				}
+			}
+			
+			if (!casNumber.equals("")) {
+				if (sourceIngredient.getCASNumber() == null) {
+					sourceIngredient.setCASNumber(casNumber);
+				}
+				else if (!sourceIngredient.getCASNumber().equals(casNumber)) {
+					System.out.println("    CASNumber conflict: '" + casNumber + "' <-> " + sourceIngredient);
+					error = true;
+				}
+			}
+		}
+		
+		return error ? null : sourceIngredient;
+	}
+	
+	
+	public static boolean errorOccurred() {
+		return error;
 	}
 	
 	
@@ -81,6 +126,9 @@ public class SourceDrug {
 		if (sourceIngredient == null) {
 			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
 			allIngredients.add(sourceIngredient);
+			if (!ingredientName.equals("")) {
+				ingredientNameIndex.put(sourceIngredient.getIngredientNameNoSpaces(), sourceIngredient);
+			}
 		}
 		SourceDrugComponent sourceComponent = null;
 		for (SourceDrugComponent component : allComponents) {

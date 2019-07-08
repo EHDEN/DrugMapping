@@ -7,6 +7,7 @@ SELECT concept.concept_id
 ,      concept.concept_code
 ,      concept.valid_start_date
 ,      concept.valid_end_date
+,      concept.invalid_reason
 ,      synonym.concept_synonym_name
 FROM @vocab.concept
 LEFT OUTER JOIN @vocab.concept_synonym synonym

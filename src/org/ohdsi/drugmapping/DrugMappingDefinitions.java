@@ -360,6 +360,27 @@ public class DrugMappingDefinitions {
 											}
 									)
 							}
+					),
+					new FileDefinition(
+							"Manual Translation File",
+							new String[] {
+									"This file should contain corrections on translations in the Genric Drugs File.",
+									"This file is optional."
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"IngredientName",
+											new String[] {
+													"This is the name of an ingredient."
+											}
+									),
+									new FileColumnDefinition(
+											"IngredientNameEnglish",
+											new String[] {
+													"This is the English name of the ingredient."
+											}
+									)
+							}
 					)
 			)
 		);

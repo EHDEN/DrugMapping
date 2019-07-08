@@ -63,7 +63,7 @@ public class InputFile extends JPanel {
 	private JButton fileSelectButton;
 	private List<JComboBox<String>> comboBoxList;
 
-	private String fileName = "";
+	private String fileName = null;
 	private String fieldDelimiter = "Comma";
 	private String textQualifier = "None";
 	private Map<String, String> columnMapping = new HashMap<String, String>();
@@ -183,25 +183,31 @@ public class InputFile extends JPanel {
 	public boolean openFile() {
 		boolean result = false;
 		
-		char delmiter = ',';
-		if      (fieldDelimiter.equals("Tab"))       delmiter = '\t';
-		else if (fieldDelimiter.equals("Semicolon")) delmiter = ';';
-		else if (fieldDelimiter.equals("Comma"))     delmiter = ',';
-		else if (fieldDelimiter.equals("Space"))     delmiter = ' ';
-		else                                         delmiter = this.fieldDelimiter.toCharArray()[0];
+		if (getFileName() != null) {
+			File inputFile = new File(getFileName());
+			if (inputFile.exists() && inputFile.canRead()) {
+				char delmiter = ',';
+				if      (fieldDelimiter.equals("Tab"))       delmiter = '\t';
+				else if (fieldDelimiter.equals("Semicolon")) delmiter = ';';
+				else if (fieldDelimiter.equals("Comma"))     delmiter = ',';
+				else if (fieldDelimiter.equals("Space"))     delmiter = ' ';
+				else                                         delmiter = this.fieldDelimiter.toCharArray()[0];
 
-		char textDelimiter = '\"';
-		if      (textQualifier.equals("None"))       textDelimiter = (char) 0;
-		else                                         textDelimiter = this.textQualifier.toCharArray()[0];
+				char textDelimiter = '\"';
+				if      (textQualifier.equals("None"))       textDelimiter = (char) 0;
+				else                                         textDelimiter = this.textQualifier.toCharArray()[0];
+				
+				ReadCSVFileWithHeader readFile = new ReadCSVFileWithHeader(getFileName(), delmiter, textDelimiter);
+				if (readFile.isOpen()) {
+					result = true;
+					fileIterator = readFile.iterator();
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
 		
-		ReadCSVFileWithHeader readFile = new ReadCSVFileWithHeader(getFileName(), delmiter, textDelimiter);
-		if (readFile.isOpen()) {
-			result = true;
-			fileIterator = readFile.iterator();
-		}
-		else {
-			JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
-		}
 		return result;
 	}
 	

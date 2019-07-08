@@ -15,6 +15,16 @@ public class SourceIngredient {
 	public static final String MATCH_MAPSTO_SINGLE_SYNONYM         = "Maps To Single Synonym";
 	public static final String MATCH_MAPSTO_EXACT_SYNONYM          = "Maps To Exact Synonym";
 	
+	public static final String MATCH_CAS_SINGLE                    = "CAS Single";
+	public static final String MATCH_CAS_EXACT                     = "CAS Exact";
+	public static final String MATCH_CAS_SINGLE_SYNONYM            = "CAS Single Synonym";
+	public static final String MATCH_CAS_EXACT_SYNONYM             = "CAS Exact Synonym";
+	
+	public static final String MATCH_CAS_MAPSTO_SINGLE             = "CAS Maps To Single";
+	public static final String MATCH_CAS_MAPSTO_EXACT              = "CAS Maps To Exact";
+	public static final String MATCH_CAS_MAPSTO_SINGLE_SYNONYM     = "CAS Maps To Single Synonym";
+	public static final String MATCH_CAS_MAPSTO_EXACT_SYNONYM      = "CAS Maps To Exact Synonym";
+	
 	public static final String MATCH_VARIANT_SINGLE                = "Variant Single";
 	public static final String MATCH_VARIANT_EXACT                 = "Variant Exact";
 	public static final String MATCH_VARIANT_SINGLE_SYNONYM        = "Variant Single Synonym";
@@ -26,7 +36,9 @@ public class SourceIngredient {
 	public static final String MATCH_VARIANT_MAPSTO_EXACT_SYNONYM  = "Variant Maps To Exact Synonym";
 	
 	private String ingredientName = null;
+	private String ingredientNameNoSpaces = null;
 	private String ingredientNameEnglish = null;
+	private String ingredientNameEnglishNoSpaces = null;
 	private String casNumber = null;
 	
 	private String match = NO_MATCH;
@@ -65,6 +77,8 @@ public class SourceIngredient {
 		this.ingredientName = ingredientName.equals("") ? null : ingredientName;
 		this.ingredientNameEnglish = ingredientNameEnglish.equals("") ? null : ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
+		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "");
+		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "");
 	}
 	
 	
@@ -73,13 +87,34 @@ public class SourceIngredient {
 	}
 	
 	
+	public String getIngredientNameNoSpaces() {
+		return ingredientNameNoSpaces;
+	}
+	
+	
 	public String getIngredientNameEnglish() {
 		return ingredientNameEnglish;
 	}
 	
 	
+	public void setIngredientNameEnglish(String ingredientNameEnglish) {
+		this.ingredientNameEnglish = ingredientNameEnglish;
+		this.ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "");
+	}
+	
+	
+	public String getIngredientNameEnglishNoSpaces() {
+		return ingredientNameEnglishNoSpaces;
+	}
+	
+	
 	public String getCASNumber() {
 		return casNumber;
+	}
+	
+	
+	public void setCASNumber(String casNumber) {
+		this.casNumber = casNumber;
 	}
 	
 	
