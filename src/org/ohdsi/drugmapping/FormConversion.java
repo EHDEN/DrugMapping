@@ -260,9 +260,9 @@ public class FormConversion {
 
 		if ((sourceForm != null) && sourceFormNames.contains(sourceForm)) {
 			if (cdmForm != null) {
-				if (!cdmFormConceptNames.contains(cdmForm)) {
-					if (cdmFormConceptIdToNameMap.keySet().contains(cdmForm)) {
-						cdmForm = cdmFormConceptIdToNameMap.get(cdmForm);
+				if (cdmFormConceptNames.contains(cdmForm)) {
+					if (cdmFormNameToConceptIdMap.keySet().contains(cdmForm)) {
+						cdmForm = cdmFormNameToConceptIdMap.get(cdmForm);
 					}
 					else {
 						cdmForm = null;

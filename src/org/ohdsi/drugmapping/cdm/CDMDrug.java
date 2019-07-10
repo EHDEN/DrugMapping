@@ -6,7 +6,8 @@ import java.util.List;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMDrug extends CDMConcept {
-	private List<CDMStrength> ingredients = new ArrayList<CDMStrength>(); 
+	private String formConceptId = null;
+	private List<CDMIngredientStrength> ingredients = new ArrayList<CDMIngredientStrength>(); 
 	
 
 	public CDMDrug(Row queryRow, String prefix) {
@@ -14,12 +15,22 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public List<CDMStrength> getIngredients() {
+	public void setForm(String formConceptId) {
+		this.formConceptId = formConceptId;
+	}
+	
+	
+	public String getForm() {
+		return formConceptId;
+	}
+	
+	
+	public List<CDMIngredientStrength> getIngredients() {
 		return ingredients;
 	}
 	
 	
-	public void addIngredient(CDMStrength ingredient) {
+	public void addIngredientStrength(CDMIngredientStrength ingredient) {
 		ingredients.add(ingredient);
 	}
 }

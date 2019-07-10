@@ -36,8 +36,8 @@ public class SourceDrug {
 		error = false;
 		SourceIngredient sourceIngredient = null;
 
-		String ingredientNameNoSpaces = ingredientName.replaceAll(" ", "").replaceAll("-", "");
-		String ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "");
+		String ingredientNameNoSpaces = ingredientName.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" ", "").replaceAll("-", "");
+		String ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" ", "").replaceAll("-", "");
 		sourceIngredient = ingredientNameIndex.get(ingredientNameNoSpaces);
 		if (sourceIngredient != null) {
 			if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals("")) {
@@ -183,10 +183,10 @@ public class SourceDrug {
 	}
 	
 	
-	public Set<SourceIngredient> getIngredients() {
-		Set<SourceIngredient> ingredients = new HashSet<SourceIngredient>();
+	public List<SourceIngredient> getIngredients() {
+		List<SourceIngredient> ingredients = new ArrayList<SourceIngredient>();
 		for (SourceDrugComponent component : components) {
-			if (component.getIngredient() != null) {
+			if ((component.getIngredient() != null) && (!ingredients.contains(component.getIngredient()))) {
 				ingredients.add(component.getIngredient());
 			}
 		}

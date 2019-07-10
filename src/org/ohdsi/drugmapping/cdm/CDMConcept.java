@@ -36,7 +36,7 @@ public class CDMConcept {
 	
 	public CDMConcept(Row queryRow, String prefix) {
 		concept_id       = queryRow.get(prefix + "concept_id").trim();
-		concept_name     = queryRow.get(prefix + "concept_name").trim().toUpperCase();
+		concept_name     = queryRow.get(prefix + "concept_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 		domain_id        = queryRow.get(prefix + "domain_id").trim();
 		vocabulary_id    = queryRow.get(prefix + "vocabulary_id").trim();
 		concept_class_id = queryRow.get(prefix + "concept_class_id").trim();

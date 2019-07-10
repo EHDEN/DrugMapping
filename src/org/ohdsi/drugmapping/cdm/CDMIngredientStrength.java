@@ -2,7 +2,7 @@ package org.ohdsi.drugmapping.cdm;
 
 import org.ohdsi.utilities.files.Row;
 
-public class CDMStrength {
+public class CDMIngredientStrength {
 	private String amount_value_string      = null;
 	private Double amount_value             = null;
 	private CDMConcept amount_unit          = null;
@@ -13,9 +13,10 @@ public class CDMStrength {
 	private Double denominator_value        = null;
 	private CDMConcept denominator_unit     = null;
 	private String box_size                 = null;
+	private CDMIngredient ingredient        = null;
 	
 	
-	public CDMStrength(Row queryRow, String prefix) {
+	public CDMIngredientStrength(Row queryRow, String prefix, CDMIngredient ingredient) {
 		amount_value_string      = queryRow.get(prefix + "amount_value");
 		amount_unit              = new CDMConcept(queryRow, prefix + "amount_unit_");
 		numerator_value_string   = queryRow.get(prefix + "numerator_value");
@@ -44,6 +45,7 @@ public class CDMStrength {
 		catch (NumberFormatException e) {
 			denominator_value = null;
 		}
+		this.ingredient = ingredient;
 	}
 	
 	
@@ -79,6 +81,11 @@ public class CDMStrength {
 	
 	public String getBoxSize() {
 		return box_size;
+	}
+	
+	
+	public CDMIngredient getIngredient() {
+		return ingredient;
 	}
 	
 	
