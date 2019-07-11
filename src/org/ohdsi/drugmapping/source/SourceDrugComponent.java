@@ -6,17 +6,36 @@ public class SourceDrugComponent {
 	private SourceIngredient ingredient = null;
 	private Double dosage = null;
 	private String dosageUnit = null;
+	private Double numeratorDosage = null;
+	private String numeratorDosageUnit = null;
+	private Double denominatorDosage = null;
+	private String denominatorDosageUnit = null;
 	
 	
 	public SourceDrugComponent(SourceIngredient ingredient, String dosage, String dosageUnit) {
 		this.ingredient = ingredient;
+		Double dosageValue = null;
 		try {
-			this.dosage = Double.parseDouble(dosage);
+			dosageValue = Double.parseDouble(dosage);
 		}
 		catch (NumberFormatException e) {
-			this.dosage = null;
+			dosageValue = null;
 		}
-		this.dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
+		if (dosageValue != null) {
+			if (dosageUnit.contains("/")) {
+				String[] dosageUnitSplit = dosageUnit.split("/");
+				numeratorDosageUnit = dosageUnitSplit[0].trim();
+				numeratorDosageUnit = numeratorDosageUnit.equals("") ? null : numeratorDosageUnit;
+				denominatorDosageUnit = dosageUnitSplit[1].trim();
+				denominatorDosageUnit = denominatorDosageUnit.equals("") ? null : denominatorDosageUnit;
+				numeratorDosage = dosageValue;
+				denominatorDosage = 1.0;
+			}
+			else {
+				this.dosage = dosageValue;
+				this.dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
+			}
+		}
 	}
 	
 	
@@ -64,6 +83,29 @@ public class SourceDrugComponent {
 					(((dosageUnit == null) && (this.dosageUnit == null)) || ((dosageUnit != null) && dosageUnit.equals(this.dosageUnit)))
 				);
 		
+		return matches;
+	}
+	
+	
+	public boolean matches(SourceIngredient ingredient, String numeratorDosage, String numeratorDosageUnit, String denominatorDosage, String denominatorDosageUnit) {
+		boolean matches = false;
+		//TODO
+		/*
+		Double dosageValue = null;
+		try {
+			dosageValue = Double.parseDouble(dosage);
+		}
+		catch (NumberFormatException e) {
+			dosageValue = null;
+		}
+		dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
+		
+		matches = (
+					(ingredient == this.ingredient) &&
+					(dosageValue == this.dosage) && 
+					(((dosageUnit == null) && (this.dosageUnit == null)) || ((dosageUnit != null) && dosageUnit.equals(this.dosageUnit)))
+				);
+		*/
 		return matches;
 	}
 

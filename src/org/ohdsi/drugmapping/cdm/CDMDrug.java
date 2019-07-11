@@ -1,12 +1,14 @@
 package org.ohdsi.drugmapping.cdm;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.ohdsi.utilities.files.Row;
 
 public class CDMDrug extends CDMConcept {
-	private String formConceptId = null;
+	private Set<String> formConceptIds = new HashSet<String>();
 	private List<CDMIngredientStrength> ingredients = new ArrayList<CDMIngredientStrength>(); 
 	
 
@@ -15,13 +17,13 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public void setForm(String formConceptId) {
-		this.formConceptId = formConceptId;
+	public void addForm(String formConceptId) {
+		formConceptIds.add(formConceptId);
 	}
 	
 	
-	public String getForm() {
-		return formConceptId;
+	public Set<String> getForms() {
+		return formConceptIds;
 	}
 	
 	

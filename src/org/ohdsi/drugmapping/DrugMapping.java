@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +14,6 @@ import javax.swing.JComponent;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
-import org.ohdsi.drugmapping.source.SourceDrug;
-import org.ohdsi.drugmapping.vocabulary.Vocabulary;
 import org.ohdsi.drugmapping.zindex.IPCIZIndexConversion;
 
 public class DrugMapping {
@@ -26,7 +23,6 @@ public class DrugMapping {
 	private static String currentPath = ""; 
 	
 	private MainFrame mainFrame;
-	private Vocabulary vocabulary;
 	private String special = "";
 	
 	
@@ -154,7 +150,7 @@ public class DrugMapping {
 				component.setEnabled(false);
 			
 			if (special.toUpperCase().equals("ZINDEX")) {
-				new IPCIZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"));
+				new IPCIZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"));
 			}
 			else {
 				//Mapping.loadReplacements(getFile("Replacements File"));

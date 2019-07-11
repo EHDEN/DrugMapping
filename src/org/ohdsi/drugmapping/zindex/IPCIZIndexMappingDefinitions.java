@@ -154,6 +154,26 @@ public class IPCIZIndexMappingDefinitions {
 											}
 									)
 							}
+					),
+					new FileDefinition(
+							"ZIndex GPK Statistics File",
+							new String[] {
+									"This file should contain the usage counts of the ZIndex GPK codes."
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"GPKCode",
+											new String[] {
+													"This is the GPK-code."
+											}
+									),
+									new FileColumnDefinition(
+											"GPKCount",
+											new String[] {
+													"This is the usage count for the GPK-code."
+											}
+									)
+							}
 					)
 			)
 		);

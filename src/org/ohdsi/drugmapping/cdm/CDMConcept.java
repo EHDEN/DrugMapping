@@ -14,6 +14,8 @@ public class CDMConcept {
 	protected String concept_code     = null;
 	protected String invalid_reason   = null;
 	
+	protected String conceptNameNoSpaces = null;
+	
 	
 	public static String getHeader() {
 		String header = "concept_id";
@@ -45,6 +47,8 @@ public class CDMConcept {
 		invalid_reason   = queryRow.get(prefix + "invalid_reason").trim();
 		
 		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
+		
+		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "");
 	}
 
 	
@@ -55,6 +59,11 @@ public class CDMConcept {
 	
 	public String getConceptName() {
 		return concept_name;
+	}
+
+	
+	public String getConceptNameNoSpaces() {
+		return conceptNameNoSpaces;
 	}
 
 	

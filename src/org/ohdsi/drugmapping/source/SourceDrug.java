@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.cdm.CDMDrug;
+
 public class SourceDrug {
 	private static boolean error = false;
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
@@ -19,7 +21,9 @@ public class SourceDrug {
 	private String name = null;
 	private String atcCode = null;
 	private String formulation = null;
+	private Integer count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
+	private CDMDrug mappedDrug = null;
 	
 	
 	public static Set<SourceDrugComponent> getAllComponents() {
@@ -77,7 +81,8 @@ public class SourceDrug {
 		String header = "SourceCode";
 		header += "," + "SourceName";
 		header += "," + "SourceATCCode";
-		header += "," + "Formulation";
+		header += "," + "SourceFormulation";
+		header += "," + "SourceCount";
 		return header;
 	}
 	
@@ -87,11 +92,17 @@ public class SourceDrug {
 	}
 	
 	
-	public SourceDrug(String sourceCode, String sourceName, String sourceATCCode, String formulation) {
+	public SourceDrug(String sourceCode, String sourceName, String sourceATCCode, String formulation, String count) {
 		this.code = sourceCode.equals("") ? null : sourceCode;
 		this.name = sourceName.equals("") ? null : sourceName;
 		this.atcCode = sourceATCCode.equals("") ? null : sourceATCCode;
 		this.formulation = formulation.equals("") ? null : formulation;
+		try {
+			this.count = Integer.valueOf(count);
+		}
+		catch (NumberFormatException e) {
+			this.count = -1;
+		}
 	}
 	
 	
@@ -112,6 +123,16 @@ public class SourceDrug {
 	
 	public String getFormulation() {
 		return formulation;
+	}
+	
+	
+	public Integer getCount() {
+		return count;
+	}
+	
+	
+	public CDMDrug getMappedDrug() {
+		return mappedDrug;
 	}
 	
 	
@@ -199,6 +220,7 @@ public class SourceDrug {
 		description += "," + (name == null ? "" : "\"" + name + "\"");
 		description += "," + (atcCode == null ? "" : atcCode);
 		description += "," + (formulation == null ? "" : "\"" + formulation + "\"");
+		description += "," + (count == null ? "" : count);
 		return description;
 	}
 	

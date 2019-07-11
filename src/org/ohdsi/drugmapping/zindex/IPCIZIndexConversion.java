@@ -25,12 +25,32 @@ public class IPCIZIndexConversion extends Mapping {
 	private static final int GenericName    = 6;
 	private static final int CASNumber      = 7;
 
+	private Map<String, Integer> gpkStatisticsMap = new HashMap<String, Integer>();
 	private Map<Integer, List<String[]>> gskMap = new HashMap<Integer, List<String[]>>();
 
 	
-	public IPCIZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile) {
+	public IPCIZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile) {
 
 		System.out.println(DrugMapping.getCurrentTime() + " Converting ZIndex Files ...");
+		
+		if (gpkStatsFile.openFile()) {
+			System.out.println("  Loading GPK Statistics File ...");
+			while (gpkStatsFile.hasNext()) {
+				Row row = gpkStatsFile.next();
+
+				String gpkCode  = gpkStatsFile.get(row, "GPKCode").trim();
+				String gpkCount = gpkStatsFile.get(row, "GPKCount").trim();
+				
+				Integer count = null;
+				try {
+					count = Integer.valueOf(gpkCount);
+					gpkStatisticsMap.put(gpkCode, count);
+				}
+				catch (NumberFormatException e) {
+				}
+			}
+			System.out.println("  Done");
+		}
 
 		if (gskFile.openFile()) {
 			System.out.println("  Loading GSK File ...");
@@ -64,7 +84,8 @@ public class IPCIZIndexConversion extends Mapping {
 				String header = "SourceCode";
 				header += "," + "SourceName";
 				header += "," + "SourceATCCode";
-				header += "," + "Formulation";
+				header += "," + "SourceFormulation";
+				header += "," + "SourceCount";
 
 				header += "," + "IngredientNameStatus";
 				header += "," + "IngredientName";
@@ -82,14 +103,16 @@ public class IPCIZIndexConversion extends Mapping {
 						String name = gpkFile.get(row, "FullName").trim();
 						if (name.equals("")) name = gpkFile.get(row, "LabelName").trim();
 						if (name.equals("")) name = gpkFile.get(row, "ShortName").trim();
+						String gpkCode = gpkFile.get(row, "GPKCode");
 						
 						// Ignore empty names and names that start with a '*'
 						if ((!name.equals("")) && (!name.substring(0, 1).equals("*"))) {
 							
-							String gpkRecord = gpkFile.get(row, "GPKCode");
+							String gpkRecord = gpkCode;
 							gpkRecord += "," + "\"" + name.replaceAll("\"", "\"\"") + "\"";
 							gpkRecord += "," + gpkFile.get(row, "ATCCode");
 							gpkRecord += "," + "\"" + gpkFile.get(row, "PharmForm").replaceAll("\"", "\"\"") + "\"";
+							gpkRecord += "," + (gpkStatisticsMap.containsKey(gpkCode) ? gpkStatisticsMap.get(gpkCode) : "0");
 							
 							List<String[]> gskList = null;
 							
