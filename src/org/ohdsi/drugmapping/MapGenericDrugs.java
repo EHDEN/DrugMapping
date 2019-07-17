@@ -21,6 +21,7 @@ import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.SourceDrugComponent;
 import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
@@ -167,6 +168,16 @@ public class MapGenericDrugs extends Mapping {
 			System.out.println("    " + fileName);
 			PrintWriter ingredientMappingFile = new PrintWriter(new File(fileName));
 			ingredientMappingFile.println(SourceIngredient.getMatchHeader() + "," + CDMIngredient.getHeader());
+
+			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Source Drugs Mapping.csv";
+			System.out.println("    " + fileName);
+			PrintWriter drugMappingFile = new PrintWriter(new File(fileName));
+			drugMappingFile.println(SourceDrug.getHeader() + "," + CDMDrug.getHeader());
+
+			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Source Drugs Unmapped.csv";
+			System.out.println("    " + fileName);
+			PrintWriter drugUnmappedFile = new PrintWriter(new File(fileName));
+			drugUnmappedFile.println(SourceDrug.getHeader() + "," + "UnmappedReason" + "," + CDMDrug.getHeader() + "," + "RejectReason");
 			
 			System.out.println(DrugMapping.getCurrentTime() + " Finished");
 			
@@ -269,10 +280,18 @@ public class MapGenericDrugs extends Mapping {
 							else if (sourceIngredient == null) {
 								sourceIngredient = sourceDrug.AddIngredient(ingredientName, ingredientNameEnglish, casNumber, dosage, dosageUnit);
 							}
+							else {
+								sourceIngredient = sourceDrug.AddIngredient(sourceIngredient, dosage, dosageUnit);
+							}
 							
-							String unit = sourceDrug.getIngredientDosageUnit(sourceIngredient);
-							if (unit != null) {
-								units.add(unit);
+							String numeratorDosageUnit = sourceDrug.getIngredientNumeratorDosageUnit(sourceIngredient);
+							if (numeratorDosageUnit != null) {
+								units.add(numeratorDosageUnit);
+							}
+							
+							String denominatorDosageUnit = sourceDrug.getIngredientDenominatorDosageUnit(sourceIngredient);
+							if (denominatorDosageUnit != null) {
+								units.add(denominatorDosageUnit);
 							}
 						}
 					}
@@ -286,7 +305,7 @@ public class MapGenericDrugs extends Mapping {
 			
 			
 			if (!sourceDrugError) {
-/*				
+				
 				// Create Units Map
 				UnitConversion unitConversionsMap = new UnitConversion(database, units);
 				if (unitConversionsMap.getStatus() == UnitConversion.STATE_EMPTY) {
@@ -307,9 +326,12 @@ public class MapGenericDrugs extends Mapping {
 				}
 
 
-				if ((unitConversionsMap.getStatus() != UnitConversion.STATE_ERROR) && (formConversionsMap.getStatus() != FormConversion.STATE_ERROR)) {
-*/
-				if (true) {
+				if (
+						(unitConversionsMap.getStatus() != UnitConversion.STATE_EMPTY) &&
+						(unitConversionsMap.getStatus() != UnitConversion.STATE_ERROR) && 
+						(formConversionsMap.getStatus() != FormConversion.STATE_EMPTY) && 
+						(formConversionsMap.getStatus() != FormConversion.STATE_ERROR)
+					) {
 					// Match ingredients by name
 				
 					queryParameters = new QueryParameters();
@@ -698,11 +720,12 @@ public class MapGenericDrugs extends Mapping {
 					System.out.println(DrugMapping.getCurrentTime() + " Finished");
 					
 					
-					
-/*
+	
 					System.out.println(DrugMapping.getCurrentTime() + " Map Source Drugs to RxNorm Clinical Drugs ...");
 					
 					for (SourceDrug sourceDrug : sourceDrugs) {
+						String unmappedReason = "";
+						Map<CDMDrug, String> cdmDrugRejectReason = new HashMap<CDMDrug, String>();
 						String sourceDrugForm = sourceDrug.getFormulation();
 						
 						List<SourceIngredient> sourceIngredients = sourceDrug.getIngredients();
@@ -711,68 +734,141 @@ public class MapGenericDrugs extends Mapping {
 							mappedCDMIngredients.add(ingredientMap.get(sourceIngredient));
 						}
 						if (!mappedCDMIngredients.contains(null)) {
+							Set<CDMDrug> remove = new HashSet<CDMDrug>();
+							
 							// All ingredients are mapped
 							boolean firstIngredient = true;
-							Set<CDMDrug> cdmDrugsWithIngredients = new HashSet<CDMDrug>();
+							Set<CDMDrug> cdmDrugsWithAllIngredients = new HashSet<CDMDrug>();
 							for (CDMIngredient mappedCDMIngredient : mappedCDMIngredients) {
 								List<CDMDrug> ingredientDrugs = cdmDrugsContainingIngredient.get(mappedCDMIngredient);
 								if (firstIngredient) {
 									if (ingredientDrugs != null) {
-										cdmDrugsWithIngredients.addAll(ingredientDrugs);
+										cdmDrugsWithAllIngredients.addAll(ingredientDrugs);
 									}
 									firstIngredient = false;
 								}
 								else {
-									Set<CDMDrug> remove = new HashSet<CDMDrug>();
-									for (CDMDrug ingredientDrug : cdmDrugsWithIngredients) {
-										if (!ingredientDrugs.contains(ingredientDrug)) {
+									remove = new HashSet<CDMDrug>();
+									for (CDMDrug ingredientDrug : cdmDrugsWithAllIngredients) {
+										if ((ingredientDrugs == null) || (!ingredientDrugs.contains(ingredientDrug))) {
 											remove.add(ingredientDrug);
 										}
 									}
-									cdmDrugsWithIngredients.removeAll(remove);
+									cdmDrugsWithAllIngredients.removeAll(remove);
 								}
-								if (cdmDrugsWithIngredients.size() == 0) {
+								if (cdmDrugsWithAllIngredients.size() == 0) {
+									// No ingredients left => no mapping on ingredients possible
 									break;
 								}
 							}
 
 							// Drugs found containing all ingredients.
+							
+							// Check the number of ingredients. If not the same as source drug remove it from the list.
+							remove = new HashSet<CDMDrug>();
+							for (CDMDrug cdmDrug : cdmDrugsWithAllIngredients) {
+								if (cdmDrug.getIngredients().size() != mappedCDMIngredients.size()) {
+									remove.add(cdmDrug);
+									cdmDrugRejectReason.put(cdmDrug, "Different number of ingredients: Source (" + Integer.toString(mappedCDMIngredients.size()) + ") <-> CDM (" + Integer.toString(cdmDrug.getIngredients().size()) + ")");
+								}
+							}
+							cdmDrugsWithAllIngredients.removeAll(remove);
 
+							
 							if (sourceDrugForm != null) {
 								// Check form
-								if (cdmDrugsWithIngredients.size() > 0) {
-									Set<CDMDrug> remove = new HashSet<CDMDrug>();
-									for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-										Set<String> cdmDrugForms = cdmDrug.getForms();
+								remove = new HashSet<CDMDrug>();
+								for (CDMDrug cdmDrug : cdmDrugsWithAllIngredients) {
+									Set<String> cdmDrugForms = cdmDrug.getForms();
+									if (cdmDrugForms.size() == 0) {
+										remove.add(cdmDrug);
+										cdmDrugRejectReason.put(cdmDrug, "No forms found");
+									}
+									else {
+										Set<String> removeForms = new HashSet<String>();
+										for (String cdmDrugForm : cdmDrugForms) {
+											if (!formConversionsMap.matches(sourceDrugForm, cdmDrugForm)) {
+												removeForms.add(cdmDrugForm);
+											}
+										}
+										cdmDrugForms.removeAll(removeForms);
 										if (cdmDrugForms.size() == 0) {
 											remove.add(cdmDrug);
-										}
-										else {
-											Set<String> removeForms = new HashSet<String>();
-											for (String cdmDrugForm : cdmDrugForms) {
-												if (!formConversionsMap.matches(sourceDrugForm, cdmDrugForm)) {
-													removeForms.add(cdmDrugForm);
-												}
-											}
-											cdmDrugForms.removeAll(removeForms);
-											if (cdmDrugForms.size() == 0) {
-												remove.add(cdmDrug);
-											}
+											cdmDrugRejectReason.put(cdmDrug, "No compatible forms found");
 										}
 									}
-									cdmDrugsWithIngredients.removeAll(remove);
 								}
+								cdmDrugsWithAllIngredients.removeAll(remove);
 							}
 							
 							// Check ingredient strengths.
-							if (cdmDrugsWithIngredients.size() > 0) {
-								//TODO
+							if (cdmDrugsWithAllIngredients.size() > 0) {
+								remove = new HashSet<CDMDrug>();
+								for (int ingredientNr = 0; ingredientNr < sourceIngredients.size(); ingredientNr++) { 
+									SourceIngredient sourceIngredient = sourceIngredients.get(ingredientNr);
+									CDMIngredient cdmIngredient = mappedCDMIngredients.get(ingredientNr);
+									
+									SourceDrugComponent sourceDrugComponent = sourceDrug.getIngredientComponent(sourceIngredient);
+									
+									for (CDMDrug cdmDrug : cdmDrugsWithAllIngredients) {
+										CDMIngredientStrength cdmIngredientStrength = cdmDrug.getIngredientStrength(cdmIngredient);
+										
+										if (!sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit())) {
+											remove.add(cdmDrug);
+											cdmDrugRejectReason.put(cdmDrug, "No compatible ingredient strengths found");
+										}
+									}
+								}
+								cdmDrugsWithAllIngredients.removeAll(remove);
+							}
+							
+							// Check what is left
+							if (cdmDrugsWithAllIngredients.size() == 1) {
+								drugMapping.put(sourceDrug, (CDMDrug) cdmDrugsWithAllIngredients.toArray()[0]);
+							}
+							else if (cdmDrugsWithAllIngredients.size() > 1) {
+								// Multiple options
+								unmappedReason = "Multiple options left";
+								for (CDMDrug cdmDrug : cdmDrugsWithAllIngredients) {
+									cdmDrugRejectReason.put(cdmDrug, "Matches");
+								}
+							}
+							else {
+								// No options
+								unmappedReason = "No options left";
+							}
+						}
+						else {
+							unmappedReason = "Not all ingredients are mapped";
+						}
+						
+						if (drugMapping.get(sourceDrug) == null) {
+							if (cdmDrugRejectReason.size() == 0) {
+								drugUnmappedFile.println(sourceDrug + "," + unmappedReason + "," + CDMDrug.emptyRecord() + ",");
+							}
+							else {
+								for (CDMDrug cdmDrug : cdmDrugRejectReason.keySet()) {
+									drugUnmappedFile.println(sourceDrug + "," + unmappedReason + "," + cdmDrug + "," + cdmDrugRejectReason.get(cdmDrug));
+								}
 							}
 						}
 					}
 					
+					// Count prescriptions covered by mapping and write mapping file
+					long total = 0;
+					long covered = 0;
+					for (SourceDrug sourceDrug : sourceDrugs) {
+						total += sourceDrug.getCount();
+						CDMDrug cdmDrug = drugMapping.get(sourceDrug); 
+						if (cdmDrug != null) {
+							covered += sourceDrug.getCount();
+							drugMappingFile.println(sourceDrug + "," + cdmDrug);
+						}
+					}
+					
+					System.out.println("    Source drugs mapped to Clinical Drugs: " + drugMapping.size() + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) drugMapping.size() / (double) sourceDrugs.size()) * 100)) + "%)");
+					System.out.println("    Source data coverage: " + covered + " of " + total + " (" + Long.toString(Math.round(((double) covered / (double) total) * 100)) + "%)");
 					System.out.println(DrugMapping.getCurrentTime() + " Finished");
-*/
 				}
 			}	
 			
@@ -782,6 +878,8 @@ public class MapGenericDrugs extends Mapping {
 			rxNormIngredientsFile.close();
 			mapsToRxNormIngredientsFile.close();
 			ingredientMappingFile.close();
+			drugMappingFile.close();
+			drugUnmappedFile.close();
 			
 		} catch (FileNotFoundException e) {
 			System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
@@ -812,74 +910,32 @@ public class MapGenericDrugs extends Mapping {
 		}
 		
 		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingRxNormIngredients = new HashSet<CDMIngredient>();
+			Set<CDMIngredient> matchingEqualRxNormIngredients = new HashSet<CDMIngredient>();
+			Set<CDMIngredient> matchingContainingRxNormIngredients = new HashSet<CDMIngredient>();
 			
 			for (CDMIngredient cdmIngredient : cdmIngredientsList) {
 				if (cdmIngredient.getConceptNameNoSpaces().equals(nameVariant)) {
-					matchingRxNormIngredients.add(cdmIngredient);
+					matchingEqualRxNormIngredients.add(cdmIngredient);
 				}
-			}
-			if (matchingRxNormIngredients.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingRxNormIngredients.toArray()[0]);
-				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_EXACT : SourceIngredient.MATCH_EXACT) : SourceIngredient.MATCH_VARIANT_EXACT);
-				match = true;
-			}
-		}
-		
-		if (!match) {
-			for (String nameVariant : nameVariants) {
-				Set<CDMIngredient> matchingRxNormIngredients = new HashSet<CDMIngredient>();
-				
-				for (CDMIngredient cdmIngredient : cdmIngredientsList) {
-					if (cdmIngredient.getConceptNameNoSpaces().contains(nameVariant)) {
-						matchingRxNormIngredients.add(cdmIngredient);
-					}
-				}
-				if (matchingRxNormIngredients.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) matchingRxNormIngredients.toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_SINGLE : SourceIngredient.MATCH_SINGLE) : SourceIngredient.MATCH_VARIANT_SINGLE);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((CDMIngredient) matchingRxNormIngredients.toArray()[0]).toString().replaceAll("\"", "'")); 
-					match = true;
-					break;
-				}
-			}
-		}
-		
-		/*
-		for (String nameVariant : nameVariants) {
-			for (CDMIngredient cdmIngredient : cdmIngredientsList) {
 				if (cdmIngredient.getConceptNameNoSpaces().contains(nameVariant)) {
-					matchingRxNormIngredients.add(cdmIngredient);
+					matchingContainingRxNormIngredients.add(cdmIngredient);
 				}
 			}
-			if (matchingRxNormIngredients.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingRxNormIngredients.toArray()[0]);
-				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_SINGLE : SourceIngredient.MATCH_SINGLE) : SourceIngredient.MATCH_VARIANT_SINGLE);
-				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((CDMIngredient) matchingRxNormIngredients.toArray()[0]).toString().replaceAll("\"", "'")); 
+			if (matchingEqualRxNormIngredients.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingEqualRxNormIngredients.toArray()[0]);
+				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_EXACT : SourceIngredient.MATCH_EXACT) : SourceIngredient.MATCH_VARIANT_EXACT);
 				match = true;
 				break;
 			}
-			
-			if ((!match) && (matchingRxNormIngredients.size() > 1)) {
-				Set<CDMIngredient> exactMatch = new HashSet<CDMIngredient>();
-				for (CDMIngredient cdmIngredient : matchingRxNormIngredients) {
-					if (cdmIngredient.getConceptName().replaceAll(" ", "").replaceAll("-", "").equals(nameVariant)) {
-						exactMatch.add(cdmIngredient);
-					}
-				}
-				if (exactMatch.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) exactMatch.toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_EXACT : SourceIngredient.MATCH_EXACT) : SourceIngredient.MATCH_VARIANT_EXACT);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((CDMIngredient) exactMatch.toArray()[0]).toString().replaceAll("\"", "'")); 
-					match = true;
-					break;
-				}
+			else if (matchingContainingRxNormIngredients.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingContainingRxNormIngredients.toArray()[0]);
+				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_SINGLE : SourceIngredient.MATCH_SINGLE) : SourceIngredient.MATCH_VARIANT_SINGLE);
+				sourceIngredient.setMatchString(nameVariant);
+				sourceIngredient.setMatchingDrug(((CDMIngredient) matchingContainingRxNormIngredients.toArray()[0]).toString().replaceAll("\"", "'")); 
+				match = true;
+				break;
 			}
 		}
-		*/
 	
 		return match;
 	}
@@ -908,7 +964,8 @@ public class MapGenericDrugs extends Mapping {
 		}
 		
 		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingRxNormIngredientsSynonyms = new HashSet<CDMIngredient>();
+			Set<CDMIngredient> matchingEqualRxNormIngredientsSynonyms = new HashSet<CDMIngredient>();
+			Set<CDMIngredient> matchingContainingRxNormIngredientsSynonyms = new HashSet<CDMIngredient>();
 			
 			// Match on synonyms
 			for (CDMIngredient cdmIngredient : cdmIngredientsList) {
@@ -917,87 +974,30 @@ public class MapGenericDrugs extends Mapping {
 					while (synonymName.contains("  ")) synonymName = synonymName.replaceAll("  ", " ");
 					synonymName = synonymName.replaceAll(" ", "").replaceAll("-", "");
 					if (synonymName.equals(nameVariant)) {
-						matchingRxNormIngredientsSynonyms.add(cdmIngredient);
+						matchingEqualRxNormIngredientsSynonyms.add(cdmIngredient);
+					}
+					if (synonymName.contains(nameVariant)) {
+						matchingContainingRxNormIngredientsSynonyms.add(cdmIngredient);
 					}
 				}
 			}
-			if (matchingRxNormIngredientsSynonyms.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingRxNormIngredientsSynonyms.toArray()[0]);
+			if (matchingEqualRxNormIngredientsSynonyms.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingEqualRxNormIngredientsSynonyms.toArray()[0]);
 				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_EXACT_SYNONYM : SourceIngredient.MATCH_EXACT_SYNONYM) : SourceIngredient.MATCH_VARIANT_EXACT_SYNONYM);
 				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((CDMIngredient) matchingRxNormIngredientsSynonyms.toArray()[0]).toStringWithSynonymsSingleField());
+				sourceIngredient.setMatchingDrug(((CDMIngredient) matchingEqualRxNormIngredientsSynonyms.toArray()[0]).toStringWithSynonymsSingleField());
 				match = true;
 				break;
 			}
-		}
-
-		if (!match) {
-			for (String nameVariant : nameVariants) {
-				Set<CDMIngredient> matchingRxNormIngredientsSynonyms = new HashSet<CDMIngredient>();
-				
-				// Match on synonyms
-				for (CDMIngredient cdmIngredient : cdmIngredientsList) {
-					for (String synonym : cdmIngredient.getSynonyms()) {
-						String synonymName = synonym.replaceAll("\n", " ").replaceAll("\r", " ");
-						while (synonymName.contains("  ")) synonymName = synonymName.replaceAll("  ", " ");
-						synonymName = synonymName.replaceAll(" ", "").replaceAll("-", "");
-						if (synonymName.contains(nameVariant)) {
-							matchingRxNormIngredientsSynonyms.add(cdmIngredient);
-						}
-					}
-				}
-				if (matchingRxNormIngredientsSynonyms.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) matchingRxNormIngredientsSynonyms.toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_SINGLE_SYNONYM : SourceIngredient.MATCH_SINGLE_SYNONYM) : SourceIngredient.MATCH_VARIANT_SINGLE_SYNONYM);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((CDMIngredient) matchingRxNormIngredientsSynonyms.toArray()[0]).toStringWithSynonymsSingleField());
-					match = true;
-					break;
-				}
-			}
-		}
-		
-		/*
-		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingRxNormIngredientsSynonyms = new HashSet<CDMIngredient>();
-			
-			// Match on synonyms
-			for (CDMIngredient cdmIngredient : cdmIngredientsList) {
-				for (String synonym : cdmIngredient.getSynonyms()) {
-					if (synonym.replaceAll(" ", "").contains(nameVariant)) {
-						matchingRxNormIngredientsSynonyms.add(cdmIngredient);
-					}
-				}
-			}
-			if (matchingRxNormIngredientsSynonyms.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingRxNormIngredientsSynonyms.toArray()[0]);
+			else if (matchingContainingRxNormIngredientsSynonyms.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingContainingRxNormIngredientsSynonyms.toArray()[0]);
 				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_SINGLE_SYNONYM : SourceIngredient.MATCH_SINGLE_SYNONYM) : SourceIngredient.MATCH_VARIANT_SINGLE_SYNONYM);
 				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((CDMIngredient) matchingRxNormIngredientsSynonyms.toArray()[0]).toStringWithSynonymsSingleField());
+				sourceIngredient.setMatchingDrug(((CDMIngredient) matchingContainingRxNormIngredientsSynonyms.toArray()[0]).toStringWithSynonymsSingleField());
 				match = true;
 				break;
 			}
-			if ((!match) && (matchingRxNormIngredientsSynonyms.size() > 1)) {
-				Set<CDMIngredient> exactMatch = new HashSet<CDMIngredient>();
-				for (CDMIngredient cdmIngredient : matchingRxNormIngredientsSynonyms) {
-					for (String synonym : cdmIngredient.getSynonyms()) {
-						if (synonym.replaceAll(" ", "").equals(nameVariant)) {
-							exactMatch.add(cdmIngredient);
-							break;
-						}
-					}
-				}
-				if (exactMatch.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) exactMatch.toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_EXACT_SYNONYM : SourceIngredient.MATCH_EXACT_SYNONYM) : SourceIngredient.MATCH_VARIANT_EXACT_SYNONYM);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((CDMIngredient) exactMatch.toArray()[0]).toStringWithSynonymsSingleField());
-					match = true;
-					break;
-				}
-			}
 		}
-		*/
 		
 		return match;
 	}
@@ -1026,8 +1026,10 @@ public class MapGenericDrugs extends Mapping {
 		}
 		
 		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
-			Set<String> matchingDrugNames = new HashSet<String>();
+			Set<CDMIngredient> matchingEqualMapsToRxNormIngredients = new HashSet<CDMIngredient>();
+			Set<String> matchingEqualDrugNames = new HashSet<String>();
+			Set<CDMIngredient> matchingContainingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
+			Set<String> matchingContainingDrugNames = new HashSet<String>();
 			
 			for (String drugName : mapsToCDMIngredient.keySet()) {
 				Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
@@ -1035,82 +1037,32 @@ public class MapGenericDrugs extends Mapping {
 				while (drugNameClean.contains("  ")) drugNameClean = drugNameClean.replaceAll("  ", " ");
 				drugNameClean = drugNameClean.replaceAll(" ", "").replaceAll("-", "");
 				if ((ingredientSet.size() == 1) && drugNameClean.equals(nameVariant)) {
-					matchingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
-					matchingDrugNames.add(drugName);
+					matchingEqualMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
+					matchingEqualDrugNames.add(drugName);
+				}
+				if ((ingredientSet.size() == 1) && drugNameClean.contains(nameVariant)) {
+					matchingContainingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
+					matchingContainingDrugNames.add(drugName);
 				}
 			}
-			if (matchingMapsToRxNormIngredients.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingMapsToRxNormIngredients.toArray()[0]);
+			if (matchingEqualMapsToRxNormIngredients.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingEqualMapsToRxNormIngredients.toArray()[0]);
 				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_EXACT : SourceIngredient.MATCH_MAPSTO_EXACT) : SourceIngredient.MATCH_VARIANT_MAPSTO_EXACT);
 				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((String) matchingDrugNames.toArray()[0]));
+				sourceIngredient.setMatchingDrug(((String) matchingEqualDrugNames.toArray()[0]));
 				match = true;
 				break;
 			}
-		}
-		
-		if (!match) {
-			for (String nameVariant : nameVariants) {
-				Set<CDMIngredient> matchingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
-				Set<String> matchingDrugNames = new HashSet<String>();
-				
-				for (String drugName : mapsToCDMIngredient.keySet()) {
-					Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
-					if ((ingredientSet.size() == 1) && drugName.replaceAll(" ", "").contains(nameVariant)) {
-						matchingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
-						matchingDrugNames.add(drugName);
-					}
-				}
-				if (matchingMapsToRxNormIngredients.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) matchingMapsToRxNormIngredients.toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_SINGLE : SourceIngredient.MATCH_MAPSTO_SINGLE) : SourceIngredient.MATCH_VARIANT_MAPSTO_SINGLE);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((String) matchingDrugNames.toArray()[0]));
-					match = true;
-					break;
-				}
-			}
-		}
-		
-		/*
-		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
-			Set<String> matchingDrugNames = new HashSet<String>();
-			
-			for (String drugName : mapsToCDMIngredient.keySet()) {
-				Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
-				if ((ingredientSet.size() == 1) && drugName.replaceAll(" ", "").contains(nameVariant)) {
-					matchingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
-					matchingDrugNames.add(drugName);
-				}
-			}
-			if (matchingMapsToRxNormIngredients.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingMapsToRxNormIngredients.toArray()[0]);
+			else if (matchingContainingMapsToRxNormIngredients.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingContainingMapsToRxNormIngredients.toArray()[0]);
 				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_SINGLE : SourceIngredient.MATCH_MAPSTO_SINGLE) : SourceIngredient.MATCH_VARIANT_MAPSTO_SINGLE);
 				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((String) matchingDrugNames.toArray()[0]));
+				sourceIngredient.setMatchingDrug(((String) matchingContainingDrugNames.toArray()[0]));
 				match = true;
 				break;
 			}
-			
-			if ((!match) && (matchingMapsToRxNormIngredients.size() > 1)) {
-				Set<String> exactMatch = new HashSet<String>();
-				for (String drugName : matchingDrugNames) {
-					if (drugName.replaceAll(" ", "").equals(nameVariant)) {
-						exactMatch.add(drugName);
-					}
-				}
-				if (exactMatch.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) mapsToCDMIngredient.get((String) exactMatch.toArray()[0]).toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_EXACT : SourceIngredient.MATCH_MAPSTO_EXACT) : SourceIngredient.MATCH_VARIANT_MAPSTO_EXACT);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((String) exactMatch.toArray()[0]));
-					match = true;
-					break;
-				}
-			}
 		}
-		*/
+		
 		return match;
 	}
 	
@@ -1138,9 +1090,12 @@ public class MapGenericDrugs extends Mapping {
 		}
 		
 		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
-			Set<String> matchingMapsToRxNormIngredientsDrugNames = new HashSet<String>();
-			Set<String> matchingMapsToRxNormIngredientsSynonyms = new HashSet<String>();
+			Set<CDMIngredient> matchingEqualMapsToRxNormIngredients = new HashSet<CDMIngredient>();
+			Set<String> matchingEqualMapsToRxNormIngredientsDrugNames = new HashSet<String>();
+			Set<String> matchingEqualMapsToRxNormIngredientsSynonyms = new HashSet<String>();
+			Set<CDMIngredient> matchingContainingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
+			Set<String> matchingContainingMapsToRxNormIngredientsDrugNames = new HashSet<String>();
+			Set<String> matchingContainingMapsToRxNormIngredientsSynonyms = new HashSet<String>();
 			
 			for (String drugName : drugNameSynonyms.keySet()) {
 				for (String synonym : drugNameSynonyms.get(drugName)) {
@@ -1149,96 +1104,34 @@ public class MapGenericDrugs extends Mapping {
 					synonymName = synonymName.replaceAll(" ", "").replaceAll("-", "");
 					Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
 					if ((ingredientSet.size() == 1) && synonymName.equals(nameVariant)) {
-						matchingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
-						matchingMapsToRxNormIngredientsDrugNames.add(drugName);
-						matchingMapsToRxNormIngredientsSynonyms.add(synonym);
+						matchingEqualMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
+						matchingEqualMapsToRxNormIngredientsDrugNames.add(drugName);
+						matchingEqualMapsToRxNormIngredientsSynonyms.add(synonym);
+					}
+					if ((ingredientSet.size() == 1) && synonymName.contains(nameVariant)) {
+						matchingContainingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
+						matchingContainingMapsToRxNormIngredientsDrugNames.add(drugName);
+						matchingContainingMapsToRxNormIngredientsSynonyms.add(synonym);
 					}
 				}
 			}
-			if (matchingMapsToRxNormIngredientsDrugNames.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingMapsToRxNormIngredients.toArray()[0]);
+			if (matchingEqualMapsToRxNormIngredientsDrugNames.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingEqualMapsToRxNormIngredients.toArray()[0]);
 				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_EXACT_SYNONYM : SourceIngredient.MATCH_MAPSTO_EXACT_SYNONYM) : SourceIngredient.MATCH_VARIANT_MAPSTO_EXACT_SYNONYM);
 				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((String) matchingMapsToRxNormIngredientsSynonyms.toArray()[0]) + "=" + ((String) matchingMapsToRxNormIngredientsDrugNames.toArray()[0]));
+				sourceIngredient.setMatchingDrug(((String) matchingEqualMapsToRxNormIngredientsSynonyms.toArray()[0]) + "=" + ((String) matchingEqualMapsToRxNormIngredientsDrugNames.toArray()[0]));
 				match = true;
 				break;
 			}
-		}
-		
-		if (!match) {
-			for (String nameVariant : nameVariants) {
-				Set<CDMIngredient> matchingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
-				Set<String> matchingMapsToRxNormIngredientsDrugNames = new HashSet<String>();
-				Set<String> matchingMapsToRxNormIngredientsSynonyms = new HashSet<String>();
-				
-				for (String drugName : drugNameSynonyms.keySet()) {
-					for (String synonym : drugNameSynonyms.get(drugName)) {
-						Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
-						if ((ingredientSet.size() == 1) && synonym.replaceAll(" ", "").contains(nameVariant)) {
-							matchingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
-							matchingMapsToRxNormIngredientsDrugNames.add(drugName);
-							matchingMapsToRxNormIngredientsSynonyms.add(synonym);
-						}
-					}
-				}
-				if (matchingMapsToRxNormIngredientsDrugNames.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) matchingMapsToRxNormIngredients.toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_SINGLE_SYNONYM : SourceIngredient.MATCH_MAPSTO_SINGLE_SYNONYM) : SourceIngredient.MATCH_VARIANT_MAPSTO_SINGLE_SYNONYM);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((String) matchingMapsToRxNormIngredientsSynonyms.toArray()[0]) + "=" + ((String) matchingMapsToRxNormIngredientsDrugNames.toArray()[0]));
-					match = true;
-					break;
-				}
-			}
-		}
-		
-		/*
-		for (String nameVariant : nameVariants) {
-			Set<CDMIngredient> matchingMapsToRxNormIngredients = new HashSet<CDMIngredient>();
-			Set<String> matchingMapsToRxNormIngredientsDrugNames = new HashSet<String>();
-			Set<String> matchingMapsToRxNormIngredientsSynonyms = new HashSet<String>();
-			
-			for (String drugName : drugNameSynonyms.keySet()) {
-				for (String synonym : drugNameSynonyms.get(drugName)) {
-					Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
-					if ((ingredientSet.size() == 1) && synonym.replaceAll(" ", "").contains(nameVariant)) {
-						matchingMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
-						matchingMapsToRxNormIngredientsDrugNames.add(drugName);
-						matchingMapsToRxNormIngredientsSynonyms.add(synonym);
-					}
-				}
-			}
-			if (matchingMapsToRxNormIngredientsDrugNames.size() == 1) {
-				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingMapsToRxNormIngredients.toArray()[0]);
+			else if (matchingContainingMapsToRxNormIngredientsDrugNames.size() == 1) {
+				ingredientMap.put(sourceIngredient, (CDMIngredient) matchingContainingMapsToRxNormIngredients.toArray()[0]);
 				sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_SINGLE_SYNONYM : SourceIngredient.MATCH_MAPSTO_SINGLE_SYNONYM) : SourceIngredient.MATCH_VARIANT_MAPSTO_SINGLE_SYNONYM);
 				sourceIngredient.setMatchString(nameVariant);
-				sourceIngredient.setMatchingDrug(((String) matchingMapsToRxNormIngredientsSynonyms.toArray()[0]) + "=" + ((String) matchingMapsToRxNormIngredientsDrugNames.toArray()[0]));
+				sourceIngredient.setMatchingDrug(((String) matchingContainingMapsToRxNormIngredientsSynonyms.toArray()[0]) + "=" + ((String) matchingContainingMapsToRxNormIngredientsDrugNames.toArray()[0]));
 				match = true;
 				break;
 			}
-			if ((!match) && (matchingMapsToRxNormIngredientsDrugNames.size() > 1)) {
-				Set<String> exactMatch = new HashSet<String>();
-				Set<String> exactMatchSynonym = new HashSet<String>();
-				for (String drugName : matchingMapsToRxNormIngredientsDrugNames) {
-					for (String synonym : drugNameSynonyms.get(drugName)) {
-						if (synonym.replaceAll(" ", "").equals(nameVariant)) {
-							exactMatch.add(drugName);
-							exactMatchSynonym.add(synonym);
-							break;
-						}
-					}
-				}
-				if (exactMatch.size() == 1) {
-					ingredientMap.put(sourceIngredient, (CDMIngredient) mapsToCDMIngredient.get((String) exactMatch.toArray()[0]).toArray()[0]);
-					sourceIngredient.setMatch(noVariants ? (useCASName ? SourceIngredient.MATCH_CAS_MAPSTO_EXACT_SYNONYM : SourceIngredient.MATCH_MAPSTO_EXACT_SYNONYM) : SourceIngredient.MATCH_VARIANT_MAPSTO_EXACT_SYNONYM);
-					sourceIngredient.setMatchString(nameVariant);
-					sourceIngredient.setMatchingDrug(((String) exactMatchSynonym.toArray()[0]) + "=" + ((String) exactMatch.toArray()[0]));
-					match = true;
-					break;
-				}
-			}
 		}
-		*/
 		
 		return match;
 	}

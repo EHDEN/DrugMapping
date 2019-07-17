@@ -92,6 +92,16 @@ public class SourceDrug {
 	}
 	
 	
+	public static String emptyRecord() {
+		String[] headerSplit = getHeader().split(",");
+		String emptyRecord = "";
+		for (int commaNr = 0; commaNr < (headerSplit.length - 1); commaNr++) {
+			emptyRecord += ",";
+		}
+		return emptyRecord;
+	}
+	
+	
 	public SourceDrug(String sourceCode, String sourceName, String sourceATCCode, String formulation, String count) {
 		this.code = sourceCode.equals("") ? null : sourceCode;
 		this.name = sourceName.equals("") ? null : sourceName;
@@ -151,6 +161,11 @@ public class SourceDrug {
 				ingredientNameIndex.put(sourceIngredient.getIngredientNameNoSpaces(), sourceIngredient);
 			}
 		}
+		return AddIngredient(sourceIngredient, dosage, dosageUnit);
+	}
+	
+	
+	public SourceIngredient AddIngredient(SourceIngredient sourceIngredient, String dosage, String dosageUnit) {
 		SourceDrugComponent sourceComponent = null;
 		for (SourceDrugComponent component : allComponents) {
 			if (component.matches(sourceIngredient, dosage, dosageUnit)) {
@@ -189,13 +204,23 @@ public class SourceDrug {
 	}
 	
 	
-	public String getIngredientDosageUnit(SourceIngredient ingredient) {
-		String dosageUnit = null;
+	public String getIngredientNumeratorDosageUnit(SourceIngredient ingredient) {
+		String numeratorDosageUnit = null;
 		SourceDrugComponent component = getIngredientComponent(ingredient);
 		if (component != null) {
-			dosageUnit = component.getDosageUnit();
+			numeratorDosageUnit = component.getNumeratorDosageUnit();
 		}
-		return dosageUnit;
+		return numeratorDosageUnit;
+	}
+	
+	
+	public String getIngredientDenominatorDosageUnit(SourceIngredient ingredient) {
+		String denominatorDosageUnit = null;
+		SourceDrugComponent component = getIngredientComponent(ingredient);
+		if (component != null) {
+			denominatorDosageUnit = component.getDenominatorDosageUnit();
+		}
+		return denominatorDosageUnit;
 	}
 	
 	

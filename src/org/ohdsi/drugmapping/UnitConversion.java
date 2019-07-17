@@ -65,7 +65,9 @@ public class UnitConversion {
 			
 			cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
 			cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
-			cdmUnitConceptNames.add(concept_name);
+			if (!cdmUnitConceptNames.contains(concept_name)) {
+				cdmUnitConceptNames.add(concept_name);
+			}
 		}
 		
 		// Close database connection
@@ -117,43 +119,43 @@ public class UnitConversion {
 						String sourceUnit = row.get("Local unit");
 						oldSourceUnits.add(sourceUnit);
 						
-						if (sourceUnitNames.contains(sourceUnit)) {
-							String mappingLine = "        " + sourceUnit;
-							
-							Map<String, Double> sourceUnitFactors = unitConversionMap.get(sourceUnit);
-							if (sourceUnitFactors == null) {
-								sourceUnitFactors = new HashMap<String, Double>();
-								unitConversionMap.put(sourceUnit, sourceUnitFactors);
+						if (!sourceUnitNames.contains(sourceUnit)) {
+							System.out.println("    WARNING: Source unit '" + sourceUnit + "' no longer exists!");
+							if (!sourceUnitNames.contains(sourceUnit)) {
+								sourceUnitNames.add(sourceUnit);
 							}
-							for (String concept_id : unitConcepts) {
+						}
+						String mappingLine = "        " + sourceUnit;
+						
+						Map<String, Double> sourceUnitFactors = unitConversionMap.get(sourceUnit);
+						if (sourceUnitFactors == null) {
+							sourceUnitFactors = new HashMap<String, Double>();
+							unitConversionMap.put(sourceUnit, sourceUnitFactors);
+						}
+						for (String concept_id : unitConcepts) {
+							if (!concept_id.equals("Local unit")) {
 								oldCDMUnits.add(concept_id);
-								if (!concept_id.equals("Local unit")) {
-									if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
-										String factorString = row.get(concept_id).trim();
-										if (!factorString.equals("")) {
-											try {
-												double factor = Double.parseDouble(factorString);
-												sourceUnitFactors.put(concept_id, factor);
-												mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdmUnitConceptIdToNameMap.get(concept_id) + "\")";
-											}
-											catch (NumberFormatException e) {
-												System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
-												status = STATE_ERROR;
-											}
+								if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
+									String factorString = row.get(concept_id).trim();
+									if (!factorString.equals("")) {
+										try {
+											double factor = Double.parseDouble(factorString);
+											sourceUnitFactors.put(concept_id, factor);
+											mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdmUnitConceptIdToNameMap.get(concept_id) + "\")";
+										}
+										catch (NumberFormatException e) {
+											System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
+											status = STATE_ERROR;
 										}
 									}
-									else {
-										System.out.println("    WARNING: Source unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-										lostUnits = true;
-									}
+								}
+								else {
+									System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+									lostUnits = true;
 								}
 							}
-							System.out.println(mappingLine);
 						}
-						else {
-							System.out.println("    WARNING: Source unit '" + sourceUnit + "' no longer exists!");
-							lostUnits = true;
-						}
+						System.out.println(mappingLine);
 					}
 				}
 				
@@ -198,7 +200,16 @@ public class UnitConversion {
 		File unitFile = new File(unitFileName);
 		if (unitFile.exists()) {
 			// Backup old unit conversion map
-			String oldUnitFileName = DrugMapping.getCurrentPath() + "/" + unitMapDate + " " + FILENAME;
+			String oldUnitFileName = null;
+			File oldUnitFile = null;
+			int fileNr = 0;
+			do {
+				fileNr++;
+				String fileNrString = "00" + Integer.toString(fileNr);
+				fileNrString = fileNrString.substring(fileNrString.length());
+				oldUnitFileName = DrugMapping.getCurrentPath() + "/" + unitMapDate + " " + fileNrString + " " + FILENAME;
+				oldUnitFile = new File(oldUnitFileName);
+			} while (oldUnitFile.exists());
 			try {
 				PrintWriter oldUnitFileWriter = new PrintWriter(new File(oldUnitFileName));
 				try {
@@ -236,6 +247,7 @@ public class UnitConversion {
 				}
 				unitFileWriter.println(header1);
 				unitFileWriter.println(header2);
+				Collections.sort(sourceUnitNames);
 				for (String sourceUnitName : sourceUnitNames) {
 					String record = "\"" + sourceUnitName + "\""; 
 					Map<String, Double> sourceUnitMap = unitConversionMap.get(sourceUnitName);
@@ -251,7 +263,7 @@ public class UnitConversion {
 				}
 				unitFileWriter.close();
 			} catch (FileNotFoundException e) {
-				System.out.println("    ERROR: Cannot create backup unit conversion map '" + DrugMapping.getCurrentPath() + "/" + unitMapDate + " " + FILENAME + "'!");
+				System.out.println("    ERROR: Cannot create unit conversion map '" + DrugMapping.getCurrentPath() + "/" + FILENAME + "'!");
 				status = STATE_ERROR;
 			}
 		}
@@ -269,11 +281,13 @@ public class UnitConversion {
 	
 	
 	private Double getFactor(String sourceUnit, String cdmUnit) {
+		Double factor = null;
+		
 		if ((sourceUnit != null) && sourceUnitNames.contains(sourceUnit)) {
 			if (cdmUnit != null) {
-				if (!cdmUnitConceptNames.contains(cdmUnit)) {
-					if (cdmUnitConceptIdToNameMap.keySet().contains(cdmUnit)) {
-						cdmUnit = cdmUnitConceptIdToNameMap.get(cdmUnit);
+				if (cdmUnitConceptNames.contains(cdmUnit)) {
+					if (cdmUnitNameToConceptIdMap.keySet().contains(cdmUnit)) {
+						cdmUnit = cdmUnitNameToConceptIdMap.get(cdmUnit);
 					}
 					else {
 						cdmUnit = null;
@@ -281,22 +295,42 @@ public class UnitConversion {
 				}
 			}
 		}
-		Double factor = null;
+		
 		if ((sourceUnit == null) && (cdmUnit == null)) {
 			factor = 1.0;
 		}
+		
 		if ((sourceUnit != null) && (cdmUnit != null)) {
 			factor = unitConversionMap.get(sourceUnit).get(cdmUnit);
 		}
+		
 		return factor;
 	}
 	
 	
 	public boolean matches(String sourceUnit, Double sourceValue, String cdmUnit, Double cdmValue) {
 		boolean matches = false;
+		
 		Double factor = getFactor(sourceUnit, cdmUnit);
 		if (factor != null) {
 			matches = (cdmValue == (sourceValue * factor));
+		}
+		
+		return matches;
+	}
+	
+	
+	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue) {
+		boolean matches = false;
+		
+		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit);
+		Double denominatorFactor = getFactor(sourceDenominatorUnit, cdmDenominatorUnit);
+		
+		if ((numeratorFactor != null) && (denominatorFactor != null)) {
+			matches = ((sourceNumeratorValue / sourceDenominatorValue) == ((cdmNumeratorValue * numeratorFactor)/(cdmDenominatorValue * denominatorFactor))); 
+		}
+		else if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
+			matches = (sourceNumeratorValue == (cdmNumeratorValue * numeratorFactor));
 		}
 		
 		return matches;

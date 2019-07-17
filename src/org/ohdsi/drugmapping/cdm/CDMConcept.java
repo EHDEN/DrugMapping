@@ -35,6 +35,16 @@ public class CDMConcept {
 	}
 	
 	
+	public static String emptyRecord() {
+		String[] headerSplit = getHeader().split(",");
+		String emptyRecord = "";
+		for (int commaNr = 0; commaNr < (headerSplit.length - 1); commaNr++) {
+			emptyRecord += ",";
+		}
+		return emptyRecord;
+	}
+	
+	
 	
 	public CDMConcept(Row queryRow, String prefix) {
 		concept_id       = queryRow.get(prefix + "concept_id").trim();

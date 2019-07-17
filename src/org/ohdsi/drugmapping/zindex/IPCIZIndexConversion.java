@@ -92,6 +92,8 @@ public class IPCIZIndexConversion extends Mapping {
 				header += "," + "IngredientNameEnglish";
 				header += "," + "Dosage";
 				header += "," + "DosageUnit";
+				header += "," + "OrgDosage";
+				header += "," + "OrgDosageUnit";
 				header += "," + "CASNumber";
 				
 				gpkFullFile.println(header);
@@ -152,7 +154,7 @@ public class IPCIZIndexConversion extends Mapping {
 											String gpkGskRecord = gpkRecord;
 											gpkGskRecord += "," + "Extracted";
 											gpkGskRecord += "," + "\"" + ingredientName.trim() + "\"";
-											for (int cellCount = 0; cellCount < (GSKColumnCount - 4); cellCount++) {
+											for (int cellCount = 0; cellCount < (GSKColumnCount - 2); cellCount++) {
 												gpkGskRecord += ",";
 											}
 											gpkFullFile.println(gpkGskRecord);
@@ -162,7 +164,7 @@ public class IPCIZIndexConversion extends Mapping {
 										String gpkGskRecord = gpkRecord;
 										gpkGskRecord += "," + "Extracted";
 										gpkGskRecord += "," + "\"" + name + "\"";
-										for (int cellCount = 0; cellCount < (GSKColumnCount - 4); cellCount++) {
+										for (int cellCount = 0; cellCount < (GSKColumnCount - 2); cellCount++) {
 											gpkGskRecord += ",";
 										}
 										gpkFullFile.println(gpkGskRecord);
@@ -171,13 +173,60 @@ public class IPCIZIndexConversion extends Mapping {
 							}
 							else {
 								for (String[] gskObject : gskList) {
+									String amount = gskObject[Amount];
+									String amountUnit = gskObject[AmountUnit];
+									// Extract unit from name
+									if (name.lastIndexOf(" ") >= 0) {
+										String strengthString = name.substring(name.lastIndexOf(" ")).trim();
+										if ("1234567890".contains(strengthString.substring(0, 1))) {
+											String strengthValueString = ""; 
+											for (int charNr = 0; charNr < strengthString.length(); charNr++) {
+												if ("1234567890,".contains(strengthString.subSequence(charNr, charNr + 1))) {
+													strengthValueString += strengthString.subSequence(charNr, charNr + 1);
+												}
+												else {
+													break;
+												}
+											}
+											String strengthUnitString = strengthString.substring(strengthValueString.length()).trim();
+											if (!
+													(
+															strengthUnitString.contains("1") ||
+															strengthUnitString.contains("2") ||
+															strengthUnitString.contains("3") ||
+															strengthUnitString.contains("4") ||
+															strengthUnitString.contains("5") ||
+															strengthUnitString.contains("6") ||
+															strengthUnitString.contains("7") ||
+															strengthUnitString.contains("8") ||
+															strengthUnitString.contains("9") ||
+															strengthUnitString.contains("0") ||
+															strengthUnitString.startsWith("-") ||
+															(strengthUnitString.contains("(") && (!strengthUnitString.contains(")"))) ||
+															((!strengthUnitString.contains("(")) && strengthUnitString.contains(")"))
+													)
+												) {
+												try {
+													Double.valueOf(strengthValueString);
+													amount = strengthValueString;
+													amountUnit = strengthUnitString;
+												}
+												catch (NumberFormatException e) {
+													// Do nothing
+												}
+											}
+										}
+									}
+									
 									if (!gskObject[GenericName].substring(0, 1).equals("*")) {
 										String gpkGskRecord = gpkRecord;
 										gpkGskRecord += "," + "ZIndex";
 										gpkGskRecord += "," + "\"" + gskObject[GenericName].replaceAll("\"", "\"\"") + "\"";
 										gpkGskRecord += ",";
-										gpkGskRecord += "," + gskObject[Amount];
-										gpkGskRecord += "," + gskObject[AmountUnit];
+										gpkGskRecord += "," + "\"" + amount + "\"";
+										gpkGskRecord += "," + "\"" + amountUnit + "\"";
+										gpkGskRecord += "," + "\"" + gskObject[Amount] + "\"";
+										gpkGskRecord += "," + "\"" + gskObject[AmountUnit] + "\"";
 										gpkGskRecord += "," + gskObject[CASNumber];
 
 										gpkFullFile.println(gpkGskRecord);
@@ -187,8 +236,10 @@ public class IPCIZIndexConversion extends Mapping {
 										gpkGskRecord += "," + "ZIndex";
 										gpkGskRecord += ",";
 										gpkGskRecord += ",";
-										gpkGskRecord += "," + gskObject[Amount];
-										gpkGskRecord += "," + gskObject[AmountUnit];
+										gpkGskRecord += "," + "\"" + amount + "\"";
+										gpkGskRecord += "," + "\"" + amountUnit + "\"";
+										gpkGskRecord += "," + "\"" + gskObject[Amount] + "\"";
+										gpkGskRecord += "," + "\"" + gskObject[AmountUnit] + "\"";
 										gpkGskRecord += "," + gskObject[CASNumber];
 
 										gpkFullFile.println(gpkGskRecord);

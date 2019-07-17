@@ -2,6 +2,8 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 
+import org.ohdsi.drugmapping.UnitConversion;
+
 public class SourceDrugComponent {
 	private SourceIngredient ingredient = null;
 	private Double dosage = null;
@@ -24,6 +26,8 @@ public class SourceDrugComponent {
 		if (dosageValue != null) {
 			if (dosageUnit.contains("/")) {
 				String[] dosageUnitSplit = dosageUnit.split("/");
+				this.dosage = null;
+				this.dosageUnit = null;
 				numeratorDosageUnit = dosageUnitSplit[0].trim();
 				numeratorDosageUnit = numeratorDosageUnit.equals("") ? null : numeratorDosageUnit;
 				denominatorDosageUnit = dosageUnitSplit[1].trim();
@@ -34,6 +38,10 @@ public class SourceDrugComponent {
 			else {
 				this.dosage = dosageValue;
 				this.dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
+				numeratorDosage = this.dosage;
+				numeratorDosageUnit = this.dosageUnit;
+				denominatorDosage = 1.0;
+				denominatorDosageUnit = null;
 			}
 		}
 	}
@@ -54,9 +62,27 @@ public class SourceDrugComponent {
 	}
 	
 	
+	public String getNumeratorDosageUnit() {
+		return numeratorDosageUnit;
+	}
+	
+	
+	public String getDenominatorDosageUnit() {
+		return denominatorDosageUnit;
+	}
+	
+	
 	public String toSTring() {
 		String description = ingredient.toString();
-		description += "," + (dosage == null ? "" : dosage);
+		if ((dosage == null) && (dosageUnit == null)) {
+			description += "," + (numeratorDosage == null ? "" : numeratorDosage) + "/" + (denominatorDosage == null ? "" : denominatorDosage);
+			description += "," + "\"" + (numeratorDosageUnit == null ? "" : numeratorDosageUnit) + "/" + (denominatorDosageUnit == null ? "" : denominatorDosageUnit) + "\"";
+		}
+		else {
+			description += "," + (dosage == null ? "" : dosage);
+			description += "," + (dosageUnit == null ? "" : "\"" + dosageUnit + "\"");
+		}
+		description += "," + (((dosage == null) && (dosageUnit == null)) ? (numeratorDosage == null ? "" : numeratorDosage) : dosage);
 		description += "," + (dosageUnit == null ? "" : "\"" + dosageUnit + "\"");
 		return description;
 	}
@@ -87,26 +113,8 @@ public class SourceDrugComponent {
 	}
 	
 	
-	public boolean matches(SourceIngredient ingredient, String numeratorDosage, String numeratorDosageUnit, String denominatorDosage, String denominatorDosageUnit) {
-		boolean matches = false;
-		//TODO
-		/*
-		Double dosageValue = null;
-		try {
-			dosageValue = Double.parseDouble(dosage);
-		}
-		catch (NumberFormatException e) {
-			dosageValue = null;
-		}
-		dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
-		
-		matches = (
-					(ingredient == this.ingredient) &&
-					(dosageValue == this.dosage) && 
-					(((dosageUnit == null) && (this.dosageUnit == null)) || ((dosageUnit != null) && dosageUnit.equals(this.dosageUnit)))
-				);
-		*/
-		return matches;
+	public boolean matches(UnitConversion unitConversion, Double numeratorDosage, String numeratorDosageUnit, Double denominatorDosage, String denominatorDosageUnit) {
+		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage);
 	}
 
 }

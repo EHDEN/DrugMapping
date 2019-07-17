@@ -323,9 +323,15 @@ public class DrugMappingDefinitions {
 											}
 									),
 									new FileColumnDefinition(
-											"Formulation",
+											"SourceFormulation",
 											new String[] {
 													"This is the pharmaceutical form of the drug."
+											}
+									),
+									new FileColumnDefinition(
+											"SourceCount",
+											new String[] {
+													"The number of occurrences of the source drug in the source database."
 											}
 									),
 									new FileColumnDefinition(

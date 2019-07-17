@@ -65,7 +65,9 @@ public class FormConversion {
 			
 			cdmFormNameToConceptIdMap.put(concept_name, concept_id);
 			cdmFormConceptIdToNameMap.put(concept_id, concept_name);
-			cdmFormConceptNames.add(concept_name);
+			if (!cdmFormConceptNames.contains(concept_name)) {
+				cdmFormConceptNames.add(concept_name);
+			}
 		}
 		
 		// Close database connection
@@ -117,36 +119,37 @@ public class FormConversion {
 						String sourceForm = row.get("Local form");
 						oldSourceForms.add(sourceForm);
 						
-						if (sourceFormNames.contains(sourceForm)) {
-							String mappingLine = "        " + sourceForm;
-							
-							Set<String> sourceFormMapping = formConversionMap.get(sourceForm);
-							if (sourceFormMapping == null) {
-								sourceFormMapping = new HashSet<String>();
-								formConversionMap.put(sourceForm, sourceFormMapping);
+						if (!sourceFormNames.contains(sourceForm)) {
+							System.out.println("    WARNING: Source form '" + sourceForm + "' no longer exists!");
+							if (!sourceFormNames.contains(sourceForm)) {
+								sourceFormNames.add(sourceForm);
 							}
-							for (String concept_id : formConcepts) {
-								oldCDMForms.add(concept_id);
-								if (!concept_id.equals("Local form")) {
-									if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
-										String cell = row.get(concept_id).trim();
-										if (!cell.equals("")) {
-											sourceFormMapping.add(concept_id);
-											mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
-										}
-									}
-									else {
-										System.out.println("    WARNING: Source form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-										lostForms = true;
+						}
+						
+						String mappingLine = "        " + sourceForm;
+						
+						Set<String> sourceFormMapping = formConversionMap.get(sourceForm);
+						if (sourceFormMapping == null) {
+							sourceFormMapping = new HashSet<String>();
+							formConversionMap.put(sourceForm, sourceFormMapping);
+						}
+						for (String concept_id : formConcepts) {
+							oldCDMForms.add(concept_id);
+							if (!concept_id.equals("Local form")) {
+								if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
+									String cell = row.get(concept_id).trim();
+									if (!cell.equals("")) {
+										sourceFormMapping.add(concept_id);
+										mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
 									}
 								}
+								else {
+									System.out.println("    WARNING: Source form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+									lostForms = true;
+								}
 							}
-							System.out.println(mappingLine);
 						}
-						else {
-							System.out.println("    WARNING: Source form '" + sourceForm + "' no longer exists!");
-							lostForms = true;
-						}
+						System.out.println(mappingLine);
 					}
 				}
 				
@@ -191,7 +194,16 @@ public class FormConversion {
 		File formFile = new File(formFileName);
 		if (formFile.exists()) {
 			// Backup old form conversion map
-			String oldFormFileName = DrugMapping.getCurrentPath() + "/" + formMapDate + " " + FILENAME;
+			String oldFormFileName = null;
+			File oldFormFile = null;
+			int fileNr = 0;
+			do {
+				fileNr++;
+				String fileNrString = "00" + Integer.toString(fileNr);
+				fileNrString = fileNrString.substring(fileNrString.length());
+				oldFormFileName = DrugMapping.getCurrentPath() + "/" + formMapDate + " " + fileNrString + " " + FILENAME;
+				oldFormFile = new File(oldFormFileName);
+			} while (oldFormFile.exists());
 			try {
 				PrintWriter oldFormFileWriter = new PrintWriter(new File(oldFormFileName));
 				try {
@@ -243,7 +255,7 @@ public class FormConversion {
 				}
 				formFileWriter.close();
 			} catch (FileNotFoundException e) {
-				System.out.println("    ERROR: Cannot create backup form conversion map '" + DrugMapping.getCurrentPath() + "/" + formMapDate + " " + FILENAME + "'!");
+				System.out.println("    ERROR: Cannot create form conversion map '" + DrugMapping.getCurrentPath() + "/" + FILENAME + "'!");
 				status = STATE_ERROR;
 			}
 		}

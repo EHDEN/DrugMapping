@@ -79,6 +79,45 @@ public class CDMIngredientStrength {
 	}
 	
 	
+	public Double getNumeratorDosage() {
+		Double numeratorDosage = getAmountValue(); 
+		if (numeratorDosage == null) {
+			numeratorDosage = getNumeratorValue(); 
+		}
+		return numeratorDosage;
+	}
+	
+	
+	public String getNumeratorDosageUnit() {
+		String numeratorDosageUnit = null;
+		if (getAmountValue() == null) {
+			numeratorDosageUnit = getNumeratorUnit().getConceptId();
+		}
+		else {
+			numeratorDosageUnit = getAmountUnit().getConceptId();
+		}
+		return numeratorDosageUnit;
+	}
+	
+	
+	public Double getDenominatorDosage() {
+		Double denominatorDosage = 1.0; 
+		if (getAmountValue() == null) {
+			denominatorDosage = getDenominatorValue(); 
+		}
+		return denominatorDosage;
+	}
+	
+	
+	public String getDenominatorDosageUnit() {
+		String denominatorDosageUnit = null;
+		if (getAmountValue() == null) {
+			denominatorDosageUnit = getDenominatorUnit().getConceptId();
+		}
+		return denominatorDosageUnit;
+	}
+	
+	
 	public String getBoxSize() {
 		return box_size;
 	}
