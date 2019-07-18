@@ -102,7 +102,7 @@ public class CDMIngredientStrength {
 	
 	public Double getDenominatorDosage() {
 		Double denominatorDosage = 1.0; 
-		if (getAmountValue() == null) {
+		if ((getAmountValue() == null) && (getDenominatorValue() != null)) {
 			denominatorDosage = getDenominatorValue(); 
 		}
 		return denominatorDosage;

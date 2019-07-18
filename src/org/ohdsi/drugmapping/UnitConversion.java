@@ -325,12 +325,21 @@ public class UnitConversion {
 		
 		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit);
 		Double denominatorFactor = getFactor(sourceDenominatorUnit, cdmDenominatorUnit);
-		
-		if ((numeratorFactor != null) && (denominatorFactor != null)) {
-			matches = ((sourceNumeratorValue / sourceDenominatorValue) == ((cdmNumeratorValue * numeratorFactor)/(cdmDenominatorValue * denominatorFactor))); 
-		}
-		else if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
-			matches = (sourceNumeratorValue == (cdmNumeratorValue * numeratorFactor));
+
+		if (numeratorFactor != null) {
+			if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
+				matches = (sourceNumeratorValue == (cdmNumeratorValue * numeratorFactor));
+			}
+			else if (
+						(sourceNumeratorValue != null) &&
+						(sourceDenominatorValue != null) &&
+						(cdmNumeratorValue != null) &&
+						(numeratorFactor != null) &&
+						(cdmDenominatorValue != null) &&
+						(denominatorFactor != null)
+			) {
+				matches = ((sourceNumeratorValue / sourceDenominatorValue) == ((cdmNumeratorValue * numeratorFactor)/(cdmDenominatorValue * denominatorFactor))); 
+			}
 		}
 		
 		return matches;
