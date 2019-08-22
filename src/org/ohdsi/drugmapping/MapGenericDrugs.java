@@ -274,6 +274,10 @@ public class MapGenericDrugs extends Mapping {
 						while (dosage.contains("  "))                dosage                = dosage.replaceAll("  ", " ");
 						while (dosageUnit.contains("  "))            dosageUnit            = dosageUnit.replaceAll("  ", " ");
 						while (casNumber.contains("  "))             casNumber             = casNumber.replaceAll("  ", " ");
+
+						// Remove comma's
+						ingredientName = ingredientName.replaceAll(",", " ").replaceAll("  ", " ");
+						ingredientNameEnglish = ingredientNameEnglish.replaceAll(",", " ").replaceAll("  ", " ");
 						
 						if (!ingredientName.equals("")) {
 							SourceIngredient sourceIngredient = SourceDrug.findIngredient(ingredientName, ingredientNameEnglish, casNumber);
@@ -549,7 +553,7 @@ public class MapGenericDrugs extends Mapping {
 						}
 						
 						// Matches on name variants
-						if (false) { //if (!match) {
+						if (!match) {
 							// Match on generated name variants
 							List<String> nameVariants = getNameVariants(sourceIngredient.getIngredientNameEnglish());
 							
@@ -580,6 +584,12 @@ public class MapGenericDrugs extends Mapping {
 								//System.out.println("        " + sourceIngredient.getMatch() + " " + cdmIngredient);
 								ingredientMappingFile.println(sourceIngredient + "," + sourceIngredient.getMatch() + "," + "\"" + sourceIngredient.getMatchString() + "\"" + "," + "\"" + sourceIngredient.getMatchingDrug() + "\"" + "," + cdmIngredient);
 							}
+							else {
+								ingredientMappingFile.println(sourceIngredient + ",NO MATCH,,,,,,,,,,");
+							}
+						}
+						else {
+							ingredientMappingFile.println(sourceIngredient + ",NO MATCH,,,,,,,,,,");
 						}
 					}
 					
@@ -753,7 +763,7 @@ public class MapGenericDrugs extends Mapping {
 					System.out.println(DrugMapping.getCurrentTime() + " Finished");
 					
 					
-	
+/*	
 					System.out.println(DrugMapping.getCurrentTime() + " Map Source Drugs to RxNorm Clinical Drugs ...");
 					
 					for (SourceDrug sourceDrug : sourceDrugs) {
@@ -986,6 +996,7 @@ public class MapGenericDrugs extends Mapping {
 					System.out.println("    Source drugs mapped: " + Integer.toString(drugMapping.size() + drugCompMapping.size()) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) (drugMapping.size() + drugCompMapping.size()) / (double) sourceDrugs.size()) * 100)) + "%)");
 					System.out.println("    Source data coverage: " + covered + " of " + total + " (" + Long.toString(Math.round(((double) covered / (double) total) * 100)) + "%)");
 					System.out.println(DrugMapping.getCurrentTime() + " Finished");
+*/
 				}
 			}	
 			
@@ -1150,6 +1161,13 @@ public class MapGenericDrugs extends Mapping {
 			
 			for (String drugName : mapsToCDMIngredient.keySet()) {
 				Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
+				// For testing
+				for (CDMIngredient cdmIngredient : ingredientSet) {
+					if (cdmIngredient.getConceptId().equals("955372")) {
+						System.out.println("matchIngredientByNameMapsTo");
+					}
+				}
+				
 				String drugNameClean = drugName.replaceAll("\n", " ").replaceAll("\r", " ");
 				while (drugNameClean.contains("  ")) drugNameClean = drugNameClean.replaceAll("  ", " ");
 				drugNameClean = drugNameClean.replaceAll(" ", "").replaceAll("-", "");
@@ -1220,6 +1238,13 @@ public class MapGenericDrugs extends Mapping {
 					while (synonymName.contains("  ")) synonymName = synonymName.replaceAll("  ", " ");
 					synonymName = synonymName.replaceAll(" ", "").replaceAll("-", "");
 					Set<CDMIngredient> ingredientSet = mapsToCDMIngredient.get(drugName);
+					// For testing
+					for (CDMIngredient cdmIngredient : ingredientSet) {
+						if (cdmIngredient.getConceptId().equals("955372")) {
+							System.out.println("matchIngredientByNameMapsTo");
+						}
+					}
+					
 					if ((ingredientSet.size() == 1) && synonymName.equals(nameVariant)) {
 						matchingEqualMapsToRxNormIngredients.add((CDMIngredient) ingredientSet.toArray()[0]);
 						matchingEqualMapsToRxNormIngredientsDrugNames.add(drugName);

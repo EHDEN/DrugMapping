@@ -179,7 +179,9 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						if ((!quoted) && line.get(columnNr).length() > 0) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
-						quoted = !quoted; 
+						else {
+							quoted = !quoted;
+						} 
 					}
 					else if (buffer[bufferPosition] == delimiter) {
 						if (quoted) {
@@ -188,6 +190,7 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						else {
 							line.add("");
 							columnNr++;
+							quoted = false;
 						}
 					}
 					else if (buffer[bufferPosition] == '\r') {
