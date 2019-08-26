@@ -3,9 +3,11 @@ package org.ohdsi.drugmapping;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,6 +20,8 @@ import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.cdm.CDMDrug;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
+import org.ohdsi.drugmapping.files.FileColumnDefinition;
+import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.source.SourceDrug;
@@ -143,7 +147,7 @@ public class MapGenericDrugs extends Mapping {
 	}
 		
 	
-	public MapGenericDrugs(CDMDatabase database, InputFile unitMappingsFile, InputFile formMappingsFile, InputFile sourceDrugsFile, InputFile translationCorrectionsFile) {
+	public MapGenericDrugs(CDMDatabase database, InputFile sourceDrugsFile, InputFile translationCorrectionsFile) {
 		
 		QueryParameters queryParameters;
 				
@@ -193,7 +197,7 @@ public class MapGenericDrugs extends Mapping {
 				while (casMappingFileIterator.hasNext()) {
 					Row row = casMappingFileIterator.next();
 					String chemicalName = row.get("ChemicalName").trim().toUpperCase().replaceAll(" ", "").replaceAll("-", "");
-					String casNumber = row.get("CasRN").trim().replace("-", "");
+					String casNumber = row.get("CasRN").trim();
 					if ((!chemicalName.equals("")) && (!casNumber.equals(""))) {
 						casMap.put(casNumber, chemicalName);
 					}
@@ -273,7 +277,10 @@ public class MapGenericDrugs extends Mapping {
 						while (ingredientNameEnglish.contains("  ")) ingredientNameEnglish = ingredientNameEnglish.replaceAll("  ", " ");
 						while (dosage.contains("  "))                dosage                = dosage.replaceAll("  ", " ");
 						while (dosageUnit.contains("  "))            dosageUnit            = dosageUnit.replaceAll("  ", " ");
-						while (casNumber.contains("  "))             casNumber             = casNumber.replaceAll("  ", " ");
+						casNumber = casNumber.replaceAll(" ", "").replaceAll("-", "");
+						if (!casNumber.equals("")) {
+							casNumber = casNumber.substring(0, casNumber.length() - 3) + "-" + casNumber.substring(casNumber.length() - 3, casNumber.length() - 1) + "-" + casNumber.substring(casNumber.length() - 1);
+						}
 
 						// Remove comma's
 						ingredientName = ingredientName.replaceAll(",", " ").replaceAll("  ", " ");
@@ -289,6 +296,7 @@ public class MapGenericDrugs extends Mapping {
 							}
 							else {
 								sourceIngredient = sourceDrug.AddIngredient(sourceIngredient, dosage, dosageUnit);
+								sourceIngredient.addCount(sourceDrug.getCount());
 							}
 							
 							String numeratorDosageUnit = sourceDrug.getIngredientNumeratorDosageUnit(sourceIngredient);
@@ -312,13 +320,132 @@ public class MapGenericDrugs extends Mapping {
 			
 			
 			if (!sourceDrugError) {
+				boolean ingredientMappingFound = false;
+
+				String ingredientMappingsFileName = DrugMapping.getCurrentPath() + "/" + "DrugMapping - Ingredient Mapping.csv";
+				File mappingsFile = new File(DrugMapping.getCurrentPath() + "/" + ingredientMappingsFileName);
+				if (mappingsFile.exists() && mappingsFile.canRead()) {
+					
+					FileDefinition ingredientMappingsFileDefinition = 
+							new FileDefinition(
+									"Ingredient Mapping File",
+									new String[] {
+											"This file should contain the ingredient mapping.",
+											"This file is optional. When not available it is created to fill."
+							  		},
+									new FileColumnDefinition[] {
+											new FileColumnDefinition("IngredientName",        new String[] { "This is the name of an ingredient." }),
+											new FileColumnDefinition("IngredientNameEnglish", new String[] { "This is the English name of the ingredient." }),
+											new FileColumnDefinition("CASNumber",             new String[] { "This is the CAS number of the ingredient." }),
+											new FileColumnDefinition("SourceCount",           new String[] { "This is the English name of the ingredient." }),
+											new FileColumnDefinition("CDMConceptId",          new String[] { "This is the CDM concept_id." }),
+											new FileColumnDefinition("CDMDomainId",           new String[] { "This is the CDM domain_id." }),
+											new FileColumnDefinition("CDMConceptName",        new String[] { "This is the CDM concept_name." }),
+											new FileColumnDefinition("CDMConceptClassId",     new String[] { "This is the CDM concept_class_id." }),
+											new FileColumnDefinition("CDMVocabularyId",       new String[] { "This is the CDM vocabulary_id." }),
+											new FileColumnDefinition("CDMConceptCode",        new String[] { "This is the CDM concept_code." }),
+											new FileColumnDefinition("CDMValidStartDate",     new String[] { "This is the CDM valid_start_date." }),
+											new FileColumnDefinition("CDMValidEndDate",       new String[] { "This is the CDM valid_end_date." }),
+											new FileColumnDefinition("CDMInvalidReason",      new String[] { "This is the CDM invalid_reason." })
+									}
+							);
+					
+					InputFile ingredientMappingsFile = new InputFile(ingredientMappingsFileDefinition);
+					ingredientMappingsFile.setFileName(ingredientMappingsFileName);
+					
+					if (ingredientMappingsFile.openFile()) {
+						// Load ingredient mapping
+						ingredientMappingFound = true;
+						while (ingredientMappingsFile.hasNext()) {
+							Row row = ingredientMappingsFile.next();
+
+							String ingredientName        = sourceDrugsFile.get(row, "IngredientName").trim().toUpperCase(); 
+							String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish").trim().toUpperCase(); 
+							String ingredientCASNumber   = sourceDrugsFile.get(row, "CASNumber").trim();
+							//String sourceCountString     = sourceDrugsFile.get(row, "SourceCount").trim(); 
+							String cdmConceptId          = sourceDrugsFile.get(row, "CDMConceptId").trim(); 
+							String cdmConceptName        = sourceDrugsFile.get(row, "CDMConceptName").trim(); 
+							String cdmDomainId           = sourceDrugsFile.get(row, "CDMDomainId").trim(); 
+							String cdmConceptClassId     = sourceDrugsFile.get(row, "CDMConceptClassId").trim(); 
+							String cdmVocabularyId       = sourceDrugsFile.get(row, "CDMVocabularyId").trim(); 
+							String cdmStandardConcept    = sourceDrugsFile.get(row, "CDMStandardConcept").trim(); 
+							String cdmConceptCode        = sourceDrugsFile.get(row, "CDMConceptCode").trim(); 
+							String cdmValidStartDate     = sourceDrugsFile.get(row, "CDMValidStartDate").trim(); 
+							String cdmValidEndDate       = sourceDrugsFile.get(row, "CDMValidEndDate").trim(); 
+							String cdmInvalidReason      = sourceDrugsFile.get(row, "CDMInvalidReason").trim();
+							
+							if (!ingredientName.equals("")) {
+								SourceIngredient sourceIngredient = SourceDrug.findIngredient(ingredientName, ingredientNameEnglish, ingredientCASNumber);
+								if (SourceDrug.errorOccurred()) {
+									sourceDrugError = true;
+								}
+								else if (sourceIngredient == null) {
+									// Source Ingredient not found. Should not happen.
+								}
+								else {
+									CDMIngredient cdmIngredient = cdmIngredients.get(cdmConceptId);
+									if (cdmIngredient == null) {
+										cdmIngredient = new CDMIngredient(cdmConceptId, cdmConceptName, cdmDomainId, cdmVocabularyId, cdmConceptClassId, cdmStandardConcept, cdmConceptCode, cdmValidStartDate, cdmValidEndDate, cdmInvalidReason);
+										cdmIngredients.put(cdmConceptId, cdmIngredient);
+										ingredientMap.put(sourceIngredient, cdmIngredient);
+									}
+								}
+							}
+						}
+					}
+					else {
+						System.out.println("    ERROR: Cannot read ingredient mapping file '" + ingredientMappingsFileName + "'!");
+					}
+				}
+				else {
+					// Create empty ingredient mapping file for use with Usagi
+					try {
+						PrintWriter ingredientMappingFileWriter = new PrintWriter(ingredientMappingsFileName);
+
+						String header = "IngredientName";
+						header += "," + "IngredientNameEnglish";
+						header += "," + "CASNumber";
+						header += "," + "SourceCount";
+						header += "," + "CDMConceptId";
+						header += "," + "CDMConceptName";
+						header += "," + "CDMDomainId";
+						header += "," + "CDMConceptClassId";
+						header += "," + "CDMVocabularyId";
+						header += "," + "CDMStandardConcept";
+						header += "," + "CDMConceptCode";
+						header += "," + "CDMValidStartDate";
+						header += "," + "CDMValidEndDate";
+						header += "," + "CDMInvalidReason";
+
+						ingredientMappingFileWriter.println(header);
+
+						for (SourceIngredient ingredient : SourceDrug.getAllIngredients()) {
+							String record = ingredient.getIngredientName();
+							record += "," + ingredient.getIngredientNameEnglish();
+							record += "," + (ingredient.getCASNumber() == null ? "" : "\"" + ingredient.getCASNumber() + "\"");
+							record += "," + ingredient.getCount();
+							record += ",,,,,,,,,,";
+
+							ingredientMappingFileWriter.println(record);
+						}
+						
+						ingredientMappingFileWriter.close();
+						
+						System.out.println("");
+						System.out.println("First map the ingredients, for example with Usagi, in the file:");
+						System.out.println("");
+						System.out.println(DrugMapping.getCurrentPath() + "/" + ingredientMappingsFileName);
+					} catch (FileNotFoundException e) {
+						System.out.println("    ERROR: Cannot create empty ingredient mapping file '" + ingredientMappingsFileName + "'!");
+					}
+				}
 				
 				// Create Units Map
 				UnitConversion unitConversionsMap = new UnitConversion(database, units);
 				if (unitConversionsMap.getStatus() == UnitConversion.STATE_EMPTY) {
 					// If no unit conversion is specified then stop.
 					System.out.println("");
-					System.out.println("FIRST FILL THE UNIT CONVERSION MAP IN THE FILE:");
+					System.out.println("First fill the unit conversion map in the file:");
 					System.out.println("");
 					System.out.println(DrugMapping.getCurrentPath() + "/" + UnitConversion.FILENAME);
 				}
@@ -327,13 +454,14 @@ public class MapGenericDrugs extends Mapping {
 				if (formConversionsMap.getStatus() == FormConversion.STATE_EMPTY) {
 					// If no form conversion is specified then stop.
 					System.out.println("");
-					System.out.println("FIRST FILL THE FORM CONVERSION MAP IN THE FILE:");
+					System.out.println("First fill the form conversion map in the file:");
 					System.out.println("");
 					System.out.println(DrugMapping.getCurrentPath() + "/" + FormConversion.FILENAME);
 				}
 
 
 				if (
+						ingredientMappingFound                                         &&
 						(unitConversionsMap.getStatus() != UnitConversion.STATE_EMPTY) &&
 						(unitConversionsMap.getStatus() != UnitConversion.STATE_ERROR) && 
 						(formConversionsMap.getStatus() != FormConversion.STATE_EMPTY) && 

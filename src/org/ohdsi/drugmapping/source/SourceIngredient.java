@@ -40,6 +40,7 @@ public class SourceIngredient {
 	private String ingredientNameEnglish = null;
 	private String ingredientNameEnglishNoSpaces = null;
 	private String casNumber = null;
+	private Integer count = 0;
 	
 	private String match = NO_MATCH;
 	private String matchString = "";
@@ -145,6 +146,16 @@ public class SourceIngredient {
 	
 	public void setMatchingDrug(String matchingDrug) {
 		this.matchingDrug = matchingDrug;
+	}
+	
+	
+	public Integer getCount() {
+		return count;
+	}
+	
+	
+	public void addCount(Integer additionalCount) {
+		count += additionalCount;
 	}
 	
 	

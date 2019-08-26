@@ -12,6 +12,8 @@ public class CDMConcept {
 	protected String concept_class_id = null;
 	protected String standard_concept = null;
 	protected String concept_code     = null;
+	protected String valid_start_date = null;
+	protected String valid_end_date   = null;
 	protected String invalid_reason   = null;
 	
 	protected String conceptNameNoSpaces = null;
@@ -25,6 +27,8 @@ public class CDMConcept {
 		header += "," + "concept_class_id";
 		header += "," + "standard_concept";
 		header += "," + "concept_code";
+		header += "," + "valid_start_date";
+		header += "," + "valid_end_date";
 		header += "," + "invalid_reason";
 		return header;
 	}
@@ -54,7 +58,28 @@ public class CDMConcept {
 		concept_class_id = queryRow.get(prefix + "concept_class_id").trim();
 		standard_concept = queryRow.get(prefix + "standard_concept").trim();
 		concept_code     = queryRow.get(prefix + "concept_code").trim().toUpperCase();
+		valid_start_date = queryRow.get(prefix + "valid_start_date").trim();
+		valid_end_date   = queryRow.get(prefix + "valid_end_date").trim();
 		invalid_reason   = queryRow.get(prefix + "invalid_reason").trim();
+		
+		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
+		
+		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "");
+	}
+	
+	
+	
+	public CDMConcept(String conceptId, String conceptName, String domainId, String vocabularyId, String conceptClassId, String standardConcept, String conceptCode, String validStartDate, String validEndDate, String invalidReason) {
+		concept_id       = conceptId;
+		concept_name     = conceptName;
+		domain_id        = domainId;
+		vocabulary_id    = vocabularyId;
+		concept_class_id = conceptClassId;
+		standard_concept = standardConcept;
+		concept_code     = conceptCode;
+		valid_start_date = validStartDate;
+		valid_end_date   = validEndDate;
+		invalid_reason   = invalidReason;
 		
 		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
 		

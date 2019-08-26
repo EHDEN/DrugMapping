@@ -67,6 +67,11 @@ public class IPCIZIndexConversion extends Mapping {
 				record[GenericName]   = gskFile.get(row, "GenericName");
 				record[CASNumber]     = gskFile.get(row, "CASNumber");
 
+				record[CASNumber] = record[CASNumber].replaceAll(" ", "").replaceAll("-", "");
+				if (!record[CASNumber].equals("")) {
+					record[CASNumber] = record[CASNumber].substring(0, record[CASNumber].length() - 3) + "-" + record[CASNumber].substring(record[CASNumber].length() - 3, record[CASNumber].length() - 1) + "-" + record[CASNumber].substring(record[CASNumber].length() - 1);
+				}
+
 				int gskCode = Integer.valueOf(record[GSKCode]); 
 				List<String[]> gskList = gskMap.get(gskCode);
 				if (gskList == null) {
