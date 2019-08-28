@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
@@ -107,9 +109,9 @@ public class IPCIZIndexConversion extends Mapping {
 					System.out.println("  Creating Full GPK File ...");
 					while (gpkFile.hasNext()) {
 						Row row = gpkFile.next();
-						String name = gpkFile.get(row, "FullName").trim();
-						if (name.equals("")) name = gpkFile.get(row, "LabelName").trim();
-						if (name.equals("")) name = gpkFile.get(row, "ShortName").trim();
+						String name = gpkFile.get(row, "FullName").trim().toUpperCase();
+						if (name.equals("")) name = gpkFile.get(row, "LabelName").trim().toUpperCase();
+						if (name.equals("")) name = gpkFile.get(row, "ShortName").trim().toUpperCase();
 						String gpkCode = gpkFile.get(row, "GPKCode");
 						
 						// Ignore empty names and names that start with a '*'
@@ -146,6 +148,126 @@ public class IPCIZIndexConversion extends Mapping {
 							
 							if (gskList == null) {
 								// Try to extract ingredients from name (separated by '/')
+/*	
+   NOT USED YET							
+								// List of words to remove from extracted parts.
+								// IMPORTANT:
+								//   This is an ordered list. The words are removed in the order of the list.
+								//   The appearance of the words are checked with surrounding parenthesis, with
+								//   surrounding spaces, and at the end of the extracted part.
+								List<String> wordsToRemove = new ArrayList<String>();
+
+								wordsToRemove.add("PDR V INFVLST");
+								wordsToRemove.add("PDR V OPLOSSING");
+								
+								wordsToRemove.add("APPLVLST");
+								wordsToRemove.add("BALSEM");
+								wordsToRemove.add("CAPSULE");
+								wordsToRemove.add("CONC");
+								wordsToRemove.add("CONCENTRAAT");
+								wordsToRemove.add("CREME");
+								wordsToRemove.add("DRAGEE");
+								wordsToRemove.add("DRANK");
+								wordsToRemove.add("DRUPPELS");
+								wordsToRemove.add("EXTRA");
+								wordsToRemove.add("EXTRACT");
+								wordsToRemove.add("FORTE");
+								wordsToRemove.add("GEL");
+								wordsToRemove.add("GELEREND");
+								wordsToRemove.add("GO");
+								wordsToRemove.add("GRANULAAT");
+								wordsToRemove.add("HUIDSPRAY");
+								wordsToRemove.add("HYDROFIEL");
+								wordsToRemove.add("HYDROFOOB");
+								wordsToRemove.add("HYDROGEL");
+								wordsToRemove.add("INFVLST");
+								wordsToRemove.add("INJECTIEPOEDER");
+								wordsToRemove.add("INJPDR");
+								wordsToRemove.add("INJVLST");
+								wordsToRemove.add("LOTION");
+								wordsToRemove.add("MGA");
+								wordsToRemove.add("MSR");
+								wordsToRemove.add("OMHULD");
+								wordsToRemove.add("OOGDRUPPELS");
+								wordsToRemove.add("OOGDR");
+								wordsToRemove.add("OOGWASSING");
+								wordsToRemove.add("OOGZALF");
+								wordsToRemove.add("ORAAL");
+								wordsToRemove.add("PDR");
+								wordsToRemove.add("POEDER");
+								wordsToRemove.add("PREPAR");
+								wordsToRemove.add("PREPARAAT");
+								wordsToRemove.add("SHAMPOO");
+								wordsToRemove.add("SMEERSEL");
+								wordsToRemove.add("STERK");
+								wordsToRemove.add("STROOP");
+								wordsToRemove.add("SUBLINGUAAL");
+								wordsToRemove.add("SUSP");
+								wordsToRemove.add("SUSPENSIE");
+								wordsToRemove.add("TABLET");
+								wordsToRemove.add("TINCTUUR");
+								wordsToRemove.add("VERNEVELVLST");
+								wordsToRemove.add("VETZALF");
+								wordsToRemove.add("VLOEIBAAR");
+								wordsToRemove.add("ZALF");
+								wordsToRemove.add("ZUIGTABLET");
+								wordsToRemove.add("ZUURBINDEND");
+
+								wordsToRemove.add("WONDSPOELING");
+								wordsToRemove.add("ZETP");
+								wordsToRemove.add("ZETP + ZALF");
+								wordsToRemove.add("OUD");
+								wordsToRemove.add("KAUWTABLET");
+								wordsToRemove.add("MODSPOELING");
+								wordsToRemove.add("ZETPIL");
+								wordsToRemove.add("ANTIRHEUMATICUM");
+								wordsToRemove.add("ROCHE");
+								wordsToRemove.add("CUTAAN");
+								wordsToRemove.add("INJ");
+								wordsToRemove.add("KAUWT");
+								wordsToRemove.add("INJV");
+								wordsToRemove.add("SCHUDMIXTUUR");
+								wordsToRemove.add("NPBI");
+								wordsToRemove.add("VOOR");
+								wordsToRemove.add("KRISTALLIJN");
+								wordsToRemove.add("BESILAAT");
+								wordsToRemove.add("KLYSMA");
+								wordsToRemove.add("INFUSIEPOEDER");
+								wordsToRemove.add("BRUISGRANULAAT");
+								wordsToRemove.add("MET ELECTR INFVLST");
+								wordsToRemove.add("SACHET");
+								wordsToRemove.add("OLIE");
+								wordsToRemove.add("CLR");
+								wordsToRemove.add("ESSENCE");
+								wordsToRemove.add("CREME DE");
+								wordsToRemove.add("ONVERDEELD");
+								wordsToRemove.add("KUNSTMATIG");
+								wordsToRemove.add("INHALATIEVLST");
+								wordsToRemove.add("OROM");
+								wordsToRemove.add("OROMUCOSAAL");
+								wordsToRemove.add("INHALATIEPOEDER");
+								wordsToRemove.add("PERIFEER");
+								wordsToRemove.add("PCH");
+								wordsToRemove.add("PDR VOOR APPLVLST");
+								wordsToRemove.add("TRACHEAAL");
+								wordsToRemove.add("POEDER V CEMENT");
+								wordsToRemove.add("DO");
+								wordsToRemove.add("ML");
+								wordsToRemove.add("MG");
+								wordsToRemove.add("PAR");
+								wordsToRemove.add("SPOELING");
+								wordsToRemove.add("STARTVERPAKKING");
+								wordsToRemove.add("PD-OPL");
+								wordsToRemove.add("KRUIDENTHEE");
+								wordsToRemove.add("THEE");
+								wordsToRemove.add("NEUSSPRAY");
+								wordsToRemove.add("UG");
+								wordsToRemove.add("UUR");
+								wordsToRemove.add("XXXXX");
+								wordsToRemove.add("XXXXX");
+								wordsToRemove.add("XXXXX");
+*/
+								
 								if (name.contains(" ")) {
 									name = name.substring(0, name.indexOf(" "));
 								}

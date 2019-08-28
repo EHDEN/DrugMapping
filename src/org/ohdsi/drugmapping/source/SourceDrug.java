@@ -15,6 +15,7 @@ public class SourceDrug {
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
 	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
 	private static Map<String, SourceIngredient> ingredientNameIndex = new HashMap<String, SourceIngredient>();
+	private static Map<String, SourceIngredient> ingredientCASNumberIndex = new HashMap<String, SourceIngredient>();
 	
 	
 	private String code = null;
@@ -33,6 +34,16 @@ public class SourceDrug {
 	
 	public static Set<SourceIngredient> getAllIngredients() {
 		return allIngredients;
+	}
+	
+	
+	public static SourceIngredient findIngredient(String casNumber) {
+		SourceIngredient sourceIngredient = null;
+
+		if ((casNumber != null) && (!casNumber.equals(""))) {
+			sourceIngredient = ingredientCASNumberIndex.get(casNumber);
+		}
+		return sourceIngredient;
 	}
 	
 	
@@ -56,7 +67,6 @@ public class SourceDrug {
 					error = true;
 				}
 			}
-			
 			if (!casNumber.equals("")) {
 				if (sourceIngredient.getCASNumber() == null) {
 					sourceIngredient.setCASNumber(casNumber);
@@ -67,7 +77,7 @@ public class SourceDrug {
 				}
 			}
 		}
-		
+
 		return error ? null : sourceIngredient;
 	}
 	
@@ -146,8 +156,26 @@ public class SourceDrug {
 	}
 	
 	
+	public SourceIngredient AddIngredientByCASnumber(String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
+		SourceIngredient sourceIngredient = null;
+		
+		sourceIngredient = SourceDrug.findIngredient(casNumber);
+		if (sourceIngredient == null) {
+			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+			allIngredients.add(sourceIngredient);
+			if ((casNumber != null) && (!casNumber.equals(""))) {
+				ingredientCASNumberIndex.put(casNumber, sourceIngredient);
+			}
+		}
+		sourceIngredient.addCount(getCount());
+
+		return AddIngredient(sourceIngredient, dosage, dosageUnit);
+	}
+	
+	
 	public SourceIngredient AddIngredient(String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
 		SourceIngredient sourceIngredient = null;
+
 		for (SourceIngredient ingredient : allIngredients) {
 			if (ingredient.matches(ingredientName, ingredientNameEnglish, casNumber)) {
 				sourceIngredient = ingredient;
@@ -161,6 +189,8 @@ public class SourceDrug {
 				ingredientNameIndex.put(sourceIngredient.getIngredientNameNoSpaces(), sourceIngredient);
 			}
 		}
+		sourceIngredient.addCount(getCount());
+
 		return AddIngredient(sourceIngredient, dosage, dosageUnit);
 	}
 	

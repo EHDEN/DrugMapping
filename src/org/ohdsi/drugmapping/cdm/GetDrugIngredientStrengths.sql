@@ -5,6 +5,8 @@ SELECT drug.concept_id AS drug_concept_id,
        drug.concept_class_id AS drug_concept_class_id,
        drug.standard_concept AS drug_standard_concept,
        drug.concept_code AS drug_concept_code,
+       drug.valid_start_date AS drug_valid_start_date
+       drug.valid_end_date AS drug_valid_end_date 
        drug.invalid_reason AS drug_invalid_reason,
        ingredient_concept_id,
        amount_value,

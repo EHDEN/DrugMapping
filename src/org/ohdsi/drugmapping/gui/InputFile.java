@@ -206,6 +206,9 @@ public class InputFile extends JPanel {
 					JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
+			else {
+				System.out.println("Cannot read file '" + getFileName() + "'!");
+			}
 		}
 		
 		return result;
