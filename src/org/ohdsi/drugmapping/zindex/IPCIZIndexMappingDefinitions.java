@@ -156,6 +156,32 @@ public class IPCIZIndexMappingDefinitions {
 							}
 					),
 					new FileDefinition(
+							"ZIndex GNK File",
+							new String[] {
+									"This file should contain the ZIndex GNK ingredient definitions."
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"GNKCode",
+											new String[] {
+													"This is the GNK-code."
+											}
+									),
+									new FileColumnDefinition(
+											"Description",
+											new String[] {
+													"This is the description for the GNK-code."
+											}
+									),
+									new FileColumnDefinition(
+											"CASCode",
+											new String[] {
+													"This is the CAS number of the ingredient."
+											}
+									)
+							}
+					),
+					new FileDefinition(
 							"ZIndex GPK Statistics File",
 							new String[] {
 									"This file should contain the usage counts of the ZIndex GPK codes."
@@ -171,6 +197,20 @@ public class IPCIZIndexMappingDefinitions {
 											"GPKCount",
 											new String[] {
 													"This is the usage count for the GPK-code."
+											}
+									)
+							}
+					),
+					new FileDefinition(
+							"ZIndex Ignored Words File",
+							new String[] {
+									"This file should contain words to remove from ingredients extracted.",
+					  		},
+							new FileColumnDefinition[] {
+									new FileColumnDefinition(
+											"Word",
+											new String[] {
+													"This is the word to remove."
 											}
 									)
 							}
