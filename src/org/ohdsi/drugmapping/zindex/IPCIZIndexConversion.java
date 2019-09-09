@@ -479,11 +479,11 @@ public class IPCIZIndexConversion extends Mapping {
 			ingredientName = ingredientName.trim().replaceAll("  "," ");
 
 			ingredientName = ingredientName.replaceAll("\t", " ").trim();
-			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
 			
-			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
 
 			ingredientName = ingredientName.replaceAll("[\"][^\"]*[\"]", "").trim().replaceAll("  "," ");
 			ingredientName = ingredientName.replaceAll(" \\(.*\\) ", "").trim().replaceAll("  "," ");
@@ -493,31 +493,31 @@ public class IPCIZIndexConversion extends Mapping {
 			ingredientName = ingredientName.replaceAll("\\([)]*$", "").trim();
 			ingredientName = ingredientName.replaceAll("\\([^)]*$", "").trim().replaceAll("  "," ");
 			
-			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*" + word + ", ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ", ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
 
-			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*" + word + " ", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
 			
-			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*" + word + ", ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ", ", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
 
-			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*" + word + " ", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
 
 			ingredientName = ingredientName.replaceAll("^" + word + " ", " ").trim().replaceAll("  "," ");
 			ingredientName = ingredientName.replaceAll(" " + word + " ", " ").trim().replaceAll("  "," ");
@@ -531,6 +531,7 @@ public class IPCIZIndexConversion extends Mapping {
 			ingredientName = ingredientName.replaceAll(" " + word + "$", "").trim().replaceAll("  "," ");
 			ingredientName = ingredientName.replaceAll("," + word + "$", "").trim().replaceAll("  "," ");
 			ingredientName = ingredientName.replaceAll(", " + word + "$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(",$", "").trim().replaceAll("  "," ");
 			
 			if (ingredientName.endsWith(" " + word)) {
 				ingredientName = ingredientName.substring(0, ingredientName.length() - word.length()).trim().replaceAll("  "," ");
