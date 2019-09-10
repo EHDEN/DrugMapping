@@ -12,10 +12,13 @@ import org.ohdsi.drugmapping.cdm.CDMDrug;
 
 public class SourceDrug {
 	private static boolean error = false;
+	
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
 	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
-	private static Map<String, SourceIngredient> ingredientNameIndex = new HashMap<String, SourceIngredient>();
+	private static Map<String, List<SourceIngredient>> ingredientNameIndex = new HashMap<String, List<SourceIngredient>>();
 	private static Map<String, SourceIngredient> ingredientCASNumberIndex = new HashMap<String, SourceIngredient>();
+	
+	private static Integer casNumbersSet = 0;
 	
 	
 	private String code = null;
@@ -25,6 +28,18 @@ public class SourceDrug {
 	private Integer count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
 	private CDMDrug mappedDrug = null;
+	
+	
+	public static void init() {
+		error = false;
+		
+		allComponents = new HashSet<SourceDrugComponent>();
+		allIngredients = new HashSet<SourceIngredient>();
+		ingredientNameIndex = new HashMap<String, List<SourceIngredient>>();
+		ingredientCASNumberIndex = new HashMap<String, SourceIngredient>();
+		
+		casNumbersSet = 0;
+	}
 	
 	
 	public static Set<SourceDrugComponent> getAllComponents() {
@@ -47,36 +62,77 @@ public class SourceDrug {
 	}
 	
 	
-	public static SourceIngredient findIngredient(String ingredientName, String ingredientNameEnglish, String casNumber) {
+	public static SourceIngredient getIngredient(String ingredientName, String ingredientNameEnglish, String casNumber) {
 		error = false;
 		SourceIngredient sourceIngredient = null;
 
 		String ingredientNameNoSpaces = ingredientName.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" ", "").replaceAll("-", "");
 		String ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" ", "").replaceAll("-", "");
-		sourceIngredient = ingredientNameIndex.get(ingredientNameNoSpaces);
-		if (sourceIngredient != null) {
-			if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals("")) {
-				sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
-			}
-			else if (!sourceIngredient.getIngredientNameEnglishNoSpaces().equals(ingredientNameEnglishNoSpaces)) {
-				if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals(sourceIngredient.getIngredientNameNoSpaces()) && (!sourceIngredient.getIngredientNameNoSpaces().equals(ingredientNameEnglishNoSpaces))) {
+		List<SourceIngredient> sourceIngredients = ingredientNameIndex.get(ingredientNameNoSpaces);
+		if (sourceIngredients != null) {
+			if (sourceIngredients.size() == 1) {
+				sourceIngredient = sourceIngredients.get(0);
+				if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals("")) {
 					sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
 				}
-				else {
-					System.out.println("    NameEnglish conflict: '" + ingredientNameEnglish + "' <-> " + sourceIngredient);
-					error = true;
+				else if (!sourceIngredient.getIngredientNameEnglishNoSpaces().equals(ingredientNameEnglishNoSpaces)) {
+					if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals(sourceIngredient.getIngredientNameNoSpaces()) && (!sourceIngredient.getIngredientNameNoSpaces().equals(ingredientNameEnglishNoSpaces))) {
+						sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
+					}
+					else {
+						System.out.println("    NameEnglish conflict: '" + ingredientNameEnglish + "' <-> " + sourceIngredient);
+						error = true;
+					}
+				}
+				if (!casNumber.equals("")) {
+					if (sourceIngredient.getCASNumber() == null) {
+						sourceIngredient.setCASNumber(casNumber);
+						casNumbersSet++;
+					}
+					else if (!sourceIngredient.getCASNumber().equals(casNumber)) {
+						/*
+						System.out.println("    CASNumber conflict: '" + casNumber + "' <-> " + sourceIngredient);
+						error = true;
+						*/
+						sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+						sourceIngredients.add(sourceIngredient);
+						ingredientCASNumberIndex.put(casNumber, sourceIngredient);
+					}
 				}
 			}
-			if (!casNumber.equals("")) {
-				if (sourceIngredient.getCASNumber() == null) {
-					sourceIngredient.setCASNumber(casNumber);
+			else {
+				if (!casNumber.equals("")) {
+					sourceIngredient = ingredientCASNumberIndex.get(casNumber);
+					if (sourceIngredient == null) {
+						sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+						sourceIngredients.add(sourceIngredient);
+						ingredientCASNumberIndex.put(casNumber, sourceIngredient);
+					}
 				}
-				else if (!sourceIngredient.getCASNumber().equals(casNumber)) {
-					System.out.println("    CASNumber conflict: '" + casNumber + "' <-> " + sourceIngredient);
-					error = true;
+				else {
+					for (SourceIngredient ingredient : sourceIngredients) {
+						if (ingredient.getCASNumber() == null) {
+							sourceIngredient = ingredient;
+							break;
+						}
+					}
+					if (sourceIngredient == null) {
+						sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+						sourceIngredients.add(sourceIngredient);
+						ingredientCASNumberIndex.put(casNumber, sourceIngredient);
+					}
 				}
 			}
 		}
+		else {
+			sourceIngredients = new ArrayList<SourceIngredient>();
+			ingredientNameIndex.put(ingredientNameNoSpaces, sourceIngredients);
+			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+			sourceIngredients.add(sourceIngredient);
+			ingredientCASNumberIndex.put(casNumber, sourceIngredient);
+		}
+		
+		allIngredients.add(sourceIngredient);
 
 		return error ? null : sourceIngredient;
 	}
@@ -84,6 +140,11 @@ public class SourceDrug {
 	
 	public static boolean errorOccurred() {
 		return error;
+	}
+	
+	
+	public static Integer getCASNumbersSet() {
+		return casNumbersSet;
 	}
 	
 	
@@ -186,7 +247,14 @@ public class SourceDrug {
 			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
 			allIngredients.add(sourceIngredient);
 			if (!ingredientName.equals("")) {
-				ingredientNameIndex.put(sourceIngredient.getIngredientNameNoSpaces(), sourceIngredient);
+				List<SourceIngredient> sourceIngredients = ingredientNameIndex.get(sourceIngredient.getIngredientNameNoSpaces());
+				if (sourceIngredients == null) {
+					sourceIngredients = new ArrayList<SourceIngredient>();
+				}
+				sourceIngredients.add(sourceIngredient);
+				if (sourceIngredient.getCASNumber() != null) {
+					ingredientCASNumberIndex.put(sourceIngredient.getCASNumber(), sourceIngredient);
+				}
 			}
 		}
 		sourceIngredient.addCount(getCount());

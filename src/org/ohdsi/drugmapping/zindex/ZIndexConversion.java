@@ -13,7 +13,7 @@ import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
 
-public class IPCIZIndexConversion extends Mapping {
+public class ZIndexConversion extends Mapping {
 
 	private static final int GSKColumnCount = 8;
 	private static final int GSKCode        = 0;
@@ -37,7 +37,7 @@ public class IPCIZIndexConversion extends Mapping {
 	private List<String> wordsToRemove = new ArrayList<String>();
 
 	
-	public IPCIZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile) {
+	public ZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile) {
 		
 		boolean ok = true;
 

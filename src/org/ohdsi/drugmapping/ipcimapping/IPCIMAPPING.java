@@ -1,36 +1,34 @@
-package org.ohdsi.drugmapping;
+package org.ohdsi.drugmapping.ipcimapping;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
+import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.FormConversion;
+import org.ohdsi.drugmapping.Mapping;
+import org.ohdsi.drugmapping.UnitConversion;
 import org.ohdsi.drugmapping.cdm.CDMDrug;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
-import org.ohdsi.drugmapping.files.FileColumnDefinition;
-import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceDrugComponent;
 import org.ohdsi.drugmapping.source.SourceIngredient;
-import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
-public class MapGenericDrugs extends Mapping {
+public class IPCIMAPPING extends Mapping {
 
 	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
 	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
@@ -58,7 +56,7 @@ public class MapGenericDrugs extends Mapping {
 	
 	private Map<SourceDrug, Map<CDMDrug, String>> cdmDrugRejectReason = new HashMap<SourceDrug, Map<CDMDrug, String>>();
 	
-	public MapGenericDrugs(CDMDatabase database, InputFile sourceDrugsFile) {
+	public IPCIMAPPING(CDMDatabase database, InputFile sourceDrugsFile) {
 		boolean ok = true;
 		
 		// Get CDM Ingredients
@@ -130,7 +128,7 @@ public class MapGenericDrugs extends Mapping {
 			
 			// Get RxNorm ingredients
 			CDMIngredient lastCdmIngredient = null;
-			for (Row queryRow : connection.queryResource("cdm/GetRxNormIngredients.sql", queryParameters)) {
+			for (Row queryRow : connection.queryResource("../cdm/GetRxNormIngredients.sql", queryParameters)) {
 				String cdmIngredientConceptId = queryRow.get("concept_id").trim();
 				if ((lastCdmIngredient == null) || (!lastCdmIngredient.getConceptId().equals(cdmIngredientConceptId))) {
 					if (lastCdmIngredient != null) {
@@ -159,7 +157,7 @@ public class MapGenericDrugs extends Mapping {
 			}
 			
 			// Get "Maps to" RxNorm Ingredients
-			for (Row queryRow : connection.queryResource("cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
+			for (Row queryRow : connection.queryResource("../cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
 				String drugName = queryRow.get("drug_name").trim().toUpperCase();
 				String cdmIngredientConceptId = queryRow.get("mapsto_concept_id").trim();
 				String drugNameSynonym = queryRow.get("drug_synonym_name").trim().toUpperCase();
@@ -214,7 +212,7 @@ public class MapGenericDrugs extends Mapping {
 			// Get RxNorm Clinical Drugs with Form and Ingredients
 			System.out.println(DrugMapping.getCurrentTime() + " Get CDM RxNorm Clinical Drugs with ingredients ...");
 			
-			for (Row queryRow : connection.queryResource("cdm/GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
+			for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
 				String cdmDrugConceptId = queryRow.get("drug_concept_id");
 				if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 					CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);

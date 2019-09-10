@@ -5,23 +5,30 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 
+import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.genericmapping.GenericMapping;
+import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
-import org.ohdsi.drugmapping.zindex.IPCIZIndexConversion;
+import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPING;
+import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPINGInputFiles;
+import org.ohdsi.drugmapping.zindex.ZIndexConversion;
+import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
 public class DrugMapping {
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
 	
 	private static String currentDate = null;
-	private static String currentPath = ""; 
+	private static String currentPath = "";	
+	private static MappingInputDefinition inputFiles = null; 
 	
 	private MainFrame mainFrame;
 	private String special = "";
@@ -54,6 +61,11 @@ public class DrugMapping {
 	}
 	
 	
+	public static List<FileDefinition> getInputFiles() {
+		return inputFiles.getInputFiles();
+	}
+	
+	
 	public DrugMapping(Map<String, String> parameters) {
 		List<String> dbSettings = null;
 		String password = null;
@@ -61,7 +73,25 @@ public class DrugMapping {
 		String logFileName = null;
 		special = parameters.get("special");
 		
-		mainFrame = new MainFrame(this, parameters.get("special"));
+		if (special != null) {
+			special = special.toUpperCase();
+			if (special.equals("ZINDEX")) {
+				inputFiles = new ZIndexConversionInputFiles();
+			}
+			else if (special.equals("IPCIMAPPING")) {
+				inputFiles = new IPCIMAPPINGInputFiles();
+			}
+			else {
+				JOptionPane.showMessageDialog(null, "Unknown special definition '" + special + "'!", "Dialog",JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+		}
+		else {
+			special = "";
+			inputFiles = new GenericMappingInputFiles();
+		}
+		
+		mainFrame = new MainFrame(this);
 		
 		if (parameters.containsKey("databasesettings")) {
 			dbSettings = mainFrame.readSettingsFromFile(parameters.get("databasesettings"));
@@ -150,14 +180,14 @@ public class DrugMapping {
 			for (JComponent component : componentsToDisableWhenRunning)
 				component.setEnabled(false);
 			
-			if (special.toUpperCase().equals("ZINDEX")) {
-				new IPCIZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"));
+			if (special.equals("ZINDEX")) {
+				new ZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"));
+			}
+			else if (special.equals("IPCIMAPPING")) {
+				new IPCIMAPPING(getDatabase(), getFile("Generic Drugs File"));
 			}
 			else {
-				//Mapping.loadReplacements(getFile("Replacements File"));
-				//new MapATC(getDatabase(), getFile("ATC File"));
-				//new MapIngredients(getDatabase(), getFile("Ingredients File"));
-				new MapGenericDrugs(getDatabase(), getFile("Generic Drugs File"));
+				new GenericMapping(getDatabase(), getFile("Generic Drugs File"));
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)
@@ -170,7 +200,6 @@ public class DrugMapping {
 	public static void main(String[] args) {
 		Map<String, String> parameters = new HashMap<String, String>();
 
-		parameters.put("special", "");
 		for (int i = 0; i < args.length; i++) {
 			int equalSignIndex = args[i].indexOf("=");
 			String argVariable = args[i].substring(0, equalSignIndex).toLowerCase();

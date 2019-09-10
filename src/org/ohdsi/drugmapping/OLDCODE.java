@@ -1,54 +1,11 @@
 package org.ohdsi.drugmapping;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.ohdsi.databases.QueryParameters;
-import org.ohdsi.databases.RichConnection;
-import org.ohdsi.drugmapping.cdm.CDMDrug;
-import org.ohdsi.drugmapping.cdm.CDMIngredient;
-import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
-import org.ohdsi.drugmapping.files.FileColumnDefinition;
-import org.ohdsi.drugmapping.files.FileDefinition;
-import org.ohdsi.drugmapping.gui.CDMDatabase;
-import org.ohdsi.drugmapping.gui.InputFile;
-import org.ohdsi.drugmapping.source.SourceDrug;
-import org.ohdsi.drugmapping.source.SourceIngredient;
-import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
-import org.ohdsi.utilities.files.Row;
-
-public class OldMapGenericDrugs extends Mapping {
-	private Set<String> forms = new HashSet<String>();
-	private Set<String> units = new HashSet<String>();
-
-	private Map<String, String> casMap = new HashMap<String, String>();
-	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
+public class OLDCODE {
+/*	
 	private Map<String, String> ingredientTranslationCorrections = new HashMap<String, String>();
-	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
-	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
-	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
-	private Map<SourceIngredient, CDMIngredient> ingredientMap = new HashMap<SourceIngredient, CDMIngredient>();
-	private Map<String, Set<CDMIngredient>> mapsToCDMIngredient = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<String>> drugNameSynonyms = new HashMap<String, Set<String>>();
-	private Map<String, CDMDrug> cdmDrugs = new HashMap<String, CDMDrug>();
-	private Map<CDMIngredient, List<CDMDrug>> cdmDrugsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
-	private Map<SourceDrug, CDMDrug> drugMapping = new HashMap<SourceDrug, CDMDrug>();
-	private Map<String, CDMDrug> cdmDrugComps = new HashMap<String, CDMDrug>();
-	private Map<CDMIngredient, List<CDMDrug>> cdmDrugCompsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
-	private Map<SourceDrug, CDMDrug> drugCompMapping = new HashMap<SourceDrug, CDMDrug>();
-	
-	private int noATCCounter = 0; // Counter of source drugs without ATC code.
-	
 	
 	private static List<String> getNameVariants(String name) {
 		List<String> nameVariants = null;
@@ -142,11 +99,13 @@ public class OldMapGenericDrugs extends Mapping {
 		
 		return nameVariants;
 	}
-		
 	
-	public OldMapGenericDrugs(CDMDatabase database, InputFile sourceDrugsFile, InputFile translationCorrectionsFile) {
+	
+	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile translationCorrectionsFile) {
 		
 		QueryParameters queryParameters;
+		
+		SourceDrug.init();
 				
 		String fileName = "";
 		try {
@@ -284,7 +243,7 @@ public class OldMapGenericDrugs extends Mapping {
 						ingredientNameEnglish = ingredientNameEnglish.replaceAll(",", " ").replaceAll("  ", " ");
 						
 						if (!ingredientName.equals("")) {
-							SourceIngredient sourceIngredient = SourceDrug.findIngredient(ingredientName, ingredientNameEnglish, casNumber);
+							SourceIngredient sourceIngredient = SourceDrug.getIngredient(ingredientName, ingredientNameEnglish, casNumber);
 							if (SourceDrug.errorOccurred()) {
 								sourceDrugError = true;
 							}
@@ -372,7 +331,7 @@ public class OldMapGenericDrugs extends Mapping {
 							String cdmInvalidReason      = sourceDrugsFile.get(row, "CDMInvalidReason").trim();
 							
 							if (!ingredientName.equals("")) {
-								SourceIngredient sourceIngredient = SourceDrug.findIngredient(ingredientName, ingredientNameEnglish, ingredientCASNumber);
+								SourceIngredient sourceIngredient = SourceDrug.getIngredient(ingredientName, ingredientNameEnglish, ingredientCASNumber);
 								if (SourceDrug.errorOccurred()) {
 									sourceDrugError = true;
 								}
@@ -1129,6 +1088,7 @@ public class OldMapGenericDrugs extends Mapping {
 					System.out.println("    Source data coverage: " + covered + " of " + total + " (" + Long.toString(Math.round(((double) covered / (double) total) * 100)) + "%)");
 					System.out.println(DrugMapping.getCurrentTime() + " Finished");
 */
+/*
 				}
 			}	
 			
@@ -1409,9 +1369,5 @@ public class OldMapGenericDrugs extends Mapping {
 		
 		return match;
 	}
-	
-	/*
-	public static void main(String[] args) {
-	}
-	*/
+*/
 }

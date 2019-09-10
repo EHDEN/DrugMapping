@@ -136,6 +136,9 @@ public class CDMConcept {
 		description += "," + (concept_class_id == null ? "null" : concept_class_id);
 		description += "," + (standard_concept == null ? "null" : standard_concept);
 		description += "," + "\"" + (concept_code == null ? "null" : concept_code) + "\"";
+		description += "," + (valid_start_date == null ? "null" : valid_start_date);
+		description += "," + (valid_end_date == null ? "null" : valid_end_date);
+		description += "," + (invalid_reason == null ? "null" : invalid_reason);
 		
 		return description;
 	}

@@ -33,9 +33,7 @@ import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.ohdsi.drugmapping.DrugMapping;
-import org.ohdsi.drugmapping.DrugMappingDefinitions;
 import org.ohdsi.drugmapping.files.FileDefinition;
-import org.ohdsi.drugmapping.zindex.IPCIZIndexMappingDefinitions;
 
 public class MainFrame {
 	
@@ -47,7 +45,6 @@ public class MainFrame {
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
 	private String logFile = null;
-	private String special = "";
 	
 
 	/**
@@ -68,8 +65,7 @@ public class MainFrame {
 	}
 	
 	
-	public MainFrame(DrugMapping drugMapping, String special) {
-		this.special = special;
+	public MainFrame(DrugMapping drugMapping) {
 		this.drugMapping = drugMapping;
 		createInterface();
 	}
@@ -103,7 +99,7 @@ public class MainFrame {
 		JPanel filePanel = new JPanel(new GridLayout(0, 1));
 		filePanel.setBorder(BorderFactory.createTitledBorder("Input Files"));
 		
-		for (FileDefinition fileDefinition : (special.toUpperCase().equals("ZINDEX") ? IPCIZIndexMappingDefinitions.FILES : DrugMappingDefinitions.FILES)) {
+		for (FileDefinition fileDefinition : DrugMapping.getInputFiles()) {
 			InputFile inputFile = new InputFile(fileDefinition);
 			inputFiles.add(inputFile);
 			filePanel.add(inputFile);
@@ -351,11 +347,6 @@ public class MainFrame {
 		if (logFile != null) {
 			console.setDebugFile(logFile);
 		}
-	}
-	
-	
-	public void setSpecial(String special) {
-		this.special = special;
 	}
 
 }
