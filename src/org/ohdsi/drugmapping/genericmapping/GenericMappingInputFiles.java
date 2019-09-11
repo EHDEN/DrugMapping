@@ -80,28 +80,34 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								}
-						)/*,
+						),
 						new FileDefinition(
-								"Manual Translation File",
+								"CAS File",
 								new String[] {
-										"This file should contain corrections on translations in the Genric Drugs File.",
+										"This file should contain CAS numbers with their chemical name an synonyms.",
 										"This file is optional."
 						  		},
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
-												"IngredientName",
+												"CASNumber",
 												new String[] {
-														"This is the name of an ingredient."
+														"This is the CAS number of the substance."
 												}
 										),
 										new FileColumnDefinition(
-												"IngredientNameEnglish",
+												"ChemicalName",
 												new String[] {
-														"This is the English name of the ingredient."
+														"This is the chemical name of the substance."
+												}
+										),
+										new FileColumnDefinition(
+												"Synonyms",
+												new String[] {
+														"This is a list of synonyms for the chemicl name separated by a '|' character."
 												}
 										)
 								}
-						)*/
+						)
 				)
 			);
 	}

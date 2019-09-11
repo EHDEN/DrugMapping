@@ -59,9 +59,7 @@ public class SourceIngredient {
 		String header = "IngredientName";
 		header += "," + "IngredientNameEnglish";
 		header += "," + "CASNumber";
-		header += "," + "Match";
 		header += "," + "MatchString";
-		header += "," + "MatchingDrug";
 		return header;
 	}
 	
@@ -163,6 +161,15 @@ public class SourceIngredient {
 		String description = (ingredientName == null ? "" : "\"" + ingredientName + "\"");
 		description += "," + (ingredientNameEnglish == null ? "" : "\"" + ingredientNameEnglish + "\"");
 		description += "," + (casNumber == null ? "" : "\"" + casNumber + "\"");
+		return description;
+	}
+	
+	
+	public String toMatchString() {
+		String description = (ingredientName == null ? "" : "\"" + ingredientName + "\"");
+		description += "," + (ingredientNameEnglish == null ? "" : "\"" + ingredientNameEnglish + "\"");
+		description += "," + (casNumber == null ? "" : "\"" + casNumber + "\"");
+		description += "," + "\"" + matchString + "\"";
 		return description;
 	}
 	

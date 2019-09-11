@@ -11,6 +11,7 @@ import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredient extends CDMConcept {
 	private Set<String> synonyms = new HashSet<String>();
+	private Set<String> synonymsNoSpaces = new HashSet<String>();
 	
 	
 	public static String getHeader() {
@@ -45,8 +46,15 @@ public class CDMIngredient extends CDMConcept {
 	}
 	
 	
+	public Set<String> getSynonymsNoSpaces() {
+		return synonymsNoSpaces;
+	}
+	
+	
 	public void addSynonym(String synonym) {
-		synonyms.add(synonym.toUpperCase());
+		synonym = synonym.replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+		synonyms.add(synonym);
+		synonymsNoSpaces.add(synonym.replaceAll(" ", "").replaceAll("-", ""));
 	}
 	
 	

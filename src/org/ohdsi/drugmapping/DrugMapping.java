@@ -187,7 +187,7 @@ public class DrugMapping {
 				new IPCIMAPPING(getDatabase(), getFile("Generic Drugs File"));
 			}
 			else {
-				new GenericMapping(getDatabase(), getFile("Generic Drugs File"));
+				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)

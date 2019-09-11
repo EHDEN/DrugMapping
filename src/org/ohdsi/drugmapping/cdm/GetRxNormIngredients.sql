@@ -16,5 +16,6 @@ WHERE domain_id = 'Drug'
 AND   vocabulary_id LIKE 'RxNorm%'
 AND   concept_class_id = 'Ingredient'
 AND   standard_concept = 'S'
+AND   invalid_reason IS NULL
 ORDER BY concept.concept_id
 ,        synonym.concept_synonym_name

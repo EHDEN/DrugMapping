@@ -55,7 +55,8 @@ LEFT OUTER JOIN @vocab.concept denominator_unit
 WHERE drugcomp.domain_id = 'Drug'
 AND   drugcomp.vocabulary_id LIKE 'RxNorm%'
 AND   drugcomp.concept_class_id = 'Clinical Drug Comp'
-AND   drugcomp.standard_concept = 'S'
+AND   drugcomp.standard_concept = 'S''
+AND   drugcomp.invalid_reason IS NULL
 GROUP BY drugcomp.concept_id,
          drugcomp.concept_name,
          drugcomp.domain_id,

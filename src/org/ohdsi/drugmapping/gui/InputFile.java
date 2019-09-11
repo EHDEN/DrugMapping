@@ -180,6 +180,19 @@ public class InputFile extends JPanel {
 		this.columnMapping = columnMapping;
 	}
 	
+	
+	public boolean fileExists() {
+		boolean exists = false;
+		if (getFileName() != null) {
+			File inputFile = new File(getFileName());
+			if (inputFile.exists()) {
+				exists = true;
+			}
+		}
+		return exists;
+	}
+	
+	
 	public boolean openFile() {
 		boolean result = false;
 		
@@ -581,7 +594,7 @@ public class InputFile extends JPanel {
 	
 	
 	private void updateColumns(String fileName, String fieldDelimiter, List<JComboBox<String>> comboBoxList) {
-		if (!fileName.equals("")) {
+		if ((fileName != null) && (!fileName.equals(""))) {
 			String fileHeader = getFileHeader(fileName);
 			String[] columns = fileHeader.split(translateDelimiter(fieldDelimiter));
 			int columnNr = 0;

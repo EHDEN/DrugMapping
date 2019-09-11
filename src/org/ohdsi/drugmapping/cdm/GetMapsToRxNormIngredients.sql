@@ -14,4 +14,5 @@ AND   mapsto.domain_id = 'Drug'
 AND   mapsto.vocabulary_id LIKE 'RxNorm%'
 AND   mapsto.concept_class_id = 'Ingredient'
 AND   mapsto.standard_concept = 'S'
+AND   mapsto.invalid_reason IS NULL
 AND   UPPER(drug.concept_name) <> UPPER(mapsto.concept_name)

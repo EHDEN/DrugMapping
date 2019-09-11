@@ -61,6 +61,7 @@ WHERE drug.domain_id = 'Drug'
 AND   drug.vocabulary_id LIKE 'RxNorm%'
 AND   drug.concept_class_id = 'Clinical Drug'
 AND   drug.standard_concept = 'S'
+AND   drug.invalid_reason IS NULL
 AND   has_form.relationship_id = 'RxNorm has dose form'
 GROUP BY drug.concept_id,
          drug.concept_name,
