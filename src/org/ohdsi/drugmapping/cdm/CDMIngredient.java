@@ -10,17 +10,21 @@ import java.util.Set;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredient extends CDMConcept {
+	private String atc = null;
+	
 	private Set<String> synonyms = new HashSet<String>();
 	private Set<String> synonymsNoSpaces = new HashSet<String>();
 	
 	
 	public static String getHeader() {
-		return CDMConcept.getHeader();
+		String header = CDMConcept.getHeader();
+		header += "," + "ATC";
+		return header;
 	}
 	
 	
 	public static String getHeaderWithSynonyms() {
-		String header = CDMConcept.getHeader();
+		String header = getHeader();
 		header += "," + "Synonym";
 		return header;
 	}
@@ -28,6 +32,11 @@ public class CDMIngredient extends CDMConcept {
 	
 	public static void writeHeaderToFile(PrintWriter file) {
 		file.println(getHeader());
+	}
+	
+	
+	public static String emptyRecord() {
+		return CDMConcept.emptyRecord() + ",";
 	}
 
 	
@@ -38,6 +47,16 @@ public class CDMIngredient extends CDMConcept {
 	
 	public CDMIngredient(String conceptId, String conceptName, String domainId, String vocabularyId, String conceptClassId, String standardConcept, String conceptCode, String validStartDate, String validEndDate, String invalidReason) {
 		super(conceptId, conceptName, domainId, vocabularyId, conceptClassId, standardConcept, conceptCode, validStartDate, validEndDate, invalidReason);
+	}
+	
+	
+	public void setATC(String atc) {
+		this.atc = atc;
+	}
+	
+	
+	public String getATC() {
+		return atc;
 	}
 	
 	
@@ -58,9 +77,14 @@ public class CDMIngredient extends CDMConcept {
 	}
 	
 	
+	public String toString() {
+		return super.toString() + "," + (getATC() == null ? "" : getATC());
+	}
+	
+	
 	public String toStringWithSynonyms() {
 		String fullDescription = "";
-		String description = super.toString();
+		String description = toString();
 		if (synonyms.size() > 0) {
 			List<String> orderedSynonyms = new ArrayList<String>();
 			orderedSynonyms.addAll(synonyms);
@@ -96,7 +120,7 @@ public class CDMIngredient extends CDMConcept {
 			}
 			description += "=";
 		}
-		description += super.toString().replaceAll("\"", "'");
+		description += toString().replaceAll("\"", "'");
 		
 		return description;
 	}

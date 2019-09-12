@@ -45,17 +45,17 @@ SELECT drug.concept_id AS drug_concept_id,
        strength.box_size,
        strength.ingredient_concept_id
 FROM @vocab.concept drug
-INNER JOIN @vocab.drug_strength strength
+  INNER JOIN @vocab.drug_strength strength
     ON strength.drug_concept_id = drug.concept_id
-LEFT OUTER JOIN @vocab.concept_relationship has_form
+  LEFT OUTER JOIN @vocab.concept_relationship has_form
     ON drug.concept_id = has_form.concept_id_1
-LEFT OUTER JOIN @vocab.concept form
+  LEFT OUTER JOIN @vocab.concept form
     ON has_form.concept_id_2 = form.concept_id
-LEFT OUTER JOIN @vocab.concept amount_unit
+  LEFT OUTER JOIN @vocab.concept amount_unit
     ON strength.amount_unit_concept_id = amount_unit.concept_id
-LEFT OUTER JOIN @vocab.concept numerator_unit
+  LEFT OUTER JOIN @vocab.concept numerator_unit
     ON strength.numerator_unit_concept_id = numerator_unit.concept_id
-LEFT OUTER JOIN @vocab.concept denominator_unit
+  LEFT OUTER JOIN @vocab.concept denominator_unit
     ON strength.denominator_unit_concept_id = denominator_unit.concept_id
 WHERE drug.domain_id = 'Drug'
 AND   drug.vocabulary_id LIKE 'RxNorm%'

@@ -3,37 +3,6 @@ package org.ohdsi.drugmapping.source;
 import java.io.PrintWriter;
 
 public class SourceIngredient {
-	public static final String NO_MATCH                            = "No Match";
-	
-	public static final String MATCH_SINGLE                        = "Single";
-	public static final String MATCH_EXACT                         = "Exact";
-	public static final String MATCH_SINGLE_SYNONYM                = "Single Synonym";
-	public static final String MATCH_EXACT_SYNONYM                 = "Exact Synonym";
-	
-	public static final String MATCH_MAPSTO_SINGLE                 = "Maps To Single";
-	public static final String MATCH_MAPSTO_EXACT                  = "Maps To Exact";
-	public static final String MATCH_MAPSTO_SINGLE_SYNONYM         = "Maps To Single Synonym";
-	public static final String MATCH_MAPSTO_EXACT_SYNONYM          = "Maps To Exact Synonym";
-	
-	public static final String MATCH_CAS_SINGLE                    = "CAS Single";
-	public static final String MATCH_CAS_EXACT                     = "CAS Exact";
-	public static final String MATCH_CAS_SINGLE_SYNONYM            = "CAS Single Synonym";
-	public static final String MATCH_CAS_EXACT_SYNONYM             = "CAS Exact Synonym";
-	
-	public static final String MATCH_CAS_MAPSTO_SINGLE             = "CAS Maps To Single";
-	public static final String MATCH_CAS_MAPSTO_EXACT              = "CAS Maps To Exact";
-	public static final String MATCH_CAS_MAPSTO_SINGLE_SYNONYM     = "CAS Maps To Single Synonym";
-	public static final String MATCH_CAS_MAPSTO_EXACT_SYNONYM      = "CAS Maps To Exact Synonym";
-	
-	public static final String MATCH_VARIANT_SINGLE                = "Variant Single";
-	public static final String MATCH_VARIANT_EXACT                 = "Variant Exact";
-	public static final String MATCH_VARIANT_SINGLE_SYNONYM        = "Variant Single Synonym";
-	public static final String MATCH_VARIANT_EXACT_SYNONYM         = "Variant Exact Synonym";
-	
-	public static final String MATCH_VARIANT_MAPSTO_SINGLE         = "Variant Maps To Single";
-	public static final String MATCH_VARIANT_MAPSTO_EXACT          = "Variant Maps To Exact";
-	public static final String MATCH_VARIANT_MAPSTO_SINGLE_SYNONYM = "Variant Maps To Single Synonym";
-	public static final String MATCH_VARIANT_MAPSTO_EXACT_SYNONYM  = "Variant Maps To Exact Synonym";
 	
 	private String ingredientName = null;
 	private String ingredientNameNoSpaces = null;
@@ -42,9 +11,8 @@ public class SourceIngredient {
 	private String casNumber = null;
 	private Integer count = 0;
 	
-	private String match = NO_MATCH;
 	private String matchString = "";
-	private String matchingDrug = "";
+	private String matchingDrug = null;
 	
 	
 	public static String getHeader() {
@@ -114,16 +82,6 @@ public class SourceIngredient {
 	
 	public void setCASNumber(String casNumber) {
 		this.casNumber = casNumber;
-	}
-	
-	
-	public String getMatch() {
-		return match;
-	}
-	
-	
-	public void setMatch(String match) {
-		this.match = match;
 	}
 	
 	

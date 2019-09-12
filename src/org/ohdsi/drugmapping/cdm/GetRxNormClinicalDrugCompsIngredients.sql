@@ -44,18 +44,18 @@ SELECT drugcomp.concept_id AS drugcomp_concept_id,
        strength.box_size,
        strength.ingredient_concept_id
 FROM @vocab.concept drugcomp
-INNER JOIN @vocab.drug_strength strength
+  INNER JOIN @vocab.drug_strength strength
     ON strength.drug_concept_id = drugcomp.concept_id
-LEFT OUTER JOIN @vocab.concept amount_unit
+  LEFT OUTER JOIN @vocab.concept amount_unit
     ON strength.amount_unit_concept_id = amount_unit.concept_id
-LEFT OUTER JOIN @vocab.concept numerator_unit
+  LEFT OUTER JOIN @vocab.concept numerator_unit
     ON strength.numerator_unit_concept_id = numerator_unit.concept_id
-LEFT OUTER JOIN @vocab.concept denominator_unit
+  LEFT OUTER JOIN @vocab.concept denominator_unit
     ON strength.denominator_unit_concept_id = denominator_unit.concept_id
 WHERE drugcomp.domain_id = 'Drug'
 AND   drugcomp.vocabulary_id LIKE 'RxNorm%'
 AND   drugcomp.concept_class_id = 'Clinical Drug Comp'
-AND   drugcomp.standard_concept = 'S''
+AND   drugcomp.standard_concept = 'S'
 AND   drugcomp.invalid_reason IS NULL
 GROUP BY drugcomp.concept_id,
          drugcomp.concept_name,
@@ -64,8 +64,8 @@ GROUP BY drugcomp.concept_id,
          drugcomp.concept_class_id,
          drugcomp.standard_concept,
          drugcomp.concept_code,
-         drug.valid_start_date,
-         drug.valid_end_date,
+         drugcomp.valid_start_date,
+         drugcomp.valid_end_date,
          drugcomp.invalid_reason,
          strength.amount_value,
          strength.amount_unit_concept_id,
