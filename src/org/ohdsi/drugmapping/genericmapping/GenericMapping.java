@@ -24,6 +24,7 @@ import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.SourceDrugComponent;
 import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.utilities.files.Row;
 
@@ -36,6 +37,8 @@ public class GenericMapping extends Mapping {
 	private Map<String, Set<String>> casMap = new HashMap<String, Set<String>>();
 	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
 	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
+	private List<SourceDrug> sourceDrugsAllIngredientsMapped = new ArrayList<SourceDrug>();
+	private Map<SourceDrug, List<CDMIngredient>> sourceDrugsCDMIngredients = new HashMap<SourceDrug, List<CDMIngredient>>();
 	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
 	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
 	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
@@ -47,6 +50,8 @@ public class GenericMapping extends Mapping {
 	private Map<CDMIngredient, Set<CDMDrug>> cdmDrugsContainingIngredient = new HashMap<CDMIngredient, Set<CDMDrug>>();
 	private Map<String, CDMDrug> cdmDrugComps = new HashMap<String, CDMDrug>();
 	private Map<CDMIngredient, List<CDMDrug>> cdmDrugCompsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
+	
+	private Map<SourceDrug, CDMDrug> drugMappingClinicalDrug = new HashMap<SourceDrug, CDMDrug>();
 		
 	
 	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile casFile) {
@@ -67,8 +72,14 @@ public class GenericMapping extends Mapping {
 		// Match ingredients by ATC and full name
 		ok = ok && matchIngredients();
 		
-		// Match drug to Clinical Drug, Clinical Drug Comp, or Clinical Drug Form
-		ok = ok && matchDrugs();
+		// Get source drugs with all ingredients mapped
+		ok = ok && getSourceDrugsWithAllIngredientsMapped();
+		
+		// Match source drugs to Clinical Drugs
+		ok = ok && matchClinicalDrugs();
+		
+		// Create the final report
+		finalReport();
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
 	}
@@ -267,7 +278,7 @@ public class GenericMapping extends Mapping {
 						}
 						existingCDMIngredients.add(cdmIngredient);
 						if (existingCDMIngredients.size() > 1) {
-							System.out.println("      WARNING: Multiple ingredients found for name '" + cdmIngredient.getConceptName() + "'!");
+							System.out.println("      WARNING: Multiple ingredients found for name '" + cdmIngredient.getConceptName() + "'");
 							//ok = false;
 						}
 					}
@@ -339,7 +350,7 @@ public class GenericMapping extends Mapping {
 				}
 				drugNameIngredients.add(cdmIngredient);
 				if (drugNameIngredients.size() > 1) {
-					System.out.println("      WARNING: Multiple ingredients found for name '" + drugName + "'!");
+					System.out.println("      WARNING: Multiple ingredients found for name '" + drugName + "'");
 					//ok = false;
 				}
 				
@@ -350,7 +361,7 @@ public class GenericMapping extends Mapping {
 				}
 				synonymIngredients.add(cdmIngredient);
 				if (synonymIngredients.size() > 1) {
-					System.out.println("      WARNING: Multiple ingredients found for synonym '" + drugNameSynonym + "'!");
+					System.out.println("      WARNING: Multiple ingredients found for synonym '" + drugNameSynonym + "'");
 					//ok = false;
 				}
 			}
@@ -707,74 +718,20 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean matchDrugs() {
-		boolean ok = true;
-		String fileName = "";
-		Integer allIngredientsMapped = 0;
-		
-		System.out.println(DrugMapping.getCurrentTime() + "     Match Drugs ...");
+	private boolean getSourceDrugsWithAllIngredientsMapped() {
+
+		System.out.println(DrugMapping.getCurrentTime() + "     Get source drugs with all ingredients mapped ...");
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			List<SourceIngredient> sourceDrugIngredients = sourceDrug.getIngredients();
-			List<CDMIngredient> cdmDrugIngredients = new ArrayList<CDMIngredient>();
-			for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
-				cdmDrugIngredients.add(ingredientMap.get(sourceDrugIngredient));
-			}
-			if (!cdmDrugIngredients.contains(null)) {
-				// All ingredients are mapped
-				allIngredientsMapped++;
-				
-				// Find CDM Clinical Drugs with corresponding ingredients
-				Set<CDMDrug> cdmDrugsWithIngredients = null;
-				for (CDMIngredient cdmIngredient : cdmDrugIngredients) {
-					Set<CDMDrug> cdmDrugsWithIngredient = cdmDrugsContainingIngredient.get(cdmIngredient);
-					if (cdmDrugsWithIngredients == null) {
-						cdmDrugsWithIngredients = new HashSet<CDMDrug>();
-						cdmDrugsWithIngredients.addAll(cdmDrugsWithIngredient);
-					}
-					else {
-						Set<CDMDrug> cdmDrugsMissingIngredient = new HashSet<CDMDrug>();
-						for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-							if (!cdmDrugsWithIngredient.contains(cdmDrug)) {
-								cdmDrugsMissingIngredient.add(cdmDrug);
-							}
-						}
-						cdmDrugsWithIngredients.removeAll(cdmDrugsMissingIngredient);
-						if (cdmDrugsWithIngredients.size() == 0) {
-							break;
-						}
-					}
+			if (sourceDrugIngredients.size() > 0) {
+				List<CDMIngredient> cdmDrugIngredients = new ArrayList<CDMIngredient>();
+				for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
+					cdmDrugIngredients.add(ingredientMap.get(sourceDrugIngredient));
 				}
-				
-				// Find CDM Clinical Drugs with corresponding formulation
-				if (cdmDrugsWithIngredients.size() > 0) {
-					if (sourceDrug.getFormulation() != null) {
-						String sourceDrugForm = sourceDrug.getFormulation(); 
-						Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
-						for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-							Set<String> cdmDrugForms = cdmDrug.getForms();
-							boolean formFound = false;
-							for (String cdmDrugForm : cdmDrugForms) {
-								if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm)) {
-									formFound = true;
-									break;
-								}
-							}
-							if (!formFound) {
-								cdmDrugsMissingForm.add(cdmDrug);
-							}
-						}
-						cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
-						if (cdmDrugsWithIngredients.size() == 0) {
-							break;
-						}
-					}
-				}
-				
-				// Find CDM Clinical Drugs with corresponding ingredient strengths
-				if (cdmDrugsWithIngredients.size() > 0) {
-					//TODO
-					
+				if (!cdmDrugIngredients.contains(null)) {
+					sourceDrugsAllIngredientsMapped.add(sourceDrug);
+					sourceDrugsCDMIngredients.put(sourceDrug, cdmDrugIngredients);
 				}
 			}
 		}
@@ -782,9 +739,174 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
 		System.out.println();
-		System.out.println("Source drugs with all ingredients mapped: " + allIngredientsMapped + " (" + Long.toString(Math.round(((double) allIngredientsMapped / (double) sourceDrugs.size()) * 100)) + "%)");
+		System.out.println("Source drugs with all ingredients mapped: " + Integer.toString(sourceDrugsAllIngredientsMapped.size()) + " (" + Long.toString(Math.round(((double) sourceDrugsAllIngredientsMapped.size() / (double) sourceDrugs.size()) * 100)) + "%)");
+		
+		return (sourceDrugsAllIngredientsMapped.size() > 0);
+	}
+	
+	
+	private boolean matchClinicalDrugs() {
+		boolean ok = true;
+		Integer multipleDrugMappings = 0;
+		String fileName = "";
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Match source drugs to Clinical Drugs ...");
+		
+		PrintWriter multipleClinicalDrugsMappingFile = null;
+		try {
+			// Create output file
+			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Multiple Clinical Drugs Mappings.csv";
+			multipleClinicalDrugsMappingFile = new PrintWriter(new File(fileName));
+			multipleClinicalDrugsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
+		}
+		catch (FileNotFoundException e) {
+			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
+			multipleClinicalDrugsMappingFile = null;
+		}
+		
+		PrintWriter noClinicalDrugsMappingFile = null;
+		try {
+			// Create output file
+			fileName = DrugMapping.getCurrentPath() + "/DrugMapping No Clinical Drugs Mappings.csv";
+			noClinicalDrugsMappingFile = new PrintWriter(new File(fileName));
+			noClinicalDrugsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
+		}
+		catch (FileNotFoundException e) {
+			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
+			noClinicalDrugsMappingFile = null;
+		}
+		
+		for (SourceDrug sourceDrug : sourceDrugsAllIngredientsMapped) {
+			List<CDMIngredient> cdmDrugIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
+			
+			// Find CDM Clinical Drugs with corresponding ingredients
+			Set<CDMDrug> cdmDrugsWithIngredients = null;
+			for (CDMIngredient cdmIngredient : cdmDrugIngredients) {
+				Set<CDMDrug> cdmDrugsWithIngredient = cdmDrugsContainingIngredient.get(cdmIngredient);
+				if (cdmDrugsWithIngredients == null) {
+					cdmDrugsWithIngredients = new HashSet<CDMDrug>();
+					cdmDrugsWithIngredients.addAll(cdmDrugsWithIngredient);
+				}
+				else {
+					Set<CDMDrug> cdmDrugsMissingIngredient = new HashSet<CDMDrug>();
+					for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+						if (!cdmDrugsWithIngredient.contains(cdmDrug)) {
+							cdmDrugsMissingIngredient.add(cdmDrug);
+						}
+					}
+					cdmDrugsWithIngredients.removeAll(cdmDrugsMissingIngredient);
+					if (cdmDrugsWithIngredients.size() == 0) {
+						break;
+					}
+				}
+			}
+			
+			// Find CDM Clinical Drugs with corresponding formulation
+			if (cdmDrugsWithIngredients.size() > 0) {
+				if (sourceDrug.getFormulation() != null) {
+					String sourceDrugForm = sourceDrug.getFormulation(); 
+					Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
+					for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+						Set<String> cdmDrugForms = cdmDrug.getForms();
+						boolean formFound = false;
+						for (String cdmDrugForm : cdmDrugForms) {
+							if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm)) {
+								formFound = true;
+								break;
+							}
+						}
+						if (!formFound) {
+							cdmDrugsMissingForm.add(cdmDrug);
+						}
+					}
+					cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
+					if (cdmDrugsWithIngredients.size() == 0) {
+						break;
+					}
+				}
+			}
+			
+			// Find CDM Clinical Drugs with corresponding ingredient strengths
+			if (cdmDrugsWithIngredients.size() > 0) {
+				Set<CDMDrug> matchingCDMDrugs = new HashSet<CDMDrug>();
+				for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+					for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
+						SourceDrugComponent sourceComponent = sourceDrug.getComponents().get(ingredientNr);
+						CDMIngredientStrength cdmIngredientStrength = cdmDrug.getIngredients().get(ingredientNr);
+						if (sourceComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit())) {
+							matchingCDMDrugs.add(cdmDrug);
+						}
+					}
+				}
+				if (matchingCDMDrugs.size() == 1) {
+					drugMappingClinicalDrug.put(sourceDrug, (CDMDrug) matchingCDMDrugs.toArray()[0]); 
+				}
+				else if (matchingCDMDrugs.size() > 1) {
+					multipleDrugMappings++;
+					if (multipleClinicalDrugsMappingFile != null) {
+						for (CDMDrug cdmDrug : matchingCDMDrugs) {
+							for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
+								multipleClinicalDrugsMappingFile.println(sourceDrug + "," + sourceDrug.getComponents().get(ingredientNr) + "," + cdmDrug + "," + cdmDrug.getIngredients().get(ingredientNr).toStringLong());
+							}
+						}
+					}
+				}
+				else {
+					if (noClinicalDrugsMappingFile != null) {
+						for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+							for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
+								noClinicalDrugsMappingFile.println(sourceDrug + "," + sourceDrug.getComponents().get(ingredientNr) + "," + cdmDrug + "," + cdmDrug.getIngredients().get(ingredientNr).toStringLong());
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (multipleClinicalDrugsMappingFile != null) {
+			multipleClinicalDrugsMappingFile.close();
+		}
+		
+		if (noClinicalDrugsMappingFile != null) {
+			noClinicalDrugsMappingFile.close();
+		}
+		
+		System.out.println();
+		System.out.println("Source drugs mapped to multiple CDM Clinical Drugs: " + multipleDrugMappings);
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
 		return ok;
+	}
+	
+	
+	private void finalReport() {
+		Integer dataCountTotal = 0;
+		Integer dataCoverageClinicalDrugs = 0;
+		Integer dataCoverageDrugComps = 0;
+		Integer dataCoverageDrugForms = 0;
+		for (SourceDrug sourceDrug : sourceDrugs) {
+			dataCountTotal += sourceDrug.getCount();
+			if (drugMappingClinicalDrug.containsKey(sourceDrug)) {
+				dataCoverageClinicalDrugs += sourceDrug.getCount();
+			}
+		}
+		
+		System.out.println();
+		System.out.println("Source drugs mapped to single CDM Clinical Drug: " + Integer.toString(drugMappingClinicalDrug.size()));
+		
+		if (dataCountTotal != 0) {
+			System.out.println();
+			System.out.println("Datacoverage CDM Clinical Drug mapping: " + dataCoverageClinicalDrugs + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugs / (double) dataCountTotal) * 100)) + "%)");
+			System.out.println("Datacoverage CDM Clinical Drug Comp mapping: " + dataCoverageDrugComps + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageDrugComps / (double) dataCountTotal) * 100)) + "%)");
+			System.out.println("Datacoverage CDM Clinical Drug Form mapping: " + dataCoverageDrugForms + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageDrugForms / (double) dataCountTotal) * 100)) + "%)");
+			System.out.println("Tota datacoverage drug mapping: " + (dataCoverageClinicalDrugs + dataCoverageDrugComps + dataCoverageDrugForms) + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) (dataCoverageClinicalDrugs + dataCoverageDrugComps + dataCoverageDrugForms) / (double) dataCountTotal) * 100)) + "%)");
+		}
+		else {
+			System.out.println();
+			System.out.println("No datacoverage counts available.");
+		}
+		
 	}
 	
 	

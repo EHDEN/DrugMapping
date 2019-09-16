@@ -16,6 +16,22 @@ public class CDMIngredientStrength {
 	private CDMIngredient ingredient        = null;
 	
 	
+	public static String getHeader() {
+		return getHeader("");
+	}
+	
+	
+	public static String getHeader(String prefix) {
+		String header = CDMIngredient.getHeader(prefix);
+		header += "," + prefix + "NumeratorDosage";
+		header += "," + prefix + "NumeratorUnit";
+		header += "," + prefix + "DenominatorDosage";
+		header += "," + prefix + "DenominatorUnit";
+		
+		return header;
+	}
+	
+	
 	public CDMIngredientStrength(Row queryRow, String prefix, CDMIngredient ingredient) {
 		amount_value_string      = queryRow.get(prefix + "amount_value");
 		amount_unit              = new CDMConcept(queryRow, prefix + "amount_unit_");
@@ -130,7 +146,12 @@ public class CDMIngredientStrength {
 	
 	public String toStringLong() {
 		
-		String description = super.toString();
+		String description = ingredient.toString();
+		description += "," + (getNumeratorDosage() == null ? "" : getNumeratorDosage());
+		description += "," + (numerator_unit.getConceptName() == null ? "" : numerator_unit.getConceptName());
+		description += "," + (getDenominatorDosage() == null ? "" : getDenominatorDosage());
+		description += "," + (denominator_unit.getConceptName() == null ? "" : denominator_unit.getConceptName());
+		/*
 		if (amount_value == null) {
 			if ((numerator_value != null) || (denominator_value == null)) {
 				description += "," + (numerator_value == null ? "" : numerator_value) + (numerator_unit.getConceptName() == null ? "" : numerator_unit.getConceptName());
@@ -140,7 +161,7 @@ public class CDMIngredientStrength {
 		else {
 			description += "," + (amount_value == null ? "" : amount_value) + (amount_unit.getConceptName() == null ? "" : amount_unit.getConceptName());
 		}
-		
+		*/
 		return description;
 	}
 }

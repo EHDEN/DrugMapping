@@ -14,6 +14,17 @@ public class SourceDrugComponent {
 	private String denominatorDosageUnit = null;
 	
 	
+	public static String getHeader() {
+		String header = SourceIngredient.getHeader();
+		header += "," + "NumeratorDosage";
+		header += "," + "NumeratorDosageUnit";
+		header += "," + "DenominatorDosage";
+		header += "," + "DenominatorDosageUnit";
+		
+		return header;
+	}
+	
+	
 	public SourceDrugComponent(SourceIngredient ingredient, String dosage, String dosageUnit) {
 		this.ingredient = ingredient;
 		Double dosageValue = null;
@@ -72,8 +83,13 @@ public class SourceDrugComponent {
 	}
 	
 	
-	public String toSTring() {
+	public String toString() {
 		String description = ingredient.toString();
+		description += "," + (numeratorDosage == null ? "" : numeratorDosage);
+		description += "," + "\"" + (numeratorDosageUnit == null ? "" : numeratorDosageUnit) + "\"";
+		description += "," + (denominatorDosage == null ? "" : denominatorDosage);
+		description += "," + "\"" + (denominatorDosageUnit == null ? "" : denominatorDosageUnit) + "\"";
+		/*
 		if ((dosage == null) && (dosageUnit == null)) {
 			description += "," + (numeratorDosage == null ? "" : numeratorDosage) + "/" + (denominatorDosage == null ? "" : denominatorDosage);
 			description += "," + "\"" + (numeratorDosageUnit == null ? "" : numeratorDosageUnit) + "/" + (denominatorDosageUnit == null ? "" : denominatorDosageUnit) + "\"";
@@ -82,8 +98,7 @@ public class SourceDrugComponent {
 			description += "," + (dosage == null ? "" : dosage);
 			description += "," + (dosageUnit == null ? "" : "\"" + dosageUnit + "\"");
 		}
-		description += "," + (((dosage == null) && (dosageUnit == null)) ? (numeratorDosage == null ? "" : numeratorDosage) : dosage);
-		description += "," + (dosageUnit == null ? "" : "\"" + dosageUnit + "\"");
+		*/
 		return description;
 	}
 	

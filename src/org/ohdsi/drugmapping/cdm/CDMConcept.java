@@ -20,16 +20,20 @@ public class CDMConcept {
 	
 	
 	public static String getHeader() {
-		String header = "concept_id";
-		header += "," + "concept_name";
-		header += "," + "domain_id";
-		header += "," + "vocabulary_id";
-		header += "," + "concept_class_id";
-		header += "," + "standard_concept";
-		header += "," + "concept_code";
-		header += "," + "valid_start_date";
-		header += "," + "valid_end_date";
-		header += "," + "invalid_reason";
+		return getHeader("");
+	}
+	
+	public static String getHeader(String prefix) {
+		String header = prefix + "concept_id";
+		header += "," + prefix + "concept_name";
+		header += "," + prefix + "domain_id";
+		header += "," + prefix + "vocabulary_id";
+		header += "," + prefix + "concept_class_id";
+		header += "," + prefix + "standard_concept";
+		header += "," + prefix + "concept_code";
+		header += "," + prefix + "valid_start_date";
+		header += "," + prefix + "valid_end_date";
+		header += "," + prefix + "invalid_reason";
 		return header;
 	}
 	
