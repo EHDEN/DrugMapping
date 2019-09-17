@@ -1,5 +1,7 @@
 package org.ohdsi.drugmapping.cdm;
 
+import java.util.List;
+
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredientStrength {
@@ -33,34 +35,42 @@ public class CDMIngredientStrength {
 	
 	
 	public CDMIngredientStrength(Row queryRow, String prefix, CDMIngredient ingredient) {
-		amount_value_string      = queryRow.get(prefix + "amount_value");
-		amount_unit              = new CDMConcept(queryRow, prefix + "amount_unit_");
-		numerator_value_string   = queryRow.get(prefix + "numerator_value");
-		numerator_unit           = new CDMConcept(queryRow, prefix + "numerator_unit_");
-		denominator_value_string = queryRow.get(prefix + "denominator_value");
-		denominator_unit         = new CDMConcept(queryRow, prefix + "denominator_unit_");
-		box_size                 = queryRow.get(prefix + "box_size");
+		List<String> fieldNames = queryRow.getFieldNames();
+		if (fieldNames.contains(prefix + "amount_value"))                amount_value_string      = queryRow.get(prefix + "amount_value");
+		if (fieldNames.contains(prefix + "amount_unit_concept_id"))      amount_unit              = new CDMConcept(queryRow, prefix + "amount_unit_");
+		if (fieldNames.contains(prefix + "numerator_value"))             numerator_value_string   = queryRow.get(prefix + "numerator_value");
+		if (fieldNames.contains(prefix + "numerator_unit_concept_id"))   numerator_unit           = new CDMConcept(queryRow, prefix + "numerator_unit_");
+		if (fieldNames.contains(prefix + "denominator_value"))           denominator_value_string = queryRow.get(prefix + "denominator_value");
+		if (fieldNames.contains(prefix + "denominator_unit_concept_id")) denominator_unit         = new CDMConcept(queryRow, prefix + "denominator_unit_");
+		if (fieldNames.contains(prefix + "box_size"))                    box_size                 = queryRow.get(prefix + "box_size");
 		
-		try {
-			amount_value = Double.parseDouble(amount_value_string);
-		}
-		catch (NumberFormatException e) {
-			amount_value = null;
-		}
-		
-		try {
-			numerator_value = Double.parseDouble(numerator_value_string);
-		}
-		catch (NumberFormatException e) {
-			numerator_value = null;
+		if (amount_value_string != null) {
+			try {
+				amount_value = Double.parseDouble(amount_value_string);
+			}
+			catch (NumberFormatException e) {
+				amount_value = null;
+			}
 		}
 		
-		try {
-			denominator_value = Double.parseDouble(denominator_value_string);
+		if (numerator_value_string != null) {
+			try {
+				numerator_value = Double.parseDouble(numerator_value_string);
+			}
+			catch (NumberFormatException e) {
+				numerator_value = null;
+			}
 		}
-		catch (NumberFormatException e) {
-			denominator_value = null;
+		
+		if (denominator_value_string != null) {
+			try {
+				denominator_value = Double.parseDouble(denominator_value_string);
+			}
+			catch (NumberFormatException e) {
+				denominator_value = null;
+			}
 		}
+		
 		this.ingredient = ingredient;
 	}
 	
@@ -163,5 +173,10 @@ public class CDMIngredientStrength {
 		}
 		*/
 		return description;
+	}
+	
+	
+	public static String emptyRecordLong() {
+		return CDMIngredient.emptyRecord() + ",,,,";
 	}
 }

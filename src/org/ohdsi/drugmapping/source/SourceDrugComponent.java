@@ -103,6 +103,11 @@ public class SourceDrugComponent {
 	}
 	
 	
+	public static String emptyRecord() {
+		return ",,,,";
+	}
+	
+	
 	public void writeDescriptionToFile(String prefix, PrintWriter file) {
 		file.println(prefix + this);
 	}
