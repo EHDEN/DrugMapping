@@ -158,9 +158,9 @@ public class CDMIngredientStrength {
 		
 		String description = ingredient.toString();
 		description += "," + (getNumeratorDosage() == null ? "" : getNumeratorDosage());
-		description += "," + (numerator_unit.getConceptName() == null ? "" : numerator_unit.getConceptName());
+		description += "," + (((numerator_unit == null) || (numerator_unit.getConceptName() == null)) ? "" : numerator_unit.getConceptName());
 		description += "," + (getDenominatorDosage() == null ? "" : getDenominatorDosage());
-		description += "," + (denominator_unit.getConceptName() == null ? "" : denominator_unit.getConceptName());
+		description += "," + (((denominator_unit == null) || (denominator_unit.getConceptName() == null)) ? "" : denominator_unit.getConceptName());
 		/*
 		if (amount_value == null) {
 			if ((numerator_value != null) || (denominator_value == null)) {
