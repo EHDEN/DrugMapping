@@ -34,6 +34,11 @@ public class CDMIngredientStrength {
 	}
 	
 	
+	public static String emptyRecord() {
+		return CDMIngredient.emptyRecord() + ",,,,";
+	}
+	
+	
 	public CDMIngredientStrength(Row queryRow, String prefix, CDMIngredient ingredient) {
 		List<String> fieldNames = queryRow.getFieldNames();
 		if (fieldNames.contains(prefix + "amount_value"))                amount_value_string      = queryRow.get(prefix + "amount_value");
@@ -154,29 +159,21 @@ public class CDMIngredientStrength {
 	}
 	
 	
-	public String toStringLong() {
+	public String toStringIngredient() {
+		
+		String description = ingredient.toString();
+		description += ",,,,";
+		return description;
+	}
+	
+	
+	public String toString() {
 		
 		String description = ingredient.toString();
 		description += "," + (getNumeratorDosage() == null ? "" : getNumeratorDosage());
 		description += "," + (((numerator_unit == null) || (numerator_unit.getConceptName() == null)) ? "" : numerator_unit.getConceptName());
 		description += "," + (getDenominatorDosage() == null ? "" : getDenominatorDosage());
 		description += "," + (((denominator_unit == null) || (denominator_unit.getConceptName() == null)) ? "" : denominator_unit.getConceptName());
-		/*
-		if (amount_value == null) {
-			if ((numerator_value != null) || (denominator_value == null)) {
-				description += "," + (numerator_value == null ? "" : numerator_value) + (numerator_unit.getConceptName() == null ? "" : numerator_unit.getConceptName());
-				description += "/" + (denominator_value == null ? "" : denominator_value) + (denominator_unit.getConceptName() == null ? "" : denominator_unit.getConceptName());
-			}
-		}
-		else {
-			description += "," + (amount_value == null ? "" : amount_value) + (amount_unit.getConceptName() == null ? "" : amount_unit.getConceptName());
-		}
-		*/
 		return description;
-	}
-	
-	
-	public static String emptyRecordLong() {
-		return CDMIngredient.emptyRecord() + ",,,,";
 	}
 }

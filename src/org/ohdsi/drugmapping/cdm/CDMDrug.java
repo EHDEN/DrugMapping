@@ -1,8 +1,10 @@
 package org.ohdsi.drugmapping.cdm;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.ohdsi.utilities.files.Row;
@@ -10,6 +12,7 @@ import org.ohdsi.utilities.files.Row;
 public class CDMDrug extends CDMConcept {
 	private Set<String> formConceptIds = new HashSet<String>();
 	private List<CDMIngredientStrength> ingredients = new ArrayList<CDMIngredientStrength>(); 
+	private Map<String, Set<CDMIngredientStrength>> ingredientsMap = new HashMap<String, Set<CDMIngredientStrength>>();
 	
 
 	public CDMDrug(Row queryRow, String prefix) {
@@ -32,8 +35,20 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
+	public Map<String, Set<CDMIngredientStrength>> getIngredientsMap() {
+		return ingredientsMap;
+	}
+	
+	
 	public void addIngredientStrength(CDMIngredientStrength ingredient) {
 		ingredients.add(ingredient);
+		String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
+		Set<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
+		if (ingredientSet == null) {
+			ingredientSet = new HashSet<CDMIngredientStrength>();
+			ingredientsMap.put(ingredientConceptId, ingredientSet);
+		}
+		ingredientSet.add(ingredient);
 	}
 	
 	

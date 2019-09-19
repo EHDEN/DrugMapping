@@ -17,8 +17,13 @@ public class CDMIngredient extends CDMConcept {
 	
 	
 	public static String getHeader() {
-		String header = CDMConcept.getHeader();
-		header += "," + "ATC";
+		return getHeader("");
+	}
+	
+	
+	public static String getHeader(String prefix) {
+		String header = CDMConcept.getHeader(prefix);
+		header += "," + prefix + "ATC";
 		return header;
 	}
 	

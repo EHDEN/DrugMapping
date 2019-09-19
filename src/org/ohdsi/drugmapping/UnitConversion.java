@@ -89,7 +89,7 @@ public class UnitConversion {
 			System.out.println("    Done");
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + " Finished");
+		System.out.println(DrugMapping.getCurrentTime() + " Done");
 	}
 	
 	

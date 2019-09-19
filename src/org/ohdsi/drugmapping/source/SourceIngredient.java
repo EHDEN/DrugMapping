@@ -12,7 +12,7 @@ public class SourceIngredient {
 	private Integer count = 0;
 	
 	private String matchString = "";
-	private String matchingDrug = null;
+	private String matchingIngredient = null;
 	
 	
 	public static String getHeader() {
@@ -95,13 +95,13 @@ public class SourceIngredient {
 	}
 	
 	
-	public String getMatchingDrug() {
-		return matchingDrug;
+	public String getMatchingIngredient() {
+		return matchingIngredient;
 	}
 	
 	
-	public void setMatchingDrug(String matchingDrug) {
-		this.matchingDrug = matchingDrug;
+	public void setMatchingIngredient(String matchingIngredient) {
+		this.matchingIngredient = matchingIngredient;
 	}
 	
 	
