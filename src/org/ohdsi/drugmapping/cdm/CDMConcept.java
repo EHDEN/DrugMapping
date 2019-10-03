@@ -68,7 +68,7 @@ public class CDMConcept {
 		
 		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
 		
-		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "");
+		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 	}
 	
 	
@@ -87,7 +87,7 @@ public class CDMConcept {
 		
 		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
 		
-		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "");
+		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 	}
 
 	

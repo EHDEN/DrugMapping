@@ -44,8 +44,8 @@ public class SourceIngredient {
 		this.ingredientName = ingredientName.equals("") ? null : ingredientName;
 		this.ingredientNameEnglish = ingredientNameEnglish.equals("") ? null : ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
-		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "");
-		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "");
+		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 	}
 	
 	
@@ -66,7 +66,7 @@ public class SourceIngredient {
 	
 	public void setIngredientNameEnglish(String ingredientNameEnglish) {
 		this.ingredientNameEnglish = ingredientNameEnglish;
-		this.ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "");
+		this.ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 	}
 	
 	

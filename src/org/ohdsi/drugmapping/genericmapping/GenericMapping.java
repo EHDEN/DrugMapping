@@ -301,7 +301,7 @@ public class GenericMapping extends Mapping {
 					lastCdmIngredient = cdmIngredient;
 				}
 				String cdmIngredientSynonym = queryRow.get("concept_synonym_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-				String cdmIngredientSynonymNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "");
+				String cdmIngredientSynonymNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 				Set<CDMIngredient> existingCDMIngredients = cdmIngredientNameIndex.get(cdmIngredientSynonymNoSpaces);
 				if (existingCDMIngredients == null) {
 					existingCDMIngredients = new HashSet<CDMIngredient>();
@@ -316,7 +316,7 @@ public class GenericMapping extends Mapping {
 				while (ingredientName.contains("F")) {
 					ingredientName = ingredientName.replaceFirst("F", "PH");
 					lastCdmIngredient.addSynonym(ingredientName);
-					String ingredientNameNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "");
+					String ingredientNameNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 					existingCDMIngredients = cdmIngredientNameIndex.get(ingredientNameNoSpaces);
 					if (existingCDMIngredients == null) {
 						existingCDMIngredients = new HashSet<CDMIngredient>();
@@ -339,24 +339,12 @@ public class GenericMapping extends Mapping {
 			// Get "Maps to" RxNorm Ingredients
 			System.out.println(DrugMapping.getCurrentTime() + "     Get CDM 'Maps to' RxNorm Ingredients ...");
 			
-			PrintWriter mapsToRxNormIngredientsFile = null;
-			try {
-				// Create output file
-				fileName = DrugMapping.getCurrentPath() + "/DrugMapping Maps To RxNorm Ingredients.csv";
-				mapsToRxNormIngredientsFile = new PrintWriter(new File(fileName));
-				mapsToRxNormIngredientsFile.println("SourceName,Synonym," + CDMIngredient.getHeader());
-			}
-			catch (FileNotFoundException e) {
-				System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
-				mapsToRxNormIngredientsFile = null;
-			}
-			
 			for (Row queryRow : connection.queryResource("../cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
 				String drugName = queryRow.get("drug_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-				String drugNameNoSpaces = drugName.replaceAll(" ", "").replaceAll("-", "");
+				String drugNameNoSpaces = drugName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 				String cdmIngredientConceptId = queryRow.get("mapsto_concept_id").trim();
 				String drugNameSynonym = queryRow.get("drug_synonym_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-				String drugNameSynonymNoSpaces = drugNameSynonym.replaceAll(" ", "").replaceAll("-", "");
+				String drugNameSynonymNoSpaces = drugNameSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 				CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 				
 				Set<CDMIngredient> drugNameIngredients = cdmIngredientNameIndex.get(drugNameNoSpaces); 
@@ -399,19 +387,7 @@ public class GenericMapping extends Mapping {
 				List<String> synonyms = new ArrayList<String>();
 				synonyms.addAll(drugNameSynonyms.get(drugName));
 				Collections.sort(synonyms);
-				
-				if (mapsToRxNormIngredientsFile != null) {
-					for (CDMIngredient cdmIngredient : cdmIngredients) {
-						for (String synonym : synonyms) {
-							String record = "\"" + drugName + "\"";
-							record += "," + "\"" + synonym + "\"";
-							record += "," + cdmIngredient.toString();
-							mapsToRxNormIngredientsFile.println(record);
-						}
-					}
-				}
 			}
-			mapsToRxNormIngredientsFile.close();
 			
 			System.out.println(DrugMapping.getCurrentTime() + "     Done");
 			
@@ -423,7 +399,7 @@ public class GenericMapping extends Mapping {
 				String cdmReplacedName        = queryRow.get("concept_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 				String cdmReplacedByConceptId = queryRow.get("concept_id");
 				
-				String cdmReplacedNameNoSpaces = cdmReplacedName.replaceAll(" ", "").replaceAll("-", "");
+				String cdmReplacedNameNoSpaces = cdmReplacedName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 				
 				CDMIngredient cdmIngredient = cdmIngredients.get(cdmReplacedByConceptId);
 				if (cdmIngredient != null) {
@@ -544,6 +520,32 @@ public class GenericMapping extends Mapping {
 
 			System.out.println(DrugMapping.getCurrentTime() + "     Done");
 			
+			PrintWriter mapsToRxNormIngredientsFile = null;
+			try {
+				// Create output file
+				fileName = DrugMapping.getCurrentPath() + "/DrugMapping Maps To RxNorm Ingredients.csv";
+				mapsToRxNormIngredientsFile = new PrintWriter(new File(fileName));
+				mapsToRxNormIngredientsFile.println("Name," + CDMIngredient.getHeader());
+			}
+			catch (FileNotFoundException e) {
+				System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
+				mapsToRxNormIngredientsFile = null;
+			}
+
+			
+			if (mapsToRxNormIngredientsFile != null) {
+				for (String name : cdmIngredientNameIndex.keySet()) {
+					Set<CDMIngredient> cdmIngredientsByName = cdmIngredientNameIndex.get(name);
+					for (CDMIngredient cdmIngredientByName : cdmIngredientsByName) {
+						String record = "\"" + name + "\"";
+						record += "," + cdmIngredientByName.toString();
+						mapsToRxNormIngredientsFile.println(record);
+					}
+				}
+			}
+			
+			mapsToRxNormIngredientsFile.close();
+			
 			
 			// Get CDM RxNorm Ingredient ATCs
 			System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredient ATCs ...");
@@ -606,12 +608,12 @@ public class GenericMapping extends Mapping {
 						Set<String> casNames = new HashSet<String>();
 						String[] synonymSplit = synonyms.split("|");
 						for (String synonym : synonymSplit) {
-							String synonymNoSpaces = synonym.trim().replaceAll(" ", "").replaceAll("-", "");
+							String synonymNoSpaces = synonym.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 							if (!synonymNoSpaces.equals("")) {
 								casNames.add(synonymNoSpaces);
 							}
 						}
-						String chemicalNameNoSpaces = chemicalName.replaceAll(" ", "").replaceAll("-", ""); 
+						String chemicalNameNoSpaces = chemicalName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", ""); 
 						if (!chemicalNameNoSpaces.equals("")) {
 							casNames.add(chemicalNameNoSpaces);
 						}
