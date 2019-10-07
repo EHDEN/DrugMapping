@@ -328,7 +328,7 @@ public class UnitConversion {
 
 		if (numeratorFactor != null) {
 			if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
-				matches = (sourceNumeratorValue == (cdmNumeratorValue * numeratorFactor));
+				matches = ((sourceNumeratorValue * numeratorFactor) == cdmNumeratorValue);
 			}
 			else if (
 						(sourceNumeratorValue != null) &&
@@ -338,7 +338,7 @@ public class UnitConversion {
 						(cdmDenominatorValue != null) &&
 						(denominatorFactor != null)
 			) {
-				matches = ((sourceNumeratorValue / sourceDenominatorValue) == ((cdmNumeratorValue * numeratorFactor)/(cdmDenominatorValue * denominatorFactor))); 
+				matches = (((sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor)) == (cdmNumeratorValue/cdmDenominatorValue)); 
 			}
 		}
 		

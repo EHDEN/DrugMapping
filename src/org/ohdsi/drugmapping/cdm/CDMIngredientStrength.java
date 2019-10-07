@@ -49,7 +49,7 @@ public class CDMIngredientStrength {
 		if (fieldNames.contains(prefix + "denominator_unit_concept_id")) denominator_unit         = new CDMConcept(queryRow, prefix + "denominator_unit_");
 		if (fieldNames.contains(prefix + "box_size"))                    box_size                 = queryRow.get(prefix + "box_size");
 		
-		if (amount_value_string != null) {
+		if ((amount_value_string != null) && (!amount_value_string.equals(""))) {
 			try {
 				amount_value = Double.parseDouble(amount_value_string);
 			}
@@ -58,7 +58,7 @@ public class CDMIngredientStrength {
 			}
 		}
 		
-		if (numerator_value_string != null) {
+		if ((numerator_value_string != null) && (!numerator_value_string.equals(""))) {
 			try {
 				numerator_value = Double.parseDouble(numerator_value_string);
 			}
@@ -67,7 +67,7 @@ public class CDMIngredientStrength {
 			}
 		}
 		
-		if (denominator_value_string != null) {
+		if ((denominator_value_string != null) && (!denominator_value_string.equals(""))) {
 			try {
 				denominator_value = Double.parseDouble(denominator_value_string);
 			}
