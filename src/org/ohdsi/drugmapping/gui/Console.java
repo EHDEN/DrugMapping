@@ -67,7 +67,11 @@ public class Console extends OutputStream {
 				textArea.setCaretPosition(textArea.getDocument().getLength());
 			}
 			if (debug != null) {
-				debug.writeln(buffer.toString());
+				String line = buffer.toString();
+				while ((line.length() > 0) && ((line.substring(line.length() - 1).equals("\r")) || (line.substring(line.length() - 1).equals("\n")))) {
+					line = line.substring(0, line.length() - 2);
+				}
+				debug.writeln(line);
 				debug.flush();
 			}
 			buffer = new StringBuffer();

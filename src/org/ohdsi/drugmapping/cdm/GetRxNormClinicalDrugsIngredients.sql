@@ -109,3 +109,5 @@ GROUP BY drug.concept_id,
          denominator_unit.invalid_reason,
          strength.box_size,
          strength.ingredient_concept_id
+ORDER BY drug.concept_id,
+         strength.ingredient_concept_id
