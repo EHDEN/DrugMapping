@@ -444,7 +444,7 @@ public class ZIndexConversion extends Mapping {
 			}
 		}
 		else {
-			System.out.println("  ERROR: Cannot open GPK file '" + gnkFile.getFileName() + "'");
+			System.out.println("  ERROR: Cannot open GPK file '" + gpkFile.getFileName() + "'");
 			ok = false;
 		}
 		
@@ -479,8 +479,8 @@ public class ZIndexConversion extends Mapping {
 			ingredientName = ingredientName.trim().replaceAll("  "," ");
 
 			ingredientName = ingredientName.replaceAll("\t", " ").trim();
-			//ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
-			//ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
 			
 			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
 			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
