@@ -74,6 +74,134 @@ public class GenericMapping extends Mapping {
 	private Map<String, Map<String, Set<CDMIngredient>>> cdmIngredientNameIndexMap = new HashMap<String, Map<String, Set<CDMIngredient>>>();
 	
 	private List<String> report = new ArrayList<String>();
+	
+	
+	
+	public static String uniformCASNumber(String casNumber) {
+		casNumber = casNumber.replaceAll(" ", "").replaceAll("-", "");
+		if (!casNumber.equals("")) {
+			casNumber = casNumber.substring(0, casNumber.length() - 3) + "-" + casNumber.substring(casNumber.length() - 3, casNumber.length() - 1) + "-" + casNumber.substring(casNumber.length() - 1);
+			casNumber = ("000000"+casNumber).substring(casNumber.length() -5);
+		}
+		return  casNumber.equals("000000-00-0") ? "" : casNumber;
+	}
+	
+	
+	public static String modifyName(String name) {
+		Map<String, String> patternReplacement = new HashMap<String, String>();
+		
+		name = " " + name.toUpperCase() + " ";
+		
+		List<String> patterns = new ArrayList<String>();
+		patterns.add("-");
+		patterns.add(",");
+		patterns.add("/");
+		patterns.add("[(]");
+		patterns.add("[)]");
+		patterns.add("_");
+
+		// Prevent these seperate letters to be patched
+		patterns.add(" A ");
+		patterns.add(" O ");
+		patterns.add(" E ");
+		patterns.add(" U ");
+		patterns.add(" P ");
+		patterns.add(" H ");
+
+		patterns.add("AAT");
+		patterns.add("OOT");
+		patterns.add("ZUUR");
+		patterns.add("AA");
+		patterns.add("OO");
+		patterns.add("EE");
+		patterns.add("UU");
+		patterns.add("TH");
+		patterns.add("AE");
+		patterns.add("EA");
+		patterns.add("PH");
+		patterns.add("S ");
+		patterns.add("E ");
+		patterns.add(" ");
+
+		patterns.add("_");
+
+		patterns.add("AA");
+		patterns.add("OO");
+		patterns.add("EE");
+		patterns.add("UU");
+		patterns.add("TH");
+		patterns.add("AE");
+		patterns.add("EA");
+		patterns.add("PH");
+		
+		patternReplacement.put("-", " ");
+		patternReplacement.put(",", " ");
+		patternReplacement.put("/", " ");
+		patternReplacement.put("[(]", " ");
+		patternReplacement.put("[)]", " ");
+		patternReplacement.put("_", " ");
+
+		// Prevent these seperate letters to be patched
+		patternReplacement.put(" A ", "_A_");
+		patternReplacement.put(" O ", "_O_");
+		patternReplacement.put(" E ", "_E_");
+		patternReplacement.put(" U ", "_U_");
+		patternReplacement.put(" P ", "_P_");
+		patternReplacement.put(" H ", "_H_");
+
+		patternReplacement.put("AAT", "ATE");
+		patternReplacement.put("OOT", "OTE");
+		patternReplacement.put("ZUUR", "ACID");
+		patternReplacement.put("AA", "A");
+		patternReplacement.put("OO", "O");
+		patternReplacement.put("EE", "E");
+		patternReplacement.put("UU", "U");
+		patternReplacement.put("TH", "T");
+		patternReplacement.put("AE", "A");
+		patternReplacement.put("EA", "A");
+		patternReplacement.put("PH", "F");
+		patternReplacement.put("S ", " ");
+		patternReplacement.put("E ", " ");
+		patternReplacement.put(" ", "");
+
+		patternReplacement.put("_", " ");
+
+		patternReplacement.put("AA", "A");
+		patternReplacement.put("OO", "O");
+		patternReplacement.put("EE", "E");
+		patternReplacement.put("UU", "U");
+		patternReplacement.put("TH", "T");
+		patternReplacement.put("AE", "A");
+		patternReplacement.put("EA", "A");
+		patternReplacement.put("PH", "F");
+		
+		for (String pattern : patterns) {
+			if (pattern.substring(0, 1).equals("^")) {
+				if (pattern.substring(pattern.length() - 1).equals("$")) {
+					if (name.equals(pattern.substring(1, pattern.length() - 1))) {
+						name = patternReplacement.get(pattern);
+					}
+				}
+				else {
+					if ((name.length() >= pattern.length() - 1) && name.substring(0, pattern.length() - 1).equals(pattern.substring(1))) {
+						name = patternReplacement.get(pattern) + name.substring(pattern.length() - 1);
+					}
+				}
+			}
+			else if (pattern.substring(pattern.length() - 1).equals("$")) {
+				if ((name.length() >= pattern.length() - 1) && name.substring(name.length() - pattern.length() + 1).equals(pattern.substring(0, pattern.length() - 1))) {
+					name = name.substring(0, name.length() - pattern.length() + 1) + patternReplacement.get(pattern);
+				}
+			}
+			else {
+				name = name.replaceAll(pattern, patternReplacement.get(pattern));
+			}
+		}
+		
+		return name.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+	}
+	
+	
 		
 	
 	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile casFile) {
@@ -753,9 +881,9 @@ public class GenericMapping extends Mapping {
 		
 		multipleMappings += matchIngredientsByCASNumber();
 		
-		multipleMappings += matchIngredientsByATC();
-		
 		multipleMappings += matchIngredientsByName();
+		
+		multipleMappings += matchIngredientsByATC();
 
 		report.add("Source ingredients mapped total : " + Integer.toString(ingredientMap.size()) + " (" + Long.toString(Math.round(((double) ingredientMap.size() / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
 		
@@ -846,20 +974,18 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
 			if (sourceIngredient.getMatchingIngredient() == null) {
-				
-				List<String> matchNameList = new ArrayList<String>();
-				matchNameList.add(modifyName(sourceIngredient.getIngredientName()));
-				matchNameList.add(modifyName(sourceIngredient.getIngredientNameEnglish()));
-				matchNameList.add(sourceIngredient.getIngredientNameEnglishNoSpaces());
-				
+
+				List<String> matchNameList = sourceIngredient.getIngredientMatchingNames();
+
+				boolean matchFound = false;
 				boolean multipleMapping = false;
 				
 				for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
 					Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
 					
-					boolean matchFound = false;
-					
 					for (String matchName : matchNameList) {
+						String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
+						matchName = matchName.substring(matchName.indexOf(": ") + 2);
 						
 						Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(matchName);
 						if (matchedCDMIngredients != null) {
@@ -867,27 +993,18 @@ public class GenericMapping extends Mapping {
 								CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
 								ingredientMap.put(sourceIngredient, cdmIngredient);
 								sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
-								sourceIngredient.setMatchString(ingredientNameIndexName + ": " + matchName);
-								multipleMapping = false;
-								matchFound = true;
+								sourceIngredient.setMatchString(matchType + matchName);
+								matchedByName++;
 								break;
 							}
 							else {
-								multipleMapping = true;
+								multipleMappings++;
 							}
 						}
 					}
 					
 					if (matchFound || multipleMapping) {
 						break;
-					}
-					
-					if (multipleMapping) {
-						multipleMappings++;
-					}
-					
-					if (matchFound) {
-						matchedByName++;
 					}
 				}
 			}
@@ -908,35 +1025,30 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
 			if (sourceIngredient.getMatchingIngredient() == null) {
-				boolean multipleMapping = false;
 				String casNumber = sourceIngredient.getCASNumber();
 				if (casNumber != null) {
-					Set<String> casNamesNoSpaces = casMap.get(casNumber);
-					if (casNamesNoSpaces != null) {
+					Set<String> casNames = casMap.get(casNumber);
+					if (casNames != null) {
 						Set<CDMIngredient>matchedCDMIngredients = new HashSet<CDMIngredient>();
-						String matchingCASnameNoSpaces = null;
-						for (String casNameNoSpaces : casNamesNoSpaces) {
-							Set<CDMIngredient> casNameIngredients = cdmIngredientNameIndex.get(casNameNoSpaces);
+						String matchingCASname = null;
+						for (String casName : casNames) {
+							Set<CDMIngredient> casNameIngredients = cdmIngredientNameIndex.get(casName);
 							if (casNameIngredients != null) {
 								matchedCDMIngredients.addAll(casNameIngredients);
-								matchingCASnameNoSpaces = casNameNoSpaces;
+								matchingCASname = casName;
 							}
 						}
 						if (matchedCDMIngredients.size() == 1) {
 							CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
 							ingredientMap.put(sourceIngredient, cdmIngredient);
 							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-							sourceIngredient.setMatchString("CAS: " + matchingCASnameNoSpaces);
+							sourceIngredient.setMatchString("CAS: " + matchingCASname);
 							matchedByCASName++;
 						}
 						else {
-							multipleMapping = true;
+							multipleMappings++;
 						}
 					}
-				}
-				
-				if (multipleMapping) {
-					multipleMappings++;
 				}
 			}
 		}
@@ -1864,131 +1976,6 @@ public class GenericMapping extends Mapping {
 		}
 		
 		return matchingIngredients;
-	}
-	
-	
-	private String uniformCASNumber(String casNumber) {
-		casNumber = casNumber.replaceAll(" ", "").replaceAll("-", "");
-		if (!casNumber.equals("")) {
-			casNumber = casNumber.substring(0, casNumber.length() - 3) + "-" + casNumber.substring(casNumber.length() - 3, casNumber.length() - 1) + "-" + casNumber.substring(casNumber.length() - 1);
-			casNumber = ("000000"+casNumber).substring(casNumber.length() -5);
-		}
-		return  casNumber;
-	}
-	
-	
-	private String modifyName(String name) {
-		Map<String, String> patternReplacement = new HashMap<String, String>();
-		
-		name = " " + name.toUpperCase() + " ";
-		
-		List<String> patterns = new ArrayList<String>();
-		patterns.add("-");
-		patterns.add(",");
-		patterns.add("/");
-		patterns.add("[(]");
-		patterns.add("[)]");
-		patterns.add("_");
-
-		// Prevent these seperate letters to be patched
-		patterns.add(" A ");
-		patterns.add(" O ");
-		patterns.add(" E ");
-		patterns.add(" U ");
-		patterns.add(" P ");
-		patterns.add(" H ");
-
-		patterns.add("AAT");
-		patterns.add("OOT");
-		patterns.add("ZUUR");
-		patterns.add("AA");
-		patterns.add("OO");
-		patterns.add("EE");
-		patterns.add("UU");
-		patterns.add("TH");
-		patterns.add("AE");
-		patterns.add("EA");
-		patterns.add("PH");
-		patterns.add("S ");
-		patterns.add("E ");
-		patterns.add(" ");
-
-		patterns.add("_");
-
-		patterns.add("AA");
-		patterns.add("OO");
-		patterns.add("EE");
-		patterns.add("UU");
-		patterns.add("TH");
-		patterns.add("AE");
-		patterns.add("EA");
-		patterns.add("PH");
-		
-		patternReplacement.put("-", " ");
-		patternReplacement.put(",", " ");
-		patternReplacement.put("/", " ");
-		patternReplacement.put("[(]", " ");
-		patternReplacement.put("[)]", " ");
-		patternReplacement.put("_", " ");
-
-		// Prevent these seperate letters to be patched
-		patternReplacement.put(" A ", "_A_");
-		patternReplacement.put(" O ", "_O_");
-		patternReplacement.put(" E ", "_E_");
-		patternReplacement.put(" U ", "_U_");
-		patternReplacement.put(" P ", "_P_");
-		patternReplacement.put(" H ", "_H_");
-
-		patternReplacement.put("AAT", "ATE");
-		patternReplacement.put("OOT", "OTE");
-		patternReplacement.put("ZUUR", "ACID");
-		patternReplacement.put("AA", "A");
-		patternReplacement.put("OO", "O");
-		patternReplacement.put("EE", "E");
-		patternReplacement.put("UU", "U");
-		patternReplacement.put("TH", "T");
-		patternReplacement.put("AE", "A");
-		patternReplacement.put("EA", "A");
-		patternReplacement.put("PH", "F");
-		patternReplacement.put("S ", " ");
-		patternReplacement.put("E ", " ");
-		patternReplacement.put(" ", "");
-
-		patternReplacement.put("_", " ");
-
-		patternReplacement.put("AA", "A");
-		patternReplacement.put("OO", "O");
-		patternReplacement.put("EE", "E");
-		patternReplacement.put("UU", "U");
-		patternReplacement.put("TH", "T");
-		patternReplacement.put("AE", "A");
-		patternReplacement.put("EA", "A");
-		patternReplacement.put("PH", "F");
-		
-		for (String pattern : patterns) {
-			if (pattern.substring(0, 1).equals("^")) {
-				if (pattern.substring(pattern.length() - 1).equals("$")) {
-					if (name.equals(pattern.substring(1, pattern.length() - 1))) {
-						name = patternReplacement.get(pattern);
-					}
-				}
-				else {
-					if ((name.length() >= pattern.length() - 1) && name.substring(0, pattern.length() - 1).equals(pattern.substring(1))) {
-						name = patternReplacement.get(pattern) + name.substring(pattern.length() - 1);
-					}
-				}
-			}
-			else if (pattern.substring(pattern.length() - 1).equals("$")) {
-				if ((name.length() >= pattern.length() - 1) && name.substring(name.length() - pattern.length() + 1).equals(pattern.substring(0, pattern.length() - 1))) {
-					name = name.substring(0, name.length() - pattern.length() + 1) + patternReplacement.get(pattern);
-				}
-			}
-			else {
-				name = name.replaceAll(pattern, patternReplacement.get(pattern));
-			}
-		}
-		
-		return name.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 	}
 	
 	

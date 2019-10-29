@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
+import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
@@ -58,10 +59,7 @@ public class ZIndexConversion extends Mapping {
 				record[GenericName]   = gskFile.get(row, "GenericName");
 				record[CASNumber]     = gskFile.get(row, "CASNumber");
 
-				record[CASNumber] = record[CASNumber].replaceAll(" ", "").replaceAll("-", "");
-				if (!record[CASNumber].equals("")) {
-					record[CASNumber] = record[CASNumber].substring(0, record[CASNumber].length() - 3) + "-" + record[CASNumber].substring(record[CASNumber].length() - 3, record[CASNumber].length() - 1) + "-" + record[CASNumber].substring(record[CASNumber].length() - 1);
-				}
+				record[CASNumber] = GenericMapping.uniformCASNumber(record[CASNumber]);
 
 				int gskCode = Integer.valueOf(record[GSKCode]); 
 				List<String[]> gskList = gskMap.get(gskCode);
@@ -89,10 +87,7 @@ public class ZIndexConversion extends Mapping {
 				record[Description] = gnkFile.get(row, "Description");
 				record[CASCode]     = gnkFile.get(row, "CASCode");
 
-				record[CASCode] = record[CASCode].replaceAll(" ", "").replaceAll("-", "");
-				if (!record[CASCode].equals("")) {
-					record[CASCode] = record[CASCode].substring(0, record[CASCode].length() - 3) + "-" + record[CASCode].substring(record[CASCode].length() - 3, record[CASCode].length() - 1) + "-" + record[CASCode].substring(record[CASCode].length() - 1);
-				}
+				record[CASCode] = GenericMapping.uniformCASNumber(record[CASCode]);
 
 				int gnkCode = Integer.valueOf(record[GNKCode]);
 				gnkMap.put(gnkCode, record);
