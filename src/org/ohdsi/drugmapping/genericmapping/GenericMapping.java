@@ -36,7 +36,7 @@ public class GenericMapping extends Mapping {
 
 	private UnitConversion unitConversionsMap = null;
 	private FormConversion formConversionsMap = null;
-	private Map<String, Set<String>> casMap = new HashMap<String, Set<String>>();
+	private Map<String, List<String>> casMap = new HashMap<String, List<String>>();
 	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
 	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
 	private List<SourceDrug> sourceDrugsAllIngredientsMapped = new ArrayList<SourceDrug>();
@@ -198,7 +198,7 @@ public class GenericMapping extends Mapping {
 			}
 		}
 		
-		return name.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+		return name.trim();
 	}
 	
 	
@@ -474,12 +474,13 @@ public class GenericMapping extends Mapping {
 					cdmIngredient = new CDMIngredient(queryRow, "");
 					cdmIngredients.put(cdmIngredient.getConceptId(), cdmIngredient);
 					cdmIngredientsList.add(cdmIngredient);
-					String cdmIngredientNameNoSpaces = cdmIngredient.getConceptNameNoSpaces();
+					//String cdmIngredientNameNoSpaces = cdmIngredient.getConceptNameNoSpaces();
 					String cdmIngredientNameModified = modifyName(cdmIngredient.getConceptName());
 					
 					List<String> nameList = new ArrayList<String>();
-					nameList.add(cdmIngredientNameModified);
-					nameList.add(cdmIngredientNameNoSpaces);
+					nameList.add(cdmIngredient.getConceptName());
+					nameList.add(modifyName(cdmIngredient.getConceptName()));
+					//nameList.add(cdmIngredientNameNoSpaces);
 					
 					for (String name : nameList) {
 						Set<CDMIngredient> existingCDMIngredients = cdmIngredientNameIndex.get(name);
@@ -494,12 +495,12 @@ public class GenericMapping extends Mapping {
 			}
 			
 			String cdmIngredientSynonym = queryRow.get("concept_synonym_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String cdmIngredientSynonymNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-			String cdmIngredientSynonymModified = modifyName(cdmIngredientSynonym); 
+			//String cdmIngredientSynonymNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 
 			List<String> nameList = new ArrayList<String>();
-			nameList.add(cdmIngredientSynonymNoSpaces);
-			nameList.add(cdmIngredientSynonymModified);
+			nameList.add(cdmIngredientSynonym);
+			nameList.add(modifyName(cdmIngredientSynonym));
+			//nameList.add(cdmIngredientSynonymNoSpaces);
 			
 			for (String name : nameList) {
 				Set<CDMIngredient> nameIngredients = cdmIngredientNameIndex.get(name); 
@@ -513,20 +514,6 @@ public class GenericMapping extends Mapping {
 			if ((cdmIngredientSynonym != null) && (!cdmIngredientSynonym.equals(""))) {
 				lastCdmIngredient.addSynonym(cdmIngredientSynonym);
 			}
-			/*
-			String ingredientName = lastCdmIngredient.getConceptName();
-			while (ingredientName.contains("F")) {
-				ingredientName = ingredientName.replaceFirst("F", "PH");
-				lastCdmIngredient.addSynonym(ingredientName);
-				String ingredientNameNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-				existingCDMIngredients = cdmIngredientNameIndex.get(ingredientNameNoSpaces);
-				if (existingCDMIngredients == null) {
-					existingCDMIngredients = new HashSet<CDMIngredient>();
-					cdmIngredientNameIndex.put(ingredientNameNoSpaces, existingCDMIngredients);
-				}
-				existingCDMIngredients.add(lastCdmIngredient);
-			}
-			*/
 		}
 		if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
 			rxNormIngredientsFile.println(lastCdmIngredient.toStringWithSynonyms());
@@ -544,20 +531,19 @@ public class GenericMapping extends Mapping {
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
 			String drugName = queryRow.get("drug_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String drugNameNoSpaces = drugName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-			String drugNameModified = modifyName(drugName);
+			//String drugNameNoSpaces = drugName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id").trim();
 			String drugNameSynonym = queryRow.get("drug_synonym_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String drugNameSynonymNoSpaces = drugNameSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-			String drugNameSynonymModified = modifyName(drugNameSynonym);
+			//String drugNameSynonymNoSpaces = drugNameSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
 			if (cdmIngredient != null) {
 				List<String> nameList = new ArrayList<String>();
-				nameList.add(drugNameNoSpaces);
-				nameList.add(drugNameModified);
-				nameList.add(drugNameSynonymNoSpaces);
-				nameList.add(drugNameSynonymModified);
+				nameList.add(drugName);
+				nameList.add(modifyName(drugName));
+				nameList.add(modifyName(drugNameSynonym));
+				//nameList.add(drugNameNoSpaces);
+				//nameList.add(drugNameSynonymNoSpaces);
 				
 				for (String name : nameList) {
 					Set<CDMIngredient> nameIngredients = cdmMapsToIngredientNameIndex.get(name); 
@@ -599,24 +585,24 @@ public class GenericMapping extends Mapping {
 			String cdmReplacedByName      = queryRow.get("concept_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			String cdmReplacedByConceptId = queryRow.get("concept_id");
 			
-			String cdmReplacedNameNoSpaces = cdmReplacedByName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+			//String cdmReplacedNameNoSpaces = cdmReplacedByName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 			String cdmReplacedNameModified = modifyName(cdmReplacedByName);
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmReplacedByConceptId);
-			if (cdmIngredient != null) {				
-				Set<CDMIngredient> cdmIngredients = cdmReplacedByIngredientNameIndex.get(cdmReplacedNameNoSpaces);
-				if (cdmIngredients == null) {
-					cdmIngredients = new HashSet<CDMIngredient>();
-					cdmReplacedByIngredientNameIndex.put(cdmReplacedNameNoSpaces, cdmIngredients);
-				}
-				cdmIngredients.add(cdmIngredient);
+			if (cdmIngredient != null) {
+				List<String> nameList = new ArrayList<String>();
+				nameList.add(cdmReplacedByName);
+				nameList.add(cdmReplacedNameModified);
+				//nameList.add(cdmReplacedNameNoSpaces);
 				
-				cdmIngredients = cdmReplacedByIngredientNameIndex.get(cdmReplacedNameModified);
-				if (cdmIngredients == null) {
-					cdmIngredients = new HashSet<CDMIngredient>();
-					cdmReplacedByIngredientNameIndex.put(cdmReplacedNameModified, cdmIngredients);
+				for (String name : nameList) {
+					Set<CDMIngredient> nameIngredients = cdmReplacedByIngredientNameIndex.get(name); 
+					if (nameIngredients == null) {
+						nameIngredients = new HashSet<CDMIngredient>();
+						cdmReplacedByIngredientNameIndex.put(name, nameIngredients);
+					}
+					nameIngredients.add(cdmIngredient);
 				}
-				cdmIngredients.add(cdmIngredient);
 			} 
 		}
 		
@@ -836,16 +822,38 @@ public class GenericMapping extends Mapping {
 					String casNumber = casFile.get(row, "CASNumber").trim();
 					String chemicalName = casFile.get(row, "ChemicalName").replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
 					String synonyms = casFile.get(row, "Synonyms").replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
+					String[] synonymSplit = synonyms.split("[|]");
 					
 					if (!casNumber.equals("")) {
 						casNumber = uniformCASNumber(casNumber);
-						Set<String> casNames = new HashSet<String>();
+						List<String> casNames = new ArrayList<String>();
 						
-						String[] synonymSplit = synonyms.split("[|]");
+						casNames.add(chemicalName);
+
+						for (String synonym : synonymSplit) {
+							if (!casNames.contains(synonym)) {
+								casNames.add(synonym);
+							}
+						}
+						
+						String modifiedName = modifyName(chemicalName);
+						if (!casNames.contains(modifiedName)) {
+							casNames.add(modifiedName);
+						}
+
+						for (String synonym : synonymSplit) {
+							modifiedName = modifyName(synonym);
+							if (!casNames.contains(modifiedName)) {
+								casNames.add(modifiedName);
+							}
+						}
+						
+						/*
 						for (String synonym : synonymSplit) {
 							String synonymNoSpaces = synonym.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 							if (!synonymNoSpaces.equals("")) {
-								casNames.add(synonymNoSpaces);
+								//casNames.add(synonymNoSpaces);
+								casNames.add(synonym);
 								casNames.add(modifyName(synonym));
 							}
 						}
@@ -855,7 +863,7 @@ public class GenericMapping extends Mapping {
 							casNames.add(chemicalNameNoSpaces);
 							casNames.add(modifyName(chemicalName));
 						}
-						
+						*/
 						casMap.put(casNumber, casNames);
 					}
 				}
@@ -993,13 +1001,19 @@ public class GenericMapping extends Mapping {
 								CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
 								ingredientMap.put(sourceIngredient, cdmIngredient);
 								sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
-								sourceIngredient.setMatchString(matchType + matchName);
+								sourceIngredient.setMatchString(matchType + ingredientNameIndexName + " " + matchName);
+								matchFound = true;
 								matchedByName++;
 								break;
 							}
 							else {
+								multipleMapping = true;
 								multipleMappings++;
 							}
+						}
+						
+						if (matchFound || multipleMapping) {
+							break;
 						}
 					}
 					
@@ -1025,9 +1039,53 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
 			if (sourceIngredient.getMatchingIngredient() == null) {
+
+				boolean matchFound = false;
+				boolean multipleMapping = false;
+				
+				for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
+					Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
+					String casNumber = sourceIngredient.getCASNumber();
+					if (casNumber != null) {
+						
+						List<String> casNames = casMap.get(casNumber);
+						if (casNames != null) {
+							
+							for (String casName : casNames) {
+								
+								Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(casName);
+								if (matchedCDMIngredients != null) {
+									if (matchedCDMIngredients.size() == 1) {
+										CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
+										ingredientMap.put(sourceIngredient, cdmIngredient);
+										sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
+										sourceIngredient.setMatchString("CAS: " + ingredientNameIndexName + " " + casName);
+										matchFound = true;
+										matchedByCASName++;
+										break;
+									}
+									else {
+										multipleMapping = true;
+										multipleMappings++;
+									}
+								}
+								
+								if (matchFound || multipleMapping) {
+									break;
+								}
+							}
+							
+							if (matchFound || multipleMapping) {
+								break;
+							}
+						}
+					}
+				}
+				
+				/*
 				String casNumber = sourceIngredient.getCASNumber();
 				if (casNumber != null) {
-					Set<String> casNames = casMap.get(casNumber);
+					List<String> casNames = casMap.get(casNumber);
 					if (casNames != null) {
 						Set<CDMIngredient>matchedCDMIngredients = new HashSet<CDMIngredient>();
 						String matchingCASname = null;
@@ -1050,6 +1108,7 @@ public class GenericMapping extends Mapping {
 						}
 					}
 				}
+				*/
 			}
 		}
 
@@ -1875,11 +1934,25 @@ public class GenericMapping extends Mapping {
 	
 	private void finalReport() {
 		Integer dataCountTotal = 0;
+		Integer dataCoverageIngredients = 0;
 		Integer dataCoverageClinicalDrugs = 0;
 		Integer dataCoverageClinicalDrugComps = 0;
 		Integer dataCoverageClinicalDrugForms = 0;
+		
 		for (SourceDrug sourceDrug : sourceDrugs) {
+			boolean allIngredientsMapped = true;
+			for (SourceIngredient sourceIngredient : sourceDrug.getIngredients()) {
+				if (sourceIngredient.getMatchingIngredient() == null) {
+					allIngredientsMapped = false;
+					break;
+				}
+			}
+			if (allIngredientsMapped) {
+				dataCoverageIngredients += sourceDrug.getCount();
+			}
+			
 			dataCountTotal += sourceDrug.getCount();
+			
 			if (drugMappingClinicalDrug.containsKey(sourceDrug)) {
 				dataCoverageClinicalDrugs += sourceDrug.getCount();
 			}
@@ -1899,6 +1972,7 @@ public class GenericMapping extends Mapping {
 		
 		if (dataCountTotal != 0) {
 			report.add("");
+			report.add("Datacoverage CDM Ingredient mapping (all ingredients mapped): " + dataCoverageIngredients + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageIngredients / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug mapping: " + dataCoverageClinicalDrugs + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugs / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug Comp mapping: " + dataCoverageClinicalDrugComps + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugComps / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug Form mapping: " + dataCoverageClinicalDrugForms + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugForms / (double) dataCountTotal) * 100)) + "%)");

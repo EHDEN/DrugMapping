@@ -99,7 +99,7 @@ public class SourceIngredient {
 			}
 		}
 		
-		for (int nameLength = 1; nameLength <= maxNameLength; nameLength++) {
+		for (int nameLength = maxNameLength; nameLength >= 1; nameLength--) {
 			List<String> nameLengthList = matchNameMap.get(nameLength);
 			if (nameLengthList != null) {
 				Set<String> matchNames = new HashSet<String>();
@@ -126,6 +126,7 @@ public class SourceIngredient {
 						ingredientMatchingNames.add(matchType + matchName);
 					}
 				}
+				/*
 				for (String matchName : nameLengthList) {
 					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
 					matchName = matchName.substring(matchName.indexOf(": ") + 2);
@@ -142,6 +143,7 @@ public class SourceIngredient {
 						ingredientMatchingNames.add(matchType + matchName);
 					}
 				}
+				*/
 			}
 		}
 	}
@@ -214,7 +216,7 @@ public class SourceIngredient {
 	
 	
 	public void addCount(Integer additionalCount) {
-		count += additionalCount;
+		count += additionalCount == null ? 0 : additionalCount;
 	}
 	
 	
