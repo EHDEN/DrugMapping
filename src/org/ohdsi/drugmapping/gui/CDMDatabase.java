@@ -87,6 +87,11 @@ public class CDMDatabase extends JPanel {
 	}
 	
 	
+	public String getDBServerName() {
+		return serverField == null ? "" : serverField.getText();
+	}
+	
+	
 	public DBSettings getDBSettings() {
 		return dbSettings;
 	}

@@ -206,7 +206,7 @@ public class GenericMapping extends Mapping {
 	
 	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile casFile) {
 		boolean ok = true;
-		
+
 		cdmIngredientNameIndexNameList.add("Ingredient");
 		cdmIngredientNameIndexMap.put("Ingredient", cdmIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("MapsToIngredient");

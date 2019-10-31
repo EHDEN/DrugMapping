@@ -181,12 +181,23 @@ public class DrugMapping {
 				component.setEnabled(false);
 			
 			if (special.equals("ZINDEX")) {
+				logDatabaseSettings(getDatabase());
+				logFileSettings("ZIndex GPK File", getFile("ZIndex GPK File"));
+				logFileSettings("ZIndex GSK File", getFile("ZIndex GSK File"));
+				logFileSettings("ZIndex GNK File", getFile("ZIndex GNK File"));
+				logFileSettings("ZIndex GPK Statistics File", getFile("ZIndex GPK Statistics File"));
+				logFileSettings("ZIndex Ignored Words File", getFile("ZIndex Ignored Words File"));
 				new ZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"));
 			}
 			else if (special.equals("IPCIMAPPING")) {
+				logDatabaseSettings(getDatabase());
+				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
 				new IPCIMAPPING(getDatabase(), getFile("Generic Drugs File"));
 			}
 			else {
+				logDatabaseSettings(getDatabase());
+				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
+				logFileSettings("CAS File", getFile("CAS File"));
 				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
 			}
 
@@ -194,6 +205,32 @@ public class DrugMapping {
 				component.setEnabled(true);
 		}
 		
+	}
+	
+	
+	private void logDatabaseSettings(CDMDatabase database) {
+		DBSettings databaseSettings = database.getDBSettings();
+		System.out.println("Database Connection: " + database.getDBServerName());
+		System.out.println("  Database Type: " + databaseSettings.dbType);
+		System.out.println("  Database: " + databaseSettings.server);
+		System.out.println("  Schema: " + databaseSettings.database);
+		System.out.println("  User: " + databaseSettings.user);
+		System.out.println();
+	}
+	
+	
+	private void logFileSettings(String fileId, InputFile file) {
+		System.out.println("Input File: " + fileId);
+		System.out.println("  Filename: " + file.getFileName());
+		System.out.println("  Field delimiter: '" + file.getFieldDelimiter() + "'");
+		System.out.println("  Text qualifier: '" + file.getTextQualifier() + "'");
+		System.out.println("  Fields:");
+		List<String> columns = file.getColumns();
+		Map<String, String> columnMapping = file.getColumnMapping();
+		for (String column : columns) {
+			System.out.println("    " + column + " -> " + columnMapping.get(column));
+		}
+		System.out.println();
 	}
 	
 	
