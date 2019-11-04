@@ -14,6 +14,31 @@ public class CDMDrug extends CDMConcept {
 	private List<CDMIngredientStrength> ingredients = new ArrayList<CDMIngredientStrength>(); 
 	private Map<String, Set<CDMIngredientStrength>> ingredientsMap = new HashMap<String, Set<CDMIngredientStrength>>();
 	
+	
+	public static String getHeader() {
+		return getHeader("");
+	}
+	
+	public static String getHeader(String prefix) {
+		String header = CDMConcept.getHeader(prefix);
+		header += "," + prefix + "form_concept_id";
+		return header;
+	}
+	
+	
+	public String toString() {
+		String description = super.toString();
+		String form_concept_ids = "";
+		for (String form_concept_id : formConceptIds) {
+			if (!form_concept_ids.equals("")) {
+				form_concept_ids += "|";
+			}
+			form_concept_ids += form_concept_id;
+		}
+		description += "," + description;
+		return description;
+	}
+	
 
 	public CDMDrug(Row queryRow, String prefix) {
 		super(queryRow, prefix);

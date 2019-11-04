@@ -1644,50 +1644,6 @@ public class GenericMapping extends Mapping {
 							}
 						}
 					}
-					
-/*			
-					// Find CDM Clinical Drugs with corresponding ingredient strengths
-					if (cdmDrugsWithIngredients.size() > 0) {
-						Set<CDMDrug> matchingCDMDrugs = new HashSet<CDMDrug>();
-						for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-							if (sourceDrug.getComponents().size() == cdmDrug.getIngredients().size()) {
-								for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-									SourceDrugComponent sourceComponent = sourceDrug.getComponents().get(ingredientNr);
-									CDMIngredientStrength cdmIngredientStrength = cdmDrug.getIngredients().get(ingredientNr);
-									if (sourceComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit())) {
-										matchingCDMDrugs.add(cdmDrug);
-									}
-								}
-							}
-						}
-						if (matchingCDMDrugs.size() == 1) {
-							drugMappingClinicalDrugForm.put(sourceDrug, (CDMDrug) matchingCDMDrugs.toArray()[0]); 
-						}
-						else if (matchingCDMDrugs.size() > 1) {
-							multipleDrugMappings++;
-							if (multipleClinicalDrugFormsMappingFile != null) {
-								for (CDMDrug cdmDrug : matchingCDMDrugs) {
-									for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-										multipleClinicalDrugFormsMappingFile.println(sourceDrug + "," + sourceDrug.getComponents().get(ingredientNr) + "," + cdmDrug + "," + cdmDrug.getIngredients().get(ingredientNr).toStringLong());
-									}
-								}
-							}
-						}
-						else {
-							if (noClinicalDrugFormsMappingFile != null) {
-								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-									for (int ingredientNr = 0; ingredientNr < Math.max(sourceDrug.getComponents().size(), cdmDrug.getIngredients().size()) ; ingredientNr++) {
-										String record = sourceDrug.toString();
-										record += "," + (ingredientNr < sourceDrug.getComponents().size() ? sourceDrug.getComponents().get(ingredientNr).toString() : SourceDrugComponent.emptyRecord());
-										record += "," + cdmDrug.toString();
-										record += "," + (ingredientNr < cdmDrug.getIngredients().size() ? cdmDrug.getIngredients().get(ingredientNr).toStringLong() : CDMIngredientStrength.emptyRecordLong());
-										noClinicalDrugFormsMappingFile.println(record);
-									}
-								}
-							}
-						}
-					}
-*/
 				}
 				else {
 					List<CDMDrug> rejectedList = rejectedClinicalDrugForms.get(sourceDrug);
@@ -1972,7 +1928,7 @@ public class GenericMapping extends Mapping {
 		
 		if (dataCountTotal != 0) {
 			report.add("");
-			report.add("Datacoverage CDM Ingredient mapping (all ingredients mapped): " + dataCoverageIngredients + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageIngredients / (double) dataCountTotal) * 100)) + "%)");
+			report.add("Datacoverage Source drugs with all ingredients mapped: " + dataCoverageIngredients + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageIngredients / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug mapping: " + dataCoverageClinicalDrugs + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugs / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug Comp mapping: " + dataCoverageClinicalDrugComps + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugComps / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug Form mapping: " + dataCoverageClinicalDrugForms + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugForms / (double) dataCountTotal) * 100)) + "%)");
