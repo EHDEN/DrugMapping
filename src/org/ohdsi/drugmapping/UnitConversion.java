@@ -320,7 +320,7 @@ public class UnitConversion {
 	}
 	
 	
-	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue) {
+	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue, double deviationPercentage) {
 		boolean matches = false;
 		
 		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit);
@@ -338,7 +338,11 @@ public class UnitConversion {
 						(cdmDenominatorValue != null) &&
 						(denominatorFactor != null)
 			) {
-				matches = (((sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor)) == (cdmNumeratorValue/cdmDenominatorValue)); 
+				Double compatibleSourceValue = ((sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor));
+				Double compatibleCDMValue = cdmNumeratorValue/cdmDenominatorValue;
+				Double deviationFactor = deviationPercentage / 100;
+				matches = ((compatibleSourceValue - (compatibleSourceValue * deviationFactor)) <= compatibleCDMValue) && ((compatibleSourceValue + (compatibleSourceValue * deviationFactor)) >= compatibleCDMValue);
+				//matches = (((sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor)) == (cdmNumeratorValue/cdmDenominatorValue)); 
 			}
 		}
 		

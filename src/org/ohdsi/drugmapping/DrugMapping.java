@@ -23,12 +23,14 @@ import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPINGInputFiles;
 import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
-public class DrugMapping {
+public class DrugMapping { 
+	public static Double strengthDeviationPercentage = 0.0;
+	
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
 	
 	private static String currentDate = null;
 	private static String currentPath = "";	
-	private static MappingInputDefinition inputFiles = null; 
+	private static MappingInputDefinition inputFiles = null;
 	
 	private MainFrame mainFrame;
 	private String special = "";
@@ -199,6 +201,8 @@ public class DrugMapping {
 				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
 				logFileSettings("CAS File", getFile("CAS File"));
 				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
+				System.out.println("Strength deviation percentage: " + DrugMapping.strengthDeviationPercentage);
+				System.out.println();
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)

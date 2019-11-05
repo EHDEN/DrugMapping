@@ -1369,11 +1369,11 @@ public class GenericMapping extends Mapping {
 		}
 		
 		for (SourceDrug sourceDrug : sourceDrugsAllIngredientsMapped) {
-			if (drugMappingClinicalDrug.get(sourceDrug) == null) {
+			if ((drugMappingClinicalDrug.get(sourceDrug) == null) && (sourceDrug.getIngredients().size() == 1)) { // Clinical Drug Comp is always single ingredient
 				List<CDMIngredient> cdmDrugIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 
-				if (cdmDrugIngredients.size() > 0) {
-					// Find CDM Clinical Drug Comps with corresponding ingredients
+				if (cdmDrugIngredients.size() == 1) {
+					// Find CDM Clinical Drug Comps with corresponding ingredient
 					Set<CDMDrug> cdmDrugCompsWithIngredients = null;
 					for (CDMIngredient cdmIngredient : cdmDrugIngredients) {
 						Set<CDMDrug> cdmDrugCompsWithIngredient = cdmDrugCompsContainingIngredient.get(cdmIngredient);

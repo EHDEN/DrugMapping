@@ -2,6 +2,7 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 
+import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.UnitConversion;
 
 public class SourceDrugComponent {
@@ -134,7 +135,7 @@ public class SourceDrugComponent {
 	
 	
 	public boolean matches(UnitConversion unitConversion, Double numeratorDosage, String numeratorDosageUnit, Double denominatorDosage, String denominatorDosageUnit) {
-		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage);
+		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage, DrugMapping.strengthDeviationPercentage);
 	}
 
 }
