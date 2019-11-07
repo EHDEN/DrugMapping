@@ -76,7 +76,6 @@ public class GenericMapping extends Mapping {
 	private List<String> report = new ArrayList<String>();
 	
 	
-	
 	public static String uniformCASNumber(String casNumber) {
 		casNumber = casNumber.replaceAll(" ", "").replaceAll("-", "");
 		if (!casNumber.equals("")) {
@@ -274,7 +273,7 @@ public class GenericMapping extends Mapping {
 			PrintWriter missingATCFile = null;
 			try {
 				// Create output file
-				fileName = DrugMapping.getCurrentPath() + "/DrugMapping Missing ATC.csv";
+				fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Missing ATC.csv";
 				missingATCFile = new PrintWriter(new File(fileName));
 				SourceDrug.writeHeaderToFile(missingATCFile);
 			} 
@@ -411,7 +410,7 @@ public class GenericMapping extends Mapping {
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getCurrentPath() + "/" + UnitConversion.FILENAME);
+			System.out.println(DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "" + UnitConversion.FILENAME);
 			ok = false;
 		}
 		
@@ -428,7 +427,7 @@ public class GenericMapping extends Mapping {
 			System.out.println("");
 			System.out.println("First fill the form conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getCurrentPath() + "/" + FormConversion.FILENAME);
+			System.out.println(DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "" + FormConversion.FILENAME);
 			ok = false;
 		}
 		
@@ -452,7 +451,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter rxNormIngredientsFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping RxNorm Ingredients.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping RxNorm Ingredients.csv";
 			rxNormIngredientsFile = new PrintWriter(new File(fileName));
 			rxNormIngredientsFile.println(CDMIngredient.getHeaderWithSynonyms());
 		}
@@ -479,7 +478,7 @@ public class GenericMapping extends Mapping {
 					
 					List<String> nameList = new ArrayList<String>();
 					nameList.add(cdmIngredient.getConceptName());
-					nameList.add(modifyName(cdmIngredient.getConceptName()));
+					nameList.add(modifyName(cdmIngredientNameModified));
 					//nameList.add(cdmIngredientNameNoSpaces);
 					
 					for (String name : nameList) {
@@ -747,7 +746,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter cdmRxNormIngredientsNameIndexFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping CDM RxNorm Ingredients Name Index.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping CDM RxNorm Ingredients Name Index.csv";
 			cdmRxNormIngredientsNameIndexFile = new PrintWriter(new File(fileName));
 			cdmRxNormIngredientsNameIndexFile.println("Name," + CDMIngredient.getHeader());
 		}
@@ -899,7 +898,7 @@ public class GenericMapping extends Mapping {
 
 		try {
 			// Create match ingredients file output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Match Ingredients.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Match Ingredients.csv";
 			PrintWriter matchIngredientsFile = new PrintWriter(new File(fileName));
 			matchIngredientsFile.println(SourceIngredient.getMatchHeader() + "," + CDMIngredient.getHeader());
 			
@@ -920,7 +919,7 @@ public class GenericMapping extends Mapping {
 
 		try {
 			// Create match ingredients file output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Match SourceDrug Ingredients.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Match SourceDrug Ingredients.csv";
 			PrintWriter matchSourceDrugIngredientsFile = new PrintWriter(new File(fileName));
 			matchSourceDrugIngredientsFile.println(SourceDrug.getHeader() + "," + SourceIngredient.getMatchHeader() + "," + CDMIngredient.getHeader());
 			
@@ -1155,7 +1154,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter multipleClinicalDrugsMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Multiple Clinical Drugs Mappings.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Multiple Clinical Drugs Mappings.csv";
 			multipleClinicalDrugsMappingFile = new PrintWriter(new File(fileName));
 			multipleClinicalDrugsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
@@ -1167,7 +1166,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter noClinicalDrugsMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping No Clinical Drugs Mappings.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping No Clinical Drugs Mappings.csv";
 			noClinicalDrugsMappingFile = new PrintWriter(new File(fileName));
 			noClinicalDrugsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
@@ -1237,9 +1236,6 @@ public class GenericMapping extends Mapping {
 							}
 						}
 						cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
-						if (cdmDrugsWithIngredients.size() == 0) {
-							break;
-						}
 					}
 				}
 				
@@ -1347,7 +1343,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter multipleClinicalDrugCompsMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Multiple Clinical Drug Comps Mappings.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Multiple Clinical Drug Comps Mappings.csv";
 			multipleClinicalDrugCompsMappingFile = new PrintWriter(new File(fileName));
 			multipleClinicalDrugCompsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
@@ -1359,7 +1355,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter noClinicalDrugCompsMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping No Clinical Drug Comps Mappings.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping No Clinical Drug Comps Mappings.csv";
 			noClinicalDrugCompsMappingFile = new PrintWriter(new File(fileName));
 			noClinicalDrugCompsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
@@ -1506,7 +1502,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter multipleClinicalDrugFormsMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Multiple Clinical Drug Forms Mappings.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Multiple Clinical Drug Forms Mappings.csv";
 			multipleClinicalDrugFormsMappingFile = new PrintWriter(new File(fileName));
 			multipleClinicalDrugFormsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
@@ -1518,7 +1514,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter noClinicalDrugFormsMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping No Clinical Drug Forms Mappings.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping No Clinical Drug Forms Mappings.csv";
 			noClinicalDrugFormsMappingFile = new PrintWriter(new File(fileName));
 			noClinicalDrugFormsMappingFile.println(SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
@@ -1684,9 +1680,9 @@ public class GenericMapping extends Mapping {
 		PrintWriter drugMappingFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping.csv";
 			drugMappingFile = new PrintWriter(new File(fileName));
-			drugMappingFile.println("MappingType," + SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
+			drugMappingFile.println("MappingStatus," + SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + "," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
@@ -1694,47 +1690,48 @@ public class GenericMapping extends Mapping {
 		}
 
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			String mappingType = "Unmapped";
+			String mappingStatus = "Unmapped";
 			List<CDMIngredientStrength> ingredientStrengths = new ArrayList<CDMIngredientStrength>();
 			CDMDrug cdmDrug = drugMappingClinicalDrug.get(sourceDrug);
 			if (cdmDrug != null) {
-				mappingType = "Clinical Drug";
+				mappingStatus = "Clinical Drug";
 				ingredientStrengths = drugMappingClinicalDrugIngredients.get(sourceDrug);
 			}
 			else {
 				cdmDrug = drugMappingClinicalDrugComp.get(sourceDrug);
 				if (cdmDrug != null) {
-					mappingType = "Clinical Drug Comp";
+					mappingStatus = "Clinical Drug Comp";
 					ingredientStrengths = drugMappingClinicalDrugCompIngredients.get(sourceDrug);
 				}
 				else {
 					cdmDrug = drugMappingClinicalDrugForm.get(sourceDrug);
 					if (cdmDrug != null) {
-						mappingType = "Clinical Drug Form";
+						mappingStatus = "Clinical Drug Form";
 						ingredientStrengths = drugMappingClinicalDrugFormIngredients.get(sourceDrug);
 					}
 				}
 			}
+			
 			if (cdmDrug != null) {
 				if (sourceDrug.getComponents().size() != ingredientStrengths.size()) {
 					System.out.println("ERROR: " + sourceDrug + "SourceIngredients: " + Integer.toString(sourceDrug.getComponents().size()) + " CDMIngredients: " + Integer.toString(ingredientStrengths.size()));
 				}
 				for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-					String record = mappingType;
+					String record = mappingStatus;
 					record += "," + sourceDrug.toString();
 					record += "," + sourceDrug.getComponents().get(ingredientNr).toString();
 					record += "," + cdmDrug.toString();
-					record += "," + (mappingType == "Clinical Drug Form" ? ingredientStrengths.get(ingredientNr).toStringIngredient() : ingredientStrengths.get(ingredientNr).toString());
+					record += "," + (mappingStatus == "Clinical Drug Form" ? ingredientStrengths.get(ingredientNr).toStringIngredient() : ingredientStrengths.get(ingredientNr).toString());
 
 					drugMappingFile.println(record);
 				}
 			}
 			else {
 				for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-					String record = mappingType;
-					record += "," + (ingredientNr == 0 ? sourceDrug.toString() : SourceDrug.emptyRecord());
+					String record = mappingStatus;
+					record += "," + sourceDrug.toString();
 					record += "," + sourceDrug.getComponents().get(ingredientNr).toString();
-					record += "," + mappingType;
+					record += "," + mappingStatus;
 					record += "," + CDMDrug.emptyRecord();
 					record += "," + CDMIngredientStrength.emptyRecord();
 
@@ -1759,9 +1756,9 @@ public class GenericMapping extends Mapping {
 		PrintWriter drugMappingRejectedFile = null;
 		try {
 			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/DrugMapping Rejected.csv";
+			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Rejected.csv";
 			drugMappingRejectedFile = new PrintWriter(new File(fileName));
-			drugMappingRejectedFile.println("MappingType," + SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + ",Reject Reason," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
+			drugMappingRejectedFile.println("MappingStatus,MappingType," + SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + ",Reject Reason," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
@@ -1769,8 +1766,29 @@ public class GenericMapping extends Mapping {
 		}
 
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			String mappingType = "Unknown";
+			String mappingStatus = "Unmapped";
 			List<CDMIngredientStrength> ingredientStrengths = new ArrayList<CDMIngredientStrength>();
+			CDMDrug cdmDrug = drugMappingClinicalDrug.get(sourceDrug);
+			if (cdmDrug != null) {
+				mappingStatus = "Clinical Drug";
+				ingredientStrengths = drugMappingClinicalDrugIngredients.get(sourceDrug);
+			}
+			else {
+				cdmDrug = drugMappingClinicalDrugComp.get(sourceDrug);
+				if (cdmDrug != null) {
+					mappingStatus = "Clinical Drug Comp";
+					ingredientStrengths = drugMappingClinicalDrugCompIngredients.get(sourceDrug);
+				}
+				else {
+					cdmDrug = drugMappingClinicalDrugForm.get(sourceDrug);
+					if (cdmDrug != null) {
+						mappingStatus = "Clinical Drug Form";
+						ingredientStrengths = drugMappingClinicalDrugFormIngredients.get(sourceDrug);
+					}
+				}
+			}
+			
+			String mappingType = "Unknown";
 			List<CDMDrug> rejectedCDMDrugs = rejectedClinicalDrugs.get(sourceDrug);
 			List<String> rejectReasons = rejectedClinicalDrugsReasons.get(sourceDrug);
 			if (rejectedCDMDrugs != null) {
@@ -1793,6 +1811,7 @@ public class GenericMapping extends Mapping {
 					}
 				}
 			}
+			
 			if (rejectedCDMDrugs != null) {
 				for (int drugNr = 0; drugNr < rejectedCDMDrugs.size(); drugNr++) {
 					CDMDrug rejectedCDMDrug = rejectedCDMDrugs.get(drugNr);
@@ -1804,7 +1823,8 @@ public class GenericMapping extends Mapping {
 									System.out.println("ERROR: " + sourceDrug + "SourceIngredients: " + Integer.toString(sourceDrug.getComponents().size()) + " CDMIngredients: " + Integer.toString(ingredientStrengths.size()));
 								}
 								for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-									String record = mappingType;
+									String record = mappingStatus;
+									record += "," + mappingType;
 									record += "," + sourceDrug.toString();
 									record += "," + sourceDrug.getComponents().get(ingredientNr).toString();
 									record += "," + rejectReason;
@@ -1816,7 +1836,8 @@ public class GenericMapping extends Mapping {
 							}
 							else {
 								for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-									String record = mappingType;
+									String record = mappingStatus;
+									record += "," + mappingType;
 									record += "," + sourceDrug.toString();
 									record += "," + sourceDrug.getComponents().get(ingredientNr).toString();
 									record += "," + rejectReason;
@@ -1830,7 +1851,8 @@ public class GenericMapping extends Mapping {
 						else {
 							if ((ingredientStrengths != null) && (ingredientStrengths.size() > 0)) {
 								for (int ingredientNr = 0; ingredientNr < ingredientStrengths.size(); ingredientNr++) {
-									String record = mappingType;
+									String record = mappingStatus;
+									record += "," + mappingType;
 									record += "," + sourceDrug.toString();
 									record += "," + SourceDrugComponent.emptyRecord();
 									record += "," + rejectReason;
@@ -1841,7 +1863,8 @@ public class GenericMapping extends Mapping {
 								}
 							}
 							else {
-								String record = mappingType;
+								String record = mappingStatus;
+								record += "," + mappingType;
 								record += "," + sourceDrug.toString();
 								record += "," + SourceDrugComponent.emptyRecord();
 								record += "," + rejectReason;
@@ -1855,7 +1878,8 @@ public class GenericMapping extends Mapping {
 					else {
 						if (sourceDrug.getComponents() != null) {
 							for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-								String record = mappingType;
+								String record = mappingStatus;
+								record += "," + mappingType;
 								record += "," + sourceDrug.toString();
 								record += "," + sourceDrug.getComponents().get(ingredientNr).toString();
 								record += "," + rejectReason;
@@ -1866,7 +1890,8 @@ public class GenericMapping extends Mapping {
 							}
 						}
 						else {
-							String record = mappingType;
+							String record = mappingStatus;
+							record += "," + mappingType;
 							record += "," + sourceDrug.toString();
 							record += "," + SourceDrugComponent.emptyRecord();
 							record += "," + rejectReason;

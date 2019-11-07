@@ -35,7 +35,7 @@ public class CDMDrug extends CDMConcept {
 			}
 			form_concept_ids += form_concept_id;
 		}
-		description += "," + description;
+		description += "," + form_concept_ids;
 		return description;
 	}
 	

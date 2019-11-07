@@ -2,9 +2,11 @@ package org.ohdsi.drugmapping;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +27,12 @@ import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
 public class DrugMapping { 
 	public static Double strengthDeviationPercentage = 0.0;
+	public static String outputVersion = "";
 	
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
 	
 	private static String currentDate = null;
-	private static String currentPath = "";	
+	private static String currentPath = null;	
 	private static MappingInputDefinition inputFiles = null;
 	
 	private MainFrame mainFrame;
@@ -50,6 +53,24 @@ public class DrugMapping {
 		Calendar cal = Calendar.getInstance();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
 		return sdf.format(cal.getTime());
+	}
+	
+	
+	private static String getOutputVersion(String logFileName) {
+		String version = "";
+		
+		String date = getCurrentDate();
+		
+		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
+			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());
+			File logFile = new File(currentPath + "/" + date + " " + versionNrString + " " + logFileName);
+			if (!logFile.exists()) {
+				version = date + " " + versionNrString + " ";
+				break;
+			}
+		}
+		
+		return version;
 	}
 	
 	
@@ -79,9 +100,11 @@ public class DrugMapping {
 			special = special.toUpperCase();
 			if (special.equals("ZINDEX")) {
 				inputFiles = new ZIndexConversionInputFiles();
+				logFileName = "ZIndex - Conversion - Log.txt";
 			}
 			else if (special.equals("IPCIMAPPING")) {
 				inputFiles = new IPCIMAPPINGInputFiles();
+				logFileName = "IPCIMAPPING Log.txt";
 			}
 			else {
 				JOptionPane.showMessageDialog(null, "Unknown special definition '" + special + "'!", "Dialog",JOptionPane.ERROR_MESSAGE);
@@ -91,6 +114,7 @@ public class DrugMapping {
 		else {
 			special = "";
 			inputFiles = new GenericMappingInputFiles();
+			logFileName = "DrugMapping Log.txt";
 		}
 		
 		mainFrame = new MainFrame(this);
@@ -104,31 +128,24 @@ public class DrugMapping {
 		if (parameters.containsKey("filesettings")) {
 			fileSettings = mainFrame.readSettingsFromFile(parameters.get("filesettings"));
 		}
-		if (parameters.containsKey("logfile")) {
-			logFileName = parameters.get("logfile");
+		if (parameters.containsKey("path")) {
+			currentPath = parameters.get("path");
 		}
-
-		File logFile;
-		if (logFileName == null) {
+		else {
 			try {
 				currentPath = new File("./").getCanonicalPath().replaceAll("\\\\", "/");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			int sequenceNr = 1;
-			boolean reUse = false;
-			do {
-				if (sequenceNr == 100) {
-					sequenceNr = 1;
-					reUse = true;
-				}
-				String sequenceNrString = Integer.toString(sequenceNr);
-				logFileName = currentPath + "/" + getCurrentDate() + " " + ("00" + sequenceNrString).substring(sequenceNrString.length()) + " DrugMapping Log.txt";
-				logFile = new File(logFileName);
-			} while ((!reUse) && logFile.exists());
+		}
+
+		File logFile;
+		if (currentPath != null) {
+			outputVersion = getOutputVersion(logFileName);
+			logFileName = currentPath + "/" + outputVersion + logFileName;
 		}
 		else {
+			outputVersion = "";
 			logFile = new File(logFileName);
 			try {
 				currentPath = logFile.getCanonicalPath().replaceAll("\\\\", "/");
@@ -200,9 +217,9 @@ public class DrugMapping {
 				logDatabaseSettings(getDatabase());
 				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
 				logFileSettings("CAS File", getFile("CAS File"));
-				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
 				System.out.println("Strength deviation percentage: " + DrugMapping.strengthDeviationPercentage);
 				System.out.println();
+				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)
