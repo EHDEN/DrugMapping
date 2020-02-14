@@ -74,8 +74,18 @@ public class SourceDrugComponent {
 	}
 	
 	
+	public Double getNumeratorDosage() {
+		return numeratorDosage;
+	}
+	
+	
 	public String getNumeratorDosageUnit() {
 		return numeratorDosageUnit;
+	}
+	
+	
+	public Double getDenominatorDosage() {
+		return denominatorDosage;
 	}
 	
 	

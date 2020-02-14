@@ -267,6 +267,11 @@ public class FormConversion {
 	}
 	
 	
+	public String getCDMFormConceptName(String cdmFromConceptId) {
+		return cdmFormConceptIdToNameMap.get(cdmFromConceptId);
+	}
+	
+	
 	public boolean matches(String sourceForm, String cdmForm) {
 		boolean matches = false;
 

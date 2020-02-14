@@ -176,4 +176,17 @@ public class CDMIngredientStrength {
 		description += "," + (((denominator_unit == null) || (denominator_unit.getConceptName() == null)) ? "" : denominator_unit.getConceptName());
 		return description;
 	}
+	
+	
+	public String getDescription() {
+		String description = "";
+		
+		description = ingredient.getConceptName();
+		description += " (" + ingredient.getConceptId() + ")";
+		description += (getNumeratorDosage() == null ? "" : " " + getNumeratorDosage()) + (((numerator_unit == null) || (numerator_unit.getConceptName() == null)) ? "" : " " + numerator_unit.getConceptName() + " (" + numerator_unit.getConceptId() + ")");
+		description += " / ";
+		description += (getDenominatorDosage() == null ? "" : " " +  getDenominatorDosage()) + (((denominator_unit == null) || (denominator_unit.getConceptName() == null)) ? "" : " " + denominator_unit.getConceptName() + " (" + denominator_unit.getConceptId() + ")");
+		
+		return description;
+	}
 }

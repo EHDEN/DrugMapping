@@ -65,6 +65,18 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
+	public String getStrengthDescription() {
+		String description = "";
+		
+		for (CDMIngredientStrength strength : ingredients) {
+			description += (description.equals("") ? "" : "; ");
+			description += strength.getDescription();
+		}
+		
+		return description;
+	}
+	
+	
 	public void addIngredientStrength(CDMIngredientStrength ingredient) {
 		ingredients.add(ingredient);
 		String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
