@@ -67,11 +67,13 @@ public class GenericMapping extends Mapping {
 	private Map<SourceDrug, CDMDrug> drugMappingClinicalDrugComp = new HashMap<SourceDrug, CDMDrug>();
 	private Map<SourceDrug, List<CDMIngredientStrength>> drugMappingClinicalDrugCompIngredients = new HashMap<SourceDrug, List<CDMIngredientStrength>>();
 	private Map<SourceDrug, Set<String>> rejectedClinicalDrugCompsByStrength = new HashMap<SourceDrug, Set<String>>();
+	private Map<SourceDrug, Set<String>> rejectedClinicalDrugCompsNotUnique = new HashMap<SourceDrug, Set<String>>();
 	private Map<SourceDrug, List<CDMDrug>> rejectedClinicalDrugComps = new HashMap<SourceDrug, List<CDMDrug>>();
 	private Map<SourceDrug, List<String>> rejectedClinicalDrugCompsReasons = new HashMap<SourceDrug, List<String>>();
 	private Map<SourceDrug, CDMDrug> drugMappingClinicalDrugForm = new HashMap<SourceDrug, CDMDrug>();
 	private Map<SourceDrug, List<CDMIngredientStrength>> drugMappingClinicalDrugFormIngredients = new HashMap<SourceDrug, List<CDMIngredientStrength>>();
 	private Map<SourceDrug, Set<String>> rejectedClinicalDrugFormsByForm = new HashMap<SourceDrug, Set<String>>();
+	private Map<SourceDrug, Set<String>> rejectedClinicalDrugFormsNotUnique = new HashMap<SourceDrug, Set<String>>();
 	private Map<SourceDrug, List<CDMDrug>> rejectedClinicalDrugForms = new HashMap<SourceDrug, List<CDMDrug>>();
 	private Map<SourceDrug, List<String>> rejectedClinicalDrugFormsReasons = new HashMap<SourceDrug, List<String>>();
 	
@@ -1353,7 +1355,7 @@ public class GenericMapping extends Mapping {
 		}
 		
 		for (SourceDrug sourceDrug : sourceDrugsAllIngredientsMapped) {
-			if ((drugMappingClinicalDrug.get(sourceDrug) == null) && (sourceDrug.getIngredients().size() == 1)) { // Clinical Drug Comp is always single ingredient
+			if ((drugMappingClinicalDrug.get(sourceDrug) == null) && (drugMappingClinicalDrugForm.get(sourceDrug) == null) && (sourceDrug.getIngredients().size() == 1)) { // Clinical Drug Comp is always single ingredient
 				List<CDMIngredient> cdmDrugIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 
 				if (cdmDrugIngredients.size() == 1) {
@@ -1397,16 +1399,12 @@ public class GenericMapping extends Mapping {
 									matchingIngredientsMap.put(cdmDrug, matchingIngredients);
 								}
 								else {
-									List<CDMDrug> rejectedList = rejectedClinicalDrugComps.get(sourceDrug);
-									List<String> rejectedReasonsList = rejectedClinicalDrugCompsReasons.get(sourceDrug);
-									if (rejectedList == null) {
-										rejectedList = new ArrayList<CDMDrug>();
-										rejectedClinicalDrugComps.put(sourceDrug, rejectedList);
-										rejectedReasonsList = new ArrayList<String>();
-										rejectedClinicalDrugCompsReasons.put(sourceDrug, rejectedReasonsList);
+									Set<String> rejectedStrengths = rejectedClinicalDrugCompsByStrength.get(sourceDrug);
+									if (rejectedStrengths == null) {
+										rejectedStrengths = new HashSet<String>();
+										rejectedClinicalDrugCompsByStrength.put(sourceDrug, rejectedStrengths);
 									}
-									rejectedList.add(cdmDrug);
-									rejectedReasonsList.add("Incompatible Ingredients/Strengths");
+									rejectedStrengths.add(cdmDrug.getStrengthDescription());
 								}
 							}
 						}
@@ -1415,24 +1413,12 @@ public class GenericMapping extends Mapping {
 							drugMappingClinicalDrugCompIngredients.put(sourceDrug, matchingIngredientsMap.get(matchingCDMDrugs.get(0)));
 						}
 						else if (matchingCDMDrugs.size() > 1) {
-							List<CDMDrug> rejectedList = rejectedClinicalDrugComps.get(sourceDrug);
-							List<String> rejectedReasonsList = rejectedClinicalDrugCompsReasons.get(sourceDrug);
-							if (rejectedList == null) {
-								rejectedList = new ArrayList<CDMDrug>();
-								rejectedClinicalDrugComps.put(sourceDrug, rejectedList);
-								rejectedReasonsList = new ArrayList<String>();
-								rejectedClinicalDrugCompsReasons.put(sourceDrug, rejectedReasonsList);
+							Set<String> rejectedNotUnique = new HashSet<String>();
+							rejectedClinicalDrugsNotUnique.put(sourceDrug, rejectedNotUnique);
+							for (CDMDrug cdmDrug : matchingCDMDrugs) {
+								rejectedNotUnique.add(cdmDrug.getConceptName() + " (" + cdmDrug.getConceptId() + "): " + cdmDrug.getStrengthDescription());
 							}
 							multipleDrugMappings++;
-							if (multipleClinicalDrugCompsMappingFile != null) {
-								for (CDMDrug cdmDrug : matchingCDMDrugs) {
-									for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-										multipleClinicalDrugCompsMappingFile.println(sourceDrug + "," + sourceDrug.getComponents().get(ingredientNr) + "," + cdmDrug + "," + cdmDrug.getIngredients().get(ingredientNr).toString());
-									}
-									rejectedList.add(cdmDrug);
-									rejectedReasonsList.add("Multiple mappings");
-								}
-							}
 						}
 						else {
 							if (noClinicalDrugCompsMappingFile != null) {
@@ -1560,16 +1546,12 @@ public class GenericMapping extends Mapping {
 								}
 								if (!formFound) {
 									cdmDrugsMissingForm.add(cdmDrug);
-									List<CDMDrug> rejectedList = rejectedClinicalDrugForms.get(sourceDrug);
-									List<String> rejectedReasonsList = rejectedClinicalDrugFormsReasons.get(sourceDrug);
-									if (rejectedList == null) {
-										rejectedList = new ArrayList<CDMDrug>();
-										rejectedClinicalDrugForms.put(sourceDrug, rejectedList);
-										rejectedReasonsList = new ArrayList<String>();
-										rejectedClinicalDrugFormsReasons.put(sourceDrug, rejectedReasonsList);
+									Set<String> rejectedForms = rejectedClinicalDrugFormsByForm.get(sourceDrug);
+									if (rejectedForms == null) {
+										rejectedForms = new HashSet<String>();
+										rejectedClinicalDrugFormsByForm.put(sourceDrug, rejectedForms);
 									}
-									rejectedList.add(cdmDrug);
-									rejectedReasonsList.add("Incompatible Form");
+									rejectedForms.addAll(cdmDrug.getForms());
 								}
 							}
 							cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
@@ -1595,24 +1577,12 @@ public class GenericMapping extends Mapping {
 							drugMappingClinicalDrugFormIngredients.put(sourceDrug, matchingIngredientsMap.get(matchingCDMDrugs.get(0)));
 						}
 						else if (matchingCDMDrugs.size() > 1) {
-							List<CDMDrug> rejectedList = rejectedClinicalDrugForms.get(sourceDrug);
-							List<String> rejectedReasonsList = rejectedClinicalDrugFormsReasons.get(sourceDrug);
-							if (rejectedList == null) {
-								rejectedList = new ArrayList<CDMDrug>();
-								rejectedClinicalDrugForms.put(sourceDrug, rejectedList);
-								rejectedReasonsList = new ArrayList<String>();
-								rejectedClinicalDrugFormsReasons.put(sourceDrug, rejectedReasonsList);
+							Set<String> rejectedNotUnique = new HashSet<String>();
+							rejectedClinicalDrugFormsNotUnique.put(sourceDrug, rejectedNotUnique);
+							for (CDMDrug cdmDrug : matchingCDMDrugs) {
+								rejectedNotUnique.add(cdmDrug.getConceptName() + " (" + cdmDrug.getConceptId() + ")");
 							}
 							multipleDrugMappings++;
-							if (multipleClinicalDrugFormsMappingFile != null) {
-								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-									for (int ingredientNr = 0; ingredientNr < sourceDrug.getComponents().size(); ingredientNr++) {
-										multipleClinicalDrugFormsMappingFile.println(sourceDrug + "," + sourceDrug.getComponents().get(ingredientNr) + "," + cdmDrug + "," + cdmDrug.getIngredients().get(ingredientNr).toString());
-									}
-									rejectedList.add(cdmDrug);
-									rejectedReasonsList.add("Form Multiple mappings");
-								}
-							}
 						}
 					}
 					else {
@@ -1740,100 +1710,105 @@ public class GenericMapping extends Mapping {
 		String fileName = "";
 		System.out.println(DrugMapping.getCurrentTime() + "     Saving Rejected Drug Mappings ...");
 
-
-		PrintWriter clinicalDrugMappingRejectedByFormFile = null;
-		try {
-			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "ClinicalDrug Mapping Rejected By Form.csv";
-			clinicalDrugMappingRejectedByFormFile = new PrintWriter(new File(fileName));
-			clinicalDrugMappingRejectedByFormFile.println(SourceDrug.getHeader() + ",Available Forms ...");
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
-			clinicalDrugMappingRejectedByFormFile = null;
-		}
+		PrintWriter clinicalDrugMappingRejectedByFormFile = openOutputFile("ClinicalDrug Mapping Rejected By Form.csv", SourceDrug.getHeader() + ",Available Forms ...");
+		PrintWriter clinicalDrugMappingRejectedByStrengthFile = openOutputFile("ClinicalDrug Mapping Rejected By Strength.csv", SourceDrug.getHeader() + ",Available Strengths ...");
+		PrintWriter clinicalDrugMappingRejectedNotUniqueFile = openOutputFile("ClinicalDrug Mapping Rejected Because Not Unique.csv", SourceDrug.getHeader() + ",Available Matches ...");
+		PrintWriter clinicalDrugCompMappingRejectedByStrengthFile = openOutputFile("ClinicalDrugComp Mapping Rejected By Strength.csv", SourceDrug.getHeader() + ",Available Strengths ...");
+		PrintWriter clinicalDrugCompMappingRejectedNotUniqueFile = openOutputFile("ClinicalDrugComp Mapping Rejected Because Not Unique.csv", SourceDrug.getHeader() + ",Available Matches ...");
+		PrintWriter clinicalDrugFormMappingRejectedByFormFile = openOutputFile("ClinicalDrugForm Mapping Rejected By Form.csv", SourceDrug.getHeader() + ",Available Forms ...");
+		PrintWriter clinicalDrugFormMappingRejectedNotUniqueFile = openOutputFile("ClinicalDrugForm Mapping Rejected Because Not Unique.csv", SourceDrug.getHeader() + ",Available Matches ...");
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			if (rejectedClinicalDrugsByForm.containsKey(sourceDrug)) {
-				Set<String> availableForms = rejectedClinicalDrugsByForm.get(sourceDrug);
-				String availableFormsString = "";
-				for (String availableForm : availableForms) {
-					availableFormsString += "," + formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")";
+//			if ((drugMappingClinicalDrug.get(sourceDrug) == null) && (drugMappingClinicalDrugComp.get(sourceDrug) == null) && (drugMappingClinicalDrugForm.get(sourceDrug) == null)) {
+				if (rejectedClinicalDrugsByForm.containsKey(sourceDrug)) {
+					Set<String> availableForms = rejectedClinicalDrugsByForm.get(sourceDrug);
+					String availableFormsString = "";
+					for (String availableForm : availableForms) {
+						availableFormsString += "," + formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")";
+					}
+					if (clinicalDrugMappingRejectedByFormFile != null) {
+						clinicalDrugMappingRejectedByFormFile.println(sourceDrug + availableFormsString);
+					}
 				}
-				clinicalDrugMappingRejectedByFormFile.println(sourceDrug + availableFormsString);
-			}
-		}
-		
-		if (clinicalDrugMappingRejectedByFormFile != null) {
-			clinicalDrugMappingRejectedByFormFile.close();
-		}
 
-		PrintWriter clinicalDrugMappingRejectedByStrengthFile = null;
-		try {
-			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "ClinicalDrug Mapping Rejected By Strength.csv";
-			clinicalDrugMappingRejectedByStrengthFile = new PrintWriter(new File(fileName));
-			clinicalDrugMappingRejectedByStrengthFile.println(SourceDrug.getHeader() + ",Available Strengths ...");
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
-			clinicalDrugMappingRejectedByStrengthFile = null;
-		}
-		
-		for (SourceDrug sourceDrug : sourceDrugs) {
-			if (rejectedClinicalDrugsByStrength.containsKey(sourceDrug)) {
-				Set<String> availableStrengths = rejectedClinicalDrugsByStrength.get(sourceDrug);
-				String availableStrengthsString = "";
-				for (String availableStrength : availableStrengths) {
-					availableStrengthsString += "," + availableStrength;
+				if (rejectedClinicalDrugsByStrength.containsKey(sourceDrug)) {
+					Set<String> availableStrengths = rejectedClinicalDrugsByStrength.get(sourceDrug);
+					String availableStrengthsString = "";
+					for (String availableStrength : availableStrengths) {
+						availableStrengthsString += "," + availableStrength;
+					}
+					if (clinicalDrugMappingRejectedByStrengthFile != null) {
+						clinicalDrugMappingRejectedByStrengthFile.println(sourceDrug + availableStrengthsString);
+					}
 				}
-				clinicalDrugMappingRejectedByStrengthFile.println(sourceDrug + availableStrengthsString);
-			}
-		}
-		
-		if (clinicalDrugMappingRejectedByStrengthFile != null) {
-			clinicalDrugMappingRejectedByStrengthFile.close();
-		}
 
-		PrintWriter clinicalDrugMappingRejectedNotUniqueFile = null;
-		try {
-			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "ClinicalDrug Mapping Rejected Because Not Unique.csv";
-			clinicalDrugMappingRejectedNotUniqueFile = new PrintWriter(new File(fileName));
-			clinicalDrugMappingRejectedNotUniqueFile.println(SourceDrug.getHeader() + ",Available Matches ...");
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
-			clinicalDrugMappingRejectedNotUniqueFile = null;
-		}
-		
-		for (SourceDrug sourceDrug : sourceDrugs) {
-			if (rejectedClinicalDrugsNotUnique.containsKey(sourceDrug)) {
-				Set<String> availableMatches = rejectedClinicalDrugsNotUnique.get(sourceDrug);
-				String availableMatchesString = "";
-				for (String availableMatch : availableMatches) {
-					availableMatchesString += "," + availableMatch;
+				if (rejectedClinicalDrugsNotUnique.containsKey(sourceDrug)) {
+					Set<String> availableMatches = rejectedClinicalDrugsNotUnique.get(sourceDrug);
+					String availableMatchesString = "";
+					for (String availableMatch : availableMatches) {
+						availableMatchesString += "," + availableMatch;
+					}
+					if (clinicalDrugMappingRejectedNotUniqueFile != null) {
+						clinicalDrugMappingRejectedNotUniqueFile.println(sourceDrug + availableMatchesString);
+					}
 				}
-				clinicalDrugMappingRejectedNotUniqueFile.println(sourceDrug + availableMatchesString);
-			}
+
+				if (rejectedClinicalDrugCompsByStrength.containsKey(sourceDrug)) {
+					Set<String> availableStrengths = rejectedClinicalDrugCompsByStrength.get(sourceDrug);
+					String availableStrengthsString = "";
+					for (String availableStrength : availableStrengths) {
+						availableStrengthsString += "," + availableStrength;
+					}
+					if (clinicalDrugCompMappingRejectedByStrengthFile != null) {
+						clinicalDrugCompMappingRejectedByStrengthFile.println(sourceDrug + availableStrengthsString);
+					}
+				}
+
+				if (rejectedClinicalDrugCompsNotUnique.containsKey(sourceDrug)) {
+					Set<String> availableMatches = rejectedClinicalDrugCompsNotUnique.get(sourceDrug);
+					String availableMatchesString = "";
+					for (String availableMatch : availableMatches) {
+						availableMatchesString += "," + availableMatch;
+					}
+					if (clinicalDrugCompMappingRejectedNotUniqueFile != null) {
+						clinicalDrugCompMappingRejectedNotUniqueFile.println(sourceDrug + availableMatchesString);
+					}
+				}
+
+				if (rejectedClinicalDrugFormsByForm.containsKey(sourceDrug)) {
+					Set<String> availableForms = rejectedClinicalDrugFormsByForm.get(sourceDrug);
+					String availableFormsString = "";
+					for (String availableForm : availableForms) {
+						availableFormsString += "," + formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")";
+					}
+					if (clinicalDrugFormMappingRejectedByFormFile != null) {
+						clinicalDrugFormMappingRejectedByFormFile.println(sourceDrug + availableFormsString);
+					}
+				}
+
+				if (rejectedClinicalDrugFormsNotUnique.containsKey(sourceDrug)) {
+					Set<String> availableMatches = rejectedClinicalDrugFormsNotUnique.get(sourceDrug);
+					String availableMatchesString = "";
+					for (String availableMatch : availableMatches) {
+						availableMatchesString += "," + availableMatch;
+					}
+					if(clinicalDrugFormMappingRejectedNotUniqueFile != null) {
+						clinicalDrugFormMappingRejectedNotUniqueFile.println(sourceDrug + availableMatchesString);
+					}
+				}
+//			}
 		}
 		
-		if (clinicalDrugMappingRejectedNotUniqueFile != null) {
-			clinicalDrugMappingRejectedNotUniqueFile.close();
-		}
+		closeOutputFile(clinicalDrugMappingRejectedByFormFile);
+		closeOutputFile(clinicalDrugMappingRejectedByStrengthFile);
+		closeOutputFile(clinicalDrugMappingRejectedNotUniqueFile);
+		closeOutputFile(clinicalDrugCompMappingRejectedByStrengthFile);
+		closeOutputFile(clinicalDrugCompMappingRejectedNotUniqueFile);
+		closeOutputFile(clinicalDrugFormMappingRejectedByFormFile);
+		closeOutputFile(clinicalDrugFormMappingRejectedNotUniqueFile);
 
 
-		PrintWriter drugMappingRejectedFile = null;
-		try {
-			// Create output file
-			fileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + "DrugMapping Rejected.csv";
-			drugMappingRejectedFile = new PrintWriter(new File(fileName));
-			drugMappingRejectedFile.println("MappingStatus,MappingType," + SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + ",Reject Reason," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
-			drugMappingRejectedFile = null;
-		}
+		PrintWriter drugMappingRejectedFile = openOutputFile("DrugMapping Rejected.csv", "MappingStatus,MappingType," + SourceDrug.getHeader() + "," + SourceDrugComponent.getHeader() + ",Reject Reason," + CDMDrug.getHeader("CDMDrug_") + "," + CDMIngredientStrength.getHeader("CDMIngredient_"));
 
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			String mappingStatus = "Unmapped";
@@ -1975,9 +1950,7 @@ public class GenericMapping extends Mapping {
 			}
 		}
 		
-		if (drugMappingRejectedFile != null) {
-			drugMappingRejectedFile.close();
-		}
+		closeOutputFile(drugMappingRejectedFile);
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
@@ -2146,6 +2119,30 @@ public class GenericMapping extends Mapping {
 		}
 		
 		return matchingIngredients;
+	}
+	
+	
+	private PrintWriter openOutputFile(String fileName, String header) {
+		PrintWriter outputFile = null;
+		String fullFileName = "";
+		try {
+			// Create output file
+			fullFileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + fileName;
+			outputFile = new PrintWriter(new File(fullFileName));
+			outputFile.println(header);
+		}
+		catch (FileNotFoundException e) {
+			System.out.println("      ERROR: Cannot create output file '" + fullFileName + "'");
+			outputFile = null;
+		}
+		return outputFile;
+	}
+	
+	
+	private void closeOutputFile(PrintWriter outputFile) {
+		if (outputFile != null) {
+			outputFile.close();
+		}
 	}
 	
 	

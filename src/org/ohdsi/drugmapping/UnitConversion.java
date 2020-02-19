@@ -94,7 +94,7 @@ public class UnitConversion {
 	
 	
 	private void readFromFile() {
-		System.out.println("    Get unit conversion map ...");
+		System.out.println("    Get unit conversion map from file " + DrugMapping.getCurrentPath() + "/" + FILENAME + " ...");
 
 		boolean newUnits = false;
 		boolean lostUnits = false;
@@ -206,7 +206,7 @@ public class UnitConversion {
 			do {
 				fileNr++;
 				String fileNrString = "00" + Integer.toString(fileNr);
-				fileNrString = fileNrString.substring(fileNrString.length());
+				fileNrString = fileNrString.substring(fileNrString.length() - 2);
 				oldUnitFileName = DrugMapping.getCurrentPath() + "/" + unitMapDate + " " + fileNrString + " " + FILENAME;
 				oldUnitFile = new File(oldUnitFileName);
 			} while (oldUnitFile.exists());
