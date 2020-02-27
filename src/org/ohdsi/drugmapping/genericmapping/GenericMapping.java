@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1707,7 +1708,6 @@ public class GenericMapping extends Mapping {
 	
 	
 	private void saveRejectedMappings() {
-		String fileName = "";
 		System.out.println(DrugMapping.getCurrentTime() + "     Saving Rejected Drug Mappings ...");
 
 		PrintWriter clinicalDrugMappingRejectedByFormFile = openOutputFile("ClinicalDrug Mapping Rejected By Form.csv", SourceDrug.getHeader() + ",Available Forms ...");
@@ -1722,9 +1722,14 @@ public class GenericMapping extends Mapping {
 //			if ((drugMappingClinicalDrug.get(sourceDrug) == null) && (drugMappingClinicalDrugComp.get(sourceDrug) == null) && (drugMappingClinicalDrugForm.get(sourceDrug) == null)) {
 				if (rejectedClinicalDrugsByForm.containsKey(sourceDrug)) {
 					Set<String> availableForms = rejectedClinicalDrugsByForm.get(sourceDrug);
-					String availableFormsString = "";
+					List<String> availableFormsList = new ArrayList<String>();
 					for (String availableForm : availableForms) {
-						availableFormsString += "," + formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")";
+						availableFormsList.add(formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")");
+					}
+					Collections.sort(availableFormsList);
+					String availableFormsString = "";
+					for (String availableForm : availableFormsList) {
+						availableFormsString += "," + availableForm;
 					}
 					if (clinicalDrugMappingRejectedByFormFile != null) {
 						clinicalDrugMappingRejectedByFormFile.println(sourceDrug + availableFormsString);
@@ -1733,8 +1738,13 @@ public class GenericMapping extends Mapping {
 
 				if (rejectedClinicalDrugsByStrength.containsKey(sourceDrug)) {
 					Set<String> availableStrengths = rejectedClinicalDrugsByStrength.get(sourceDrug);
-					String availableStrengthsString = "";
+					List<String> availableStrengthsList = new ArrayList<String>();
 					for (String availableStrength : availableStrengths) {
+						availableStrengthsList.add(availableStrength);
+					}
+					Collections.sort(availableStrengthsList);
+					String availableStrengthsString = "";
+					for (String availableStrength : availableStrengthsList) {
 						availableStrengthsString += "," + availableStrength;
 					}
 					if (clinicalDrugMappingRejectedByStrengthFile != null) {
@@ -1744,8 +1754,13 @@ public class GenericMapping extends Mapping {
 
 				if (rejectedClinicalDrugsNotUnique.containsKey(sourceDrug)) {
 					Set<String> availableMatches = rejectedClinicalDrugsNotUnique.get(sourceDrug);
-					String availableMatchesString = "";
+					List<String> availableMatchesList = new ArrayList<String>();
 					for (String availableMatch : availableMatches) {
+						availableMatchesList.add(availableMatch);
+					}
+					Collections.sort(availableMatchesList);
+					String availableMatchesString = "";
+					for (String availableMatch : availableMatchesList) {
 						availableMatchesString += "," + availableMatch;
 					}
 					if (clinicalDrugMappingRejectedNotUniqueFile != null) {
@@ -1755,8 +1770,13 @@ public class GenericMapping extends Mapping {
 
 				if (rejectedClinicalDrugCompsByStrength.containsKey(sourceDrug)) {
 					Set<String> availableStrengths = rejectedClinicalDrugCompsByStrength.get(sourceDrug);
-					String availableStrengthsString = "";
+					List<String> availableStrengthsList = new ArrayList<String>();
 					for (String availableStrength : availableStrengths) {
+						availableStrengthsList.add(availableStrength);
+					}
+					Collections.sort(availableStrengthsList);
+					String availableStrengthsString = "";
+					for (String availableStrength : availableStrengthsList) {
 						availableStrengthsString += "," + availableStrength;
 					}
 					if (clinicalDrugCompMappingRejectedByStrengthFile != null) {
@@ -1766,8 +1786,13 @@ public class GenericMapping extends Mapping {
 
 				if (rejectedClinicalDrugCompsNotUnique.containsKey(sourceDrug)) {
 					Set<String> availableMatches = rejectedClinicalDrugCompsNotUnique.get(sourceDrug);
-					String availableMatchesString = "";
+					List<String> availableMatchesList = new ArrayList<String>();
 					for (String availableMatch : availableMatches) {
+						availableMatchesList.add(availableMatch);
+					}
+					Collections.sort(availableMatchesList);
+					String availableMatchesString = "";
+					for (String availableMatch : availableMatchesList) {
 						availableMatchesString += "," + availableMatch;
 					}
 					if (clinicalDrugCompMappingRejectedNotUniqueFile != null) {
@@ -1777,9 +1802,14 @@ public class GenericMapping extends Mapping {
 
 				if (rejectedClinicalDrugFormsByForm.containsKey(sourceDrug)) {
 					Set<String> availableForms = rejectedClinicalDrugFormsByForm.get(sourceDrug);
-					String availableFormsString = "";
+					List<String> availableFormsList = new ArrayList<String>();
 					for (String availableForm : availableForms) {
-						availableFormsString += "," + formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")";
+						availableFormsList.add(formConversionsMap.getCDMFormConceptName(availableForm) + " (" + availableForm + ")");
+					}
+					Collections.sort(availableFormsList);
+					String availableFormsString = "";
+					for (String availableForm : availableFormsList) {
+						availableFormsString += "," + availableForm;
 					}
 					if (clinicalDrugFormMappingRejectedByFormFile != null) {
 						clinicalDrugFormMappingRejectedByFormFile.println(sourceDrug + availableFormsString);
@@ -1788,8 +1818,13 @@ public class GenericMapping extends Mapping {
 
 				if (rejectedClinicalDrugFormsNotUnique.containsKey(sourceDrug)) {
 					Set<String> availableMatches = rejectedClinicalDrugFormsNotUnique.get(sourceDrug);
-					String availableMatchesString = "";
+					List<String> availableMatchesList = new ArrayList<String>();
 					for (String availableMatch : availableMatches) {
+						availableMatchesList.add(availableMatch);
+					}
+					Collections.sort(availableMatchesList);
+					String availableMatchesString = "";
+					for (String availableMatch : availableMatchesList) {
 						availableMatchesString += "," + availableMatch;
 					}
 					if(clinicalDrugFormMappingRejectedNotUniqueFile != null) {
