@@ -1188,12 +1188,12 @@ public class GenericMapping extends Mapping {
 		}
 		
 		for (SourceDrug sourceDrug : sourceDrugsAllIngredientsMapped) {
-			List<CDMIngredient> cdmDrugIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
+			List<CDMIngredient> sourceDrugCDMIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 			
-			if (cdmDrugIngredients.size() > 0) {
+			if (sourceDrugCDMIngredients.size() > 0) {
 				// Find CDM Clinical Drugs with corresponding ingredients
 				Set<CDMDrug> cdmDrugsWithIngredients = null;
-				for (CDMIngredient cdmIngredient : cdmDrugIngredients) {
+				for (CDMIngredient cdmIngredient : sourceDrugCDMIngredients) {
 					Set<CDMDrug> cdmDrugsWithIngredient = cdmDrugsContainingIngredient.get(cdmIngredient);
 					if (cdmDrugsWithIngredient != null) {
 						if (cdmDrugsWithIngredients == null) {
@@ -1203,8 +1203,12 @@ public class GenericMapping extends Mapping {
 						else {
 							Set<CDMDrug> cdmDrugsMissingIngredient = new HashSet<CDMDrug>();
 							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								if (!cdmDrugsWithIngredient.contains(cdmDrug)) {
-									cdmDrugsMissingIngredient.add(cdmDrug);
+								List<CDMIngredientStrength> cdmDrugIngredients = cdmDrug.getIngredients();
+								for (CDMIngredientStrength cdmIngredientStrength : cdmDrugIngredients) {
+									if (!sourceDrugCDMIngredients.contains(cdmIngredientStrength.getIngredient())) {
+										cdmDrugsMissingIngredient.add(cdmDrug);
+										break;
+									}
 								}
 							}
 							cdmDrugsWithIngredients.removeAll(cdmDrugsMissingIngredient);
@@ -1357,12 +1361,12 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceDrug sourceDrug : sourceDrugsAllIngredientsMapped) {
 			if ((drugMappingClinicalDrug.get(sourceDrug) == null) && (drugMappingClinicalDrugForm.get(sourceDrug) == null) && (sourceDrug.getIngredients().size() == 1)) { // Clinical Drug Comp is always single ingredient
-				List<CDMIngredient> cdmDrugIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
+				List<CDMIngredient> sourceDrugCDMIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 
-				if (cdmDrugIngredients.size() == 1) {
+				if (sourceDrugCDMIngredients.size() == 1) {
 					// Find CDM Clinical Drug Comps with corresponding ingredient
 					Set<CDMDrug> cdmDrugCompsWithIngredients = null;
-					for (CDMIngredient cdmIngredient : cdmDrugIngredients) {
+					for (CDMIngredient cdmIngredient : sourceDrugCDMIngredients) {
 						Set<CDMDrug> cdmDrugCompsWithIngredient = cdmDrugCompsContainingIngredient.get(cdmIngredient);
 						if (cdmDrugCompsWithIngredient != null) {
 							if (cdmDrugCompsWithIngredients == null) {
