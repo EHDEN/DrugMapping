@@ -145,7 +145,7 @@ public class SourceDrugComponent {
 	
 	
 	public boolean matches(UnitConversion unitConversion, Double numeratorDosage, String numeratorDosageUnit, Double denominatorDosage, String denominatorDosageUnit) {
-		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage, DrugMapping.strengthDeviationPercentage);
+		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage, DrugMapping.settings.strengthDeviationPercentage);
 	}
 
 }

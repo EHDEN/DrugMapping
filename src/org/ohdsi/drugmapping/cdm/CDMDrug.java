@@ -11,7 +11,8 @@ import org.ohdsi.utilities.files.Row;
 
 public class CDMDrug extends CDMConcept {
 	private Set<String> formConceptIds = new HashSet<String>();
-	private List<CDMIngredientStrength> ingredients = new ArrayList<CDMIngredientStrength>(); 
+	private List<CDMIngredientStrength> ingredientStrengths = new ArrayList<CDMIngredientStrength>();
+	private List<CDMIngredient> ingredients = new ArrayList<CDMIngredient>(); 
 	private Map<String, Set<CDMIngredientStrength>> ingredientsMap = new HashMap<String, Set<CDMIngredientStrength>>();
 	
 	
@@ -55,8 +56,13 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public List<CDMIngredientStrength> getIngredients() {
+	public List<CDMIngredient> getIngredients() {
 		return ingredients;
+	}
+	
+	
+	public List<CDMIngredientStrength> getIngredientStrengths() {
+		return ingredientStrengths;
 	}
 	
 	
@@ -68,7 +74,7 @@ public class CDMDrug extends CDMConcept {
 	public String getStrengthDescription() {
 		String description = "";
 		
-		for (CDMIngredientStrength strength : ingredients) {
+		for (CDMIngredientStrength strength : ingredientStrengths) {
 			description += (description.equals("") ? "" : "; ");
 			description += strength.getDescription();
 		}
@@ -78,7 +84,8 @@ public class CDMDrug extends CDMConcept {
 	
 	
 	public void addIngredientStrength(CDMIngredientStrength ingredient) {
-		ingredients.add(ingredient);
+		ingredientStrengths.add(ingredient);
+		ingredients.add(ingredient.getIngredient());
 		String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
 		Set<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
 		if (ingredientSet == null) {
@@ -91,7 +98,7 @@ public class CDMDrug extends CDMConcept {
 	
 	public CDMIngredientStrength getIngredientStrength(CDMIngredient ingredient) {
 		CDMIngredientStrength ingredientStrength = null;
-		for (CDMIngredientStrength strength : getIngredients()) {
+		for (CDMIngredientStrength strength : getIngredientStrengths()) {
 			if (strength.getIngredient() == ingredient) {
 				ingredientStrength = strength;
 			}

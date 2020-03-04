@@ -1,6 +1,7 @@
 package org.ohdsi.drugmapping.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -18,10 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -44,6 +48,8 @@ public class MainFrame {
 	private Console console;
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
+	private Integer[] strengthDeviationOptions = new Integer[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	JComboBox<Integer> strengthDeviationField = null;
 	private String logFile = null;
 	
 
@@ -88,14 +94,18 @@ public class MainFrame {
 		JMenuBar menuBar = createMenu();
 		frame.setJMenuBar(menuBar);
 
+		
+		// Database settings
 		JPanel databasePanel = new JPanel(new GridLayout(0, 1));
 		databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Database"));
 		database = new CDMDatabase();
 		databasePanel.add(database);
 		
-		JPanel subFrame = new JPanel(new BorderLayout());
-		subFrame.setBorder(BorderFactory.createEmptyBorder());
+		JPanel level1Frame = new JPanel(new BorderLayout());
+		level1Frame.setBorder(BorderFactory.createEmptyBorder());
 
+		
+		// File settings
 		JPanel filePanel = new JPanel(new GridLayout(0, 1));
 		filePanel.setBorder(BorderFactory.createTitledBorder("Input Files"));
 		
@@ -105,9 +115,43 @@ public class MainFrame {
 			filePanel.add(inputFile);
 		}
 		
-		// Start Button
-		JPanel buttonSectionPanel = new JPanel(new BorderLayout());
+		JPanel level2Frame = new JPanel(new BorderLayout());
+		level2Frame.setBorder(BorderFactory.createEmptyBorder());
+
 		
+		// General Settings
+		JPanel generalPanel = new JPanel(new GridLayout(0, 1));
+		generalPanel.setBorder(BorderFactory.createTitledBorder("General Settings"));
+		
+		JPanel generalSettingsPanel = new JPanel(new BorderLayout());
+		JPanel settingsListPanel = new JPanel();
+		settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
+		generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
+		generalPanel.add(generalSettingsPanel);
+				
+		// Strength Deviation Setting
+		JPanel strengthDeviationPanel = new JPanel(new FlowLayout());
+		strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
+		JLabel strengthDeviationLabel = new JLabel("Strength deviation percentage:");
+		strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
+		strengthDeviationPanel.add(strengthDeviationLabel);
+		strengthDeviationPanel.add(strengthDeviationField);
+		int strengthDeviationIndex = 0;
+		for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
+			if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
+				strengthDeviationIndex = optionIndex;
+				break;
+			}
+		}
+		strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
+		
+		settingsListPanel.add(strengthDeviationPanel);
+		
+		
+		// Buttons
+		JPanel buttonSectionPanel = new JPanel(new BorderLayout());
+
+		// Start Button
 		JPanel buttonPanel = new JPanel(new FlowLayout());
 		JButton startButton = new JButton("  Start  ");
 		startButton.addActionListener(new ActionListener() {
@@ -118,13 +162,16 @@ public class MainFrame {
 			}
 		});
 		buttonPanel.add(startButton);
-		
 		buttonSectionPanel.add(buttonPanel, BorderLayout.WEST);
 	
+		
+		// Build frame
 		frame.add(databasePanel, BorderLayout.NORTH);
-		frame.add(subFrame, BorderLayout.CENTER);
-		subFrame.add(filePanel, BorderLayout.NORTH);
-		subFrame.add(createConsolePanel(), BorderLayout.CENTER);
+		frame.add(level1Frame, BorderLayout.CENTER);
+		level1Frame.add(filePanel, BorderLayout.NORTH);
+		level1Frame.add(level2Frame, BorderLayout.CENTER);
+		level2Frame.add(generalPanel, BorderLayout.NORTH);
+		level2Frame.add(createConsolePanel(), BorderLayout.CENTER);
 		frame.add(buttonSectionPanel, BorderLayout.SOUTH);
 		
 		DrugMapping.disableWhenRunning(startButton);
@@ -199,6 +246,28 @@ public class MainFrame {
 		});
 		file.add(saveFileSettingsMenuItem);
 		
+		JMenuItem loadGeneralSettingsMenuItem = new JMenuItem("Load General Settings");
+		loadGeneralSettingsMenuItem.setToolTipText("Load General Settings");
+		loadGeneralSettingsMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				loadGeneralSettingsFile();
+			}
+		});
+		file.add(loadGeneralSettingsMenuItem);
+		
+		JMenuItem saveGeneralSettingsMenuItem = new JMenuItem("Save General Settings");
+		saveGeneralSettingsMenuItem.setToolTipText("Save General Settings");
+		saveGeneralSettingsMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				saveGeneralSettingsFile();
+			}
+		});
+		file.add(saveGeneralSettingsMenuItem);
+		
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setToolTipText("Exit application");
 		exitMenuItem.addActionListener(new ActionListener() {
@@ -261,6 +330,40 @@ public class MainFrame {
 			settings.add("");
 		}
 		saveSettingsToFile(settings);
+	}
+
+	
+	private void loadGeneralSettingsFile() {
+		List<String> generalSettings = readSettingsFromFile();
+		loadGeneralSettingsFile(generalSettings);
+	}
+
+	
+	public void loadGeneralSettingsFile(List<String> generalSettings) {
+		if (generalSettings != null) {
+			DrugMapping.settings.putSettings(generalSettings);
+		}
+		int strengthDeviationIndex = 0;
+		for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
+			if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
+				strengthDeviationIndex = optionIndex;
+				break;
+			}
+		}
+		strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
+	}
+
+	
+	private void saveGeneralSettingsFile() {
+		if (database != null) {
+			List<String> settings = DrugMapping.settings.getSettings();
+			if (settings != null) {
+				saveSettingsToFile(settings);
+			}
+			else {
+				JOptionPane.showMessageDialog(frame, "No general settings to save!", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+		}
 	}
 	
 	

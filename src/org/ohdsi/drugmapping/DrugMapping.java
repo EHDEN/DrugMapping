@@ -26,7 +26,7 @@ import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
 public class DrugMapping { 
-	public static Double strengthDeviationPercentage = 0.0;
+	public static GeneralSettings settings = new GeneralSettings();
 	public static String outputVersion = "";
 	
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
@@ -93,6 +93,7 @@ public class DrugMapping {
 		List<String> dbSettings = null;
 		String password = null;
 		List<String> fileSettings = null;
+		List<String> generalSettings = null;
 		String logFileName = null;
 		special = parameters.get("special");
 		
@@ -128,6 +129,9 @@ public class DrugMapping {
 		if (parameters.containsKey("filesettings")) {
 			fileSettings = mainFrame.readSettingsFromFile(parameters.get("filesettings"));
 		}
+		if (parameters.containsKey("generalsettings")) {
+			generalSettings = mainFrame.readSettingsFromFile(parameters.get("generalsettings"));
+		}
 		if (parameters.containsKey("path")) {
 			currentPath = parameters.get("path");
 		}
@@ -158,6 +162,11 @@ public class DrugMapping {
 		if (fileSettings != null) {
 			mainFrame.loadFileSettingsFile(fileSettings);
 		}
+		
+		if (generalSettings != null) {
+			mainFrame.loadGeneralSettingsFile(generalSettings);
+		}
+		
 		if (dbSettings != null) {
 			if (password != null) {
 				dbSettings.add("password=" + password);
@@ -217,8 +226,7 @@ public class DrugMapping {
 				logDatabaseSettings(getDatabase());
 				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
 				logFileSettings("CAS File", getFile("CAS File"));
-				System.out.println("Strength deviation percentage: " + DrugMapping.strengthDeviationPercentage);
-				System.out.println();
+				logGeneralSettings();
 				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
 			}
 
@@ -251,6 +259,13 @@ public class DrugMapping {
 		for (String column : columns) {
 			System.out.println("    " + column + " -> " + columnMapping.get(column));
 		}
+		System.out.println();
+	}
+	
+	
+	private void logGeneralSettings() {
+		System.out.println("General Settings:");
+		System.out.println("  Strength deviation allowed: " + DrugMapping.settings.strengthDeviationPercentage + "%");
 		System.out.println();
 	}
 	

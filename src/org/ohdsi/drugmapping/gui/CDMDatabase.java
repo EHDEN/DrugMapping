@@ -119,7 +119,7 @@ public class CDMDatabase extends JPanel {
 			settings.add("dbtype=" + dbSettings.dbType.toString());
 			settings.add("server=" + dbSettings.server);
 			settings.add("user=" + dbSettings.user);
-			settings.add("database=" + dbSettings.database);
+			settings.add("vocabSchema" + dbSettings.database);
 		}
 		return settings;
 	}
@@ -137,7 +137,7 @@ public class CDMDatabase extends JPanel {
 				if (settingVariable.equals("server")) dbSettings.server = value;
 				if (settingVariable.equals("user")) dbSettings.user = value;
 				if (settingVariable.equals("password")) dbSettings.password = value;
-				if (settingVariable.equals("database")) dbSettings.database = value;
+				if (settingVariable.equals("vocabSchema")) dbSettings.database = value;
 			}
 		}
 		if (dbSettings.password == null) {

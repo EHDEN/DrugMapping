@@ -501,7 +501,7 @@ public class IPCIMAPPING extends Mapping {
 					if (firstComponent) {
 						for (CDMDrug cdmDrugContainingIngredient : cdmDrugsContainingIngredient.get(mappedIngredient)) {
 							// Check if the number of ingredients match
-							if (cdmDrugContainingIngredient.getIngredients().size() == components.size()) {
+							if (cdmDrugContainingIngredient.getIngredientStrengths().size() == components.size()) {
 								cdmDrugsContainingAllIngredients.add(cdmDrugContainingIngredient);
 							}
 						}
@@ -509,7 +509,7 @@ public class IPCIMAPPING extends Mapping {
 					else {
 						for (CDMDrug cdmDrugContainingIngredient : cdmDrugsContainingIngredient.get(mappedIngredient)) {
 							// Check if the number of ingredients match
-							if (cdmDrugContainingIngredient.getIngredients().size() == components.size()) {
+							if (cdmDrugContainingIngredient.getIngredientStrengths().size() == components.size()) {
 								Set<CDMDrug> oldCDMDrugsContainingAllIngredients = cdmDrugsContainingAllIngredients;
 								cdmDrugsContainingAllIngredients = new HashSet<CDMDrug>();
 								
