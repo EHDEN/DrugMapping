@@ -215,7 +215,8 @@ public class DrugMapping {
 				logFileSettings("ZIndex GNK File", getFile("ZIndex GNK File"));
 				logFileSettings("ZIndex GPK Statistics File", getFile("ZIndex GPK Statistics File"));
 				logFileSettings("ZIndex Ignored Words File", getFile("ZIndex Ignored Words File"));
-				new ZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"));
+				logFileSettings("ZIndex GPK IPCI Compositions File", getFile("ZIndex GPK IPCI Compositions File"));
+				new ZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"), getFile("ZIndex GPK IPCI Compositions File"));
 			}
 			else if (special.equals("IPCIMAPPING")) {
 				logDatabaseSettings(getDatabase());

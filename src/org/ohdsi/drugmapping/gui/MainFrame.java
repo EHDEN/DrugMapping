@@ -33,7 +33,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.ohdsi.drugmapping.DrugMapping;
@@ -49,7 +52,9 @@ public class MainFrame {
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
 	private Integer[] strengthDeviationOptions = new Integer[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	JComboBox<Integer> strengthDeviationField = null;
+	//private JComboBox<Integer> strengthDeviationField = null;
+	private JTextField strengthDeviationField = null;
+	private JButton startButton = null;
 	private String logFile = null;
 	
 
@@ -133,17 +138,51 @@ public class MainFrame {
 		JPanel strengthDeviationPanel = new JPanel(new FlowLayout());
 		strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
 		JLabel strengthDeviationLabel = new JLabel("Strength deviation percentage:");
-		strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
+		//strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
+		strengthDeviationField = new JTextField(6);
+		strengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				check();
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				check();
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				check();
+			}
+			
+			
+			private void check() {
+				try {
+					double value = Double.parseDouble(strengthDeviationField.getText());
+					DrugMapping.settings.strengthDeviationPercentage = value;
+					if (startButton != null) {
+						startButton.setEnabled(true);
+					}
+				}
+				catch (NumberFormatException e) {
+					if (startButton != null) {
+						startButton.setEnabled(false);
+					}
+				}
+			}
+		});
 		strengthDeviationPanel.add(strengthDeviationLabel);
 		strengthDeviationPanel.add(strengthDeviationField);
-		int strengthDeviationIndex = 0;
-		for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
-			if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
-				strengthDeviationIndex = optionIndex;
-				break;
-			}
-		}
-		strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
+		//int strengthDeviationIndex = 0;
+		//for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
+		//	if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
+		//		strengthDeviationIndex = optionIndex;
+		//		break;
+		//	}
+		//}
+		//strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
 		
 		settingsListPanel.add(strengthDeviationPanel);
 		
@@ -153,7 +192,7 @@ public class MainFrame {
 
 		// Start Button
 		JPanel buttonPanel = new JPanel(new FlowLayout());
-		JButton startButton = new JButton("  Start  ");
+		startButton = new JButton("  Start  ");
 		startButton.addActionListener(new ActionListener() {
 			
 			@Override
@@ -343,6 +382,8 @@ public class MainFrame {
 		if (generalSettings != null) {
 			DrugMapping.settings.putSettings(generalSettings);
 		}
+		strengthDeviationField.setText(Double.toString(DrugMapping.settings.strengthDeviationPercentage));
+		/*
 		int strengthDeviationIndex = 0;
 		for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
 			if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
@@ -351,6 +392,7 @@ public class MainFrame {
 			}
 		}
 		strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
+		*/
 	}
 
 	

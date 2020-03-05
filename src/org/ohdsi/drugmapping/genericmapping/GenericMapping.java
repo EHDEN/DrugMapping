@@ -1282,10 +1282,12 @@ public class GenericMapping extends Mapping {
 					if (matchingCDMDrugs.size() == 1) {
 						drugMappingClinicalDrug.put(sourceDrug, matchingCDMDrugs.get(0)); 
 						drugMappingClinicalDrugIngredients.put(sourceDrug, matchingIngredientsMap.get(matchingCDMDrugs.get(0)));
+						rejectedClinicalDrugsByStrength.remove(sourceDrug);
 					}
 					else if (matchingCDMDrugs.size() > 1) {
 						Set<String> rejectedNotUnique = new HashSet<String>();
 						rejectedClinicalDrugsNotUnique.put(sourceDrug, rejectedNotUnique);
+						rejectedClinicalDrugsByStrength.remove(sourceDrug);
 						for (CDMDrug cdmDrug : matchingCDMDrugs) {
 							rejectedNotUnique.add(cdmDrug.getConceptName() + " (" + cdmDrug.getConceptId() + "): " + cdmDrug.getStrengthDescription());
 						}
@@ -1303,6 +1305,9 @@ public class GenericMapping extends Mapping {
 							}
 						}
 					}
+				}
+				else {
+					rejectedClinicalDrugsByForm.remove(sourceDrug);
 				}
 			}
 			else {
@@ -1423,10 +1428,12 @@ public class GenericMapping extends Mapping {
 						if (matchingCDMDrugs.size() == 1) {
 							drugMappingClinicalDrugComp.put(sourceDrug, matchingCDMDrugs.get(0)); 
 							drugMappingClinicalDrugCompIngredients.put(sourceDrug, matchingIngredientsMap.get(matchingCDMDrugs.get(0)));
+							rejectedClinicalDrugsByStrength.remove(sourceDrug);
 						}
 						else if (matchingCDMDrugs.size() > 1) {
 							Set<String> rejectedNotUnique = new HashSet<String>();
 							rejectedClinicalDrugsNotUnique.put(sourceDrug, rejectedNotUnique);
+							rejectedClinicalDrugsByStrength.remove(sourceDrug);
 							for (CDMDrug cdmDrug : matchingCDMDrugs) {
 								rejectedNotUnique.add(cdmDrug.getConceptName() + " (" + cdmDrug.getConceptId() + "): " + cdmDrug.getStrengthDescription());
 							}
@@ -1587,10 +1594,12 @@ public class GenericMapping extends Mapping {
 						if (matchingCDMDrugs.size() == 1) {
 							drugMappingClinicalDrugForm.put(sourceDrug, matchingCDMDrugs.get(0));
 							drugMappingClinicalDrugFormIngredients.put(sourceDrug, matchingIngredientsMap.get(matchingCDMDrugs.get(0)));
+							rejectedClinicalDrugsByForm.remove(sourceDrug);
 						}
 						else if (matchingCDMDrugs.size() > 1) {
 							Set<String> rejectedNotUnique = new HashSet<String>();
 							rejectedClinicalDrugFormsNotUnique.put(sourceDrug, rejectedNotUnique);
+							rejectedClinicalDrugsByForm.remove(sourceDrug);
 							for (CDMDrug cdmDrug : matchingCDMDrugs) {
 								rejectedNotUnique.add(cdmDrug.getConceptName() + " (" + cdmDrug.getConceptId() + ")");
 							}

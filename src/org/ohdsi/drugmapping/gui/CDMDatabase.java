@@ -119,7 +119,7 @@ public class CDMDatabase extends JPanel {
 			settings.add("dbtype=" + dbSettings.dbType.toString());
 			settings.add("server=" + dbSettings.server);
 			settings.add("user=" + dbSettings.user);
-			settings.add("vocabSchema" + dbSettings.database);
+			settings.add("vocabSchema=" + dbSettings.database);
 		}
 		return settings;
 	}

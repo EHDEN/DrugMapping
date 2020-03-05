@@ -16,29 +16,42 @@ import org.ohdsi.utilities.files.Row;
 
 public class ZIndexConversion extends Mapping {
 
-	private static final int GSKColumnCount = 8;
-	private static final int GSKCode        = 0;
-	private static final int PartNumber     = 1;
-	private static final int Type           = 2;
-	private static final int Amount         = 3;
-	private static final int AmountUnit     = 4;
-	private static final int GSK_GNKCode    = 5;
-	private static final int GenericName    = 6;
-	private static final int CASNumber      = 7;
+	private static final int GSK_ColumnCount = 8;
+	private static final int GSK_GSKCode     = 0;
+	private static final int GSK_PartNumber  = 1;
+	private static final int GSK_Type        = 2;
+	private static final int GSK_Amount      = 3;
+	private static final int GSK_AmountUnit  = 4;
+	private static final int GSK_GNKCode     = 5;
+	private static final int GSK_GenericName = 6;
+	private static final int GSK_CASNumber   = 7;
 	
-	private static final int GNKColumnCount = 3;
-	private static final int GNKCode        = 0;
-	private static final int Description    = 1;
-	private static final int CASCode        = 2;
+	private static final int GNK_ColumnCount = 3;
+	private static final int GNK_GNKCode     = 0;
+	private static final int GNK_Description = 1;
+	private static final int GNK_CASCode     = 2;
+
+	private static final int GPKIPCI_ColumnCount = 10;
+	private static final int GPKIPCI_GPKCode     = 0;
+	private static final int GPKIPCI_PartNr      = 1;
+	private static final int GPKIPCI_Type        = 2;
+	private static final int GPKIPCI_Amount      = 3;
+	private static final int GPKIPCI_AmountUnit  = 4;
+	private static final int GPKIPCI_GNKCode     = 5;
+	private static final int GPKIPCI_GNKName     = 6;
+	private static final int GPKIPCI_CasNr       = 7;
+	private static final int GPKIPCI_BaseName    = 8;
+	private static final int GPKIPCI_Formula     = 9;
 
 	private Map<Integer, List<String[]>> gskMap = new HashMap<Integer, List<String[]>>();
 	private Map<Integer, String[]> gnkMap = new HashMap<Integer, String[]>();
 	private Map<String, Integer> gnkNameMap = new HashMap<String, Integer>();
 	private Map<String, Integer> gpkStatisticsMap = new HashMap<String, Integer>();
 	private List<String> wordsToRemove = new ArrayList<String>();
+	private Map<String, String[]> gpkIPCIMap = new HashMap<String, String[]>();
 
 	
-	public ZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile) {
+	public ZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile, InputFile gpkIPCIFile) {
 		
 		boolean ok = true;
 
@@ -49,19 +62,19 @@ public class ZIndexConversion extends Mapping {
 			while (gskFile.hasNext()) {
 				Row row = gskFile.next();
 
-				String[] record = new String[GSKColumnCount];
-				record[GSKCode]       = gskFile.get(row, "GSKCode");
-				record[PartNumber]    = gskFile.get(row, "PartNumber");
-				record[Type]          = gskFile.get(row, "Type");
-				record[Amount]        = gskFile.get(row, "Amount");
-				record[AmountUnit]    = gskFile.get(row, "AmountUnit");
-				record[GSK_GNKCode]   = gskFile.get(row, "GNKCode");
-				record[GenericName]   = gskFile.get(row, "GenericName");
-				record[CASNumber]     = gskFile.get(row, "CASNumber");
+				String[] record = new String[GSK_ColumnCount];
+				record[GSK_GSKCode]       = gskFile.get(row, "GSKCode");
+				record[GSK_PartNumber]    = gskFile.get(row, "PartNumber");
+				record[GSK_Type]          = gskFile.get(row, "Type");
+				record[GSK_Amount]        = gskFile.get(row, "Amount");
+				record[GSK_AmountUnit]    = gskFile.get(row, "AmountUnit");
+				record[GSK_GNKCode]       = gskFile.get(row, "GNKCode");
+				record[GSK_GenericName]   = gskFile.get(row, "GenericName");
+				record[GSK_CASNumber]     = gskFile.get(row, "CASNumber");
 
-				record[CASNumber] = GenericMapping.uniformCASNumber(record[CASNumber]);
+				record[GSK_CASNumber] = GenericMapping.uniformCASNumber(record[GSK_CASNumber]);
 
-				int gskCode = Integer.valueOf(record[GSKCode]); 
+				int gskCode = Integer.valueOf(record[GSK_GSKCode]); 
 				List<String[]> gskList = gskMap.get(gskCode);
 				if (gskList == null) {
 					gskList = new ArrayList<String[]>();
@@ -82,20 +95,20 @@ public class ZIndexConversion extends Mapping {
 			while (gnkFile.hasNext()) {
 				Row row = gnkFile.next();
 
-				String[] record = new String[GNKColumnCount];
-				record[GNKCode]     = gnkFile.get(row, "GNKCode");
-				record[Description] = gnkFile.get(row, "Description");
-				record[CASCode]     = gnkFile.get(row, "CASCode");
+				String[] record = new String[GNK_ColumnCount];
+				record[GNK_GNKCode]     = gnkFile.get(row, "GNKCode");
+				record[GNK_Description] = gnkFile.get(row, "Description");
+				record[GNK_CASCode]     = gnkFile.get(row, "CASCode");
 
-				record[CASCode] = GenericMapping.uniformCASNumber(record[CASCode]);
+				record[GNK_CASCode] = GenericMapping.uniformCASNumber(record[GNK_CASCode]);
 
-				int gnkCode = Integer.valueOf(record[GNKCode]);
+				int gnkCode = Integer.valueOf(record[GNK_GNKCode]);
 				gnkMap.put(gnkCode, record);
-				if (gnkNameMap.get(record[Description]) == null) {
-					gnkNameMap.put(record[Description], Integer.valueOf(record[GNKCode]));
+				if (gnkNameMap.get(record[GNK_Description]) == null) {
+					gnkNameMap.put(record[GNK_Description], Integer.valueOf(record[GNK_GNKCode]));
 				}
 				else {
-					System.out.println("  ERROR: Duplicate GNK name '" + record[Description] + "' (" + gnkNameMap.get(record[Description]) + " <-> " + record[GNKCode] + ")");
+					System.out.println("  ERROR: Duplicate GNK name '" + record[GNK_Description] + "' (" + gnkNameMap.get(record[GNK_Description]) + " <-> " + record[GNK_GNKCode] + ")");
 					ok = false;
 				}
 			}
@@ -218,6 +231,29 @@ public class ZIndexConversion extends Mapping {
 		}
 		
 
+		if (ok && gpkIPCIFile.openFile()) {
+			System.out.println("  Loading ZIndex GPK IPCI File ...");
+			while (gpkIPCIFile.hasNext()) {
+				Row row = gpkIPCIFile.next();
+
+				String[] record = new String[GPKIPCI_ColumnCount];
+				record[GPKIPCI_GPKCode]    = gpkIPCIFile.get(row, "GPK").trim();
+				record[GPKIPCI_PartNr]     = gpkIPCIFile.get(row, "PartNr").trim();
+				record[GPKIPCI_Type]       = gpkIPCIFile.get(row, "Typ").trim();
+				record[GPKIPCI_Amount]     = gpkIPCIFile.get(row, "Amount").trim();
+				record[GPKIPCI_AmountUnit] = gpkIPCIFile.get(row, "AmountUnit").trim();
+				record[GPKIPCI_GNKCode]    = gpkIPCIFile.get(row, "GNK").trim();
+				record[GPKIPCI_GNKName]    = gpkIPCIFile.get(row, "GnkName").trim();
+				record[GPKIPCI_CasNr]      = gpkIPCIFile.get(row, "CASNr").trim();
+				record[GPKIPCI_BaseName]   = gpkIPCIFile.get(row, "BaseName").trim();
+				record[GPKIPCI_Formula]    = gpkIPCIFile.get(row, "Formula").trim();
+				
+				gpkIPCIMap.put(record[GPKIPCI_GPKCode], record);
+			}
+			System.out.println("  Done");
+		}
+		
+
 		if (ok && gpkFile.openFile()) {
 			System.out.println("  Creating ZIndex GPK Full File ...");
 
@@ -268,7 +304,7 @@ public class ZIndexConversion extends Mapping {
 								// Remove non-active ingredients
 								List<String[]> remove = new ArrayList<String[]>();
 								for (String[] gskObject : gskList) {
-									if (!gskObject[Type].equals("W")) {
+									if (!gskObject[GSK_Type].equals("W")) {
 										remove.add(gskObject);
 									}
 								}
@@ -305,17 +341,17 @@ public class ZIndexConversion extends Mapping {
 												String gpkGskRecord = gpkRecord;
 												gpkGskRecord += "," + "Mapped to GNK";
 												gpkGskRecord += "," + "\"" + ingredientName + "\"";
-												for (int cellCount = 0; cellCount < (GSKColumnCount - 3); cellCount++) {
+												for (int cellCount = 0; cellCount < (GSK_ColumnCount - 3); cellCount++) {
 													gpkGskRecord += ",";
 												}
-												gpkGskRecord += "," + gnkRecord[CASCode];
+												gpkGskRecord += "," + gnkRecord[GNK_CASCode];
 												gpkFullFile.println(gpkGskRecord);
 											}
 											else {
 												String gpkGskRecord = gpkRecord;
 												gpkGskRecord += "," + "Extracted";
 												gpkGskRecord += "," + "\"" + ingredientName.trim() + "\"";
-												for (int cellCount = 0; cellCount < (GSKColumnCount - 2); cellCount++) {
+												for (int cellCount = 0; cellCount < (GSK_ColumnCount - 2); cellCount++) {
 													gpkGskRecord += ",";
 												}
 												gpkFullFile.println(gpkGskRecord);
@@ -333,17 +369,17 @@ public class ZIndexConversion extends Mapping {
 											String gpkGskRecord = gpkRecord;
 											gpkGskRecord += "," + "Mapped to GNK";
 											gpkGskRecord += "," + "\"" + name + "\"";
-											for (int cellCount = 0; cellCount < (GSKColumnCount - 3); cellCount++) {
+											for (int cellCount = 0; cellCount < (GSK_ColumnCount - 3); cellCount++) {
 												gpkGskRecord += ",";
 											}
-											gpkGskRecord += "," + gnkRecord[CASCode];
+											gpkGskRecord += "," + gnkRecord[GNK_CASCode];
 											gpkFullFile.println(gpkGskRecord);
 										}
 										else {
 											String gpkGskRecord = gpkRecord;
 											gpkGskRecord += "," + "Extracted";
 											gpkGskRecord += "," + "\"" + name + "\"";
-											for (int cellCount = 0; cellCount < (GSKColumnCount - 2); cellCount++) {
+											for (int cellCount = 0; cellCount < (GSK_ColumnCount - 2); cellCount++) {
 												gpkGskRecord += ",";
 											}
 											gpkFullFile.println(gpkGskRecord);
@@ -354,8 +390,8 @@ public class ZIndexConversion extends Mapping {
 						}
 						else {
 							for (String[] gskObject : gskList) {
-								String amount = gskObject[Amount];
-								String amountUnit = gskObject[AmountUnit];
+								String amount = gskObject[GSK_Amount];
+								String amountUnit = gskObject[GSK_AmountUnit];
 								// Extract unit from name
 								if (name.lastIndexOf(" ") >= 0) {
 									String strengthString = name.substring(name.lastIndexOf(" ")).trim();
@@ -399,19 +435,19 @@ public class ZIndexConversion extends Mapping {
 									}
 								}
 								
-								if (!gskObject[GenericName].substring(0, 1).equals("*")) {
+								if (!gskObject[GSK_GenericName].substring(0, 1).equals("*")) {
 									// Cleanup ZIndex ingredient name
-									String genericName = cleanupExtractedIngredientName(gskObject[GenericName]);
+									String genericName = cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
 									
 									String gpkGskRecord = gpkRecord;
 									gpkGskRecord += "," + "ZIndex";
-									gpkGskRecord += "," + (genericName != null ? "\"" + genericName + "\"" : "\"" + gskObject[GenericName].replaceAll("\"", "\"\"") + "\"");
+									gpkGskRecord += "," + (genericName != null ? "\"" + genericName + "\"" : "\"" + gskObject[GSK_GenericName].replaceAll("\"", "\"\"") + "\"");
 									gpkGskRecord += ",";
 									gpkGskRecord += "," + "\"" + amount + "\"";
 									gpkGskRecord += "," + "\"" + amountUnit + "\"";
-									gpkGskRecord += "," + "\"" + gskObject[Amount] + "\"";
-									gpkGskRecord += "," + "\"" + gskObject[AmountUnit] + "\"";
-									gpkGskRecord += "," + gskObject[CASNumber];
+									gpkGskRecord += "," + "\"" + gskObject[GSK_Amount] + "\"";
+									gpkGskRecord += "," + "\"" + gskObject[GSK_AmountUnit] + "\"";
+									gpkGskRecord += "," + gskObject[GSK_CASNumber];
 
 									gpkFullFile.println(gpkGskRecord);
 								}
@@ -422,9 +458,9 @@ public class ZIndexConversion extends Mapping {
 									gpkGskRecord += ",";
 									gpkGskRecord += "," + "\"" + amount + "\"";
 									gpkGskRecord += "," + "\"" + amountUnit + "\"";
-									gpkGskRecord += "," + "\"" + gskObject[Amount] + "\"";
-									gpkGskRecord += "," + "\"" + gskObject[AmountUnit] + "\"";
-									gpkGskRecord += "," + gskObject[CASNumber];
+									gpkGskRecord += "," + "\"" + gskObject[GSK_Amount] + "\"";
+									gpkGskRecord += "," + "\"" + gskObject[GSK_AmountUnit] + "\"";
+									gpkGskRecord += "," + gskObject[GSK_CASNumber];
 
 									gpkFullFile.println(gpkGskRecord);
 								}

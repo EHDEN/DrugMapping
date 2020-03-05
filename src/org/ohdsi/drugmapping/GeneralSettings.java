@@ -5,7 +5,7 @@ import java.util.List;
 
 public class GeneralSettings {
 
-	public Integer strengthDeviationPercentage = 0;
+	public Double strengthDeviationPercentage = 0.0;
 	
 	
 	public List<String> getSettings() {
@@ -27,7 +27,14 @@ public class GeneralSettings {
 				int equalSignIndex = setting.indexOf("=");
 				String settingVariable = setting.substring(0, equalSignIndex);
 				String value = setting.substring(equalSignIndex + 1);
-				if (settingVariable.equals("strengthDeviationPercentage")) strengthDeviationPercentage = Integer.valueOf(value);
+				if (settingVariable.equals("strengthDeviationPercentage")) {
+					try {
+						DrugMapping.settings.strengthDeviationPercentage = Double.valueOf(value);
+					}
+					catch (NumberFormatException e) {
+						DrugMapping.settings.strengthDeviationPercentage = 0.0;
+					}
+				}
 			}
 		}
 	}

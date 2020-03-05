@@ -320,12 +320,12 @@ public class UnitConversion {
 	}
 	
 	
-	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue, int deviationPercentage) {
+	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue, double deviationPercentage) {
 		boolean matches = false;
 		
 		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit);
 		Double denominatorFactor = getFactor(sourceDenominatorUnit, cdmDenominatorUnit);
-		Double deviationFactor = (double)deviationPercentage / 100.0;
+		Double deviationFactor = deviationPercentage / 100.0;
 
 		if (numeratorFactor != null) {
 			if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {

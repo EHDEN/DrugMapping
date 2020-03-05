@@ -116,7 +116,9 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												"Type",
 												new String[] {
 														"This is the type of the component",
-														"in this combination."
+														"in this combination.",
+														"W = active component",
+														"H = auxiliary component"
 												}
 										),
 										new FileColumnDefinition(
@@ -212,6 +214,80 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												"Word",
 												new String[] {
 														"This is the word to remove."
+												}
+										)
+								}
+						),
+						new FileDefinition(
+								"ZIndex GPK IPCI Compositions File",
+								new String[] {
+										"This file should contain ZIndex GPK drug definitions derived by the IPCI database.",
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"GPK",
+												new String[] {
+														"This is the GPK-code of the drug."
+												}
+										),
+										new FileColumnDefinition(
+												"PartNr",
+												new String[] {
+														"This is the ingredient number."
+												}
+										),
+										new FileColumnDefinition(
+												"Type",
+												new String[] {
+														"This is the type of the component",
+														"in this combination.",
+														"W = active component",
+														"H = auxiliary component"
+												}
+										),
+										new FileColumnDefinition(
+												"Amount",
+												new String[] {
+														"This is the amount of the component",
+														"in this combination."
+												}
+										),
+										new FileColumnDefinition(
+												"AmountUnit",
+												new String[] {
+														"This is the unit of the amount of the",
+														"component in this combination."
+												}
+										),
+										new FileColumnDefinition(
+												"GNK",
+												new String[] {
+														"This is the GNK-code."
+												}
+										),
+										new FileColumnDefinition(
+												"GnkName",
+												new String[] {
+														"This is the description for the GNK-code."
+												}
+										),
+										new FileColumnDefinition(
+												"CASNr",
+												new String[] {
+														"This is the CAS number of the ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"BaseName",
+												new String[] {
+														"This is the base name of the ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"Formula",
+												new String[] {
+														"This is the chemical formula of the",
+														"ingredient."
 												}
 										)
 								}
