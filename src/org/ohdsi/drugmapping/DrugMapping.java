@@ -28,6 +28,7 @@ import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 public class DrugMapping { 
 	public static GeneralSettings settings = new GeneralSettings();
 	public static String outputVersion = "";
+	public static String special = "";
 	
 	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
 	
@@ -36,7 +37,6 @@ public class DrugMapping {
 	private static MappingInputDefinition inputFiles = null;
 	
 	private MainFrame mainFrame;
-	private String special = "";
 	
 	
 	public static String getCurrentDate() {

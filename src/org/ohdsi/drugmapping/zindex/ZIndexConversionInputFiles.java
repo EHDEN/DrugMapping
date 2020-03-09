@@ -221,6 +221,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 						new FileDefinition(
 								"ZIndex GPK IPCI Compositions File",
 								new String[] {
+										"This file is optional.",
 										"This file should contain ZIndex GPK drug definitions derived by the IPCI database.",
 						  		},
 								new FileColumnDefinition[] {
@@ -237,7 +238,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												}
 										),
 										new FileColumnDefinition(
-												"Type",
+												"Typ",
 												new String[] {
 														"This is the type of the component",
 														"in this combination.",

@@ -81,8 +81,8 @@ public class InputFile extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		fileLabelPanel = new JPanel(new BorderLayout());
-		fileLabelPanel.setMinimumSize(new Dimension(150, fileLabelPanel.getHeight()));
-		fileLabelPanel.setPreferredSize(new Dimension(150, fileLabelPanel.getHeight()));
+		fileLabelPanel.setMinimumSize(new Dimension(200, fileLabelPanel.getHeight()));
+		fileLabelPanel.setPreferredSize(new Dimension(200, fileLabelPanel.getHeight()));
 		fileLabel = new JLabel(labelText + ":");
 		fileLabelPanel.add(fileLabel, BorderLayout.WEST);
 		

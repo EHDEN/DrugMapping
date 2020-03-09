@@ -123,68 +123,70 @@ public class MainFrame {
 		JPanel level2Frame = new JPanel(new BorderLayout());
 		level2Frame.setBorder(BorderFactory.createEmptyBorder());
 
-		
-		// General Settings
-		JPanel generalPanel = new JPanel(new GridLayout(0, 1));
-		generalPanel.setBorder(BorderFactory.createTitledBorder("General Settings"));
-		
-		JPanel generalSettingsPanel = new JPanel(new BorderLayout());
-		JPanel settingsListPanel = new JPanel();
-		settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
-		generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
-		generalPanel.add(generalSettingsPanel);
+		JPanel generalPanel = null;
+		if (!DrugMapping.special.equals("ZINDEX")) {
+			// General Settings
+			generalPanel = new JPanel(new GridLayout(0, 1));
+			generalPanel.setBorder(BorderFactory.createTitledBorder("General Settings"));
+			
+			JPanel generalSettingsPanel = new JPanel(new BorderLayout());
+			JPanel settingsListPanel = new JPanel();
+			settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
+			generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
+			generalPanel.add(generalSettingsPanel);
+
+			// Strength Deviation Setting
+			JPanel strengthDeviationPanel = new JPanel(new FlowLayout());
+			strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
+			JLabel strengthDeviationLabel = new JLabel("Strength deviation percentage:");
+			//strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
+			strengthDeviationField = new JTextField(6);
+			strengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
 				
-		// Strength Deviation Setting
-		JPanel strengthDeviationPanel = new JPanel(new FlowLayout());
-		strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
-		JLabel strengthDeviationLabel = new JLabel("Strength deviation percentage:");
-		//strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
-		strengthDeviationField = new JTextField(6);
-		strengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
-			
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				check();
-			}
-			
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				check();
-			}
-			
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				check();
-			}
-			
-			
-			private void check() {
-				try {
-					double value = Double.parseDouble(strengthDeviationField.getText());
-					DrugMapping.settings.strengthDeviationPercentage = value;
-					if (startButton != null) {
-						startButton.setEnabled(true);
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					check();
+				}
+				
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					check();
+				}
+				
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					check();
+				}
+				
+				
+				private void check() {
+					try {
+						double value = Double.parseDouble(strengthDeviationField.getText());
+						DrugMapping.settings.strengthDeviationPercentage = value;
+						if (startButton != null) {
+							startButton.setEnabled(true);
+						}
+					}
+					catch (NumberFormatException e) {
+						if (startButton != null) {
+							startButton.setEnabled(false);
+						}
 					}
 				}
-				catch (NumberFormatException e) {
-					if (startButton != null) {
-						startButton.setEnabled(false);
-					}
-				}
-			}
-		});
-		strengthDeviationPanel.add(strengthDeviationLabel);
-		strengthDeviationPanel.add(strengthDeviationField);
-		//int strengthDeviationIndex = 0;
-		//for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
-		//	if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
-		//		strengthDeviationIndex = optionIndex;
-		//		break;
-		//	}
-		//}
-		//strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
-		
-		settingsListPanel.add(strengthDeviationPanel);
+			});
+			strengthDeviationPanel.add(strengthDeviationLabel);
+			strengthDeviationPanel.add(strengthDeviationField);
+			//int strengthDeviationIndex = 0;
+			//for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
+			//	if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
+			//		strengthDeviationIndex = optionIndex;
+			//		break;
+			//	}
+			//}
+			//strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
+			
+			settingsListPanel.add(strengthDeviationPanel);
+		}
 		
 		
 		// Buttons
@@ -209,7 +211,9 @@ public class MainFrame {
 		frame.add(level1Frame, BorderLayout.CENTER);
 		level1Frame.add(filePanel, BorderLayout.NORTH);
 		level1Frame.add(level2Frame, BorderLayout.CENTER);
-		level2Frame.add(generalPanel, BorderLayout.NORTH);
+		if (generalPanel != null) {
+			level2Frame.add(generalPanel, BorderLayout.NORTH);
+		}
 		level2Frame.add(createConsolePanel(), BorderLayout.CENTER);
 		frame.add(buttonSectionPanel, BorderLayout.SOUTH);
 		
