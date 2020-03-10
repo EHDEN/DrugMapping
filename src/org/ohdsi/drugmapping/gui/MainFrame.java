@@ -186,6 +186,8 @@ public class MainFrame {
 			//strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
 			
 			settingsListPanel.add(strengthDeviationPanel);
+			
+			DrugMapping.disableWhenRunning(strengthDeviationField);
 		}
 		
 		

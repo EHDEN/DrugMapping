@@ -309,7 +309,7 @@ public class ZIndexConversion extends Mapping {
 							gpkIngredientRecord += "," + "\"" + gpkIPCIIngredient[GPKIPCI_AmountUnit] + "\"";
 							gpkIngredientRecord += ",";
 							gpkIngredientRecord += ",";
-							gpkIngredientRecord += "," + gpkIPCIIngredient[GPKIPCI_CasNr];
+							gpkIngredientRecord += "," + GenericMapping.uniformCASNumber(gpkIPCIIngredient[GPKIPCI_CasNr]);
 
 							gpkFullFile.println(gpkIngredientRecord);
 						}

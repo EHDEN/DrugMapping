@@ -2,14 +2,13 @@ package org.ohdsi.drugmapping;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -30,7 +29,7 @@ public class DrugMapping {
 	public static String outputVersion = "";
 	public static String special = "";
 	
-	private static List<JComponent> componentsToDisableWhenRunning = new ArrayList<JComponent>();
+	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
 	private static String currentDate = null;
 	private static String currentPath = null;	
