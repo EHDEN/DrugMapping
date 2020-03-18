@@ -330,7 +330,7 @@ public class SourceDrug {
 	public List<SourceIngredient> getIngredients() {
 		List<SourceIngredient> ingredients = new ArrayList<SourceIngredient>();
 		for (SourceDrugComponent component : components) {
-			if ((component.getIngredient() != null) && (!ingredients.contains(component.getIngredient()))) {
+			if (component.getIngredient() != null) {
 				ingredients.add(component.getIngredient());
 			}
 		}
