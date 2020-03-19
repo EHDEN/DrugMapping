@@ -131,6 +131,18 @@ public class CDMIngredientStrength {
 	}
 	
 	
+	public String getNumeratorDosageUnitName() {
+		String numeratorDosageUnitName = null;
+		if (getAmountValue() == null) {
+			numeratorDosageUnitName = getNumeratorUnit().getConceptName();
+		}
+		else {
+			numeratorDosageUnitName = getAmountUnit().getConceptName();
+		}
+		return numeratorDosageUnitName;
+	}
+	
+	
 	public Double getDenominatorDosage() {
 		Double denominatorDosage = 1.0; 
 		if ((getAmountValue() == null) && (getDenominatorValue() != null)) {
@@ -147,7 +159,16 @@ public class CDMIngredientStrength {
 		}
 		return denominatorDosageUnit;
 	}
+
 	
+	
+	public String getDenominatorDosageUnitName() {
+		String denominatorDosageUnit = null;
+		if (getAmountValue() == null) {
+			denominatorDosageUnit = getDenominatorUnit().getConceptName();
+		}
+		return denominatorDosageUnit;
+	}
 	
 	public String getBoxSize() {
 		return box_size;
@@ -183,9 +204,9 @@ public class CDMIngredientStrength {
 		
 		description = ingredient.getConceptName();
 		description += " (" + ingredient.getConceptId() + ")";
-		description += (getNumeratorDosage() == null ? "" : " " + getNumeratorDosage()) + (((numerator_unit == null) || (numerator_unit.getConceptName() == null)) ? "" : " " + numerator_unit.getConceptName() + " (" + numerator_unit.getConceptId() + ")");
+		description += (getNumeratorDosage() == null ? "" : " " + getNumeratorDosage()) + ((getNumeratorDosageUnit() == null) ? "" : " " + getNumeratorDosageUnitName() + " (" + getNumeratorDosageUnit() + ")");
 		description += " / ";
-		description += (getDenominatorDosage() == null ? "" : " " +  getDenominatorDosage()) + (((denominator_unit == null) || (denominator_unit.getConceptName() == null)) ? "" : " " + denominator_unit.getConceptName() + " (" + denominator_unit.getConceptId() + ")");
+		description += (getDenominatorDosage() == null ? "" : " " +  getDenominatorDosage()) + ((getDenominatorDosageUnit() == null) ? "" : " " + getDenominatorDosageUnitName() + " (" + getDenominatorDosageUnit() + ")");
 		
 		return description;
 	}
