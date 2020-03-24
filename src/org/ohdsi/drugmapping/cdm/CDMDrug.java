@@ -22,11 +22,13 @@ public class CDMDrug extends CDMConcept {
 	
 	public static String getHeader(String prefix) {
 		String header = CDMConcept.getHeader(prefix);
+	/*
 		header += "," + prefix + "form_concept_id";
+	*/
 		return header;
 	}
 	
-	
+	/*
 	public String toString() {
 		String description = super.toString();
 		String form_concept_ids = "";
@@ -39,7 +41,7 @@ public class CDMDrug extends CDMConcept {
 		description += "," + form_concept_ids;
 		return description;
 	}
-	
+	*/
 
 	public CDMDrug(Row queryRow, String prefix) {
 		super(queryRow, prefix);

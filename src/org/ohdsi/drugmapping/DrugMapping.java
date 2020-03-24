@@ -227,7 +227,7 @@ public class DrugMapping {
 				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
 				logFileSettings("CAS File", getFile("CAS File"));
 				logGeneralSettings();
-				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"));
+				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"), getFile("Manual Mappings File"));
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)

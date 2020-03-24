@@ -194,6 +194,11 @@ public class InputFile extends JPanel {
 	
 	
 	public boolean openFile() {
+		return openFile(false);
+	}
+	
+	
+	public boolean openFile(boolean suppressError) {
 		boolean result = false;
 		
 		if (getFileName() != null) {
@@ -216,11 +221,15 @@ public class InputFile extends JPanel {
 					fileIterator = readFile.iterator();
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
+					if (!suppressError) {
+						JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
+					}
 				}
 			}
 			else {
-				System.out.println("Cannot read file '" + getFileName() + "'!");
+				if (!suppressError) {
+					System.out.println("Cannot read file '" + getFileName() + "'!");
+				}
 			}
 		}
 		

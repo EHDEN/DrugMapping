@@ -21,7 +21,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										new FileColumnDefinition(
 												"SourceCode",
 												new String[] {
-														"This is the GPK-code of the drug."
+														"This is the code of the source drug."
 												}
 										),
 										new FileColumnDefinition(
@@ -104,6 +104,31 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												"Synonyms",
 												new String[] {
 														"This is a list of synonyms for the chemicl name separated by a '|' character."
+												}
+										)
+								}
+						),
+						new FileDefinition(
+								"Manual Mappings File",
+								new String[] {
+										"This file should contain manual mappings from source drugs to",
+										"clinical drugs, clinical drug comps, or clinical drug forms",
+										"that overrule the automated mapping.",
+										"This file is optional."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"SourceCode",
+												new String[] {
+														"This is the code of the source drug."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_id",
+												new String[] {
+														"This is the CDM concept id of the clinical drug,",
+														"clinical drug comp, or clinical drug form",
+														"the source drug should be mapped to."
 												}
 										)
 								}
