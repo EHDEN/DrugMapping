@@ -329,7 +329,8 @@ public class UnitConversion {
 
 		if (numeratorFactor != null) {
 			if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
-				matches = (((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) <= cdmNumeratorValue) && (((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) >= cdmNumeratorValue);
+				matches = (Math.round(((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) * 1000000) <= Math.round(cdmNumeratorValue * 1000000)) && (Math.round(((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) * 1000000) >= Math.round(cdmNumeratorValue * 1000000));
+				//matches = (((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) <= cdmNumeratorValue) && (((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) >= cdmNumeratorValue);
 				//matches = ((sourceNumeratorValue * numeratorFactor) == cdmNumeratorValue);
 			}
 			else if (
@@ -342,7 +343,8 @@ public class UnitConversion {
 			) {
 				Double compatibleSourceValue = ((sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor));
 				Double compatibleCDMValue = cdmNumeratorValue/cdmDenominatorValue;
-				matches = ((compatibleSourceValue - (compatibleSourceValue * deviationFactor)) <= compatibleCDMValue) && ((compatibleSourceValue + (compatibleSourceValue * deviationFactor)) >= compatibleCDMValue);
+				matches = (Math.round((compatibleSourceValue - (compatibleSourceValue * deviationFactor)) * 1000000) <= Math.round(compatibleCDMValue * 1000000)) && (Math.round((compatibleSourceValue + (compatibleSourceValue * deviationFactor)) * 1000000) >= Math.round(compatibleCDMValue * 1000000));
+				//matches = ((compatibleSourceValue - (compatibleSourceValue * deviationFactor)) <= compatibleCDMValue) && ((compatibleSourceValue + (compatibleSourceValue * deviationFactor)) >= compatibleCDMValue);
 				//matches = (((sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor)) == (cdmNumeratorValue/cdmDenominatorValue)); 
 			}
 		}

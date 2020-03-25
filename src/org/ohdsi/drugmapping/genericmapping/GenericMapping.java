@@ -1448,7 +1448,7 @@ public class GenericMapping extends Mapping {
 											rejectedStrengths = new ArrayList<String>();
 											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH, rejectedStrengths);
 										}
-										rejectedStrengths.add(cdmDrug.getStrengthDescription());
+										rejectedStrengths.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
 									}
 								}
 							}
@@ -1546,7 +1546,7 @@ public class GenericMapping extends Mapping {
 											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
 										}
 										for (CDMDrug cdmDrug : matchingCDMDrugs) {
-											String cdmDrugDescription = cdmDrug + ": " + cdmDrug.getStrengthDescription();
+											String cdmDrugDescription = cdmDrug.toString();
 											if (!multipleMappings.contains(cdmDrugDescription)) {
 												multipleMappings.add(cdmDrugDescription);
 											}
@@ -1597,7 +1597,7 @@ public class GenericMapping extends Mapping {
 											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
 										}
 										for (CDMDrug cdmDrug : matchingCDMDrugs) {
-											String cdmDrugDescription = cdmDrug + ": " + cdmDrug.getStrengthDescription();
+											String cdmDrugDescription = cdmDrug.toString();
 											if (!multipleMappings.contains(cdmDrugDescription)) {
 												multipleMappings.add(cdmDrugDescription);
 											}
@@ -1741,7 +1741,7 @@ public class GenericMapping extends Mapping {
 											rejectedStrengths = new ArrayList<String>();
 											rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH, rejectedStrengths);
 										}
-										rejectedStrengths.add(cdmDrug.getStrengthDescription());
+										rejectedStrengths.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
 									}
 								}
 							}
