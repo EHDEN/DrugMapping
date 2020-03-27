@@ -534,7 +534,7 @@ public class IPCIMAPPING extends Mapping {
 					for (CDMDrug cdmDrug : cdmDrugsContainingAllIngredients) {
 						CDMIngredientStrength cdmIngredientStrength = cdmDrug.getIngredientStrength(cdmIngredient);
 						
-						if (!sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit())) {
+						if (!sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit(), 0.0)) {
 							removeClinicalDrugs.add(cdmDrug);
 							rejectReason.put(cdmDrug, "No compatible ingredient strengths found");
 							break;

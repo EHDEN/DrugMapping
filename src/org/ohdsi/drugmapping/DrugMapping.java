@@ -265,7 +265,7 @@ public class DrugMapping {
 	
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
-		System.out.println("  Strength deviation allowed: " + DrugMapping.settings.strengthDeviationPercentage + "%");
+		System.out.println("  Max. Strength deviation allowed: " + DrugMapping.settings.strengthDeviationPercentage + "%");
 		System.out.println();
 	}
 	

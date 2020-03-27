@@ -1328,11 +1328,6 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Match source drugs to Clinical Drugs ...");
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			CDMDrug manualMapping = manualMappings.get(sourceDrug);
-			if ((manualMapping != null) && (!manualMapping.getConceptClassId().equals("Clinical Drug"))) {
-				manualMapping = null;
-			}
-			
 			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 				List<CDMIngredient> sourceDrugCDMIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 				
@@ -1423,37 +1418,53 @@ public class GenericMapping extends Mapping {
 						// Find CDM Clinical Drugs with corresponding ingredient strengths
 						if (cdmDrugsWithIngredients.size() > 0) {
 							List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();
+							List<String> rejectedDrugs = new ArrayList<String>();
 							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
-							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								if (sourceDrug.getComponents().size() == cdmDrug.getIngredientStrengths().size()) {
-									List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), true);
-									if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
-										matchingCDMDrugs.add(cdmDrug);
-										matchingIngredientsMap.put(cdmDrug, matchingIngredients);
-									}
-									else {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
-										if (sourceDugMappingResults == null) {
-											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
-											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+							
+							List<Double> strengthDeviationPercentages = new ArrayList<Double>();
+							strengthDeviationPercentages.add(0.0);
+							if (DrugMapping.settings.strengthDeviationPercentage != 0.0) {
+								strengthDeviationPercentages.add(DrugMapping.settings.strengthDeviationPercentage);
+							}
+							
+							for (Double strengthDeviationPercentage : strengthDeviationPercentages) {
+								matchingCDMDrugs = new ArrayList<CDMDrug>();
+								rejectedDrugs = new ArrayList<String>();
+								
+								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+									if (sourceDrug.getComponents().size() == cdmDrug.getIngredientStrengths().size()) {
+										List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), strengthDeviationPercentage);
+										if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
+											matchingCDMDrugs.add(cdmDrug);
+											matchingIngredientsMap.put(cdmDrug, matchingIngredients);
 										}
-										Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDugMappingResults.put(mapping, rejectedForMapping);
+										else {
+											rejectedDrugs.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
 										}
-										
-										List<String> rejectedStrengths = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH);
-										if (rejectedStrengths == null) {
-											rejectedStrengths = new ArrayList<String>();
-											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH, rejectedStrengths);
-										}
-										rejectedStrengths.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
 									}
 								}
+								
+								if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
+									break;
+								}
 							}
+
+							Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+							if (sourceDugMappingResults == null) {
+								sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+							}
+							Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+							if (rejectedForMapping == null) {
+								rejectedForMapping = new HashMap<Integer, List<String>>();
+								sourceDugMappingResults.put(mapping, rejectedForMapping);
+							}
+							rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
+							
 							if (matchingCDMDrugs.size() == 1) {
-								Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+								mappedSourceDrugs.add(sourceDrug);
+								
+								sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 								if (sourceDugMappingResults == null) {
 									sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 									sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
@@ -1464,17 +1475,12 @@ public class GenericMapping extends Mapping {
 									sourceDugMappingResults.put(mapping, acceptedForMapping);
 								}
 
-								int mappingType = CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING;
-								if (manualMappings.get(sourceDrug) == null) {
-									mappingType = CLINICAL_DRUG_MAPPING_MAPPED;
-									mappedSourceDrugs.add(sourceDrug);
-								}
-								List<String> singleMapping = acceptedForMapping.get(mappingType);
+								List<String> singleMapping = acceptedForMapping.get(CLINICAL_DRUG_MAPPING_MAPPED);
 								if (singleMapping == null) {
 									singleMapping = new ArrayList<String>();
-									acceptedForMapping.put(mappingType, singleMapping);
+									acceptedForMapping.put(CLINICAL_DRUG_MAPPING_MAPPED, singleMapping);
 								}
-								singleMapping.add( matchingCDMDrugs.get(0).toString());
+								singleMapping.add(matchingCDMDrugs.get(0).toString());
 							}
 							else if (matchingCDMDrugs.size() > 1) {
 								// Discard drugs without strength units
@@ -1505,7 +1511,9 @@ public class GenericMapping extends Mapping {
 								}
 								if (matchingCDMDrugsWithTwoUnits.size() > 0) {
 									if (matchingCDMDrugsWithTwoUnits.size() == 1) {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										mappedSourceDrugs.add(sourceDrug);
+										
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
@@ -1516,25 +1524,20 @@ public class GenericMapping extends Mapping {
 											sourceDugMappingResults.put(mapping, acceptedForMapping);
 										}
 
-										int mappingType = CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING;
-										if (manualMappings.get(sourceDrug) == null) {
-											mappingType = CLINICAL_DRUG_MAPPING_MAPPED;
-											mappedSourceDrugs.add(sourceDrug);
-										}
-										List<String> singleMapping = acceptedForMapping.get(mappingType);
+										List<String> singleMapping = acceptedForMapping.get(CLINICAL_DRUG_MAPPING_MAPPED);
 										if (singleMapping == null) {
 											singleMapping = new ArrayList<String>();
-											acceptedForMapping.put(mappingType, singleMapping);
+											acceptedForMapping.put(CLINICAL_DRUG_MAPPING_MAPPED, singleMapping);
 										}
 										singleMapping.add(matchingCDMDrugsWithTwoUnits.get(0).toString());
 									}
 									else {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 										}
-										Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+										rejectedForMapping = sourceDugMappingResults.get(mapping);
 										if (rejectedForMapping == null) {
 											rejectedForMapping = new HashMap<Integer, List<String>>();
 											sourceDugMappingResults.put(mapping, rejectedForMapping);
@@ -1556,7 +1559,9 @@ public class GenericMapping extends Mapping {
 								}
 								else {
 									if (matchingCDMDrugsWithOneUnit.size() == 1) {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										mappedSourceDrugs.add(sourceDrug);
+										
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
@@ -1567,25 +1572,20 @@ public class GenericMapping extends Mapping {
 											sourceDugMappingResults.put(mapping, acceptedForMapping);
 										}
 
-										int mappingType = CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING;
-										if (manualMappings.get(sourceDrug) == null) {
-											mappingType = CLINICAL_DRUG_MAPPING_MAPPED;
-											mappedSourceDrugs.add(sourceDrug);
-										}
-										List<String> singleMapping = acceptedForMapping.get(mappingType);
+										List<String> singleMapping = acceptedForMapping.get(CLINICAL_DRUG_MAPPING_MAPPED);
 										if (singleMapping == null) {
 											singleMapping = new ArrayList<String>();
-											acceptedForMapping.put(mappingType, singleMapping);
+											acceptedForMapping.put(CLINICAL_DRUG_MAPPING_MAPPED, singleMapping);
 										}
 										singleMapping.add(matchingCDMDrugsWithOneUnit.get(0).toString());
 									}
 									else {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 										}
-										Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+										rejectedForMapping = sourceDugMappingResults.get(mapping);
 										if (rejectedForMapping == null) {
 											rejectedForMapping = new HashMap<Integer, List<String>>();
 											sourceDugMappingResults.put(mapping, rejectedForMapping);
@@ -1628,28 +1628,41 @@ public class GenericMapping extends Mapping {
 					}
 				}
 			}
-			
+
+			// Check for manual mapping.
+			CDMDrug manualMapping = manualMappings.get(sourceDrug);
 			if (manualMapping != null) {
-				mappedSourceDrugs.add(sourceDrug);
-				
+				// There is a manual mapping.
 				Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 				if (sourceDugMappingResults == null) {
 					sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 					sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 				}
-				Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
-				if (rejectedForMapping == null) {
-					rejectedForMapping = new HashMap<Integer, List<String>>();
-					sourceDugMappingResults.put(mapping, rejectedForMapping);
-				}
+				Map<Integer, List<String>> mappingTypeResults = sourceDugMappingResults.get(mapping);
 				
-				List<String> manualMappingList = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_MAPPED);
-				if (manualMappingList == null) {
-					manualMappingList = new ArrayList<String>();
-					rejectedForMapping.put(CLINICAL_DRUG_MAPPING_MAPPED, manualMappingList);
+				// Remove mapping if it exists and store them it as an overruled mapping.
+				if (mappingTypeResults != null) {
+					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_MAPPING_MAPPED);
+					if (acceptedMappingList != null) {
+						List<String> overruledMappingList = new ArrayList<String>();
+						mappingTypeResults.put(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING, overruledMappingList);
+						for (String overruledMapping : acceptedMappingList) {
+							overruledMappingList.add(overruledMapping);
+						}
+						acceptedMappingList.clear();
+						mappingTypeResults.put(CLINICAL_DRUG_MAPPING_MAPPED, null);
+					}
 				}
-				manualMappingList.add(manualMapping.toString());
-				
+
+				// Set manual mapping if it has the current mapping type
+				if (manualMapping.getConceptClassId().equals("Clinical Drug")) {
+					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_MAPPING_MAPPED);
+					if (acceptedMappingList == null) {
+						acceptedMappingList = new ArrayList<String>();
+						mappingTypeResults.put(CLINICAL_DRUG_MAPPING_MAPPED, acceptedMappingList);
+					}
+					acceptedMappingList.add(manualMapping.toString());
+				}
 			}
 		}
 
@@ -1668,11 +1681,6 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Match source drugs to Clinical Drug Comps ...");
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			CDMDrug manualMapping = manualMappings.get(sourceDrug);
-			if ((manualMapping != null) && (!manualMapping.getConceptClassId().equals("Clinical Drug Comp"))) {
-				manualMapping = null;
-			}
-			
 			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 				boolean earlierNotUniqueMapping = false;
 				for (int mappingType : notUniqueMapping.keySet()) {
@@ -1716,37 +1724,55 @@ public class GenericMapping extends Mapping {
 						// Find CDM Clinical Drug Comps with corresponding ingredient strengths
 						if (cdmDrugCompsWithIngredients.size() > 0) {
 							List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();
+							List<String> rejectedDrugs = new ArrayList<String>();
 							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
-							for (CDMDrug cdmDrug : cdmDrugCompsWithIngredients) {
-								if (sourceDrug.getComponents().size() == cdmDrug.getIngredientStrengths().size()) {
-									List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), true);
-									if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
-										matchingCDMDrugs.add(cdmDrug);
-										matchingIngredientsMap.put(cdmDrug, matchingIngredients);
-									}
-									else {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
-										if (sourceDugMappingResults == null) {
-											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
-											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+							
+							List<Double> strengthDeviationPercentages = new ArrayList<Double>();
+							strengthDeviationPercentages.add(0.0);
+							if (DrugMapping.settings.strengthDeviationPercentage != 0.0) {
+								strengthDeviationPercentages.add(DrugMapping.settings.strengthDeviationPercentage);
+							}
+							
+							for (Double strengthDeviationPercentage : strengthDeviationPercentages) {
+								matchingCDMDrugs = new ArrayList<CDMDrug>();
+								rejectedDrugs = new ArrayList<String>();
+								
+								for (CDMDrug cdmDrug : cdmDrugCompsWithIngredients) {
+									if (sourceDrug.getComponents().size() == cdmDrug.getIngredientStrengths().size()) {
+										List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), strengthDeviationPercentage);
+										if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
+											matchingCDMDrugs.add(cdmDrug);
+											matchingIngredientsMap.put(cdmDrug, matchingIngredients);
 										}
-										Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDugMappingResults.put(mapping, rejectedForMapping);
+										else {
+											rejectedDrugs.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
 										}
-										
-										List<String> rejectedStrengths = rejectedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH);
-										if (rejectedStrengths == null) {
-											rejectedStrengths = new ArrayList<String>();
-											rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH, rejectedStrengths);
-										}
-										rejectedStrengths.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
 									}
 								}
+								
+								if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
+									break;
+								}
 							}
+							
+							// Save the rejected drugs
+							Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+							if (sourceDugMappingResults == null) {
+								sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+							}
+							Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+							if (rejectedForMapping == null) {
+								rejectedForMapping = new HashMap<Integer, List<String>>();
+								sourceDugMappingResults.put(mapping, rejectedForMapping);
+							}
+							rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
+							
+							
 							if (matchingCDMDrugs.size() == 1) {
-								Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+								mappedSourceDrugs.add(sourceDrug);
+								
+								sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 								if (sourceDugMappingResults == null) {
 									sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 									sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
@@ -1757,18 +1783,12 @@ public class GenericMapping extends Mapping {
 									sourceDugMappingResults.put(mapping, acceptedForMapping);
 								}
 
-								int mappingType = CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING;
-								if (manualMappings.get(sourceDrug) == null) {
-									mappingType = CLINICAL_DRUG_COMP_MAPPING_MAPPED;
-									mappedSourceDrugs.add(sourceDrug);
-								}
-								List<String> singleMapping = acceptedForMapping.get(mappingType);
+								List<String> singleMapping = acceptedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_MAPPED);
 								if (singleMapping == null) {
 									singleMapping = new ArrayList<String>();
-									acceptedForMapping.put(mappingType, singleMapping);
+									acceptedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED, singleMapping);
 								}
-								String matchingDrugDescription = matchingCDMDrugs.get(0).toString();
-								singleMapping.add(matchingDrugDescription);
+								singleMapping.add(matchingCDMDrugs.get(0).toString());
 							}
 							else if (matchingCDMDrugs.size() > 1) {
 								// Discard drugs without strength units
@@ -1799,7 +1819,9 @@ public class GenericMapping extends Mapping {
 								}
 								if (matchingCDMDrugsWithTwoUnits.size() > 0) {
 									if (matchingCDMDrugsWithTwoUnits.size() == 1) {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										mappedSourceDrugs.add(sourceDrug);
+										
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
@@ -1810,26 +1832,20 @@ public class GenericMapping extends Mapping {
 											sourceDugMappingResults.put(mapping, acceptedForMapping);
 										}
 
-										int mappingType = CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING;
-										if (manualMappings.get(sourceDrug) == null) {
-											mappingType = CLINICAL_DRUG_COMP_MAPPING_MAPPED;
-											mappedSourceDrugs.add(sourceDrug);
-										}
-										List<String> singleMapping = acceptedForMapping.get(mappingType);
+										List<String> singleMapping = acceptedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_MAPPED);
 										if (singleMapping == null) {
 											singleMapping = new ArrayList<String>();
-											acceptedForMapping.put(mappingType, singleMapping);
+											acceptedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED, singleMapping);
 										}
-										String matchingDrugDescription = matchingCDMDrugs.get(0).toString();
-										singleMapping.add(matchingDrugDescription);
+										singleMapping.add(matchingCDMDrugs.get(0).toString());
 									}
 									else {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 										}
-										Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+										rejectedForMapping = sourceDugMappingResults.get(mapping);
 										if (rejectedForMapping == null) {
 											rejectedForMapping = new HashMap<Integer, List<String>>();
 											sourceDugMappingResults.put(mapping, rejectedForMapping);
@@ -1851,7 +1867,7 @@ public class GenericMapping extends Mapping {
 								}
 								else {
 									if (matchingCDMDrugsWithOneUnit.size() == 1) {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
@@ -1876,12 +1892,12 @@ public class GenericMapping extends Mapping {
 										singleMapping.add(matchingDrugDescription);
 									}
 									else {
-										Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 										}
-										Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+										rejectedForMapping = sourceDugMappingResults.get(mapping);
 										if (rejectedForMapping == null) {
 											rejectedForMapping = new HashMap<Integer, List<String>>();
 											sourceDugMappingResults.put(mapping, rejectedForMapping);
@@ -1937,26 +1953,40 @@ public class GenericMapping extends Mapping {
 				}
 			}
 
+			// Check for manual mapping.
+			CDMDrug manualMapping = manualMappings.get(sourceDrug);
 			if (manualMapping != null) {
-				mappedSourceDrugs.add(sourceDrug);
-				
+				// There is a manual mapping.
 				Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 				if (sourceDugMappingResults == null) {
 					sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 					sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 				}
-				Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
-				if (rejectedForMapping == null) {
-					rejectedForMapping = new HashMap<Integer, List<String>>();
-					sourceDugMappingResults.put(mapping, rejectedForMapping);
-				}
+				Map<Integer, List<String>> mappingTypeResults = sourceDugMappingResults.get(mapping);
 				
-				List<String> manualMappingList = rejectedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_MAPPED);
-				if (manualMappingList == null) {
-					manualMappingList = new ArrayList<String>();
-					rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED, manualMappingList);
+				// Remove mapping if it exists and store them it as an overruled mapping.
+				if (mappingTypeResults != null) {
+					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_COMP_MAPPING_MAPPED);
+					if (acceptedMappingList != null) {
+						List<String> overruledMappingList = new ArrayList<String>();
+						mappingTypeResults.put(CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING, overruledMappingList);
+						for (String overruledMapping : acceptedMappingList) {
+							overruledMappingList.add(overruledMapping);
+						}
+						acceptedMappingList.clear();
+						mappingTypeResults.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED, null);
+					}
 				}
-				manualMappingList.add(manualMapping.toString());
+
+				// Set manual mapping if it has the current mapping type
+				if (manualMapping.getConceptClassId().equals("Clinical Drug Comp")) {
+					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_COMP_MAPPING_MAPPED);
+					if (acceptedMappingList == null) {
+						acceptedMappingList = new ArrayList<String>();
+						mappingTypeResults.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED, acceptedMappingList);
+					}
+					acceptedMappingList.add(manualMapping.toString());
+				}
 			}
 		}
 
@@ -1975,11 +2005,6 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Match source drugs to Clinical Drug Forms ...");
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			CDMDrug manualMapping = manualMappings.get(sourceDrug);
-			if ((manualMapping != null) && (!manualMapping.getConceptClassId().equals("Clinical Drug Comp"))) {
-				manualMapping = null;
-			}
-			
 			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 				boolean earlierNotUniqueMapping = false;
 				for (int mappingType : notUniqueMapping.keySet()) {
@@ -2067,8 +2092,9 @@ public class GenericMapping extends Mapping {
 						if (cdmDrugsWithIngredients.size() > 0) {
 							List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();
 							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
+							
 							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), false);
+								List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), null);
 								if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
 									matchingCDMDrugs.add(cdmDrug);
 									matchingIngredientsMap.put(cdmDrug, matchingIngredients);
@@ -2143,26 +2169,40 @@ public class GenericMapping extends Mapping {
 				}
 			}
 
+			// Check for manual mapping.
+			CDMDrug manualMapping = manualMappings.get(sourceDrug);
 			if (manualMapping != null) {
-				mappedSourceDrugs.add(sourceDrug);
-				
+				// There is a manual mapping.
 				Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 				if (sourceDugMappingResults == null) {
 					sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
 					sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
 				}
-				Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
-				if (rejectedForMapping == null) {
-					rejectedForMapping = new HashMap<Integer, List<String>>();
-					sourceDugMappingResults.put(mapping, rejectedForMapping);
+				Map<Integer, List<String>> mappingTypeResults = sourceDugMappingResults.get(mapping);
+				
+				// Remove mapping if it exists and store them it as an overruled mapping.
+				if (mappingTypeResults != null) {
+					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_FORM_MAPPING_MAPPED);
+					if (acceptedMappingList != null) {
+						List<String> overruledMappingList = new ArrayList<String>();
+						mappingTypeResults.put(CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING, overruledMappingList);
+						for (String overruledMapping : acceptedMappingList) {
+							overruledMappingList.add(overruledMapping);
+						}
+						acceptedMappingList.clear();
+						mappingTypeResults.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED, null);
+					}
 				}
 				
-				List<String> manualMappingList = rejectedForMapping.get(CLINICAL_DRUG_FORM_MAPPING_MAPPED);
-				if (manualMappingList == null) {
-					manualMappingList = new ArrayList<String>();
-					rejectedForMapping.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED, manualMappingList);
+				// Set manual mapping if it has the current mapping type
+				if (manualMapping.getConceptClassId().equals("Clinical Drug Form")) {
+					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_FORM_MAPPING_MAPPED);
+					if (acceptedMappingList == null) {
+						acceptedMappingList = new ArrayList<String>();
+						mappingTypeResults.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED, acceptedMappingList);
+					}
+					acceptedMappingList.add(manualMapping.toString());
 				}
-				manualMappingList.add(manualMapping.toString());
 			}
 		}
 
@@ -2233,7 +2273,7 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceDrug sourceDrug : sourceDrugs) {
-				String mappingStatus = mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped";
+				String mappingStatus = manualMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
 				Map<Integer, Map<Integer, List<String>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
 				
 				if (sourceDrugMappings == null) {
@@ -2387,9 +2427,9 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private List<CDMIngredientStrength> matchingIngredients(List<SourceDrugComponent> sourceDrugComponents, Map<String, Set<CDMIngredientStrength>> cdmIngredientsMap, boolean useStrength) {
+	private List<CDMIngredientStrength> matchingIngredients(List<SourceDrugComponent> sourceDrugComponents, Map<String, Set<CDMIngredientStrength>> cdmIngredientsMap, Double strengthDeviationPercentage) {
 		List<CDMIngredientStrength> matchingIngredients = new ArrayList<CDMIngredientStrength>();
-		
+		matchingIngredients = new ArrayList<CDMIngredientStrength>();
 		for (SourceDrugComponent sourceDrugComponent : sourceDrugComponents) {
 			SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
 			if (sourceIngredient != null) {
@@ -2397,10 +2437,10 @@ public class GenericMapping extends Mapping {
 				if (cdmIngredientConceptId != null) {
 					Set<CDMIngredientStrength> matchingCDMIngredients = cdmIngredientsMap.get(cdmIngredientConceptId);
 					if (matchingCDMIngredients != null) {
-						if (useStrength) {
+						if (strengthDeviationPercentage != null) {
 							boolean found = false;
 							for (CDMIngredientStrength cdmIngredientStrength : matchingCDMIngredients) {
-								if (sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit())) {
+								if (sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit(), strengthDeviationPercentage)) {
 									matchingIngredients.add(cdmIngredientStrength);
 									found = true;
 									break;

@@ -138,7 +138,7 @@ public class MainFrame {
 			// Strength Deviation Setting
 			JPanel strengthDeviationPanel = new JPanel(new FlowLayout());
 			strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
-			JLabel strengthDeviationLabel = new JLabel("Strength deviation percentage:");
+			JLabel strengthDeviationLabel = new JLabel("Max. strength deviation percentage:");
 			//strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
 			strengthDeviationField = new JTextField(6);
 			strengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
@@ -176,14 +176,6 @@ public class MainFrame {
 			});
 			strengthDeviationPanel.add(strengthDeviationLabel);
 			strengthDeviationPanel.add(strengthDeviationField);
-			//int strengthDeviationIndex = 0;
-			//for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
-			//	if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
-			//		strengthDeviationIndex = optionIndex;
-			//		break;
-			//	}
-			//}
-			//strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
 			
 			settingsListPanel.add(strengthDeviationPanel);
 			
