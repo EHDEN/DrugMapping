@@ -907,6 +907,12 @@ public class GenericMapping extends Mapping {
 				
 				SourceDrug sourceDrug = sourceDrugMap.get(sourceCode);
 				CDMDrug cdmDrug = cdmDrugs.get(cdmConceptId);
+				if (cdmDrug == null) {
+					cdmDrug = cdmDrugComps.get(cdmConceptId);
+				}
+				if (cdmDrug == null) {
+					cdmDrug = cdmDrugForms.get(cdmConceptId);
+				}
 				System.out.println("Mapping " + (sourceDrug == null ? sourceCode : sourceDrug) + " -> " + (cdmDrug == null ? cdmConceptId : cdmDrug));
 				if (sourceDrug == null) {
 					System.out.println("    ERROR: SourceCode " + sourceCode + " does not exist!");
