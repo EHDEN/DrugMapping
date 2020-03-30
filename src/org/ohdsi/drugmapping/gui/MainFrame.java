@@ -21,7 +21,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -51,8 +50,7 @@ public class MainFrame {
 	private Console console;
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
-	private Integer[] strengthDeviationOptions = new Integer[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	//private JComboBox<Integer> strengthDeviationField = null;
+	private JTextField minimumUseCountField = null;
 	private JTextField strengthDeviationField = null;
 	private JButton startButton = null;
 	private String logFile = null;
@@ -132,14 +130,58 @@ public class MainFrame {
 			JPanel generalSettingsPanel = new JPanel(new BorderLayout());
 			JPanel settingsListPanel = new JPanel();
 			settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
+			settingsListPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 			generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
 			generalPanel.add(generalSettingsPanel);
 
 			// Strength Deviation Setting
-			JPanel strengthDeviationPanel = new JPanel(new FlowLayout());
+			JPanel minimumUseCountPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			minimumUseCountPanel.setBorder(BorderFactory.createEmptyBorder());
+			JLabel minimumUseCountLabel = new JLabel("Min. use count:");
+			minimumUseCountField = new JTextField(6);
+			minimumUseCountField.getDocument().addDocumentListener(new DocumentListener() {
+				
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					check();
+				}
+				
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					check();
+				}
+				
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					check();
+				}
+				
+				
+				private void check() {
+					try {
+						long value = Long.parseLong(minimumUseCountField.getText());
+						DrugMapping.settings.minimumUseCount = value;
+						if (startButton != null) {
+							startButton.setEnabled(true);
+						}
+					}
+					catch (NumberFormatException e) {
+						if (startButton != null) {
+							startButton.setEnabled(false);
+						}
+					}
+				}
+			});
+			minimumUseCountPanel.add(minimumUseCountLabel);
+			minimumUseCountPanel.add(minimumUseCountField);
+			settingsListPanel.add(minimumUseCountPanel);
+			
+			DrugMapping.disableWhenRunning(minimumUseCountField);
+
+			// Strength Deviation Setting
+			JPanel strengthDeviationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
 			JLabel strengthDeviationLabel = new JLabel("Max. strength deviation percentage:");
-			//strengthDeviationField = new JComboBox<Integer>(strengthDeviationOptions);
 			strengthDeviationField = new JTextField(6);
 			strengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
 				
@@ -176,7 +218,6 @@ public class MainFrame {
 			});
 			strengthDeviationPanel.add(strengthDeviationLabel);
 			strengthDeviationPanel.add(strengthDeviationField);
-			
 			settingsListPanel.add(strengthDeviationPanel);
 			
 			DrugMapping.disableWhenRunning(strengthDeviationField);
@@ -380,17 +421,8 @@ public class MainFrame {
 		if (generalSettings != null) {
 			DrugMapping.settings.putSettings(generalSettings);
 		}
+		minimumUseCountField.setText(Long.toString(DrugMapping.settings.minimumUseCount));
 		strengthDeviationField.setText(Double.toString(DrugMapping.settings.strengthDeviationPercentage));
-		/*
-		int strengthDeviationIndex = 0;
-		for (int optionIndex = 0; optionIndex < strengthDeviationOptions.length; optionIndex++) {
-			if (strengthDeviationOptions[optionIndex] == DrugMapping.settings.strengthDeviationPercentage) {
-				strengthDeviationIndex = optionIndex;
-				break;
-			}
-		}
-		strengthDeviationField.setSelectedIndex(strengthDeviationIndex);
-		*/
 	}
 
 	
@@ -433,13 +465,15 @@ public class MainFrame {
 		List<String> settings = new ArrayList<String>();
 		if (settingsFileName != null) {
 			try {
-				BufferedReader settingsFile = new BufferedReader(new FileReader(settingsFileName));
-				String line = settingsFile.readLine();
+				BufferedReader settingsFileBufferedReader = new BufferedReader(new FileReader(settingsFileName));
+				File settingsFile = new File(settingsFileName);
+				DrugMapping.setCurrentPath(settingsFile.getAbsolutePath());
+				String line = settingsFileBufferedReader.readLine();
 				while (line != null) {
 					settings.add(line);
-					line = settingsFile.readLine();
+					line = settingsFileBufferedReader.readLine();
 				}
-				settingsFile.close();
+				settingsFileBufferedReader.close();
 			}
 			catch (IOException e) {
 				JOptionPane.showMessageDialog(frame, "Unable to read settings from file!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -453,7 +487,7 @@ public class MainFrame {
 	private String getFile(FileNameExtensionFilter extensionsFilter, boolean fileShouldExist) {
 		String fileName = null;
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setSelectedFile(new File(System.getProperty("user.dir")));
+		fileChooser.setSelectedFile(new File(DrugMapping.getCurrentPath() == null ? System.getProperty("user.dir") : DrugMapping.getCurrentPath()));
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		if (extensionsFilter != null) {
 			fileChooser.setFileFilter(extensionsFilter);
@@ -461,6 +495,7 @@ public class MainFrame {
 		int returnVal = fileShouldExist ? fileChooser.showOpenDialog(frame) : fileChooser.showDialog(frame, "Save");
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			fileName = fileChooser.getSelectedFile().getAbsolutePath();
+			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath());
 		}
 		return fileName;
 	}

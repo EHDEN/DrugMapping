@@ -25,7 +25,7 @@ public class SourceDrug {
 	private String name = null;
 	private String atcCode = null;
 	private String formulation = null;
-	private Integer count = null;
+	private Long count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
 	private CDMDrug mappedDrug = null;
 	
@@ -179,10 +179,10 @@ public class SourceDrug {
 		this.atcCode = sourceATCCode.equals("") ? null : sourceATCCode;
 		this.formulation = formulation.equals("") ? null : formulation;
 		try {
-			this.count = Integer.valueOf(count);
+			this.count = Long.valueOf(count);
 		}
 		catch (NumberFormatException e) {
-			this.count = -1;
+			this.count = -1L;
 		}
 	}
 	
@@ -207,7 +207,7 @@ public class SourceDrug {
 	}
 	
 	
-	public Integer getCount() {
+	public Long getCount() {
 		return count;
 	}
 	

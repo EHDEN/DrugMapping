@@ -5,6 +5,7 @@ import java.util.List;
 
 public class GeneralSettings {
 
+	public Long minimumUseCount = 1L;
 	public Double strengthDeviationPercentage = 0.0;
 	
 	

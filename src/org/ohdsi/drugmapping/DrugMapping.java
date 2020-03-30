@@ -78,6 +78,11 @@ public class DrugMapping {
 	}
 	
 	
+	public static void setCurrentPath(String path) {
+		currentPath = path;
+	}
+	
+	
 	public static void disableWhenRunning(JComponent component) {
 		componentsToDisableWhenRunning.add(component);
 	}
@@ -265,6 +270,7 @@ public class DrugMapping {
 	
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
+		System.out.println("  Min. use count: " + DrugMapping.settings.minimumUseCount);
 		System.out.println("  Max. Strength deviation allowed: " + DrugMapping.settings.strengthDeviationPercentage + "%");
 		System.out.println();
 	}

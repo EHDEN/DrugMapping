@@ -531,12 +531,13 @@ public class InputFile extends JPanel {
 	private boolean selectFile(Component parent, JTextField fileField) {
 		boolean result = false;
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setSelectedFile(new File(System.getProperty("user.dir")));
+		fileChooser.setSelectedFile(new File(DrugMapping.getCurrentPath() == null ? System.getProperty("user.dir") : DrugMapping.getCurrentPath()));
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files", "csv", "txt"));
 		int returnVal = fileChooser.showDialog(parent, "Select file");
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			fileField.setText(fileChooser.getSelectedFile().getAbsolutePath());
+			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath());
 			result = true;
 		}
 		return result;

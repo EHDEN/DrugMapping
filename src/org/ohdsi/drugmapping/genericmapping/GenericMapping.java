@@ -29,8 +29,7 @@ import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.utilities.files.Row;
 
 public class GenericMapping extends Mapping {
-	private static int MINIMUM_USE_COUNT = 1;
-	
+
 	// Mapping types
 	// The mapping type values should start at 0 and incremented by 1.
 	private static int CLINICAL_DRUG_MAPPING      = 0;
@@ -302,7 +301,7 @@ public class GenericMapping extends Mapping {
 		SourceDrug.init();
 		
 		// Load source drug ingredient mapping
-		ok = ok && getSourceDrugs(sourceDrugsFile, MINIMUM_USE_COUNT) && (!SourceDrug.errorOccurred());
+		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.minimumUseCount) && (!SourceDrug.errorOccurred());
 		
 		// Get unit conversion from local units to CDM units
 		ok = getUnitConversion(database);
@@ -344,7 +343,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getSourceDrugs(InputFile sourceDrugsFile, int minimumUseCount) {
+	private boolean getSourceDrugs(InputFile sourceDrugsFile, long minimumUseCount) {
 		boolean sourceDrugError = false;
 		Integer sourceDrugCount = 0;
 		String fileName = "";
@@ -474,7 +473,7 @@ public class GenericMapping extends Mapping {
 				}
 			}
 			sourceDrugs.removeAll(sourceDrugsToBeRemoved);
-			report.add("Found " + Integer.toString(sourceDrugs.size()) + " source drugs with a miminum use count of " + Integer.toString(minimumUseCount));
+			report.add("Found " + Integer.toString(sourceDrugs.size()) + " source drugs with a miminum use count of " + Long.toString(minimumUseCount));
 			report.add("Found " + noATCCounter + " source drugs without ATC (" + Long.toString(Math.round(((double) noATCCounter / (double) sourceDrugs.size()) * 100)) + "%)");
 			report.add("Found " + Integer.toString(SourceDrug.getAllIngredients().size()) + " source ingredients");
 		}
@@ -2271,8 +2270,8 @@ public class GenericMapping extends Mapping {
 			Collections.sort(sourceDrugs, new Comparator<SourceDrug>() {
 				@Override
 				public int compare(SourceDrug sourceDrug1, SourceDrug sourceDrug2) {
-					int countCompare = Integer.compare(sourceDrug1.getCount() == null ? 0 : sourceDrug1.getCount(), sourceDrug2.getCount() == null ? 0 : sourceDrug2.getCount()); 
-					int compareResult = (countCompare == 0 ? Integer.compare(sourceDrug1.getCode() == null ? Integer.MAX_VALUE : Integer.valueOf(sourceDrug1.getCode()), sourceDrug2.getCode() == null ? Integer.MAX_VALUE : Integer.valueOf(sourceDrug2.getCode())) : -countCompare);
+					int countCompare = Long.compare(sourceDrug1.getCount() == null ? 0L : sourceDrug1.getCount(), sourceDrug2.getCount() == null ? 0L : sourceDrug2.getCount()); 
+					int compareResult = (countCompare == 0 ? (sourceDrug1.getCode() == null ? "" : sourceDrug1.getCode()).compareTo(sourceDrug2.getCode() == null ? "" : sourceDrug2.getCode()) : -countCompare);
 					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
 					return compareResult;
 				}
@@ -2366,27 +2365,23 @@ public class GenericMapping extends Mapping {
 			
 			dataCountTotal += sourceDrug.getCount();
 						
-			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_MAPPING).get(CLINICAL_DRUG_MAPPING_MAPPED) != null) {
-				mappingClinicalDrugs++;
-				dataCoverageClinicalDrugs += sourceDrug.getCount();
+			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_MAPPING) != null) {
+				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_MAPPING).get(CLINICAL_DRUG_MAPPING_MAPPED) != null) {
+					mappingClinicalDrugs++;
+					dataCoverageClinicalDrugs += sourceDrug.getCount();
+				}
 			}
-			else if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_COMP_MAPPING) != null) {
+			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_COMP_MAPPING) != null) {
 				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_COMP_MAPPING).get(CLINICAL_DRUG_COMP_MAPPING_MAPPED) != null) {
 					mappingClinicalDrugComps++;
 					dataCoverageClinicalDrugComps += sourceDrug.getCount();
 				}
-				else if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING) != null) {
-					if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING).get(CLINICAL_DRUG_FORM_MAPPING_MAPPED) != null) {
-						mappingClinicalDrugForms++;
-						dataCoverageClinicalDrugForms += sourceDrug.getCount();
-					}
-				}
-				else {
-					System.out.println("ERROR 1: " + sourceDrug);
-				}
 			}
-			else {
-				System.out.println("ERROR 2: " + sourceDrug);
+			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING) != null) {
+				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING).get(CLINICAL_DRUG_FORM_MAPPING_MAPPED) != null) {
+					mappingClinicalDrugForms++;
+					dataCoverageClinicalDrugForms += sourceDrug.getCount();
+				}
 			}
 		}
 		
@@ -2497,19 +2492,19 @@ public class GenericMapping extends Mapping {
 	
 	
 	private PrintWriter openOutputFile(String fileName, String header) {
-		PrintWriter outputFile = null;
+		PrintWriter outputPrintWriter = null;
 		String fullFileName = "";
 		try {
 			// Create output file
 			fullFileName = DrugMapping.getCurrentPath() + "/" + DrugMapping.outputVersion + fileName;
-			outputFile = new PrintWriter(new File(fullFileName));
-			outputFile.println(header);
+			outputPrintWriter = new PrintWriter(new File(fullFileName));
+			outputPrintWriter.println(header);
 		}
 		catch (FileNotFoundException e) {
 			System.out.println("      ERROR: Cannot create output file '" + fullFileName + "'");
-			outputFile = null;
+			outputPrintWriter = null;
 		}
-		return outputFile;
+		return outputPrintWriter;
 	}
 	
 	

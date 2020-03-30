@@ -17,7 +17,7 @@ public class SourceIngredient {
 	private String ingredientNameEnglish = null;
 	private String ingredientNameEnglishNoSpaces = null;
 	private String casNumber = null;
-	private Integer count = 0;
+	private Long count = 0L;
 	private List<String> ingredientMatchingNames = new ArrayList<String>();
 	
 	private String matchString = "";
@@ -210,12 +210,12 @@ public class SourceIngredient {
 	}
 	
 	
-	public Integer getCount() {
+	public Long getCount() {
 		return count;
 	}
 	
 	
-	public void addCount(Integer additionalCount) {
+	public void addCount(Long additionalCount) {
 		count += additionalCount == null ? 0 : additionalCount;
 	}
 	
