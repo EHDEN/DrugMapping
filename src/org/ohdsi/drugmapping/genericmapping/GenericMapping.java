@@ -1427,11 +1427,14 @@ public class GenericMapping extends Mapping {
 							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
 							
 							List<Double> strengthDeviationPercentages = new ArrayList<Double>();
-							strengthDeviationPercentages.add(0.0);
-							if (DrugMapping.settings.strengthDeviationPercentage != 0.0) {
-								strengthDeviationPercentages.add(DrugMapping.settings.strengthDeviationPercentage);
+
+							// Try deviation percentage from 0.0 to maximumStrengthDeviationPercentage with steps of 0.1
+							Double percentage = 0.0;
+							while (percentage <= DrugMapping.settings.maximumStrengthDeviationPercentage) {
+								strengthDeviationPercentages.add(percentage);
+								percentage += 0.1;
 							}
-							
+
 							for (Double strengthDeviationPercentage : strengthDeviationPercentages) {
 								matchingCDMDrugs = new ArrayList<CDMDrug>();
 								rejectedDrugs = new ArrayList<String>();
@@ -1733,11 +1736,14 @@ public class GenericMapping extends Mapping {
 							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
 							
 							List<Double> strengthDeviationPercentages = new ArrayList<Double>();
-							strengthDeviationPercentages.add(0.0);
-							if (DrugMapping.settings.strengthDeviationPercentage != 0.0) {
-								strengthDeviationPercentages.add(DrugMapping.settings.strengthDeviationPercentage);
-							}
 							
+							// Try deviation percentage from 0.0 to maximumStrengthDeviationPercentage with steps of 0.1
+							Double percentage = 0.0;
+							while (percentage <= DrugMapping.settings.maximumStrengthDeviationPercentage) {
+								strengthDeviationPercentages.add(percentage);
+								percentage += 0.1;
+							}
+
 							for (Double strengthDeviationPercentage : strengthDeviationPercentages) {
 								matchingCDMDrugs = new ArrayList<CDMDrug>();
 								rejectedDrugs = new ArrayList<String>();

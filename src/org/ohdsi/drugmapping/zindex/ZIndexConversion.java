@@ -315,6 +315,9 @@ public class ZIndexConversion extends Mapping {
 						}
 					}
 					else {
+						String hpkAmount = gpkFile.get(row, "HPKMG").trim();
+						String hpkUnit = gpkFile.get(row, "HPKMGUnit").trim();
+						
 						// Ignore empty names and names that start with a '*'
 						if ((!name.equals("")) && (!name.substring(0, 1).equals("*"))) {
 							
@@ -463,6 +466,13 @@ public class ZIndexConversion extends Mapping {
 												}
 											}
 										}
+									}
+									
+									// When no amount is specified for the ingredient and it is the only ingredient and
+									// a HPK amount is specified, use that as the amount.
+									if (amount.equals("") && (gskList.size() == 1) && (!hpkAmount.equals("")) && (!hpkUnit.equals(""))) {
+										amount = hpkAmount;
+										amountUnit = hpkUnit;
 									}
 									
 									if (!gskObject[GSK_GenericName].substring(0, 1).equals("*")) {

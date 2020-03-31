@@ -51,7 +51,7 @@ public class MainFrame {
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
 	private JTextField minimumUseCountField = null;
-	private JTextField strengthDeviationField = null;
+	private JTextField maximumStrengthDeviationField = null;
 	private JButton startButton = null;
 	private String logFile = null;
 	
@@ -179,11 +179,11 @@ public class MainFrame {
 			DrugMapping.disableWhenRunning(minimumUseCountField);
 
 			// Strength Deviation Setting
-			JPanel strengthDeviationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			strengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
-			JLabel strengthDeviationLabel = new JLabel("Max. strength deviation percentage:");
-			strengthDeviationField = new JTextField(6);
-			strengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
+			JPanel maximumStrengthDeviationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			maximumStrengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
+			JLabel maximumStrengthDeviationLabel = new JLabel("Max. strength deviation percentage:");
+			maximumStrengthDeviationField = new JTextField(6);
+			maximumStrengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
 				
 				@Override
 				public void removeUpdate(DocumentEvent e) {
@@ -203,8 +203,8 @@ public class MainFrame {
 				
 				private void check() {
 					try {
-						double value = Double.parseDouble(strengthDeviationField.getText());
-						DrugMapping.settings.strengthDeviationPercentage = value;
+						double value = Double.parseDouble(maximumStrengthDeviationField.getText());
+						DrugMapping.settings.maximumStrengthDeviationPercentage = value;
 						if (startButton != null) {
 							startButton.setEnabled(true);
 						}
@@ -216,11 +216,11 @@ public class MainFrame {
 					}
 				}
 			});
-			strengthDeviationPanel.add(strengthDeviationLabel);
-			strengthDeviationPanel.add(strengthDeviationField);
-			settingsListPanel.add(strengthDeviationPanel);
+			maximumStrengthDeviationPanel.add(maximumStrengthDeviationLabel);
+			maximumStrengthDeviationPanel.add(maximumStrengthDeviationField);
+			settingsListPanel.add(maximumStrengthDeviationPanel);
 			
-			DrugMapping.disableWhenRunning(strengthDeviationField);
+			DrugMapping.disableWhenRunning(maximumStrengthDeviationField);
 		}
 		
 		
@@ -422,7 +422,7 @@ public class MainFrame {
 			DrugMapping.settings.putSettings(generalSettings);
 		}
 		minimumUseCountField.setText(Long.toString(DrugMapping.settings.minimumUseCount));
-		strengthDeviationField.setText(Double.toString(DrugMapping.settings.strengthDeviationPercentage));
+		maximumStrengthDeviationField.setText(Double.toString(DrugMapping.settings.maximumStrengthDeviationPercentage));
 	}
 
 	

@@ -6,7 +6,7 @@ import java.util.List;
 public class GeneralSettings {
 
 	public Long minimumUseCount = 1L;
-	public Double strengthDeviationPercentage = 0.0;
+	public Double maximumStrengthDeviationPercentage = 0.0;
 	
 	
 	public List<String> getSettings() {
@@ -16,7 +16,8 @@ public class GeneralSettings {
 		settings.add("# General Settings");
 		settings.add("#");
 		settings.add("");
-		settings.add("strengthDeviationPercentage=" + strengthDeviationPercentage);
+		settings.add("minimumUseCount=" + minimumUseCount);
+		settings.add("maximumStrengthDeviationPercentage=" + maximumStrengthDeviationPercentage);
 		
 		return settings;
 	}
@@ -28,12 +29,20 @@ public class GeneralSettings {
 				int equalSignIndex = setting.indexOf("=");
 				String settingVariable = setting.substring(0, equalSignIndex);
 				String value = setting.substring(equalSignIndex + 1);
-				if (settingVariable.equals("strengthDeviationPercentage")) {
+				if (settingVariable.equals("minimumUseCount")) {
 					try {
-						DrugMapping.settings.strengthDeviationPercentage = Double.valueOf(value);
+						DrugMapping.settings.minimumUseCount = Long.valueOf(value);
 					}
 					catch (NumberFormatException e) {
-						DrugMapping.settings.strengthDeviationPercentage = 0.0;
+						DrugMapping.settings.minimumUseCount = 1L;
+					}
+				}
+				else if (settingVariable.equals("maximumStrengthDeviationPercentage")) {
+					try {
+						DrugMapping.settings.maximumStrengthDeviationPercentage = Double.valueOf(value);
+					}
+					catch (NumberFormatException e) {
+						DrugMapping.settings.maximumStrengthDeviationPercentage = 0.0;
 					}
 				}
 			}

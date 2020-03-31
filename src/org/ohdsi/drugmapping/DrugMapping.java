@@ -271,7 +271,7 @@ public class DrugMapping {
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
 		System.out.println("  Min. use count: " + DrugMapping.settings.minimumUseCount);
-		System.out.println("  Max. Strength deviation allowed: " + DrugMapping.settings.strengthDeviationPercentage + "%");
+		System.out.println("  Max. Strength deviation allowed: " + DrugMapping.settings.maximumStrengthDeviationPercentage + "%");
 		System.out.println();
 	}
 	
