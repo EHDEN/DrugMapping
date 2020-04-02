@@ -368,9 +368,8 @@ public class ZIndexConversion extends Mapping {
 								//		name = name.substring(0, name.length() - 1);
 								//	}
 								if (!shortName.equals("")) {
-									if (shortName.contains("/")) {
-										String[] shortNameSplit = shortName.split("/");
-										int lastSpaceIndex = fullName.lastIndexOf(" ");
+									if (shortName.contains("/") || shortName.contains("+")) {
+										String[] shortNameSplit = shortName.contains("/") ? shortName.split("/") :  shortName.split("+");
 										String doseString = getDoseString(fullName);
 										String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
 										String denominatorUnit = (((doseStringSplit != null) && (doseStringSplit.length > shortNameSplit.length)) ? doseStringSplit[shortNameSplit.length] : "").trim();
@@ -399,6 +398,10 @@ public class ZIndexConversion extends Mapping {
 														}
 														amount = amount.replace(",", ".");
 														amountUnit = ingredientDoseString.substring(amount.length());
+														if ((!amountUnit.equals("")) && (amountUnit.substring(0, 1).equals("-"))) { // Solve things like 5-WATER
+															amount = "";
+															amountUnit = "";
+														}
 													}
 												}
 												lastAmountUnit = amountUnit;
@@ -459,7 +462,6 @@ public class ZIndexConversion extends Mapping {
 											String amount = "";
 											String amountUnit = "";
 
-											int lastSpaceIndex = fullName.lastIndexOf(" ");
 											String doseString = getDoseString(fullName);
 											String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
 											if (doseStringSplit != null) {
@@ -476,7 +478,14 @@ public class ZIndexConversion extends Mapping {
 													amount += doseString.charAt(charNr);
 												}
 												amount = amount.replace(",", ".");
-												amountUnit = doseString.substring(amount.length()) + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit);
+												amountUnit = doseString.substring(amount.length());
+												if ((!amountUnit.equals("")) && (amountUnit.substring(0, 1).equals("-"))) { // Solve things like 5-WATER
+													amount = "";
+													amountUnit = "";
+												}
+												else {
+													amountUnit = amountUnit + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit);
+												}
 											}
 											
 											Integer gnkCode = gnkNameMap.get(ingredientName);
@@ -733,6 +742,16 @@ public class ZIndexConversion extends Mapping {
 	
 	private String getDoseString(String fullName) {
 		String doseString = null;
+		
+		// Remove piece between parenthesis at the end
+		if ((!fullName.equals("")) && fullName.substring(fullName.length() - 1).equals(")")) {
+			int openParenthesisIndex = fullName.lastIndexOf("(");
+			if (openParenthesisIndex > 0) {
+				fullName = fullName.substring(0, openParenthesisIndex).trim();
+			}
+		}
+		
+		// Get the last part as dose information
 		String[] fullNameSplit = fullName.split(" ");
 		if ((fullNameSplit.length > 2) && (!fullNameSplit[fullNameSplit.length - 1].trim().equals("")) && (DIGITS.contains(fullNameSplit[fullNameSplit.length - 1].trim().substring(0, 1)))) {
 			doseString = fullNameSplit[fullNameSplit.length - 1].trim();

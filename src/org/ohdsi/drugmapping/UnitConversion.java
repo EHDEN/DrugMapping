@@ -88,6 +88,11 @@ public class UnitConversion {
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
+		else if (status == STATE_NEW_UNITS) {
+			System.out.println("    Adding new units to unit conversion map ...");
+			writeUnitConversionsToFile();
+			System.out.println("    Done");
+		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Done");
 	}
@@ -96,7 +101,8 @@ public class UnitConversion {
 	private void readFromFile() {
 		System.out.println("    Get unit conversion map from file " + DrugMapping.getCurrentPath() + "/" + FILENAME + " ...");
 
-		boolean newUnits = false;
+		boolean newSourceUnits = false;
+		boolean newCDMUnits = false;
 		boolean lostUnits = false;
 		boolean conceptNamesRead = false;
 		Set<String> oldSourceUnits = new HashSet<String>();
@@ -118,14 +124,14 @@ public class UnitConversion {
 					else {
 						String sourceUnit = row.get("Local unit");
 						oldSourceUnits.add(sourceUnit);
-						
+
+						String mappingLine = "        " + sourceUnit;
 						if (!sourceUnitNames.contains(sourceUnit)) {
-							System.out.println("    WARNING: Source unit '" + sourceUnit + "' no longer exists!");
+							mappingLine = "    WARNING: Source unit '" + sourceUnit + "' no longer exists!";
 							if (!sourceUnitNames.contains(sourceUnit)) {
 								sourceUnitNames.add(sourceUnit);
 							}
 						}
-						String mappingLine = "        " + sourceUnit;
 						
 						Map<String, Double> sourceUnitFactors = unitConversionMap.get(sourceUnit);
 						if (sourceUnitFactors == null) {
@@ -161,28 +167,29 @@ public class UnitConversion {
 				
 				for (String sourceUnit : sourceUnitNames) {
 					if (!oldSourceUnits.contains(sourceUnit)) {
-						newUnits = true;
-						break;
-					}
-				}
-				
-				if (!newUnits) {
-					for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
-						if (!oldCDMUnits.contains(cdmUnit)) {
-							newUnits = true;
+						if (!newSourceUnits) {
+							System.out.println("    WARNING: New source units found:");
 						}
+						System.out.println("        " + sourceUnit);
+						newSourceUnits = true;
+					}
+				}
+
+				for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
+					if (!oldCDMUnits.contains(cdmUnit)) {
+						if (!newCDMUnits) {
+							System.out.println("    WARNING: New CDM units found:");
+						}
+						System.out.println("        " + cdmUnit);
+						newCDMUnits = true;
 					}
 				}
 				
-				if (newUnits) {
+				if (newSourceUnits || newCDMUnits) {
 					status = STATE_NEW_UNITS;
 				}
 				else {
 					status = STATE_OK;
-				}
-				
-				if (newUnits || lostUnits) {
-					writeUnitConversionsToFile();
 				}
 			}
 		}
@@ -301,6 +308,10 @@ public class UnitConversion {
 		}
 		
 		if ((sourceUnit != null) && (cdmUnit != null)) {
+			if (unitConversionMap.get(sourceUnit) == null) {
+				//TODO
+				System.out.println("ERROR");
+			}
 			factor = unitConversionMap.get(sourceUnit).get(cdmUnit);
 		}
 		
