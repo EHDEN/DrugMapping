@@ -15,6 +15,8 @@ import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
 
 public class ZIndexConversion extends Mapping {
+	private static final String DIGITS = "1234567890";
+	private static final String NUMBER_CHARS = "1234567890,.";
 
 	private static final int GSK_ColumnCount = 8;
 	private static final int GSK_GSKCode     = 0;
@@ -285,9 +287,12 @@ public class ZIndexConversion extends Mapping {
 				
 				while (gpkFile.hasNext()) {
 					Row row = gpkFile.next();
-					String name = gpkFile.get(row, "FullName").trim().toUpperCase();
-					if (name.equals("")) name = gpkFile.get(row, "LabelName").trim().toUpperCase();
-					if (name.equals("")) name = gpkFile.get(row, "ShortName").trim().toUpperCase();
+					String fullName = gpkFile.get(row, "FullName").trim().toUpperCase();
+					String labelName = gpkFile.get(row, "LabelName").trim().toUpperCase();
+					String shortName = gpkFile.get(row, "ShortName").trim().toUpperCase();
+					String name = fullName;
+					if (name.equals("")) name = labelName;
+					if (name.equals("")) name = shortName;
 					String gpkCode = gpkFile.get(row, "GPKCode");
 					
 					List<String[]> gpkIPCIIngredients = gpkIPCIMap.get(gpkCode);
@@ -358,25 +363,76 @@ public class ZIndexConversion extends Mapping {
 								//   The appearance of the words are checked with surrounding parenthesis, with
 								//   surrounding spaces, and at the end of the extracted part.
 								
-								if (!name.equals("")) {
-									if (name.substring(name.length() - 1).equals(",")) {
-										name = name.substring(0, name.length() - 1);
-									}
-									if (name.contains("/")) {
-										String[] nameSplit = name.split("/");
-										for (String ingredientName : nameSplit) {
+								//if (!name.equals("")) {
+								//	if (name.substring(name.length() - 1).equals(",")) {
+								//		name = name.substring(0, name.length() - 1);
+								//	}
+								if (!shortName.equals("")) {
+									if (shortName.contains("/")) {
+										String[] shortNameSplit = shortName.split("/");
+										int lastSpaceIndex = fullName.lastIndexOf(" ");
+										String doseString = getDoseString(fullName);
+										String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
+										String denominatorUnit = (((doseStringSplit != null) && (doseStringSplit.length > shortNameSplit.length)) ? doseStringSplit[shortNameSplit.length] : "").trim();
+										
+										List<String> ingredientNames = new ArrayList<String>();
+										List<String> ingredientAmounts = new ArrayList<String>();
+										List<String> ingredientAmountUnits = new ArrayList<String>();
+										String lastAmountUnit = null;
+										for (int ingredientNr = 0; ingredientNr < shortNameSplit.length; ingredientNr++) {
+											String ingredientName = shortNameSplit[ingredientNr];
 											ingredientName = cleanupExtractedIngredientName(ingredientName);
+											if (ingredientName != null) {
+												ingredientNames.add(ingredientName);
+												
+												String amount = "";
+												String amountUnit = "";
+												if (doseStringSplit != null) {
+													if (ingredientNr < doseStringSplit.length) {
+														String ingredientDoseString = doseStringSplit[ingredientNr];
+														String numberChars = NUMBER_CHARS;
+														for (int charNr = 0; charNr < ingredientDoseString.length(); charNr++) {
+															if (numberChars.indexOf(ingredientDoseString.charAt(charNr)) < 0) {
+																break;
+															}
+															amount += ingredientDoseString.charAt(charNr);
+														}
+														amount = amount.replace(",", ".");
+														amountUnit = ingredientDoseString.substring(amount.length());
+													}
+												}
+												lastAmountUnit = amountUnit;
+												ingredientAmounts.add(amount);
+												ingredientAmountUnits.add(amountUnit);
+											}
+											else {
+												ingredientNames.add(null);
+												ingredientAmounts.add(null);
+												ingredientAmountUnits.add(null);
+											}
+										}
+										for (int ingredientNr = 0; ingredientNr < shortNameSplit.length; ingredientNr++) {
+											String ingredientName = ingredientNames.get(ingredientNr);
 											
 											if (ingredientName != null) {
+												String amount = ingredientAmounts.get(ingredientNr);
+												String amountUnit = ingredientAmountUnits.get(ingredientNr);
+												if (amountUnit.equals("")) {
+													amountUnit = lastAmountUnit;
+												}
+												amountUnit = amountUnit + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit);
+												
 												Integer gnkCode = gnkNameMap.get(ingredientName);
 												if (gnkCode != null) {
 													String[] gnkRecord = gnkMap.get(gnkCode);
 													String gpkGskRecord = gpkRecord;
 													gpkGskRecord += "," + "Mapped to GNK";
 													gpkGskRecord += "," + "\"" + ingredientName + "\"";
-													for (int cellCount = 0; cellCount < (GSK_ColumnCount - 3); cellCount++) {
-														gpkGskRecord += ",";
-													}
+													gpkGskRecord += ",";
+													gpkGskRecord += "," + "\"" + amount + "\"";
+													gpkGskRecord += "," + "\"" + amountUnit + "\"";
+													gpkGskRecord += ",";
+													gpkGskRecord += ",";
 													gpkGskRecord += "," + gnkRecord[GNK_CASCode];
 													gpkFullFile.println(gpkGskRecord);
 												}
@@ -384,37 +440,69 @@ public class ZIndexConversion extends Mapping {
 													String gpkGskRecord = gpkRecord;
 													gpkGskRecord += "," + "Extracted";
 													gpkGskRecord += "," + "\"" + ingredientName.trim() + "\"";
-													for (int cellCount = 0; cellCount < (GSK_ColumnCount - 2); cellCount++) {
-														gpkGskRecord += ",";
-													}
+													gpkGskRecord += ",";
+													gpkGskRecord += "," + "\"" + amount + "\"";
+													gpkGskRecord += "," + "\"" + amountUnit + "\"";
+													gpkGskRecord += ",";
+													gpkGskRecord += ",";
+													gpkGskRecord += ",";
 													gpkFullFile.println(gpkGskRecord);
 												}
 											}
 										}
 									}
 									else {
-										name = cleanupExtractedIngredientName(name);
+										//name = cleanupExtractedIngredientName(name);
+										String ingredientName = shortName;
 										
-										if (name != null) {
-											Integer gnkCode = gnkNameMap.get(name);
+										if (ingredientName != null) {
+											String amount = "";
+											String amountUnit = "";
+
+											int lastSpaceIndex = fullName.lastIndexOf(" ");
+											String doseString = getDoseString(fullName);
+											String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
+											if (doseStringSplit != null) {
+												String denominatorUnit = "";
+												if (doseString.contains("/")) {
+													doseString = doseStringSplit[0];
+													denominatorUnit = (doseStringSplit.length > 1 ? doseStringSplit[1] : "").trim();
+												}
+												String numberChars = NUMBER_CHARS;
+												for (int charNr = 0; charNr < doseString.length(); charNr++) {
+													if (numberChars.indexOf(doseString.charAt(charNr)) < 0) {
+														break;
+													}
+													amount += doseString.charAt(charNr);
+												}
+												amount = amount.replace(",", ".");
+												amountUnit = doseString.substring(amount.length()) + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit);
+											}
+											
+											Integer gnkCode = gnkNameMap.get(ingredientName);
 											if (gnkCode != null) {
 												String[] gnkRecord = gnkMap.get(gnkCode);
 												String gpkGskRecord = gpkRecord;
 												gpkGskRecord += "," + "Mapped to GNK";
-												gpkGskRecord += "," + "\"" + name + "\"";
-												for (int cellCount = 0; cellCount < (GSK_ColumnCount - 3); cellCount++) {
-													gpkGskRecord += ",";
-												}
+												gpkGskRecord += "," + "\"" + ingredientName + "\"";
+												gpkGskRecord += ",";
+												gpkGskRecord += "," + "\"" + amount + "\"";
+												gpkGskRecord += "," + "\"" + amountUnit + "\"";
+												gpkGskRecord += ",";
+												gpkGskRecord += ",";
 												gpkGskRecord += "," + gnkRecord[GNK_CASCode];
 												gpkFullFile.println(gpkGskRecord);
 											}
 											else {
 												String gpkGskRecord = gpkRecord;
 												gpkGskRecord += "," + "Extracted";
-												gpkGskRecord += "," + "\"" + name + "\"";
-												for (int cellCount = 0; cellCount < (GSK_ColumnCount - 2); cellCount++) {
-													gpkGskRecord += ",";
-												}
+												gpkGskRecord += "," + "\"" + ingredientName + "\"";
+												gpkGskRecord += ",";
+												gpkGskRecord += "," + "\"" + amount + "\"";
+												gpkGskRecord += "," + "\"" + amountUnit + "\"";
+												gpkGskRecord += ",";
+												gpkGskRecord += ",";
+												gpkGskRecord += ",";
 												gpkFullFile.println(gpkGskRecord);
 											}
 										}
@@ -428,10 +516,10 @@ public class ZIndexConversion extends Mapping {
 									// Extract unit from name
 									if (name.lastIndexOf(" ") >= 0) {
 										String strengthString = name.substring(name.lastIndexOf(" ")).trim();
-										if ("1234567890".contains(strengthString.substring(0, 1))) {
+										if (DIGITS.contains(strengthString.substring(0, 1))) {
 											String strengthValueString = ""; 
 											for (int charNr = 0; charNr < strengthString.length(); charNr++) {
-												if ("1234567890,".contains(strengthString.subSequence(charNr, charNr + 1))) {
+												if (NUMBER_CHARS.contains(strengthString.subSequence(charNr, charNr + 1))) {
 													strengthValueString += strengthString.subSequence(charNr, charNr + 1);
 												}
 												else {
@@ -640,5 +728,15 @@ public class ZIndexConversion extends Mapping {
 			}
 		}
 		return ingredientName;
+	}
+	
+	
+	private String getDoseString(String fullName) {
+		String doseString = null;
+		String[] fullNameSplit = fullName.split(" ");
+		if ((fullNameSplit.length > 2) && (!fullNameSplit[fullNameSplit.length - 1].trim().equals("")) && (DIGITS.contains(fullNameSplit[fullNameSplit.length - 1].trim().substring(0, 1)))) {
+			doseString = fullNameSplit[fullNameSplit.length - 1].trim();
+		}
+		return doseString;
 	}
 }
