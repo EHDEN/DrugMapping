@@ -369,7 +369,7 @@ public class ZIndexConversion extends Mapping {
 								//	}
 								if (!shortName.equals("")) {
 									if (shortName.contains("/") || shortName.contains("+")) {
-										String[] shortNameSplit = shortName.contains("/") ? shortName.split("/") :  shortName.split("+");
+										String[] shortNameSplit = shortName.contains("/") ? shortName.split("/") :  shortName.split("\\+");
 										String doseString = getDoseString(fullName);
 										String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
 										String denominatorUnit = (((doseStringSplit != null) && (doseStringSplit.length > shortNameSplit.length)) ? doseStringSplit[shortNameSplit.length] : "").trim();

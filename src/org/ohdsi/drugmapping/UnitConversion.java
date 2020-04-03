@@ -27,7 +27,7 @@ import org.ohdsi.utilities.files.Row;
 public class UnitConversion {
 	public static int STATE_NOT_FOUND = 0;
 	public static int STATE_EMPTY     = 1;
-	public static int STATE_NEW_UNITS = 2;
+	public static int STATE_CRITICAL  = 2;
 	public static int STATE_OK        = 3;
 	public static int STATE_ERROR     = 4;
 	
@@ -88,8 +88,8 @@ public class UnitConversion {
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
-		else if (status == STATE_NEW_UNITS) {
-			System.out.println("    Adding new units to unit conversion map ...");
+		else if (status == STATE_CRITICAL) {
+			System.out.println("    Creating new unit conversion map ...");
 			writeUnitConversionsToFile();
 			System.out.println("    Done");
 		}
@@ -103,7 +103,7 @@ public class UnitConversion {
 
 		boolean newSourceUnits = false;
 		boolean newCDMUnits = false;
-		boolean lostUnits = false;
+		boolean lostCDMUnits = false;
 		boolean conceptNamesRead = false;
 		Set<String> oldSourceUnits = new HashSet<String>();
 		Set<String> oldCDMUnits = new HashSet<String>();
@@ -111,6 +111,7 @@ public class UnitConversion {
 		File unitFile = new File(DrugMapping.getCurrentPath() + "/" + FILENAME);
 		if (unitFile.exists()) {
 			ReadCSVFileWithHeader unitConversionFile = new ReadCSVFileWithHeader(DrugMapping.getCurrentPath() + "/" + FILENAME, ',', '"');
+
 			Iterator<Row> unitConversionFileIterator = unitConversionFile.iterator();
 			Set<String> unitConcepts = unitConversionFile.getColumns();
 			if (unitConcepts != null) {
@@ -157,7 +158,7 @@ public class UnitConversion {
 								}
 								else {
 									System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-									lostUnits = true;
+									lostCDMUnits = true;
 								}
 							}
 						}
@@ -185,8 +186,8 @@ public class UnitConversion {
 					}
 				}
 				
-				if (newSourceUnits || newCDMUnits) {
-					status = STATE_NEW_UNITS;
+				if (newSourceUnits || newCDMUnits || lostCDMUnits) {
+					status = STATE_CRITICAL;
 				}
 				else {
 					status = STATE_OK;

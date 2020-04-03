@@ -489,7 +489,7 @@ public class GenericMapping extends Mapping {
 		
 		// Create Units Map
 		unitConversionsMap = new UnitConversion(database, units);
-		if (unitConversionsMap.getStatus() == UnitConversion.STATE_EMPTY) {
+		if (unitConversionsMap.getStatus() != UnitConversion.STATE_OK) {
 			// If no unit conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
@@ -506,7 +506,7 @@ public class GenericMapping extends Mapping {
 		boolean ok = true;
 		
 		formConversionsMap = new FormConversion(database, forms);
-		if (formConversionsMap.getStatus() == FormConversion.STATE_EMPTY) {
+		if (formConversionsMap.getStatus() != FormConversion.STATE_OK) {
 			// If no form conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the form conversion map in the file:");

@@ -27,7 +27,7 @@ import org.ohdsi.utilities.files.Row;
 public class FormConversion {
 	public static int STATE_NOT_FOUND = 0;
 	public static int STATE_EMPTY     = 1;
-	public static int STATE_NEW_UNITS = 2;
+	public static int STATE_CRITICAL  = 2;
 	public static int STATE_OK        = 3;
 	public static int STATE_ERROR     = 4;
 	
@@ -88,6 +88,11 @@ public class FormConversion {
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
+		if (status == STATE_CRITICAL) {
+			System.out.println("    Creating new form conversion map ...");
+			writeFormConversionsToFile();
+			System.out.println("    Done");
+		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + " Done");
 	}
@@ -96,8 +101,9 @@ public class FormConversion {
 	private void readFromFile() {
 		System.out.println("    Get form conversion map from file " + DrugMapping.getCurrentPath() + "/" + FILENAME + " ...");
 
-		boolean newForms = false;
-		boolean lostForms = false;
+		boolean newSourceForms = false;
+		boolean newCDMForms = false;
+		boolean lostCDMForms = false;
 		boolean conceptNamesRead = false;
 		Set<String> oldSourceForms = new HashSet<String>();
 		Set<String> oldCDMForms = new HashSet<String>();
@@ -146,8 +152,8 @@ public class FormConversion {
 										}
 									}
 									else {
-										System.out.println("    WARNING: Source form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-										lostForms = true;
+										System.out.println("    WARNING: CDM form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+										lostCDMForms = true;
 									}
 								}
 							}
@@ -158,28 +164,27 @@ public class FormConversion {
 				
 				for (String sourceForm : sourceFormNames) {
 					if (!oldSourceForms.contains(sourceForm)) {
-						newForms = true;
-						break;
-					}
-				}
-				
-				if (!newForms) {
-					for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
-						if (!oldCDMForms.contains(cdmForm)) {
-							newForms = true;
+						if (!newSourceForms) {
+							System.out.println("    WARNING: New source forms found:");
 						}
+						newSourceForms = true;
+					}
+				}
+
+				for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
+					if (!oldCDMForms.contains(cdmForm)) {
+						if (!newCDMForms) {
+							System.out.println("    WARNING: New CDM forms found:");
+						}
+						newCDMForms = true;
 					}
 				}
 				
-				if (newForms) {
-					status = STATE_NEW_UNITS;
+				if (newSourceForms || newCDMForms || lostCDMForms) {
+					status = STATE_CRITICAL;
 				}
 				else {
 					status = STATE_OK;
-				}
-				
-				if (newForms || lostForms) {
-					writeFormConversionsToFile();
 				}
 			}
 		}
