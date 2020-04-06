@@ -110,6 +110,7 @@ public class FormConversion {
 		
 		File formFile = new File(DrugMapping.getCurrentPath() + "/" + FILENAME);
 		if (formFile.exists()) {
+			status = STATE_OK;
 			ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getCurrentPath() + "/" + FILENAME, ',', '"');
 			
 			Iterator<Row> formConversionFileIterator = formConversionFile.iterator();
@@ -165,7 +166,7 @@ public class FormConversion {
 				for (String sourceForm : sourceFormNames) {
 					if (!oldSourceForms.contains(sourceForm)) {
 						if (!newSourceForms) {
-							System.out.println("    WARNING: New source forms found:");
+							System.out.println("    NEW SOURCE FORMS FOUND:");
 						}
 						newSourceForms = true;
 					}
@@ -174,13 +175,13 @@ public class FormConversion {
 				for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
 					if (!oldCDMForms.contains(cdmForm)) {
 						if (!newCDMForms) {
-							System.out.println("    WARNING: New CDM forms found:");
+							System.out.println("    NEW CDM FORMS FOUND:");
 						}
 						newCDMForms = true;
 					}
 				}
 				
-				if (newSourceForms || newCDMForms || lostCDMForms) {
+				if (newSourceForms || newCDMForms) {
 					status = STATE_CRITICAL;
 				}
 				else {
@@ -209,7 +210,7 @@ public class FormConversion {
 				fileNr++;
 				String fileNrString = "00" + Integer.toString(fileNr);
 				fileNrString = fileNrString.substring(fileNrString.length() - 2);
-				oldFormFileName = DrugMapping.getCurrentPath() + "/" + formMapDate + " " + fileNrString + " " + FILENAME;
+				oldFormFileName = DrugMapping.getCurrentPath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + formMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
 				oldFormFile = new File(oldFormFileName);
 			} while (oldFormFile.exists());
 			try {

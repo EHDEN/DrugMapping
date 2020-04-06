@@ -147,4 +147,30 @@ public class CDMDrug extends CDMConcept {
 		}
 		return denominatorDosageUnit;
 	}
+	
+	
+	public String generatedName(boolean includeDose) {
+		String generatedName = "";
+		
+		for (CDMIngredientStrength ingredientStrength : getIngredientStrengths()) {
+			if (!generatedName.equals("")) {
+				generatedName += " / ";
+			}
+			generatedName += ingredientStrength.getIngredient().getConceptName();
+			if (includeDose) {
+				if (ingredientStrength.getAmountValueString() == null) {
+					generatedName += " " + (ingredientStrength.getNumeratorValueString() == null ? "1" : ingredientStrength.getNumeratorValueString());
+					generatedName += ingredientStrength.getNumeratorDosageUnit() == null ? "" : (" " + ingredientStrength.getNumeratorDosageUnit());
+					generatedName += "/" + (ingredientStrength.getDenominatorValueString() == null ? "1" : ingredientStrength.getDenominatorValueString());
+					generatedName += ingredientStrength.getDenominatorDosageUnit() == null ? "" : (" " + ingredientStrength.getDenominatorDosageUnit());
+				}
+				else {
+					generatedName += " " + (ingredientStrength.getAmountValueString() == null ? "1" : ingredientStrength.getAmountValueString());
+					generatedName += ingredientStrength.getAmountUnit() == null ? "" : (" " + ingredientStrength.getAmountUnit().getConceptName());
+				}
+			}
+		}
+		
+		return generatedName;
+	}
 }

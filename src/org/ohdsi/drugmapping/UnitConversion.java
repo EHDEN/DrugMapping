@@ -110,6 +110,7 @@ public class UnitConversion {
 		
 		File unitFile = new File(DrugMapping.getCurrentPath() + "/" + FILENAME);
 		if (unitFile.exists()) {
+			status = STATE_OK;
 			ReadCSVFileWithHeader unitConversionFile = new ReadCSVFileWithHeader(DrugMapping.getCurrentPath() + "/" + FILENAME, ',', '"');
 
 			Iterator<Row> unitConversionFileIterator = unitConversionFile.iterator();
@@ -169,7 +170,7 @@ public class UnitConversion {
 				for (String sourceUnit : sourceUnitNames) {
 					if (!oldSourceUnits.contains(sourceUnit)) {
 						if (!newSourceUnits) {
-							System.out.println("    WARNING: New source units found:");
+							System.out.println("    NEW SOURCE UNITS FOUND:");
 						}
 						System.out.println("        " + sourceUnit);
 						newSourceUnits = true;
@@ -179,14 +180,14 @@ public class UnitConversion {
 				for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
 					if (!oldCDMUnits.contains(cdmUnit)) {
 						if (!newCDMUnits) {
-							System.out.println("    WARNING: New CDM units found:");
+							System.out.println("    NEW CDM UNITS FOUND:");
 						}
 						System.out.println("        " + cdmUnit);
 						newCDMUnits = true;
 					}
 				}
 				
-				if (newSourceUnits || newCDMUnits || lostCDMUnits) {
+				if (newSourceUnits || newCDMUnits) {
 					status = STATE_CRITICAL;
 				}
 				else {
@@ -215,7 +216,7 @@ public class UnitConversion {
 				fileNr++;
 				String fileNrString = "00" + Integer.toString(fileNr);
 				fileNrString = fileNrString.substring(fileNrString.length() - 2);
-				oldUnitFileName = DrugMapping.getCurrentPath() + "/" + unitMapDate + " " + fileNrString + " " + FILENAME;
+				oldUnitFileName = DrugMapping.getCurrentPath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + unitMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
 				oldUnitFile = new File(oldUnitFileName);
 			} while (oldUnitFile.exists());
 			try {
@@ -311,7 +312,7 @@ public class UnitConversion {
 		if ((sourceUnit != null) && (cdmUnit != null)) {
 			if (unitConversionMap.get(sourceUnit) == null) {
 				//TODO
-				System.out.println("ERROR");
+				System.out.println("ERROR: " + sourceUnit);
 			}
 			factor = unitConversionMap.get(sourceUnit).get(cdmUnit);
 		}

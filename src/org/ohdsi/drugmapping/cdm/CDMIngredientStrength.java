@@ -80,6 +80,11 @@ public class CDMIngredientStrength {
 	}
 	
 	
+	public String getAmountValueString() {
+		return amount_value_string;
+	}
+	
+	
 	public Double getAmountValue() {
 		return amount_value;
 	}
@@ -90,6 +95,11 @@ public class CDMIngredientStrength {
 	}
 	
 	
+	public String getNumeratorValueString() {
+		return numerator_value_string;
+	}
+	
+	
 	public Double getNumeratorValue() {
 		return numerator_value;
 	}
@@ -97,6 +107,11 @@ public class CDMIngredientStrength {
 	
 	public CDMConcept getNumeratorUnit() {
 		return numerator_unit;
+	}
+	
+	
+	public String getDenominatorValueString() {
+		return denominator_value_string;
 	}
 	
 	

@@ -304,13 +304,13 @@ public class GenericMapping extends Mapping {
 		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.minimumUseCount) && (!SourceDrug.errorOccurred());
 		
 		// Get unit conversion from local units to CDM units
-		ok = getUnitConversion(database);
+		ok = ok && getUnitConversion(database);
 		
 		// Get form conversion from local forms to CDM forms
-		ok = getFormConversion(database);
+		ok = ok && getFormConversion(database);
 		
 		// Get CDM Ingredients
-		ok = getCDMData(database);		
+		ok = ok && getCDMData(database);		
 		
 		// Load manual mappings
 		ok = ok && getManualMappings(manualMappingFile);
