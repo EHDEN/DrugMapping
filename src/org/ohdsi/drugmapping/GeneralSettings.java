@@ -1,12 +1,45 @@
 package org.ohdsi.drugmapping;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeneralSettings {
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
 
-	public Long minimumUseCount = 1L;
-	public Double maximumStrengthDeviationPercentage = 0.0;
+import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.gui.Setting;
+
+public class GeneralSettings extends JPanel {
+	private static final long serialVersionUID = 4495095183509328565L;
+	
+	List<Setting> generalSettings = new ArrayList<Setting>();
+	JPanel settingsListPanel = null;
+	
+	
+	public GeneralSettings(MainFrame mainFrame) {
+		
+		setLayout(new GridLayout(0, 1));
+		setBorder(BorderFactory.createTitledBorder("General Settings"));
+		
+		JPanel generalSettingsPanel = new JPanel(new BorderLayout());
+		settingsListPanel = new JPanel();
+		settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
+		settingsListPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
+		add(generalSettingsPanel);
+	}
+	
+	
+	public int addSetting(Setting setting) {
+		generalSettings.add(setting);
+		settingsListPanel.add(setting);
+		
+		return generalSettings.indexOf(setting);
+	}
 	
 	
 	public List<String> getSettings() {
@@ -16,8 +49,9 @@ public class GeneralSettings {
 		settings.add("# General Settings");
 		settings.add("#");
 		settings.add("");
-		settings.add("minimumUseCount=" + minimumUseCount);
-		settings.add("maximumStrengthDeviationPercentage=" + maximumStrengthDeviationPercentage);
+		for (Setting generalSetting : generalSettings) {
+			settings.add(generalSetting.getName() + "=" + generalSetting.getValueAsString());
+		}
 		
 		return settings;
 	}
@@ -29,23 +63,44 @@ public class GeneralSettings {
 				int equalSignIndex = setting.indexOf("=");
 				String settingVariable = setting.substring(0, equalSignIndex);
 				String value = setting.substring(equalSignIndex + 1);
-				if (settingVariable.equals("minimumUseCount")) {
-					try {
-						DrugMapping.settings.minimumUseCount = Long.valueOf(value);
-					}
-					catch (NumberFormatException e) {
-						DrugMapping.settings.minimumUseCount = 1L;
-					}
-				}
-				else if (settingVariable.equals("maximumStrengthDeviationPercentage")) {
-					try {
-						DrugMapping.settings.maximumStrengthDeviationPercentage = Double.valueOf(value);
-					}
-					catch (NumberFormatException e) {
-						DrugMapping.settings.maximumStrengthDeviationPercentage = 0.0;
+				for (Setting generalSetting : generalSettings) {
+					if (settingVariable.equals(generalSetting.getName())) {
+						generalSetting.setValueAsString(value);
 					}
 				}
 			}
 		}
+	}
+	
+	
+	public String getValueAsString(int index) {
+		return generalSettings.get(index).getValueAsString();
+	}
+	
+	
+	public Long getLongSetting(int index) {
+		Long value = null;
+		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_LONG) {
+			value = Long.parseLong(generalSettings.get(index).getValueAsString());
+		}
+		return value;
+	}
+	
+	
+	public Double getDoubleSetting(int index) {
+		Double value = null;
+		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_DOUBLE) {
+			value = Double.parseDouble(generalSettings.get(index).getValueAsString());
+		}
+		return value;
+	}
+	
+	
+	public String getStringSetting(int index) {
+		String value = null;
+		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_DOUBLE) {
+			value = generalSettings.get(index).getValueAsString();
+		}
+		return value;
 	}
 }

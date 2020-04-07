@@ -23,6 +23,7 @@ import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceDrugComponent;
 import org.ohdsi.drugmapping.source.SourceIngredient;
@@ -301,7 +302,7 @@ public class GenericMapping extends Mapping {
 		SourceDrug.init();
 		
 		// Load source drug ingredient mapping
-		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.minimumUseCount) && (!SourceDrug.errorOccurred());
+		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT)) && (!SourceDrug.errorOccurred());
 		
 		// Get unit conversion from local units to CDM units
 		ok = ok && getUnitConversion(database);
@@ -1430,7 +1431,7 @@ public class GenericMapping extends Mapping {
 
 							// Try deviation percentage from 0.0 to maximumStrengthDeviationPercentage with steps of 0.1
 							Double percentage = 0.0;
-							while (percentage <= DrugMapping.settings.maximumStrengthDeviationPercentage) {
+							while (percentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) {
 								strengthDeviationPercentages.add(percentage);
 								percentage += 0.1;
 							}
@@ -1739,7 +1740,7 @@ public class GenericMapping extends Mapping {
 							
 							// Try deviation percentage from 0.0 to maximumStrengthDeviationPercentage with steps of 0.1
 							Double percentage = 0.0;
-							while (percentage <= DrugMapping.settings.maximumStrengthDeviationPercentage) {
+							while (percentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) {
 								strengthDeviationPercentages.add(percentage);
 								percentage += 0.1;
 							}

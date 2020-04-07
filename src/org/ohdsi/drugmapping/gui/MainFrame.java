@@ -1,7 +1,6 @@
 package org.ohdsi.drugmapping.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -19,12 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -32,26 +29,27 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.GeneralSettings;
 import org.ohdsi.drugmapping.files.FileDefinition;
 
 public class MainFrame {
 	
 	private static final String ICON = "/org/ohdsi/drugmapping/gui/OHDSI Icon Picture 048x048.gif"; 
 	
+	public static int MINIMUM_USE_COUNT;
+	public static int MAXIMUM_STRENGTH_DEVIATION;
+	public static int PREFERENCE_RXNORM;
+	
 	private DrugMapping drugMapping;
 	private JFrame frame;
 	private Console console;
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
-	private JTextField minimumUseCountField = null;
-	private JTextField maximumStrengthDeviationField = null;
+	private List<Setting> settings = new ArrayList<Setting>();
 	private JButton startButton = null;
 	private String logFile = null;
 	
@@ -82,6 +80,17 @@ public class MainFrame {
 	
 	public void show() {
 		frame.setVisible(true);
+	}
+	
+	
+	public void checkReadyToStart() {
+		boolean readyToStart = true;
+		for (Setting setting : settings) {
+			readyToStart = readyToStart && setting.isSetCorrectly();
+		}
+		if (startButton != null) {
+			startButton.setEnabled(readyToStart);
+		}
 	}
 	
 	
@@ -121,106 +130,15 @@ public class MainFrame {
 		JPanel level2Frame = new JPanel(new BorderLayout());
 		level2Frame.setBorder(BorderFactory.createEmptyBorder());
 
-		JPanel generalPanel = null;
+
+		// General Settings
+		DrugMapping.settings = null;
 		if (!DrugMapping.special.equals("ZINDEX")) {
-			// General Settings
-			generalPanel = new JPanel(new GridLayout(0, 1));
-			generalPanel.setBorder(BorderFactory.createTitledBorder("General Settings"));
+			DrugMapping.settings = new GeneralSettings(this);
 			
-			JPanel generalSettingsPanel = new JPanel(new BorderLayout());
-			JPanel settingsListPanel = new JPanel();
-			settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
-			settingsListPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-			generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
-			generalPanel.add(generalSettingsPanel);
-
-			// Strength Deviation Setting
-			JPanel minimumUseCountPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			minimumUseCountPanel.setBorder(BorderFactory.createEmptyBorder());
-			JLabel minimumUseCountLabel = new JLabel("Min. use count:");
-			minimumUseCountField = new JTextField(6);
-			minimumUseCountField.getDocument().addDocumentListener(new DocumentListener() {
-				
-				@Override
-				public void removeUpdate(DocumentEvent e) {
-					check();
-				}
-				
-				@Override
-				public void insertUpdate(DocumentEvent e) {
-					check();
-				}
-				
-				@Override
-				public void changedUpdate(DocumentEvent e) {
-					check();
-				}
-				
-				
-				private void check() {
-					try {
-						long value = Long.parseLong(minimumUseCountField.getText());
-						DrugMapping.settings.minimumUseCount = value;
-						if (startButton != null) {
-							startButton.setEnabled(true);
-						}
-					}
-					catch (NumberFormatException e) {
-						if (startButton != null) {
-							startButton.setEnabled(false);
-						}
-					}
-				}
-			});
-			minimumUseCountPanel.add(minimumUseCountLabel);
-			minimumUseCountPanel.add(minimumUseCountField);
-			settingsListPanel.add(minimumUseCountPanel);
-			
-			DrugMapping.disableWhenRunning(minimumUseCountField);
-
-			// Strength Deviation Setting
-			JPanel maximumStrengthDeviationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			maximumStrengthDeviationPanel.setBorder(BorderFactory.createEmptyBorder());
-			JLabel maximumStrengthDeviationLabel = new JLabel("Max. strength deviation percentage:");
-			maximumStrengthDeviationField = new JTextField(6);
-			maximumStrengthDeviationField.getDocument().addDocumentListener(new DocumentListener() {
-				
-				@Override
-				public void removeUpdate(DocumentEvent e) {
-					check();
-				}
-				
-				@Override
-				public void insertUpdate(DocumentEvent e) {
-					check();
-				}
-				
-				@Override
-				public void changedUpdate(DocumentEvent e) {
-					check();
-				}
-				
-				
-				private void check() {
-					try {
-						double value = Double.parseDouble(maximumStrengthDeviationField.getText());
-						DrugMapping.settings.maximumStrengthDeviationPercentage = value;
-						if (startButton != null) {
-							startButton.setEnabled(true);
-						}
-					}
-					catch (NumberFormatException e) {
-						if (startButton != null) {
-							startButton.setEnabled(false);
-						}
-					}
-				}
-			});
-			maximumStrengthDeviationPanel.add(maximumStrengthDeviationLabel);
-			maximumStrengthDeviationPanel.add(maximumStrengthDeviationField);
-			settingsListPanel.add(maximumStrengthDeviationPanel);
-			
-			DrugMapping.disableWhenRunning(maximumStrengthDeviationField);
+			MINIMUM_USE_COUNT          = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:"));
+			MAXIMUM_STRENGTH_DEVIATION = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Max. strength deviation percentage:"));
+			PREFERENCE_RXNORM          = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
 		}
 		
 		
@@ -246,8 +164,8 @@ public class MainFrame {
 		frame.add(level1Frame, BorderLayout.CENTER);
 		level1Frame.add(filePanel, BorderLayout.NORTH);
 		level1Frame.add(level2Frame, BorderLayout.CENTER);
-		if (generalPanel != null) {
-			level2Frame.add(generalPanel, BorderLayout.NORTH);
+		if (DrugMapping.settings != null) {
+			level2Frame.add(DrugMapping.settings, BorderLayout.NORTH);
 		}
 		level2Frame.add(createConsolePanel(), BorderLayout.CENTER);
 		frame.add(buttonSectionPanel, BorderLayout.SOUTH);
@@ -421,8 +339,9 @@ public class MainFrame {
 		if (generalSettings != null) {
 			DrugMapping.settings.putSettings(generalSettings);
 		}
-		minimumUseCountField.setText(Long.toString(DrugMapping.settings.minimumUseCount));
-		maximumStrengthDeviationField.setText(Double.toString(DrugMapping.settings.maximumStrengthDeviationPercentage));
+		for (Setting setting : settings) {
+			setting.initialize();
+		}
 	}
 
 	

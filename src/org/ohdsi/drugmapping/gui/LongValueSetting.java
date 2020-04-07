@@ -1,0 +1,95 @@
+package org.ohdsi.drugmapping.gui;
+
+import java.awt.FlowLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+
+public class LongValueSetting extends Setting {
+	private static final long serialVersionUID = 5333685802924611718L;
+
+	private JTextField longValueField = null;
+	private Long value;
+
+	
+	public LongValueSetting(MainFrame mainFrame, String name, String label) {
+		valueType = Setting.SETTING_TYPE_LONG;
+		this.name = name;
+		
+		setLayout(new FlowLayout(FlowLayout.LEFT));
+		setBorder(BorderFactory.createEmptyBorder());
+		JLabel minimumUseCountLabel = new JLabel(label);
+		longValueField = new JTextField(6);
+		longValueField.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				check();
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				check();
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				check();
+			}
+			
+			
+			private void check() {
+				try {
+					value = Long.parseLong(longValueField.getText());
+					correct = true;
+					mainFrame.checkReadyToStart();
+				}
+				catch (NumberFormatException e) {
+					correct = false;
+					mainFrame.checkReadyToStart();
+				}
+			}
+		});
+		add(minimumUseCountLabel);
+		add(longValueField);
+		initialize();
+	}
+	
+
+	public void initialize() {
+		setValue(1L);
+	}
+	
+	
+	public Long getValue() {
+		return value;
+	}
+	
+	
+	public void setValue(Long value) {
+		this.value = value;
+		longValueField.setText(value.toString());
+		correct = true;
+	}
+	
+	
+	public String getValueAsString() {
+		return value.toString();
+	}
+	
+	
+	public void setValueAsString(String stringValue) {
+		try {
+			setValue(Long.parseLong(stringValue));
+		}
+		catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(null, "Illegal value for general setting '" + name + "!\nShould be a long value.\nCurrent value is: " + value, "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+}

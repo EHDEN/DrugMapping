@@ -25,7 +25,7 @@ import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
 public class DrugMapping { 
-	public static GeneralSettings settings = new GeneralSettings();
+	public static GeneralSettings settings = null;
 	public static String outputVersion = "";
 	public static String special = "";
 	
@@ -270,8 +270,9 @@ public class DrugMapping {
 	
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
-		System.out.println("  Min. use count: " + DrugMapping.settings.minimumUseCount);
-		System.out.println("  Max. Strength deviation allowed: " + DrugMapping.settings.maximumStrengthDeviationPercentage + "%");
+		System.out.println("  Minimum use count: " + DrugMapping.settings.getValueAsString(MainFrame.MINIMUM_USE_COUNT));
+		System.out.println("  Maximum Strength deviation allowed: " + DrugMapping.settings.getValueAsString(MainFrame.MAXIMUM_STRENGTH_DEVIATION) + "%");
+		System.out.println("  Preferred choice for multiple mappings: " + DrugMapping.settings.getValueAsString(MainFrame.PREFERENCE_RXNORM));
 		System.out.println();
 	}
 	
