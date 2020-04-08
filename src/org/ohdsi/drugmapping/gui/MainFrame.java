@@ -44,6 +44,7 @@ public class MainFrame {
 	public static int MAXIMUM_STRENGTH_DEVIATION;
 	public static int PREFERENCE_RXNORM;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
+	//TODO public static int PREFERENCE_TAKE_FIRST;
 	
 	private DrugMapping drugMapping;
 	private JFrame frame;
@@ -75,6 +76,7 @@ public class MainFrame {
 	public MainFrame(DrugMapping drugMapping) {
 		this.drugMapping = drugMapping;
 		createInterface();
+		initialize();
 	}
 	
 	
@@ -140,6 +142,7 @@ public class MainFrame {
 			MAXIMUM_STRENGTH_DEVIATION    = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Max. strength deviation percentage:"));
 			PREFERENCE_RXNORM             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
 			PREFERENCE_PRIORITIZE_BY_DATE = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Yes", "No" }));
+			//TODO PREFERENCE_TAKE_FIRST         = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Take first when multiple mappings left:", new String[] { "Yes", "No" }));
 		}
 		
 		
@@ -284,6 +287,13 @@ public class MainFrame {
 	}
 
 	
+	public void initialize() {
+		for (Setting setting : DrugMapping.settings.getSettings()) {
+			setting.initialize();
+		}
+	}
+
+	
 	private void loadDatabaseSettingsFile() {
 		List<String> databaseSettings = readSettingsFromFile();
 		if (databaseSettings != null) {
@@ -339,9 +349,6 @@ public class MainFrame {
 	public void loadGeneralSettingsFile(List<String> generalSettings) {
 		if (generalSettings != null) {
 			DrugMapping.settings.putSettings(generalSettings);
-		}
-		for (Setting setting : DrugMapping.settings.getSettings()) {
-			setting.initialize();
 		}
 	}
 

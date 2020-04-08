@@ -95,6 +95,8 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS     , "No drugs with matching ingredients");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                       , "Rejected by form");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                   , "Rejected by strength");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE          , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE            , "Rejected by valid start date");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                      , "No unique mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_MAPPED                                 , "Mapped");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                      , "Overruled mapping");
@@ -105,6 +107,8 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG         , "No single ingredient drug");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS, "No drugs with matching ingredients");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH              , "Rejected by strength");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE     , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_DATE_PREFERENCE       , "Rejected by valid start date");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                 , "No unique mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED                            , "Mapped");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                 , "Overruled mapping");
@@ -114,6 +118,8 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING         , "Double ingredient mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS, "No drugs with matching ingredients");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                  , "Rejected by form");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_PREFERENCE     , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_DATE_PREFERENCE       , "Rejected by valid start date");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                 , "No unique mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED                            , "Mapped");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                 , "Overruled mapping");
@@ -1524,6 +1530,7 @@ public class GenericMapping extends Mapping {
 										matchingCDMDrugsWithOneUnit.add(matchingCDMDrug);
 									}
 								}
+								// TODO Added Start
 								if (matchingCDMDrugsWithTwoUnits.size() > 1) {
 									String vocabulary_id = null;
 									if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
@@ -1566,16 +1573,65 @@ public class GenericMapping extends Mapping {
 											}
 										}
 									}
-									if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
+									if ((matchingCDMDrugsWithTwoUnits.size() > 1) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
 										List<CDMDrug> remove = new ArrayList<CDMDrug>();
+										List<CDMDrug> lastDrugs = new ArrayList<CDMDrug>();
+										int lastDate = -1;
 										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
-											//TODO
-											//if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
+											try {
+												Integer date = Integer.parseInt(cdmDrug.getValidStartDate().replaceAll("-",""));
+												if (lastDate == -1) {
+													lastDrugs.add(cdmDrug);
+													lastDate = date;
+												}
+												else {
+													if (date > lastDate) {
+														remove.addAll(lastDrugs);
+														lastDrugs.clear();
+														lastDrugs.add(cdmDrug);
+														lastDate = date;
+													}
+													else if (date == lastDate) {
+														lastDrugs.add(cdmDrug);
+													}
+													else {
+														remove.add(cdmDrug);
+													}
+												}
+											}
+											catch (NumberFormatException e) {
 												remove.add(cdmDrug);
-											//}
+											}
+										}
+										if (matchingCDMDrugsWithTwoUnits.size() != remove.size()) {
+											matchingCDMDrugsWithTwoUnits.removeAll(remove);
+											
+											sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+											if (sourceDugMappingResults == null) {
+												sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+											}
+											rejectedForMapping = sourceDugMappingResults.get(mapping);
+											if (rejectedForMapping == null) {
+												rejectedForMapping = new HashMap<Integer, List<String>>();
+												sourceDugMappingResults.put(mapping, rejectedForMapping);
+											}
+											
+											List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE);
+											if (multipleMappings == null) {
+												multipleMappings = new ArrayList<String>();
+												rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE, multipleMappings);
+											}
+											for (CDMDrug cdmDrug : remove) {
+												String cdmDrugDescription = cdmDrug.toString();
+												if (!multipleMappings.contains(cdmDrugDescription)) {
+													multipleMappings.add(cdmDrugDescription);
+												}
+											}
 										}
 									}
 								}
+								// TODO Added End
 								if (matchingCDMDrugsWithTwoUnits.size() > 0) {
 									if (matchingCDMDrugsWithTwoUnits.size() == 1) {
 										mappedSourceDrugs.add(sourceDrug);
@@ -1625,6 +1681,106 @@ public class GenericMapping extends Mapping {
 									}
 								}
 								else {
+									if (matchingCDMDrugsWithOneUnit.size() > 1) {
+										String vocabulary_id = null;
+										if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+											vocabulary_id = "RxNorm";
+										}
+										else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
+											vocabulary_id = "RxNorm Extension";
+										}
+										if (vocabulary_id != null) {
+											List<CDMDrug> remove = new ArrayList<CDMDrug>();
+											for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
+												if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
+													remove.add(cdmDrug);
+												}
+											}
+											if (matchingCDMDrugsWithOneUnit.size() != remove.size()) {
+												matchingCDMDrugsWithOneUnit.removeAll(remove);
+												
+												sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+												if (sourceDugMappingResults == null) {
+													sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+													sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+												}
+												rejectedForMapping = sourceDugMappingResults.get(mapping);
+												if (rejectedForMapping == null) {
+													rejectedForMapping = new HashMap<Integer, List<String>>();
+													sourceDugMappingResults.put(mapping, rejectedForMapping);
+												}
+												
+												List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE);
+												if (multipleMappings == null) {
+													multipleMappings = new ArrayList<String>();
+													rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE, multipleMappings);
+												}
+												for (CDMDrug cdmDrug : remove) {
+													String cdmDrugDescription = cdmDrug.toString();
+													if (!multipleMappings.contains(cdmDrugDescription)) {
+														multipleMappings.add(cdmDrugDescription);
+													}
+												}
+											}
+										}
+										if ((matchingCDMDrugsWithOneUnit.size() > 1) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
+											List<CDMDrug> remove = new ArrayList<CDMDrug>();
+											List<CDMDrug> lastDrugs = new ArrayList<CDMDrug>();
+											int lastDate = -1;
+											for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
+												try {
+													Integer date = Integer.parseInt(cdmDrug.getValidStartDate().replaceAll("-",""));
+													if (lastDate == -1) {
+														lastDrugs.add(cdmDrug);
+														lastDate = date;
+													}
+													else {
+														if (date > lastDate) {
+															remove.addAll(lastDrugs);
+															lastDrugs.clear();
+															lastDrugs.add(cdmDrug);
+															lastDate = date;
+														}
+														else if (date == lastDate) {
+															lastDrugs.add(cdmDrug);
+														}
+														else {
+															remove.add(cdmDrug);
+														}
+													}
+												}
+												catch (NumberFormatException e) {
+													remove.add(cdmDrug);
+												}
+											}
+											if (matchingCDMDrugsWithOneUnit.size() != remove.size()) {
+												matchingCDMDrugsWithOneUnit.removeAll(remove);
+												
+												sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+												if (sourceDugMappingResults == null) {
+													sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+													sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+												}
+												rejectedForMapping = sourceDugMappingResults.get(mapping);
+												if (rejectedForMapping == null) {
+													rejectedForMapping = new HashMap<Integer, List<String>>();
+													sourceDugMappingResults.put(mapping, rejectedForMapping);
+												}
+												
+												List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE);
+												if (multipleMappings == null) {
+													multipleMappings = new ArrayList<String>();
+													rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE, multipleMappings);
+												}
+												for (CDMDrug cdmDrug : remove) {
+													String cdmDrugDescription = cdmDrug.toString();
+													if (!multipleMappings.contains(cdmDrugDescription)) {
+														multipleMappings.add(cdmDrugDescription);
+													}
+												}
+											}
+										}
+									}
 									if (matchingCDMDrugsWithOneUnit.size() == 1) {
 										mappedSourceDrugs.add(sourceDrug);
 										
@@ -1845,7 +2001,109 @@ public class GenericMapping extends Mapping {
 								sourceDugMappingResults.put(mapping, rejectedForMapping);
 							}
 							rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
-							
+
+							// TODO Added Start
+							if (matchingCDMDrugs.size() > 1) {
+								String vocabulary_id = null;
+								if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+									vocabulary_id = "RxNorm";
+								}
+								else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
+									vocabulary_id = "RxNorm Extension";
+								}
+								if (vocabulary_id != null) {
+									List<CDMDrug> remove = new ArrayList<CDMDrug>();
+									for (CDMDrug cdmDrug : matchingCDMDrugs) {
+										if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
+											remove.add(cdmDrug);
+										}
+									}
+									if (matchingCDMDrugs.size() != remove.size()) {
+										matchingCDMDrugs.removeAll(remove);
+										
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										if (sourceDugMappingResults == null) {
+											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+										}
+										rejectedForMapping = sourceDugMappingResults.get(mapping);
+										if (rejectedForMapping == null) {
+											rejectedForMapping = new HashMap<Integer, List<String>>();
+											sourceDugMappingResults.put(mapping, rejectedForMapping);
+										}
+										
+										List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE);
+										if (multipleMappings == null) {
+											multipleMappings = new ArrayList<String>();
+											rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE, multipleMappings);
+										}
+										for (CDMDrug cdmDrug : remove) {
+											String cdmDrugDescription = cdmDrug.toString();
+											if (!multipleMappings.contains(cdmDrugDescription)) {
+												multipleMappings.add(cdmDrugDescription);
+											}
+										}
+									}
+								}
+								if ((matchingCDMDrugs.size() > 1) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
+									List<CDMDrug> remove = new ArrayList<CDMDrug>();
+									List<CDMDrug> lastDrugs = new ArrayList<CDMDrug>();
+									int lastDate = -1;
+									for (CDMDrug cdmDrug : matchingCDMDrugs) {
+										try {
+											Integer date = Integer.parseInt(cdmDrug.getValidStartDate().replaceAll("-",""));
+											if (lastDate == -1) {
+												lastDrugs.add(cdmDrug);
+												lastDate = date;
+											}
+											else {
+												if (date > lastDate) {
+													remove.addAll(lastDrugs);
+													lastDrugs.clear();
+													lastDrugs.add(cdmDrug);
+													lastDate = date;
+												}
+												else if (date == lastDate) {
+													lastDrugs.add(cdmDrug);
+												}
+												else {
+													remove.add(cdmDrug);
+												}
+											}
+										}
+										catch (NumberFormatException e) {
+											remove.add(cdmDrug);
+										}
+									}
+									if (matchingCDMDrugs.size() != remove.size()) {
+										matchingCDMDrugs.removeAll(remove);
+										
+										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+										if (sourceDugMappingResults == null) {
+											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+										}
+										rejectedForMapping = sourceDugMappingResults.get(mapping);
+										if (rejectedForMapping == null) {
+											rejectedForMapping = new HashMap<Integer, List<String>>();
+											sourceDugMappingResults.put(mapping, rejectedForMapping);
+										}
+										
+										List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_DATE_PREFERENCE);
+										if (multipleMappings == null) {
+											multipleMappings = new ArrayList<String>();
+											rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_DATE_PREFERENCE, multipleMappings);
+										}
+										for (CDMDrug cdmDrug : remove) {
+											String cdmDrugDescription = cdmDrug.toString();
+											if (!multipleMappings.contains(cdmDrugDescription)) {
+												multipleMappings.add(cdmDrugDescription);
+											}
+										}
+									}
+								}
+							}
+							// TODO Added End
 							
 							if (matchingCDMDrugs.size() == 1) {
 								mappedSourceDrugs.add(sourceDrug);
@@ -2165,7 +2423,109 @@ public class GenericMapping extends Mapping {
 							}
 							cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
 						}
-						
+
+						// TODO Added Start
+						if (cdmDrugsWithIngredients.size() > 1) {
+							String vocabulary_id = null;
+							if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+								vocabulary_id = "RxNorm";
+							}
+							else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
+								vocabulary_id = "RxNorm Extension";
+							}
+							if (vocabulary_id != null) {
+								List<CDMDrug> remove = new ArrayList<CDMDrug>();
+								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+									if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
+										remove.add(cdmDrug);
+									}
+								}
+								if (cdmDrugsWithIngredients.size() != remove.size()) {
+									cdmDrugsWithIngredients.removeAll(remove);
+									
+									Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+									if (sourceDugMappingResults == null) {
+										sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+										sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+									}
+									Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+									if (rejectedForMapping == null) {
+										rejectedForMapping = new HashMap<Integer, List<String>>();
+										sourceDugMappingResults.put(mapping, rejectedForMapping);
+									}
+									
+									List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE);
+									if (multipleMappings == null) {
+										multipleMappings = new ArrayList<String>();
+										rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE, multipleMappings);
+									}
+									for (CDMDrug cdmDrug : remove) {
+										String cdmDrugDescription = cdmDrug.toString();
+										if (!multipleMappings.contains(cdmDrugDescription)) {
+											multipleMappings.add(cdmDrugDescription);
+										}
+									}
+								}
+							}
+							if ((cdmDrugsWithIngredients.size() > 1) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
+								List<CDMDrug> remove = new ArrayList<CDMDrug>();
+								List<CDMDrug> lastDrugs = new ArrayList<CDMDrug>();
+								int lastDate = -1;
+								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+									try {
+										Integer date = Integer.parseInt(cdmDrug.getValidStartDate().replaceAll("-",""));
+										if (lastDate == -1) {
+											lastDrugs.add(cdmDrug);
+											lastDate = date;
+										}
+										else {
+											if (date > lastDate) {
+												remove.addAll(lastDrugs);
+												lastDrugs.clear();
+												lastDrugs.add(cdmDrug);
+												lastDate = date;
+											}
+											else if (date == lastDate) {
+												lastDrugs.add(cdmDrug);
+											}
+											else {
+												remove.add(cdmDrug);
+											}
+										}
+									}
+									catch (NumberFormatException e) {
+										remove.add(cdmDrug);
+									}
+								}
+								if (cdmDrugsWithIngredients.size() != remove.size()) {
+									cdmDrugsWithIngredients.removeAll(remove);
+									
+									Map<Integer, Map<Integer, List<String>>> sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+									if (sourceDugMappingResults == null) {
+										sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+										sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+									}
+									Map<Integer, List<String>> rejectedForMapping = sourceDugMappingResults.get(mapping);
+									if (rejectedForMapping == null) {
+										rejectedForMapping = new HashMap<Integer, List<String>>();
+										sourceDugMappingResults.put(mapping, rejectedForMapping);
+									}
+									
+									List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE);
+									if (multipleMappings == null) {
+										multipleMappings = new ArrayList<String>();
+										rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE, multipleMappings);
+									}
+									for (CDMDrug cdmDrug : remove) {
+										String cdmDrugDescription = cdmDrug.toString();
+										if (!multipleMappings.contains(cdmDrugDescription)) {
+											multipleMappings.add(cdmDrugDescription);
+										}
+									}
+								}
+							}
+						}
+						// TODO Added End
 
 						if (cdmDrugsWithIngredients.size() > 0) {
 							List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();

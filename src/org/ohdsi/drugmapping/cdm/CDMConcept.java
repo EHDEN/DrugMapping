@@ -129,6 +129,11 @@ public class CDMConcept {
 	public String getConceptCode() {
 		return concept_code;
 	}
+
+	
+	public String getValidStartDate() {
+		return valid_start_date;
+	}
 	
 	
 	public String toString() {

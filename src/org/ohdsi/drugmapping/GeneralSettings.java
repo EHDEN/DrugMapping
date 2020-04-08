@@ -103,7 +103,7 @@ public class GeneralSettings extends JPanel {
 	
 	public String getStringSetting(int index) {
 		String value = null;
-		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_DOUBLE) {
+		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_STRING) {
 			value = generalSettings.get(index).getValueAsString();
 		}
 		return value;
