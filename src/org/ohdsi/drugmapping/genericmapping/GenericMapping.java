@@ -51,34 +51,40 @@ public class GenericMapping extends Mapping {
 	// Make sure that the MAPPED result type is the last one for each mapping type and
 	// that there is a gap between the last result type value of one mapping type and
 	// the first result type value of the next mapping type.
-	private static int CLINICAL_DRUG_MAPPING_NO_SOURCE_INGREDIENTS                   =  0; // The source drug has no ingredients
-	private static int CLINICAL_DRUG_MAPPING_UNMAPPED_SOURCE_INGREDIENTS             =  1; // The source drug has unmapped ingredients
-	private static int CLINICAL_DRUG_MAPPING_DOUBLE_INGREDIENT_MAPPING               =  2; // Two or more source drug ingredients are mapped to the same CDM ingredient.
-	private static int CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS      =  3; // There is no CDM clinical drug with matching ingredients.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                        =  4; // The CDM clinical drugs rejected because they have a different form than the source drug.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                    =  5; // The CDM clinical drugs rejected because they have a different strength than the source drug.
-	private static int CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                       =  6; // There are several clinical drugs the source drug could be mapped to.
-	private static int CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                       =  7; // A mapping to a single clinical drug or a failing mapping is overruled by a manual mapping.
-	private static int CLINICAL_DRUG_MAPPING_MAPPED                                  =  8; // The final mapping of the source drug to a clinical drug.
+	private static int CLINICAL_DRUG_MAPPING_NO_SOURCE_INGREDIENTS                   =   0; // The source drug has no ingredients
+	private static int CLINICAL_DRUG_MAPPING_UNMAPPED_SOURCE_INGREDIENTS             =   1; // The source drug has unmapped ingredients
+	private static int CLINICAL_DRUG_MAPPING_DOUBLE_INGREDIENT_MAPPING               =   2; // Two or more source drug ingredients are mapped to the same CDM ingredient.
+	private static int CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS      =   3; // There is no CDM clinical drug with matching ingredients.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                        =   4; // The CDM clinical drugs rejected because they have a different form than the source drug.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                    =   5; // The CDM clinical drugs rejected because they have a different strength than the source drug.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE           =   6; // The CDM clinical drugs rejected because they are not in the preferred RxNorm (Extension) vocabulary.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_DATE_PREFERENCE             =   7; // The CDM clinical drugs rejected because they do not have the most recent valid start date.
+	private static int CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                       =   8; // There are several clinical drugs the source drug could be mapped to.
+	private static int CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                       =   9; // A mapping to a single clinical drug or a failing mapping is overruled by a manual mapping.
+	private static int CLINICAL_DRUG_MAPPING_MAPPED                                  =  10; // The final mapping of the source drug to a clinical drug.
 
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS              = 10; // The source drug has no ingredients
-	private static int CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS        = 11; // The source drug has unmapped ingredients
-	private static int CLINICAL_DRUG_COMP_MAPPING_DOUBLE_INGREDIENT_MAPPING          = 12; // Two or more source drug ingredients are mapped to the same CDM ingredient.
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG          = 13; // The source drug should have only one ingredient to map to a CDM clinical drug comp.
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS = 14; // There is no CDM clinical drug comp with matching ingredients.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH               = 15; // The CDM clinical drug comps rejected because they have a different strength than the source drug.
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                  = 16; // There are several clinical drug comps the source drug could be mapped to.
-	private static int CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                  = 17; // A mapping to a single clinical drug comp or a failing mapping is overruled by a manual mapping.
-	private static int CLINICAL_DRUG_COMP_MAPPING_MAPPED                             = 18; // The final mapping of the source drug to a clinical drug comp.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS              = 100; // The source drug has no ingredients
+	private static int CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS        = 101; // The source drug has unmapped ingredients
+	private static int CLINICAL_DRUG_COMP_MAPPING_DOUBLE_INGREDIENT_MAPPING          = 102; // Two or more source drug ingredients are mapped to the same CDM ingredient.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG          = 103; // The source drug should have only one ingredient to map to a CDM clinical drug comp.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS = 104; // There is no CDM clinical drug comp with matching ingredients.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH               = 105; // The CDM clinical drug comps rejected because they have a different strength than the source drug.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE      = 106; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm (Extension) vocabulary.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_DATE_PREFERENCE        = 107; // The CDM clinical drug comps rejected because they do not have the most recent valid start date.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                  = 108; // There are several clinical drug comps the source drug could be mapped to.
+	private static int CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                  = 109; // A mapping to a single clinical drug comp or a failing mapping is overruled by a manual mapping.
+	private static int CLINICAL_DRUG_COMP_MAPPING_MAPPED                             = 110; // The final mapping of the source drug to a clinical drug comp.
 
-	private static int CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS              = 20; // The source drug has no ingredients
-	private static int CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS        = 21; // The source drug has unmapped ingredients
-	private static int CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING          = 22; // Two or more source drug ingredients are mapped to the same CDM ingredient.
-	private static int CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS = 23; // There is no CDM clinical drug form with matching ingredients.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                   = 24; // The CDM clinical drug forms rejected because they have a different form than the source drug.
-	private static int CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                  = 25; // There are several clinical drug forms the source drug could be mapped to.
-	private static int CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                  = 26; // A mapping to a single clinical drug form or a failing mapping is overruled by a manual mapping.
-	private static int CLINICAL_DRUG_FORM_MAPPING_MAPPED                             = 27; // The final mapping of the source drug to a clinical drug form.
+	private static int CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS              = 200; // The source drug has no ingredients
+	private static int CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS        = 201; // The source drug has unmapped ingredients
+	private static int CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING          = 202; // Two or more source drug ingredients are mapped to the same CDM ingredient.
+	private static int CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS = 203; // There is no CDM clinical drug form with matching ingredients.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                   = 204; // The CDM clinical drug forms rejected because they have a different form than the source drug.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_PREFERENCE      = 205; // The CDM clinical drug forms rejected because they are not in the preferred RxNorm (Extension) vocabulary.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_DATE_PREFERENCE        = 205; // The CDM clinical drug forms rejected because they do not have the most recent valid start date.
+	private static int CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                  = 207; // There are several clinical drug forms the source drug could be mapped to.
+	private static int CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                  = 208; // A mapping to a single clinical drug form or a failing mapping is overruled by a manual mapping.
+	private static int CLINICAL_DRUG_FORM_MAPPING_MAPPED                             = 209; // The final mapping of the source drug to a clinical drug form.
 
 	private static Map<Integer, String> mappingResultDescriptions;
 	static {
@@ -1246,10 +1252,10 @@ public class GenericMapping extends Mapping {
 								sourceDugMappingResults.put(mapping, mappingTypeResults);
 							}
 							
-							List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 10) + 2); // <mapping>DOUBLE_INGREDIENT_MAPPING
+							List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 100) + 2); // <mapping>DOUBLE_INGREDIENT_MAPPING
 							if (mappingSourceIngredients == null) {
 								mappingSourceIngredients = new ArrayList<String>();
-								mappingTypeResults.put((mapping * 10) + 2, mappingSourceIngredients); // <mapping>DOUBLE_INGREDIENT_MAPPING
+								mappingTypeResults.put((mapping * 100) + 2, mappingSourceIngredients); // <mapping>DOUBLE_INGREDIENT_MAPPING
 							}
 							for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
 								CDMIngredient cdmIngredient = ingredientMap.get(sourceDrugIngredient);
@@ -1276,10 +1282,10 @@ public class GenericMapping extends Mapping {
 							sourceDugMappingResults.put(mapping, mappingTypeResults);
 						}
 						
-						List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 10) + 1); // <mapping>UNMAPPED_SOURCE_INGREDIENTS
+						List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 100) + 1); // <mapping>UNMAPPED_SOURCE_INGREDIENTS
 						if (mappingSourceIngredients == null) {
 							mappingSourceIngredients = new ArrayList<String>();
-							mappingTypeResults.put((mapping * 10) + 1, mappingSourceIngredients); // <mapping>UNMAPPED_SOURCE_INGREDIENTS
+							mappingTypeResults.put((mapping * 100) + 1, mappingSourceIngredients); // <mapping>UNMAPPED_SOURCE_INGREDIENTS
 						}
 						for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
 							CDMIngredient cdmIngredient = ingredientMap.get(sourceDrugIngredient);
@@ -1306,11 +1312,11 @@ public class GenericMapping extends Mapping {
 						sourceDugMappingResults.put(mapping, mappingTypeResults);
 					}
 					
-					List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 10) + 0); // <mapping>NO_SOURCE_INGREDIENTS
+					List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 100) + 0); // <mapping>NO_SOURCE_INGREDIENTS
 					if (mappingSourceIngredients == null) {
 						mappingSourceIngredients = new ArrayList<String>();
 						mappingSourceIngredients.add(" ");
-						mappingTypeResults.put((mapping * 10) + 0, mappingSourceIngredients); // <mapping>NO_SOURCE_INGREDIENTS
+						mappingTypeResults.put((mapping * 100) + 0, mappingSourceIngredients); // <mapping>NO_SOURCE_INGREDIENTS
 					}
 					
 					mapping++;
@@ -1518,6 +1524,58 @@ public class GenericMapping extends Mapping {
 										matchingCDMDrugsWithOneUnit.add(matchingCDMDrug);
 									}
 								}
+								if (matchingCDMDrugsWithTwoUnits.size() > 1) {
+									String vocabulary_id = null;
+									if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+										vocabulary_id = "RxNorm";
+									}
+									else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
+										vocabulary_id = "RxNorm Extension";
+									}
+									if (vocabulary_id != null) {
+										List<CDMDrug> remove = new ArrayList<CDMDrug>();
+										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
+											if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
+												remove.add(cdmDrug);
+											}
+										}
+										if (matchingCDMDrugsWithTwoUnits.size() != remove.size()) {
+											matchingCDMDrugsWithTwoUnits.removeAll(remove);
+											
+											sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
+											if (sourceDugMappingResults == null) {
+												sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResults.put(sourceDrug, sourceDugMappingResults);
+											}
+											rejectedForMapping = sourceDugMappingResults.get(mapping);
+											if (rejectedForMapping == null) {
+												rejectedForMapping = new HashMap<Integer, List<String>>();
+												sourceDugMappingResults.put(mapping, rejectedForMapping);
+											}
+											
+											List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE);
+											if (multipleMappings == null) {
+												multipleMappings = new ArrayList<String>();
+												rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE, multipleMappings);
+											}
+											for (CDMDrug cdmDrug : remove) {
+												String cdmDrugDescription = cdmDrug.toString();
+												if (!multipleMappings.contains(cdmDrugDescription)) {
+													multipleMappings.add(cdmDrugDescription);
+												}
+											}
+										}
+									}
+									if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
+										List<CDMDrug> remove = new ArrayList<CDMDrug>();
+										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
+											//TODO
+											//if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
+												remove.add(cdmDrug);
+											//}
+										}
+									}
+								}
 								if (matchingCDMDrugsWithTwoUnits.size() > 0) {
 									if (matchingCDMDrugsWithTwoUnits.size() == 1) {
 										mappedSourceDrugs.add(sourceDrug);
@@ -1557,7 +1615,7 @@ public class GenericMapping extends Mapping {
 											multipleMappings = new ArrayList<String>();
 											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
 										}
-										for (CDMDrug cdmDrug : matchingCDMDrugs) {
+										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
 											String cdmDrugDescription = cdmDrug.toString();
 											if (!multipleMappings.contains(cdmDrugDescription)) {
 												multipleMappings.add(cdmDrugDescription);
@@ -1589,6 +1647,14 @@ public class GenericMapping extends Mapping {
 										singleMapping.add(matchingCDMDrugsWithOneUnit.get(0).toString());
 									}
 									else {
+										if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+											
+										}
+										else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
+											
+										}
+										if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Yes")) {
+										}
 										sourceDugMappingResults = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDugMappingResults == null) {
 											sourceDugMappingResults = new HashMap<Integer, Map<Integer, List<String>>>();
@@ -1605,7 +1671,7 @@ public class GenericMapping extends Mapping {
 											multipleMappings = new ArrayList<String>();
 											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
 										}
-										for (CDMDrug cdmDrug : matchingCDMDrugs) {
+										for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
 											String cdmDrugDescription = cdmDrug.toString();
 											if (!multipleMappings.contains(cdmDrugDescription)) {
 												multipleMappings.add(cdmDrugDescription);
@@ -2253,7 +2319,7 @@ public class GenericMapping extends Mapping {
 			counters.put(mappingType, mappingTypeCounters);
 			Map<Integer, Long> mappingTypeDataCoverage = new HashMap<Integer, Long>();
 			dataCoverage.put(mappingType, mappingTypeDataCoverage);
-			int mappingResultType = (10 * mappingType);
+			int mappingResultType = (100 * mappingType);
 			while (mappingResultDescriptions.containsKey(mappingResultType)) {
 				mappingTypeCounters.put(mappingResultType, 0L);
 				mappingTypeDataCoverage.put(mappingResultType, 0L);
@@ -2297,7 +2363,7 @@ public class GenericMapping extends Mapping {
 					Map<Integer, List<String>> mappingResult = sourceDrugMappings.get(mappingType);
 					if (mappingResult != null) {
 						// Get the MAPPED result type value for the current mapping type
-						int mappingResultType = (10 * mappingType);
+						int mappingResultType = (100 * mappingType);
 						int mappedResultType = mappingResultType;
 						while (mappingResultDescriptions.containsKey(mappingResultType)) {
 							mappedResultType = mappingResultType;
@@ -2305,7 +2371,7 @@ public class GenericMapping extends Mapping {
 						}
 
 						// Write the result records
-						mappingResultType = (10 * mappingType);
+						mappingResultType = (100 * mappingType);
 						while (mappingResultDescriptions.containsKey(mappingResultType)) {
 							String record = mappingStatus;
 							record += "," + sourceDrug;

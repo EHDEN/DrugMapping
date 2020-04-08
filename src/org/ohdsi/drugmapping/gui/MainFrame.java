@@ -43,13 +43,13 @@ public class MainFrame {
 	public static int MINIMUM_USE_COUNT;
 	public static int MAXIMUM_STRENGTH_DEVIATION;
 	public static int PREFERENCE_RXNORM;
+	public static int PREFERENCE_PRIORITIZE_BY_DATE;
 	
 	private DrugMapping drugMapping;
 	private JFrame frame;
 	private Console console;
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
-	private List<Setting> settings = new ArrayList<Setting>();
 	private JButton startButton = null;
 	private String logFile = null;
 	
@@ -84,11 +84,11 @@ public class MainFrame {
 	
 	
 	public void checkReadyToStart() {
-		boolean readyToStart = true;
-		for (Setting setting : settings) {
-			readyToStart = readyToStart && setting.isSetCorrectly();
-		}
 		if (startButton != null) {
+			boolean readyToStart = true;
+			for (Setting setting : DrugMapping.settings.getSettings()) {
+				readyToStart = readyToStart && setting.isSetCorrectly();
+			}
 			startButton.setEnabled(readyToStart);
 		}
 	}
@@ -136,9 +136,10 @@ public class MainFrame {
 		if (!DrugMapping.special.equals("ZINDEX")) {
 			DrugMapping.settings = new GeneralSettings(this);
 			
-			MINIMUM_USE_COUNT          = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:"));
-			MAXIMUM_STRENGTH_DEVIATION = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Max. strength deviation percentage:"));
-			PREFERENCE_RXNORM          = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
+			MINIMUM_USE_COUNT             = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:"));
+			MAXIMUM_STRENGTH_DEVIATION    = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Max. strength deviation percentage:"));
+			PREFERENCE_RXNORM             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
+			PREFERENCE_PRIORITIZE_BY_DATE = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Yes", "No" }));
 		}
 		
 		
@@ -339,7 +340,7 @@ public class MainFrame {
 		if (generalSettings != null) {
 			DrugMapping.settings.putSettings(generalSettings);
 		}
-		for (Setting setting : settings) {
+		for (Setting setting : DrugMapping.settings.getSettings()) {
 			setting.initialize();
 		}
 	}
@@ -347,7 +348,7 @@ public class MainFrame {
 	
 	private void saveGeneralSettingsFile() {
 		if (database != null) {
-			List<String> settings = DrugMapping.settings.getSettings();
+			List<String> settings = DrugMapping.settings.getSettingsSave();
 			if (settings != null) {
 				saveSettingsToFile(settings);
 			}

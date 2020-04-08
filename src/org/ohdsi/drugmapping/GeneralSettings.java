@@ -42,7 +42,12 @@ public class GeneralSettings extends JPanel {
 	}
 	
 	
-	public List<String> getSettings() {
+	public List<Setting> getSettings() {
+		return generalSettings;
+	}
+	
+	
+	public List<String> getSettingsSave() {
 		List<String> settings = new ArrayList<String>();
 
 		settings.add("#");
