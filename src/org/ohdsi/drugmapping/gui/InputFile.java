@@ -281,7 +281,7 @@ public class InputFile extends JPanel {
 			if ((!setting.trim().equals("")) && (!setting.substring(0, 1).equals("#"))) {
 				int equalSignIndex = setting.indexOf("=");
 				String settingPath = setting.substring(0, equalSignIndex);
-				String value = setting.substring(equalSignIndex + 1);
+				String value = setting.substring(equalSignIndex + 1).trim();
 				String[] settingPathSplit = settingPath.split("\\.");
 				if ((settingPathSplit.length > 0) && (settingPathSplit[0].equals(getLabelText()))) {
 					if ((settingPathSplit.length == 3) && (settingPathSplit[1].equals("column"))) { // Column mapping
@@ -531,13 +531,13 @@ public class InputFile extends JPanel {
 	private boolean selectFile(Component parent, JTextField fileField) {
 		boolean result = false;
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setSelectedFile(new File(DrugMapping.getCurrentPath() == null ? System.getProperty("user.dir") : DrugMapping.getCurrentPath()));
+		fileChooser.setCurrentDirectory(new File(DrugMapping.getCurrentPath() == null ? (DrugMapping.getBasePath() == null ? System.getProperty("user.dir") : DrugMapping.getBasePath()) : DrugMapping.getCurrentPath()));
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files", "csv", "txt"));
 		int returnVal = fileChooser.showDialog(parent, "Select file");
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			fileField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath());
+			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath().substring(0, fileChooser.getSelectedFile().getAbsolutePath().lastIndexOf(File.separator)));
 			result = true;
 		}
 		return result;

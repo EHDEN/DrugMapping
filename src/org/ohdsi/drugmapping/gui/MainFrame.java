@@ -44,7 +44,7 @@ public class MainFrame {
 	public static int MAXIMUM_STRENGTH_DEVIATION;
 	public static int PREFERENCE_RXNORM;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
-	//TODO public static int PREFERENCE_TAKE_FIRST;
+	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
 	
 	private DrugMapping drugMapping;
 	private JFrame frame;
@@ -139,10 +139,10 @@ public class MainFrame {
 			DrugMapping.settings = new GeneralSettings(this);
 			
 			MINIMUM_USE_COUNT             = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:"));
-			MAXIMUM_STRENGTH_DEVIATION    = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Max. strength deviation percentage:"));
+			MAXIMUM_STRENGTH_DEVIATION    = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:"));
 			PREFERENCE_RXNORM             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
-			PREFERENCE_PRIORITIZE_BY_DATE = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Yes", "No" }));
-			//TODO PREFERENCE_TAKE_FIRST         = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Take first when multiple mappings left:", new String[] { "Yes", "No" }));
+			PREFERENCE_PRIORITIZE_BY_DATE = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Latest", "Oldest", "No" }));
+			PREFERENCE_TAKE_FIRST_OR_LAST = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "Take first or last when multiple mappings left:", new String[] { "First", "Last", "None" }));
 		}
 		
 		
@@ -393,8 +393,6 @@ public class MainFrame {
 		if (settingsFileName != null) {
 			try {
 				BufferedReader settingsFileBufferedReader = new BufferedReader(new FileReader(settingsFileName));
-				File settingsFile = new File(settingsFileName);
-				DrugMapping.setCurrentPath(settingsFile.getAbsolutePath());
 				String line = settingsFileBufferedReader.readLine();
 				while (line != null) {
 					settings.add(line);
@@ -414,7 +412,7 @@ public class MainFrame {
 	private String getFile(FileNameExtensionFilter extensionsFilter, boolean fileShouldExist) {
 		String fileName = null;
 		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setSelectedFile(new File(DrugMapping.getCurrentPath() == null ? System.getProperty("user.dir") : DrugMapping.getCurrentPath()));
+		fileChooser.setCurrentDirectory(new File(DrugMapping.getCurrentPath() == null ? (DrugMapping.getBasePath() == null ? System.getProperty("user.dir") : DrugMapping.getBasePath()) : DrugMapping.getCurrentPath()));
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		if (extensionsFilter != null) {
 			fileChooser.setFileFilter(extensionsFilter);
@@ -422,7 +420,7 @@ public class MainFrame {
 		int returnVal = fileShouldExist ? fileChooser.showOpenDialog(frame) : fileChooser.showDialog(frame, "Save");
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			fileName = fileChooser.getSelectedFile().getAbsolutePath();
-			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath());
+			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath().substring(0, fileChooser.getSelectedFile().getAbsolutePath().lastIndexOf(File.separator)));
 		}
 		return fileName;
 	}

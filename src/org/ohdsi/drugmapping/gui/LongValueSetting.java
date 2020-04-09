@@ -20,6 +20,7 @@ public class LongValueSetting extends Setting {
 	public LongValueSetting(MainFrame mainFrame, String name, String label) {
 		valueType = Setting.SETTING_TYPE_LONG;
 		this.name = name;
+		this.label = label;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());

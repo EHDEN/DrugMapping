@@ -24,6 +24,7 @@ public class ChoiceValueSetting extends Setting {
 	public ChoiceValueSetting(MainFrame mainFrame, String name, String label, String[] choices) {
 		valueType = Setting.SETTING_TYPE_STRING;
 		this.name = name;
+		this.label = label;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());

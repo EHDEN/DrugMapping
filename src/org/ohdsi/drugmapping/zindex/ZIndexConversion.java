@@ -264,7 +264,7 @@ public class ZIndexConversion extends Mapping {
 		if (ok && gpkFile.openFile()) {
 			System.out.println("  Creating ZIndex GPK Full File ...");
 
-			String gpkFullFileName = DrugMapping.getCurrentPath() + "/ZIndex - GPK Full.csv";
+			String gpkFullFileName = DrugMapping.getBasePath() + "/ZIndex - GPK Full.csv";
 			try {
 				PrintWriter gpkFullFile = new PrintWriter(new File(gpkFullFileName));
 				

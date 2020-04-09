@@ -99,7 +99,7 @@ public class UnitConversion {
 	
 	
 	private void readFromFile() {
-		System.out.println("    Get unit conversion map from file " + DrugMapping.getCurrentPath() + "/" + FILENAME + " ...");
+		System.out.println("    Get unit conversion map from file " + DrugMapping.getBasePath() + "/" + FILENAME + " ...");
 
 		boolean newSourceUnits = false;
 		boolean newCDMUnits = false;
@@ -108,10 +108,10 @@ public class UnitConversion {
 		Set<String> oldSourceUnits = new HashSet<String>();
 		Set<String> oldCDMUnits = new HashSet<String>();
 		
-		File unitFile = new File(DrugMapping.getCurrentPath() + "/" + FILENAME);
+		File unitFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
 		if (unitFile.exists()) {
 			status = STATE_OK;
-			ReadCSVFileWithHeader unitConversionFile = new ReadCSVFileWithHeader(DrugMapping.getCurrentPath() + "/" + FILENAME, ',', '"');
+			ReadCSVFileWithHeader unitConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
 
 			Iterator<Row> unitConversionFileIterator = unitConversionFile.iterator();
 			Set<String> unitConcepts = unitConversionFile.getColumns();
@@ -205,7 +205,7 @@ public class UnitConversion {
 	
 	
 	private void writeUnitConversionsToFile() {
-		String unitFileName = DrugMapping.getCurrentPath() + "/" + FILENAME;
+		String unitFileName = DrugMapping.getBasePath() + "/" + FILENAME;
 		File unitFile = new File(unitFileName);
 		if (unitFile.exists()) {
 			// Backup old unit conversion map
@@ -216,7 +216,7 @@ public class UnitConversion {
 				fileNr++;
 				String fileNrString = "00" + Integer.toString(fileNr);
 				fileNrString = fileNrString.substring(fileNrString.length() - 2);
-				oldUnitFileName = DrugMapping.getCurrentPath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + unitMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
+				oldUnitFileName = DrugMapping.getBasePath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + unitMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
 				oldUnitFile = new File(oldUnitFileName);
 			} while (oldUnitFile.exists());
 			try {
@@ -272,7 +272,7 @@ public class UnitConversion {
 				}
 				unitFileWriter.close();
 			} catch (FileNotFoundException e) {
-				System.out.println("    ERROR: Cannot create unit conversion map '" + DrugMapping.getCurrentPath() + "/" + FILENAME + "'!");
+				System.out.println("    ERROR: Cannot create unit conversion map '" + DrugMapping.getBasePath() + "/" + FILENAME + "'!");
 				status = STATE_ERROR;
 			}
 		}

@@ -19,6 +19,7 @@ public class DoubleValueSetting extends Setting {
 	public DoubleValueSetting(MainFrame mainFrame, String name, String label) {
 		valueType = Setting.SETTING_TYPE_DOUBLE;
 		this.name = name;
+		this.label = label;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());

@@ -19,6 +19,7 @@ import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.gui.Setting;
 import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPING;
 import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPINGInputFiles;
 import org.ohdsi.drugmapping.zindex.ZIndexConversion;
@@ -33,6 +34,7 @@ public class DrugMapping {
 	
 	private static String currentDate = null;
 	private static String currentPath = null;	
+	private static String basePath = null;
 	private static MappingInputDefinition inputFiles = null;
 	
 	private MainFrame mainFrame;
@@ -62,7 +64,7 @@ public class DrugMapping {
 		
 		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
 			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());
-			File logFile = new File(currentPath + "/" + date + " " + versionNrString + " " + logFileName);
+			File logFile = new File(basePath + "/" + date + " " + versionNrString + " " + logFileName);
 			if (!logFile.exists()) {
 				version = date + " " + versionNrString + " ";
 				break;
@@ -80,6 +82,16 @@ public class DrugMapping {
 	
 	public static void setCurrentPath(String path) {
 		currentPath = path;
+	}
+	
+	
+	public static String getBasePath() {
+		return basePath;
+	}
+	
+	
+	public static void setBasePath(String path) {
+		basePath = path;
 	}
 	
 	
@@ -137,27 +149,29 @@ public class DrugMapping {
 			generalSettings = mainFrame.readSettingsFromFile(parameters.get("generalsettings"));
 		}
 		if (parameters.containsKey("path")) {
-			currentPath = parameters.get("path");
+			basePath = parameters.get("path");
+			currentPath = basePath;
 		}
 		else {
 			try {
-				currentPath = new File("./").getCanonicalPath().replaceAll("\\\\", "/");
+				basePath = new File("./").getCanonicalPath().replaceAll("\\\\", "/");
+				currentPath = basePath;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 
 		File logFile;
-		if (currentPath != null) {
+		if (basePath != null) {
 			outputVersion = getOutputVersion(logFileName);
-			logFileName = currentPath + "/" + outputVersion + logFileName;
+			logFileName = basePath + "/" + outputVersion + logFileName;
 		}
 		else {
 			outputVersion = "";
 			logFile = new File(logFileName);
 			try {
-				currentPath = logFile.getCanonicalPath().replaceAll("\\\\", "/");
-				currentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+				basePath = logFile.getCanonicalPath().replaceAll("\\\\", "/");
+				basePath = basePath.substring(0, basePath.lastIndexOf(File.pathSeparator));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -270,9 +284,9 @@ public class DrugMapping {
 	
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
-		System.out.println("  Minimum use count: " + DrugMapping.settings.getValueAsString(MainFrame.MINIMUM_USE_COUNT));
-		System.out.println("  Maximum Strength deviation allowed: " + DrugMapping.settings.getValueAsString(MainFrame.MAXIMUM_STRENGTH_DEVIATION) + "%");
-		System.out.println("  Preferred choice for multiple mappings: " + DrugMapping.settings.getValueAsString(MainFrame.PREFERENCE_RXNORM));
+		for (Setting setting : DrugMapping.settings.getSettings()) {
+			System.out.println(setting.getLabel() + " " + setting.getValueAsString());
+		}
 		System.out.println();
 	}
 	

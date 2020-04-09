@@ -99,7 +99,7 @@ public class FormConversion {
 	
 	
 	private void readFromFile() {
-		System.out.println("    Get form conversion map from file " + DrugMapping.getCurrentPath() + "/" + FILENAME + " ...");
+		System.out.println("    Get form conversion map from file " + DrugMapping.getBasePath() + "/" + FILENAME + " ...");
 
 		boolean newSourceForms = false;
 		boolean newCDMForms = false;
@@ -108,10 +108,10 @@ public class FormConversion {
 		Set<String> oldSourceForms = new HashSet<String>();
 		Set<String> oldCDMForms = new HashSet<String>();
 		
-		File formFile = new File(DrugMapping.getCurrentPath() + "/" + FILENAME);
+		File formFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
 		if (formFile.exists()) {
 			status = STATE_OK;
-			ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getCurrentPath() + "/" + FILENAME, ',', '"');
+			ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
 			
 			Iterator<Row> formConversionFileIterator = formConversionFile.iterator();
 			Set<String> formConcepts = formConversionFile.getColumns();
@@ -199,7 +199,7 @@ public class FormConversion {
 	
 	
 	private void writeFormConversionsToFile() {
-		String formFileName = DrugMapping.getCurrentPath() + "/" + FILENAME;
+		String formFileName = DrugMapping.getBasePath() + "/" + FILENAME;
 		File formFile = new File(formFileName);
 		if (formFile.exists()) {
 			// Backup old form conversion map
@@ -210,7 +210,7 @@ public class FormConversion {
 				fileNr++;
 				String fileNrString = "00" + Integer.toString(fileNr);
 				fileNrString = fileNrString.substring(fileNrString.length() - 2);
-				oldFormFileName = DrugMapping.getCurrentPath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + formMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
+				oldFormFileName = DrugMapping.getBasePath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + formMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
 				oldFormFile = new File(oldFormFileName);
 			} while (oldFormFile.exists());
 			try {
@@ -264,7 +264,7 @@ public class FormConversion {
 				}
 				formFileWriter.close();
 			} catch (FileNotFoundException e) {
-				System.out.println("    ERROR: Cannot create form conversion map '" + DrugMapping.getCurrentPath() + "/" + FILENAME + "'!");
+				System.out.println("    ERROR: Cannot create form conversion map '" + DrugMapping.getBasePath() + "/" + FILENAME + "'!");
 				status = STATE_ERROR;
 			}
 		}
@@ -276,8 +276,8 @@ public class FormConversion {
 	}
 	
 	
-	public String getCDMFormConceptName(String cdmFromConceptId) {
-		return cdmFormConceptIdToNameMap.get(cdmFromConceptId);
+	public String getCDMFormConceptName(String cdmFormConceptId) {
+		return cdmFormConceptIdToNameMap.get(cdmFormConceptId);
 	}
 	
 	

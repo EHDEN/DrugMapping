@@ -11,6 +11,7 @@ public class Setting extends JPanel {
 	
 	protected boolean correct = false;
 	protected String name = "";
+	protected String label = "";
 	protected int valueType = -1;
 
 	public void initialize() {
@@ -20,6 +21,11 @@ public class Setting extends JPanel {
 	
 	public String getName() {
 		return name;
+	}
+	
+	
+	public String getLabel() {
+		return label;
 	}
 	
 	
