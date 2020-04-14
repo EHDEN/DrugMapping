@@ -2,7 +2,6 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 
-import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.UnitConversion;
 
 public class SourceDrugComponent {

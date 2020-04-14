@@ -405,7 +405,7 @@ public class GenericMapping extends Mapping {
 			while (sourceDrugsFile.hasNext()) {
 				Row row = sourceDrugsFile.next();
 				
-				String sourceCode = sourceDrugsFile.get(row, "SourceCode").trim();
+				String sourceCode = sourceDrugsFile.get(row, "SourceCode", true).trim();
 				
 				if ((!sourceCode.equals("")) && (!ignoredSourceCodes.contains(sourceCode))) {
 					SourceDrug sourceDrug = sourceDrugMap.get(sourceCode);
@@ -414,10 +414,10 @@ public class GenericMapping extends Mapping {
 						sourceDrugCount++;
 						sourceDrug = new SourceDrug(
 											sourceCode, 
-											sourceDrugsFile.get(row, "SourceName").trim().toUpperCase(), 
-											sourceDrugsFile.get(row, "SourceATCCode").trim().toUpperCase(), 
-											sourceDrugsFile.get(row, "SourceFormulation").trim().toUpperCase(), 
-											sourceDrugsFile.get(row, "SourceCount").trim()
+											sourceDrugsFile.get(row, "SourceName", true).trim().toUpperCase(), 
+											sourceDrugsFile.get(row, "SourceATCCode", true).trim().toUpperCase(), 
+											sourceDrugsFile.get(row, "SourceFormulation", true).trim().toUpperCase(), 
+											sourceDrugsFile.get(row, "SourceCount", true).trim()
 											);
 						if (sourceDrug.getCount() >= minimumUseCount) {
 							sourceDrugs.add(sourceDrug);
@@ -444,12 +444,14 @@ public class GenericMapping extends Mapping {
 					}
 
 					if (sourceDrug != null) {
-						String ingredientName        = sourceDrugsFile.get(row, "IngredientName").trim().toUpperCase(); 
-						String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish").trim().toUpperCase();
-						String dosage                = sourceDrugsFile.get(row, "Dosage").trim(); 
-						String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit").trim().toUpperCase(); 
-						String casNumber             = sourceDrugsFile.get(row, "CASNumber").trim();
+						String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", false); 
+						String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase(); 
+						String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
+						String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
+						String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim().toUpperCase(); 
+						String casNumber             = sourceDrugsFile.get(row, "CASNumber", true).trim();
 						
+						if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
 						while (ingredientName.contains("  "))        ingredientName        = ingredientName.replaceAll("  ", " ");
 						while (ingredientNameEnglish.contains("  ")) ingredientNameEnglish = ingredientNameEnglish.replaceAll("  ", " ");
 						while (dosage.contains("  "))                dosage                = dosage.replaceAll("  ", " ");
@@ -462,7 +464,7 @@ public class GenericMapping extends Mapping {
 
 						SourceIngredient sourceIngredient = null;
 						if (!ingredientName.equals("")) {
-							sourceIngredient = SourceDrug.getIngredient(ingredientName, ingredientNameEnglish, casNumber);
+							sourceIngredient = SourceDrug.getIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 							if (sourceIngredient == null) {
 								sourceDrugError = true;
 							}
@@ -583,7 +585,7 @@ public class GenericMapping extends Mapping {
 		// Get RxNorm ingredients
 		CDMIngredient lastCdmIngredient = null;
 		for (Row queryRow : connection.queryResource("../cdm/GetRxNormIngredients.sql", queryParameters)) {
-			String cdmIngredientConceptId = queryRow.get("concept_id").trim();
+			String cdmIngredientConceptId = queryRow.get("concept_id", true).trim();
 			if ((lastCdmIngredient == null) || (!lastCdmIngredient.getConceptId().equals(cdmIngredientConceptId))) {
 				if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
 					rxNormIngredientsFile.println(lastCdmIngredient.toStringWithSynonyms());
@@ -613,7 +615,7 @@ public class GenericMapping extends Mapping {
 				lastCdmIngredient = cdmIngredient;
 			}
 			
-			String cdmIngredientSynonym = queryRow.get("concept_synonym_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String cdmIngredientSynonym = queryRow.get("concept_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			//String cdmIngredientSynonymNoSpaces = cdmIngredientSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 
 			List<String> nameList = new ArrayList<String>();
@@ -649,10 +651,10 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM 'Maps to' RxNorm Ingredients ...");
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
-			String drugName = queryRow.get("drug_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String drugName = queryRow.get("drug_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			//String drugNameNoSpaces = drugName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id").trim();
-			String drugNameSynonym = queryRow.get("drug_synonym_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id", true).trim();
+			String drugNameSynonym = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			//String drugNameSynonymNoSpaces = drugNameSynonym.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
@@ -701,8 +703,8 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM concepts replaced by RxNorm ingredients ...");
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetConceptReplacedByRxNormIngredient.sql", queryParameters)) {
-			String cdmReplacedByName      = queryRow.get("concept_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String cdmReplacedByConceptId = queryRow.get("concept_id");
+			String cdmReplacedByName      = queryRow.get("concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String cdmReplacedByConceptId = queryRow.get("concept_id", true);
 			
 			//String cdmReplacedNameNoSpaces = cdmReplacedByName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 			String cdmReplacedNameModified = modifyName(cdmReplacedByName);
@@ -758,7 +760,7 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
-			String cdmDrugConceptId = queryRow.get("drug_concept_id");
+			String cdmDrugConceptId = queryRow.get("drug_concept_id", true);
 			
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
@@ -766,10 +768,10 @@ public class GenericMapping extends Mapping {
 					cdmDrug = new CDMDrug(queryRow, "drug_");
 					cdmDrugs.put(cdmDrug.getConceptId(), cdmDrug);
 				}
-				String cdmFormConceptId = queryRow.get("form_concept_id");
+				String cdmFormConceptId = queryRow.get("form_concept_id", true);
 				cdmDrug.addForm(cdmFormConceptId);
 				
-				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id");
+				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
 				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 					if (cdmIngredient != null) {
@@ -797,7 +799,7 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Comps with ingredients ...");
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugCompsIngredients.sql", queryParameters)) {
-			String cdmDrugConceptId = queryRow.get("drugcomp_concept_id");
+			String cdmDrugConceptId = queryRow.get("drugcomp_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugComp = cdmDrugComps.get(cdmDrugConceptId);
 				if (cdmDrugComp == null) {
@@ -805,7 +807,7 @@ public class GenericMapping extends Mapping {
 					cdmDrugComps.put(cdmDrugComp.getConceptId(), cdmDrugComp);
 				}
 				
-				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id");
+				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
 				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 					if (cdmIngredient != null) {
@@ -831,7 +833,7 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugFormsIngredients.sql", queryParameters)) {
-			String cdmDrugConceptId = queryRow.get("drugform_concept_id");
+			String cdmDrugConceptId = queryRow.get("drugform_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugForm = cdmDrugForms.get(cdmDrugConceptId);
 				if (cdmDrugForm == null) {
@@ -839,12 +841,12 @@ public class GenericMapping extends Mapping {
 					cdmDrugForms.put(cdmDrugForm.getConceptId(), cdmDrugForm);
 				}
 				
-				String cdmFormConceptId = queryRow.get("form_concept_id");
+				String cdmFormConceptId = queryRow.get("form_concept_id", true);
 				if ((cdmFormConceptId != null) && (!cdmFormConceptId.equals(""))) {
 					cdmDrugForm.addForm(cdmFormConceptId);
 				}
 				
-				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id");
+				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
 				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 					if (cdmIngredient != null) {
@@ -896,8 +898,8 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredient ATCs ...");
 		
 		for (Row queryRow : connection.queryResource("../cdm/GetRxNormIngredientATC.sql", queryParameters)) {
-			String cdmIngredientConceptId = queryRow.get("concept_id");
-			String cdmIngredientATC = queryRow.get("atc");
+			String cdmIngredientConceptId = queryRow.get("concept_id", true);
+			String cdmIngredientATC = queryRow.get("atc", true);
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			if (cdmIngredient != null) {
@@ -939,8 +941,8 @@ public class GenericMapping extends Mapping {
 			while (manualMappingFile.hasNext()) {
 				Row row = manualMappingFile.next();
 				
-				String sourceCode = manualMappingFile.get(row, "SourceCode").trim();
-				String cdmConceptId = manualMappingFile.get(row, "concept_id").trim();
+				String sourceCode = manualMappingFile.get(row, "SourceCode", true).trim();
+				String cdmConceptId = manualMappingFile.get(row, "concept_id", true).trim();
 				
 				SourceDrug sourceDrug = sourceDrugMap.get(sourceCode);
 				CDMDrug cdmDrug = cdmDrugs.get(cdmConceptId);
@@ -992,9 +994,9 @@ public class GenericMapping extends Mapping {
 				while (casFile.hasNext()) {
 					Row row = casFile.next();
 					
-					String casNumber = casFile.get(row, "CASNumber").trim();
-					String chemicalName = casFile.get(row, "ChemicalName").replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
-					String synonyms = casFile.get(row, "Synonyms").replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
+					String casNumber = casFile.get(row, "CASNumber", true).trim();
+					String chemicalName = casFile.get(row, "ChemicalName", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
+					String synonyms = casFile.get(row, "Synonyms", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
 					String[] synonymSplit = synonyms.split("[|]");
 					
 					if (!casNumber.equals("")) {

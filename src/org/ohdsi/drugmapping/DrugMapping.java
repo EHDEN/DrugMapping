@@ -20,8 +20,6 @@ import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
-import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPING;
-import org.ohdsi.drugmapping.ipcimapping.IPCIMAPPINGInputFiles;
 import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
@@ -118,10 +116,6 @@ public class DrugMapping {
 			if (special.equals("ZINDEX")) {
 				inputFiles = new ZIndexConversionInputFiles();
 				logFileName = "ZIndex - Conversion - Log.txt";
-			}
-			else if (special.equals("IPCIMAPPING")) {
-				inputFiles = new IPCIMAPPINGInputFiles();
-				logFileName = "IPCIMAPPING Log.txt";
 			}
 			else {
 				JOptionPane.showMessageDialog(null, "Unknown special definition '" + special + "'!", "Dialog",JOptionPane.ERROR_MESSAGE);
@@ -235,11 +229,6 @@ public class DrugMapping {
 				logFileSettings("ZIndex Ignored Words File", getFile("ZIndex Ignored Words File"));
 				logFileSettings("ZIndex GPK IPCI Compositions File", getFile("ZIndex GPK IPCI Compositions File"));
 				new ZIndexConversion(getDatabase(), getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"), getFile("ZIndex GPK IPCI Compositions File"));
-			}
-			else if (special.equals("IPCIMAPPING")) {
-				logDatabaseSettings(getDatabase());
-				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
-				new IPCIMAPPING(getDatabase(), getFile("Generic Drugs File"));
 			}
 			else {
 				logDatabaseSettings(getDatabase());

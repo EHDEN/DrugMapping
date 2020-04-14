@@ -304,7 +304,7 @@ public class RichConnection {
 			throw new RuntimeException("Database type not supported");
 		
 		for (Row row : query(query))
-			names.add(row.get(row.getFieldNames().get(0)));
+			names.add(row.get(row.getFieldNames().get(0), true));
 		return names;
 	}
 	
@@ -325,7 +325,7 @@ public class RichConnection {
 		}
 		
 		for (Row row : query(query))
-			names.add(row.get(row.getFieldNames().get(0)));
+			names.add(row.get(row.getFieldNames().get(0), true));
 		return names;
 	}
 	
@@ -333,13 +333,13 @@ public class RichConnection {
 		List<String> names = new ArrayList<String>();
 		if (dbType == DbType.MSSQL) {
 			for (Row row : query("SELECT name FROM syscolumns WHERE id=OBJECT_ID('" + table + "')"))
-				names.add(row.get("name"));
+				names.add(row.get("name", true));
 		} else if (dbType == DbType.MYSQL)
 			for (Row row : query("SHOW COLUMNS FROM " + table))
-				names.add(row.get("COLUMN_NAME"));
+				names.add(row.get("COLUMN_NAME", true));
 		else if (dbType == DbType.POSTGRESQL)
 			for (Row row : query("SELECT column_name FROM information_schema.columns WHERE table_name='" + table.toLowerCase() + "'"))
-				names.add(row.get("column_name"));
+				names.add(row.get("column_name", true));
 		else
 			throw new RuntimeException("DB type not supported");
 		
@@ -524,7 +524,7 @@ public class RichConnection {
 			PreparedStatement statement = connection.prepareStatement(sql);
 			for (Row row : rows) {
 				for (int i = 0; i < columns.size(); i++) {
-					String value = row.get(sourceColumns.get(i));
+					String value = row.get(sourceColumns.get(i), true);
 					if (value == null)
 						System.out.println(row.toString());
 					if (value.length() == 0 && emptyStringToNull)
@@ -584,7 +584,7 @@ public class RichConnection {
 			fields.add(new FieldInfo(field));
 		for (Row row : rows) {
 			for (FieldInfo fieldInfo : fields) {
-				String value = row.get(fieldInfo.name);
+				String value = row.get(fieldInfo.name, true);
 				if (fieldInfo.isNumeric && !StringUtilities.isInteger(value))
 					fieldInfo.isNumeric = false;
 				if (value.length() > fieldInfo.maxLength)
@@ -665,21 +665,21 @@ public class RichConnection {
 				first = false;
 			else
 				sql.append(',');
-			sql.append(row.get("COLUMN_NAME"));
+			sql.append(row.get("COLUMN_NAME", true));
 			sql.append(' ');
 			if (targetConnection.dbType == DbType.ORACLE) {
-				if (row.get("DATA_TYPE").equals("bigint"))
+				if (row.get("DATA_TYPE", true).equals("bigint"))
 					sql.append("number");
-				else if (row.get("DATA_TYPE").equals("varchar"))
+				else if (row.get("DATA_TYPE", true).equals("varchar"))
 					sql.append("VARCHAR(512)");
 				else
-					sql.append(row.get("DATA_TYPE"));
+					sql.append(row.get("DATA_TYPE", true));
 			} else if (targetConnection.dbType == DbType.MYSQL) {
-				sql.append(row.get("DATA_TYPE"));
-				if (row.get("DATA_TYPE").equals("varchar"))
+				sql.append(row.get("DATA_TYPE", true));
+				if (row.get("DATA_TYPE", true).equals("varchar"))
 					sql.append("(max)");
 			} else if (targetConnection.dbType == DbType.POSTGRESQL) {
-				sql.append(row.get("DATA_TYPE"));
+				sql.append(row.get("DATA_TYPE", true));
 			}
 		}
 		sql.append(");");

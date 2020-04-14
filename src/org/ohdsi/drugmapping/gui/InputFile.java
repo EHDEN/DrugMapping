@@ -252,9 +252,16 @@ public class InputFile extends JPanel {
 	}
 	
 	
-	public String get(Row row, String fieldName) {
+	public String get(Row row, String fieldName, boolean required) {
+		String value = null;
 		String mappedFieldName = columnMapping.get(fieldName);	
-		return row.get(mappedFieldName);
+		if (required && (mappedFieldName == null)) {
+			throw new RuntimeException("Field \"" + fieldName + "\" not found");
+		}
+		else {
+			value = row.get(mappedFieldName, required);
+		}
+		return value;
 	}
 	
 	

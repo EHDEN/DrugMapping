@@ -60,8 +60,8 @@ public class FormConversion {
 		// Get CDM Forms
 		for (Row queryRow : connection.queryResource("cdm/GetCDMForms.sql", queryParameters)) {
 			
-			String concept_id   = queryRow.get("concept_id").trim();
-			String concept_name = queryRow.get("concept_name").trim();
+			String concept_id   = queryRow.get("concept_id", true).trim();
+			String concept_name = queryRow.get("concept_name", true).trim();
 			
 			cdmFormNameToConceptIdMap.put(concept_name, concept_id);
 			cdmFormConceptIdToNameMap.put(concept_id, concept_name);
@@ -103,7 +103,6 @@ public class FormConversion {
 
 		boolean newSourceForms = false;
 		boolean newCDMForms = false;
-		boolean lostCDMForms = false;
 		boolean conceptNamesRead = false;
 		Set<String> oldSourceForms = new HashSet<String>();
 		Set<String> oldCDMForms = new HashSet<String>();
@@ -121,10 +120,10 @@ public class FormConversion {
 					
 					if (!conceptNamesRead) {
 						conceptNamesRead = true;
-						formMapDate = row.get("Local form").replace('/', '-');
+						formMapDate = row.get("Local form", true).replace('/', '-');
 					}
 					else {
-						String sourceForm = row.get("Local form");
+						String sourceForm = row.get("Local form", true);
 						if (!sourceForm.trim().equals("")) {
 							oldSourceForms.add(sourceForm);
 							
@@ -146,7 +145,7 @@ public class FormConversion {
 								oldCDMForms.add(concept_id);
 								if (!concept_id.equals("Local form")) {
 									if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
-										String cell = row.get(concept_id).trim();
+										String cell = row.get(concept_id, true).trim();
 										if (!cell.equals("")) {
 											sourceFormMapping.add(concept_id);
 											mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
@@ -154,7 +153,6 @@ public class FormConversion {
 									}
 									else {
 										System.out.println("    WARNING: CDM form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-										lostCDMForms = true;
 									}
 								}
 							}

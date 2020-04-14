@@ -24,9 +24,9 @@ public class MapIngredients extends Mapping {
 		if (ingredientsFile.openFile()) {
 			while (ingredientsFile.hasNext()) {
 				Row row = ingredientsFile.next();
-				String ingredientID = ingredientsFile.get(row, "IngredientID");
-				String ingredientText = ingredientsFile.get(row, "IngredientText");
-				String ingredientTextEnglish = ingredientsFile.get(row, "IngredientTextEnglish");
+				String ingredientID = ingredientsFile.get(row, "IngredientID", true);
+				String ingredientText = ingredientsFile.get(row, "IngredientText", true);
+				String ingredientTextEnglish = ingredientsFile.get(row, "IngredientTextEnglish", true);
 				String ingredientTextEnglishUpperCase = ingredientTextEnglish.toUpperCase().replaceAll("'", "''");
 				
 				System.out.println("    " + ingredientID + "," + ingredientText + "," + ingredientTextEnglish);
@@ -75,10 +75,10 @@ public class MapIngredients extends Mapping {
 										break;
 									}
 									mappedRecord = new HashMap<String, String>(); 
-									mappedRecord.put("concept_id"      , queryRow.get("concept_id"));
-									mappedRecord.put("concept_name"    , queryRow.get("concept_name"));
-									mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id"));
-									mappedRecord.put("concept_code"    , queryRow.get("concept_code"));
+									mappedRecord.put("concept_id"      , queryRow.get("concept_id", true));
+									mappedRecord.put("concept_name"    , queryRow.get("concept_name", true));
+									mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id", true));
+									mappedRecord.put("concept_code"    , queryRow.get("concept_code", true));
 									mappedRecord.put("match"           , nameMatchDescription + "-RxNorm%-Ingredient-S");
 								}
 							}
@@ -99,10 +99,10 @@ public class MapIngredients extends Mapping {
 									while (database.hasNext()) {
 										Row queryRow = database.next();
 										Map<String, String> matchingConcept = new HashMap<String, String>();
-										matchingConcept.put("concept_id"      , queryRow.get("concept_id"));
-										matchingConcept.put("match"           , nameMatchDescription + " " + queryRow.get("concept_id"));
-										matchingConcepts.put(queryRow.get("concept_id"), matchingConcept);
-										foundConcepts.add(queryRow.get("concept_id"));
+										matchingConcept.put("concept_id"      , queryRow.get("concept_id", true));
+										matchingConcept.put("match"           , nameMatchDescription + " " + queryRow.get("concept_id", true));
+										matchingConcepts.put(queryRow.get("concept_id", true), matchingConcept);
+										foundConcepts.add(queryRow.get("concept_id", true));
 									}
 									
 									// Go through the "Maps to" relations until you found a single standard
@@ -129,20 +129,20 @@ public class MapIngredients extends Mapping {
 											if (database.hasNext()) {
 												while (database.hasNext()) {
 													Row queryRow = database.next();
-													if (foundConcepts.add(queryRow.get("concept_id"))) {
+													if (foundConcepts.add(queryRow.get("concept_id", true))) {
 														if (
-																queryRow.get("domain_id").equals("Drug") &&
-																queryRow.get("vocabulary_id").substring(0, 6).equals("RxNorm") &&
-																queryRow.get("concept_class_id").equals("Ingredient") &&
-																queryRow.get("standard_concept").equals("S")
+																queryRow.get("domain_id", true).equals("Drug") &&
+																queryRow.get("vocabulary_id", true).substring(0, 6).equals("RxNorm") &&
+																queryRow.get("concept_class_id", true).equals("Ingredient") &&
+																queryRow.get("standard_concept", true).equals("S")
 															) {
 															// Found RxNorm ingredient
 															mappedRecord = new HashMap<String, String>(); 
-															mappedRecord.put("concept_id"      , queryRow.get("concept_id"));
-															mappedRecord.put("concept_name"    , queryRow.get("concept_name"));
-															mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id"));
-															mappedRecord.put("concept_code"    , queryRow.get("concept_code"));
-															mappedRecord.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1")).get("match") + "-" + "Maps to " + mappedRecord.get("concept_id"));
+															mappedRecord.put("concept_id"      , queryRow.get("concept_id", true));
+															mappedRecord.put("concept_name"    , queryRow.get("concept_name", true));
+															mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id", true));
+															mappedRecord.put("concept_code"    , queryRow.get("concept_code", true));
+															mappedRecord.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1", true)).get("match") + "-" + "Maps to " + mappedRecord.get("concept_id"));
 															
 															database.disconnect();
 															
@@ -152,11 +152,11 @@ public class MapIngredients extends Mapping {
 														}
 														else {
 															Map<String, String> matchingConcept = new HashMap<String, String>();
-															matchingConcept.put("concept_id"      , queryRow.get("concept_id"));
-															matchingConcept.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1")).get("match") + "-" + "Maps to " + queryRow.get("concept_id"));
+															matchingConcept.put("concept_id"      , queryRow.get("concept_id", true));
+															matchingConcept.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1", true)).get("match") + "-" + "Maps to " + queryRow.get("concept_id", true));
 															
-															conceptsForNextLevel.add(queryRow.get("concept_id_1"));
-															nextLevelMatchingConcepts.put(queryRow.get("concept_id"), matchingConcept);
+															conceptsForNextLevel.add(queryRow.get("concept_id_1", true));
+															nextLevelMatchingConcepts.put(queryRow.get("concept_id", true), matchingConcept);
 														}
 													}
 												}
@@ -184,10 +184,10 @@ public class MapIngredients extends Mapping {
 									while (database.hasNext()) {
 										Row queryRow = database.next();
 										Map<String, String> matchingConcept = new HashMap<String, String>();
-										matchingConcept.put("concept_id"      , queryRow.get("concept_id"));
-										matchingConcept.put("match"           , nameMatchDescription + " Synonym " + queryRow.get("concept_id"));
-										matchingConcepts.put(queryRow.get("concept_id"), matchingConcept);
-										foundConcepts.add(queryRow.get("concept_id"));
+										matchingConcept.put("concept_id"      , queryRow.get("concept_id", true));
+										matchingConcept.put("match"           , nameMatchDescription + " Synonym " + queryRow.get("concept_id", true));
+										matchingConcepts.put(queryRow.get("concept_id", true), matchingConcept);
+										foundConcepts.add(queryRow.get("concept_id", true));
 									}
 									
 									// Go through the "Maps to" relations until you found a single standard
@@ -214,20 +214,20 @@ public class MapIngredients extends Mapping {
 											if (database.hasNext()) {
 												while (database.hasNext()) {
 													Row queryRow = database.next();
-													if (foundConcepts.add(queryRow.get("concept_id"))) {
+													if (foundConcepts.add(queryRow.get("concept_id", true))) {
 														if (
-																queryRow.get("domain_id").equals("Drug") &&
-																queryRow.get("vocabulary_id").substring(0, 6).equals("RxNorm") &&
-																queryRow.get("concept_class_id").equals("Ingredient") &&
-																queryRow.get("standard_concept").equals("S")
+																queryRow.get("domain_id", true).equals("Drug") &&
+																queryRow.get("vocabulary_id", true).substring(0, 6).equals("RxNorm") &&
+																queryRow.get("concept_class_id", true).equals("Ingredient") &&
+																queryRow.get("standard_concept", true).equals("S")
 															) {
 															// Found RxNorm ingredient
 															mappedRecord = new HashMap<String, String>(); 
-															mappedRecord.put("concept_id"      , queryRow.get("concept_id"));
-															mappedRecord.put("concept_name"    , queryRow.get("concept_name"));
-															mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id"));
-															mappedRecord.put("concept_code"    , queryRow.get("concept_code"));
-															mappedRecord.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1")).get("match") + "-" + "Maps to " + mappedRecord.get("concept_id"));
+															mappedRecord.put("concept_id"      , queryRow.get("concept_id", true));
+															mappedRecord.put("concept_name"    , queryRow.get("concept_name", true));
+															mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id", true));
+															mappedRecord.put("concept_code"    , queryRow.get("concept_code", true));
+															mappedRecord.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1", true)).get("match") + "-" + "Maps to " + mappedRecord.get("concept_id"));
 															
 															database.disconnect();
 															
@@ -237,11 +237,11 @@ public class MapIngredients extends Mapping {
 														}
 														else {
 															Map<String, String> matchingConcept = new HashMap<String, String>();
-															matchingConcept.put("concept_id"      , queryRow.get("concept_id"));
-															matchingConcept.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1")).get("match") + "-" + "Maps to " + queryRow.get("concept_id"));
+															matchingConcept.put("concept_id"      , queryRow.get("concept_id", true));
+															matchingConcept.put("match"           , matchingConcepts.get(queryRow.get("concept_id_1", true)).get("match") + "-" + "Maps to " + queryRow.get("concept_id", true));
 															
-															conceptsForNextLevel.add(queryRow.get("concept_id_1"));
-															nextLevelMatchingConcepts.put(queryRow.get("concept_id"), matchingConcept);
+															conceptsForNextLevel.add(queryRow.get("concept_id_1", true));
+															nextLevelMatchingConcepts.put(queryRow.get("concept_id", true), matchingConcept);
 														}
 													}
 												}

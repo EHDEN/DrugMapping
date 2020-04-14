@@ -55,16 +55,16 @@ public class CDMConcept {
 	
 	
 	public CDMConcept(Row queryRow, String prefix) {
-		concept_id       = queryRow.get(prefix + "concept_id").trim();
-		concept_name     = queryRow.get(prefix + "concept_name").replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-		domain_id        = queryRow.get(prefix + "domain_id").trim();
-		vocabulary_id    = queryRow.get(prefix + "vocabulary_id").trim();
-		concept_class_id = queryRow.get(prefix + "concept_class_id").trim();
-		standard_concept = queryRow.get(prefix + "standard_concept").trim();
-		concept_code     = queryRow.get(prefix + "concept_code").trim().toUpperCase();
-		valid_start_date = queryRow.get(prefix + "valid_start_date").trim();
-		valid_end_date   = queryRow.get(prefix + "valid_end_date").trim();
-		invalid_reason   = queryRow.get(prefix + "invalid_reason").trim();
+		concept_id       = queryRow.get(prefix + "concept_id", true).trim();
+		concept_name     = queryRow.get(prefix + "concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+		domain_id        = queryRow.get(prefix + "domain_id", true).trim();
+		vocabulary_id    = queryRow.get(prefix + "vocabulary_id", true).trim();
+		concept_class_id = queryRow.get(prefix + "concept_class_id", true).trim();
+		standard_concept = queryRow.get(prefix + "standard_concept", true).trim();
+		concept_code     = queryRow.get(prefix + "concept_code", true).trim().toUpperCase();
+		valid_start_date = queryRow.get(prefix + "valid_start_date", true).trim();
+		valid_end_date   = queryRow.get(prefix + "valid_end_date", true).trim();
+		invalid_reason   = queryRow.get(prefix + "invalid_reason", true).trim();
 		
 		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
 		

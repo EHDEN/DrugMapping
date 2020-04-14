@@ -62,7 +62,7 @@ public class SourceDrug {
 	}
 	
 	
-	public static SourceIngredient getIngredient(String ingredientName, String ingredientNameEnglish, String casNumber) {
+	public static SourceIngredient getIngredient(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber) {
 		error = false;
 		SourceIngredient sourceIngredient = null;
 
@@ -94,7 +94,7 @@ public class SourceDrug {
 						System.out.println("    CASNumber conflict: '" + casNumber + "' <-> " + sourceIngredient);
 						error = true;
 						*/
-						sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+						sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 						sourceIngredients.add(sourceIngredient);
 						ingredientCASNumberIndex.put(casNumber, sourceIngredient);
 					}
@@ -104,7 +104,7 @@ public class SourceDrug {
 				if (!casNumber.equals("")) {
 					sourceIngredient = ingredientCASNumberIndex.get(casNumber);
 					if (sourceIngredient == null) {
-						sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+						sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 						sourceIngredients.add(sourceIngredient);
 						ingredientCASNumberIndex.put(casNumber, sourceIngredient);
 					}
@@ -117,7 +117,7 @@ public class SourceDrug {
 						}
 					}
 					if (sourceIngredient == null) {
-						sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+						sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 						sourceIngredients.add(sourceIngredient);
 						ingredientCASNumberIndex.put(casNumber, sourceIngredient);
 					}
@@ -127,7 +127,7 @@ public class SourceDrug {
 		else {
 			sourceIngredients = new ArrayList<SourceIngredient>();
 			ingredientNameIndex.put(ingredientNameNoSpaces, sourceIngredients);
-			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 			sourceIngredients.add(sourceIngredient);
 			ingredientCASNumberIndex.put(casNumber, sourceIngredient);
 		}
@@ -217,12 +217,12 @@ public class SourceDrug {
 	}
 	
 	
-	public SourceIngredient AddIngredientByCASnumber(String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
+	public SourceIngredient AddIngredientByCASnumber(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
 		SourceIngredient sourceIngredient = null;
 		
 		sourceIngredient = SourceDrug.findIngredient(casNumber);
 		if (sourceIngredient == null) {
-			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 			allIngredients.add(sourceIngredient);
 			if ((casNumber != null) && (!casNumber.equals(""))) {
 				ingredientCASNumberIndex.put(casNumber, sourceIngredient);
@@ -234,7 +234,7 @@ public class SourceDrug {
 	}
 	
 	
-	public SourceIngredient AddIngredient(String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
+	public SourceIngredient AddIngredient(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
 		SourceIngredient sourceIngredient = null;
 
 		for (SourceIngredient ingredient : allIngredients) {
@@ -244,7 +244,7 @@ public class SourceDrug {
 			}
 		}
 		if (sourceIngredient == null) {
-			sourceIngredient = new SourceIngredient(ingredientName, ingredientNameEnglish, casNumber);
+			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 			allIngredients.add(sourceIngredient);
 			if (!ingredientName.equals("")) {
 				List<SourceIngredient> sourceIngredients = ingredientNameIndex.get(sourceIngredient.getIngredientNameNoSpaces());

@@ -88,8 +88,10 @@ public class MainFrame {
 	public void checkReadyToStart() {
 		if (startButton != null) {
 			boolean readyToStart = true;
-			for (Setting setting : DrugMapping.settings.getSettings()) {
-				readyToStart = readyToStart && setting.isSetCorrectly();
+			if (DrugMapping.settings != null) {
+				for (Setting setting : DrugMapping.settings.getSettings()) {
+					readyToStart = readyToStart && setting.isSetCorrectly();
+				}
 			}
 			startButton.setEnabled(readyToStart);
 		}
@@ -288,8 +290,10 @@ public class MainFrame {
 
 	
 	public void initialize() {
-		for (Setting setting : DrugMapping.settings.getSettings()) {
-			setting.initialize();
+		if (DrugMapping.settings != null) {
+			for (Setting setting : DrugMapping.settings.getSettings()) {
+				setting.initialize();
+			}
 		}
 	}
 
@@ -355,12 +359,14 @@ public class MainFrame {
 	
 	private void saveGeneralSettingsFile() {
 		if (database != null) {
-			List<String> settings = DrugMapping.settings.getSettingsSave();
-			if (settings != null) {
-				saveSettingsToFile(settings);
-			}
-			else {
-				JOptionPane.showMessageDialog(frame, "No general settings to save!", "Error", JOptionPane.ERROR_MESSAGE);
+			if (DrugMapping.settings != null) {
+				List<String> settings = DrugMapping.settings.getSettingsSave();
+				if (settings != null) {
+					saveSettingsToFile(settings);
+				}
+				else {
+					JOptionPane.showMessageDialog(frame, "No general settings to save!", "Error", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		}
 	}

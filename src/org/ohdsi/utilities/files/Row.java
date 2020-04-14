@@ -41,14 +41,17 @@ public class Row {
 		fieldName2ColumnIndex = new HashMap<String, Integer>(row.fieldName2ColumnIndex);
 	}
 	
-	public String get(String fieldName) {
-		int index;
+	public String get(String fieldName, boolean required) {
+		Integer index;
 		try {
 			index = fieldName2ColumnIndex.get(fieldName);
 		} catch (NullPointerException e) {
-			throw new RuntimeException("Field \"" + fieldName + "\" not found");
+			index = null;
+			if (required) {
+				throw new RuntimeException("Field \"" + fieldName + "\" not found");
+			}
 		}
-		if (cells.size() <= index)
+		if ((index == null) || (cells.size() <= index))
 			return null;
 		else
 			return cells.get(index);
@@ -64,15 +67,15 @@ public class Row {
 	}
 	
 	public int getInt(String fieldName) {
-		return Integer.parseInt(get(fieldName).trim());
+		return Integer.parseInt(get(fieldName, true).trim());
 	}
 	
 	public long getLong(String fieldName) {
-		return Long.parseLong(get(fieldName));
+		return Long.parseLong(get(fieldName, true));
 	}
 	
 	public double getDouble(String fieldName) {
-		return Double.parseDouble(get(fieldName));
+		return Double.parseDouble(get(fieldName, true));
 	}
 	
 	public void add(String fieldName, String value) {

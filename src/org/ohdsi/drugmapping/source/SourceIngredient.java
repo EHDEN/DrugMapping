@@ -12,6 +12,7 @@ import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 
 public class SourceIngredient {
 	
+	private String ingredientCode = null;
 	private String ingredientName = null;
 	private String ingredientNameNoSpaces = null;
 	private String ingredientNameEnglish = null;
@@ -25,7 +26,8 @@ public class SourceIngredient {
 	
 	
 	public static String getHeader() {
-		String header = "IngredientName";
+		String header = "IngredientCode";
+		header += "," + "IngredientName";
 		header += "," + "IngredientNameEnglish";
 		header += "," + "CASNumber";
 		return header;
@@ -33,7 +35,8 @@ public class SourceIngredient {
 	
 	
 	public static String getMatchHeader() {
-		String header = "IngredientName";
+		String header = "IngredientCode";
+		header += "," + "IngredientName";
 		header += "," + "IngredientNameEnglish";
 		header += "," + "CASNumber";
 		header += "," + "MatchString";
@@ -46,7 +49,10 @@ public class SourceIngredient {
 	}
 	
 	
-	public SourceIngredient(String ingredientName, String ingredientNameEnglish, String casNumber) {
+	public SourceIngredient(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber) {
+		if (ingredientCode != null) {
+			ingredientCode = ingredientCode.trim();
+		}
 		ingredientName = ingredientName.trim();
 		while (ingredientName.contains("  ")) {
 			ingredientName = ingredientName.replaceAll("  ", " ");
@@ -56,7 +62,8 @@ public class SourceIngredient {
 		while (ingredientNameEnglish.contains("  ")) {
 			ingredientNameEnglish = ingredientNameEnglish.replaceAll("  ", " ");
 		}
-		
+
+		this.ingredientCode = ((ingredientCode == null) || ingredientCode.equals("")) ? null : ingredientCode;
 		this.ingredientName = ingredientName.equals("") ? null : ingredientName;
 		this.ingredientNameEnglish = ingredientNameEnglish.equals("") ? null : ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
@@ -221,7 +228,8 @@ public class SourceIngredient {
 	
 	
 	public String toString() {
-		String description = (ingredientName == null ? "" : "\"" + ingredientName + "\"");
+		String description = (ingredientCode == null ? "" : "\"" + ingredientCode + "\"");
+		description += "," + (ingredientName == null ? "" : "\"" + ingredientName + "\"");
 		description += "," + (ingredientNameEnglish == null ? "" : "\"" + ingredientNameEnglish + "\"");
 		description += "," + (casNumber == null ? "" : "\"" + casNumber + "\"");
 		return description;
@@ -229,7 +237,8 @@ public class SourceIngredient {
 	
 	
 	public String toMatchString() {
-		String description = (ingredientName == null ? "" : "\"" + ingredientName + "\"");
+		String description = (ingredientCode == null ? "" : "\"" + ingredientCode + "\"");
+		description += "," + (ingredientName == null ? "" : "\"" + ingredientName + "\"");
 		description += "," + (ingredientNameEnglish == null ? "" : "\"" + ingredientNameEnglish + "\"");
 		description += "," + (casNumber == null ? "" : "\"" + casNumber + "\"");
 		description += "," + "\"" + matchString + "\"";

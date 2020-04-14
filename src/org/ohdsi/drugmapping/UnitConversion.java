@@ -60,8 +60,8 @@ public class UnitConversion {
 		// Get CDM Forms
 		for (Row queryRow : connection.queryResource("cdm/GetCDMUnits.sql", queryParameters)) {
 			
-			String concept_id   = queryRow.get("concept_id").trim();
-			String concept_name = queryRow.get("concept_name").trim();
+			String concept_id   = queryRow.get("concept_id", true).trim();
+			String concept_name = queryRow.get("concept_name", true).trim();
 			
 			cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
 			cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
@@ -103,7 +103,6 @@ public class UnitConversion {
 
 		boolean newSourceUnits = false;
 		boolean newCDMUnits = false;
-		boolean lostCDMUnits = false;
 		boolean conceptNamesRead = false;
 		Set<String> oldSourceUnits = new HashSet<String>();
 		Set<String> oldCDMUnits = new HashSet<String>();
@@ -121,10 +120,10 @@ public class UnitConversion {
 					
 					if (!conceptNamesRead) {
 						conceptNamesRead = true;
-						unitMapDate = row.get("Local unit").replace('/', '-');
+						unitMapDate = row.get("Local unit", true).replace('/', '-');
 					}
 					else {
-						String sourceUnit = row.get("Local unit");
+						String sourceUnit = row.get("Local unit", true);
 						oldSourceUnits.add(sourceUnit);
 
 						String mappingLine = "        " + sourceUnit;
@@ -144,7 +143,7 @@ public class UnitConversion {
 							if (!concept_id.equals("Local unit")) {
 								oldCDMUnits.add(concept_id);
 								if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
-									String factorString = row.get(concept_id).trim();
+									String factorString = row.get(concept_id, true).trim();
 									if (!factorString.equals("")) {
 										try {
 											double factor = Double.parseDouble(factorString);
@@ -159,7 +158,6 @@ public class UnitConversion {
 								}
 								else {
 									System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-									lostCDMUnits = true;
 								}
 							}
 						}

@@ -81,7 +81,7 @@ public class MultiRowIterator implements Iterator<MultiRowSet> {
 		buffer.linkingId = lowestLinkingColumn;
 		for (int i = 0; i < iterators.length; i++) {
 			Iterator<Row> iterator = iterators[i];
-			while (nextRows[i] != null && nextRows[i].get(linkingColumn).equals(lowestLinkingColumn)) {
+			while (nextRows[i] != null && nextRows[i].get(linkingColumn, true).equals(lowestLinkingColumn)) {
 				buffer.get(tableNames[i]).add(nextRows[i]);
 				if (iterator.hasNext())
 					nextRows[i] = iterator.next();
@@ -94,8 +94,8 @@ public class MultiRowIterator implements Iterator<MultiRowSet> {
 	private String findLowestLinkingColumn(Row[] rows) {
 		String linkingId = null;
 		for (Row row : rows)
-			if (row != null && (linkingId == null || compare(row.get(linkingColumn), linkingId) < 0))
-				linkingId = row.get(linkingColumn);
+			if (row != null && (linkingId == null || compare(row.get(linkingColumn, true), linkingId) < 0))
+				linkingId = row.get(linkingColumn, true);
 		return linkingId;
 	}
 

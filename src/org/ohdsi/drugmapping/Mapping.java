@@ -19,8 +19,8 @@ public class Mapping {
 			if (replacementsFile.openFile()) {
 				while (replacementsFile.hasNext()) {
 					Row row = replacementsFile.next();
-					String replace = replacementsFile.get(row, "Replace").toUpperCase();
-					String by = replacementsFile.get(row, "By").toUpperCase();
+					String replace = replacementsFile.get(row, "Replace", true).toUpperCase();
+					String by = replacementsFile.get(row, "By", true).toUpperCase();
 					
 					System.out.println("    Replace \"" + replace + "\" by \"" + by);
 					replacements.put(replace, by);

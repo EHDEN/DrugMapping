@@ -20,9 +20,9 @@ public class MapATC extends Mapping {
 		if (atcFile.openFile()) {
 			while (atcFile.hasNext()) {
 				Row row = atcFile.next();
-				String atc = atcFile.get(row, "ATC");
-				String atcText = atcFile.get(row, "ATCText");
-				String atcTextEnglish = atcFile.get(row, "ATCTextEnglish");
+				String atc = atcFile.get(row, "ATC", true);
+				String atcText = atcFile.get(row, "ATCText", true);
+				String atcTextEnglish = atcFile.get(row, "ATCTextEnglish", true);
 				//String atcTextEnglishUpperCase = atcTextEnglish.toUpperCase().replaceAll("'", "''");
 				
 				System.out.println("    " + atc + "," + atcText + "," + atcTextEnglish);
@@ -52,12 +52,12 @@ public class MapATC extends Mapping {
 								break;
 							}
 							mappedRecord = new HashMap<String, String>(); 
-							mappedRecord.put("concept_id"      , queryRow.get("concept_id"));
-							mappedRecord.put("concept_name"    , queryRow.get("concept_name"));
-							mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id"));
-							mappedRecord.put("concept_class_id", queryRow.get("concept_class_id"));
-							mappedRecord.put("standard_concept", queryRow.get("standard_concept"));
-							mappedRecord.put("concept_code"    , queryRow.get("concept_code"));
+							mappedRecord.put("concept_id"      , queryRow.get("concept_id", true));
+							mappedRecord.put("concept_name"    , queryRow.get("concept_name", true));
+							mappedRecord.put("vocabulary_id"   , queryRow.get("vocabulary_id", true));
+							mappedRecord.put("concept_class_id", queryRow.get("concept_class_id", true));
+							mappedRecord.put("standard_concept", queryRow.get("standard_concept", true));
+							mappedRecord.put("concept_code"    , queryRow.get("concept_code", true));
 							mappedRecord.put("match"           , atc);
 						}
 					}
