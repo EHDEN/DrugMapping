@@ -26,6 +26,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -58,6 +59,7 @@ public class InputFile extends JPanel {
 	private String labelText;
 	
 	private JPanel fileLabelPanel;
+	private JCheckBox fileSelectCheckBox;
 	private JLabel fileLabel;
 	private JTextField fileNameField;
 	private JButton fileSelectButton;
@@ -80,6 +82,11 @@ public class InputFile extends JPanel {
 		}
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		
+		fileSelectCheckBox = new JCheckBox();
+		fileSelectCheckBox.setSelected(true);
+		fileSelectCheckBox.setEnabled(!fileDefinition.isRequired());
+		
 		fileLabelPanel = new JPanel(new BorderLayout());
 		fileLabelPanel.setMinimumSize(new Dimension(200, fileLabelPanel.getHeight()));
 		fileLabelPanel.setPreferredSize(new Dimension(200, fileLabelPanel.getHeight()));
@@ -93,6 +100,7 @@ public class InputFile extends JPanel {
 
 		fileSelectButton = new JButton("Select");
 
+		add(fileSelectCheckBox);
 		add(fileLabelPanel);
 		add(fileNameField);
 		add(new JLabel("  "));
@@ -178,6 +186,11 @@ public class InputFile extends JPanel {
 	
 	public void setColumnMapping(Map<String, String> columnMapping) {
 		this.columnMapping = columnMapping;
+	}
+	
+	
+	public boolean isSelected() {
+		return fileSelectCheckBox.isSelected();
 	}
 	
 	

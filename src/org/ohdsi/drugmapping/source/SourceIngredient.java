@@ -156,6 +156,11 @@ public class SourceIngredient {
 	}
 	
 	
+	public String getIngredientCode() {
+		return ingredientCode;
+	}
+	
+	
 	public String getIngredientName() {
 		return ingredientName;
 	}

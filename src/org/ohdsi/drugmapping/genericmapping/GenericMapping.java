@@ -155,7 +155,7 @@ public class GenericMapping extends Mapping {
 	private Map<SourceDrug, CDMDrug> manualMappings = new HashMap<SourceDrug, CDMDrug>();
 	private UnitConversion unitConversionsMap = null;
 	private FormConversion formConversionsMap = null;
-	private Map<String, List<String>> casMap = new HashMap<String, List<String>>();
+	private Map<String, List<String>> externalCASSynonymsMap = null;
 	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
 	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
 	private List<SourceDrug> sourceDrugsAllIngredientsMapped = new ArrayList<SourceDrug>();
@@ -168,6 +168,7 @@ public class GenericMapping extends Mapping {
 	private Map<String, Set<CDMIngredient>> cdmATCIngredientMap = new HashMap<String, Set<CDMIngredient>>();
 	private Map<SourceIngredient, CDMIngredient> ingredientMap = new HashMap<SourceIngredient, CDMIngredient>();
 	private Map<String, Set<CDMIngredient>> mapsToCDMIngredient = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, CDMIngredient> cdmCASIngredientMap = new HashMap<String, CDMIngredient>();
 	private Map<String, Set<String>> drugNameSynonyms = new HashMap<String, Set<String>>();
 	private Map<String, CDMDrug> cdmDrugs = new HashMap<String, CDMDrug>();
 	private Map<CDMIngredient, List<CDMDrug>> cdmDrugsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
@@ -925,6 +926,26 @@ public class GenericMapping extends Mapping {
 		report.add("Found " + atcCount + " CDM Ingredients with ATC (" + Long.toString(Math.round(((double) atcCount / (double) cdmIngredients.size()) * 100)) + "%)");
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
+		
+		// Get CAS code to CDM RxNorm (Extension) Ingredient mapping
+		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM CAS number to Ingredient mapping ...");
+		
+		int casCount = 0;
+		for (Row queryRow : connection.queryResource("../cdm/GetCASMapsToRxNormIngredients.sql", queryParameters)) {
+			String cdmCASNr = uniformCASNumber(queryRow.get("casnr", true));
+			String cdmIngredientConceptId = queryRow.get("concept_id", true);
+			
+			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
+			if (cdmIngredient != null) {
+				cdmCASIngredientMap.put(cdmCASNr, cdmIngredient);
+				casCount++;
+			}
+		}
+		
+		report.add("Found " + atcCount + " CDM Ingredients with CAS nr (" + Long.toString(Math.round(((double) casCount / (double) cdmIngredients.size()) * 100)) + "%)");
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		
+		
 		// Close database connection
 		connection.close();
 		
@@ -987,71 +1008,78 @@ public class GenericMapping extends Mapping {
 	private boolean getCASNames(InputFile casFile) {
 		boolean ok = true;
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading CAS names ...");
-		
-		if (casFile.fileExists()) {
-			if (casFile.openFile()) {
-				while (casFile.hasNext()) {
-					Row row = casFile.next();
-					
-					String casNumber = casFile.get(row, "CASNumber", true).trim();
-					String chemicalName = casFile.get(row, "ChemicalName", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
-					String synonyms = casFile.get(row, "Synonyms", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
-					String[] synonymSplit = synonyms.split("[|]");
-					
-					if (!casNumber.equals("")) {
-						casNumber = uniformCASNumber(casNumber);
-						List<String> casNames = new ArrayList<String>();
+		if ((casFile != null) && casFile.isSelected()) {
+			externalCASSynonymsMap = new HashMap<String, List<String>>();
+			
+			System.out.println(DrugMapping.getCurrentTime() + "     Loading CAS names ...");
+			
+			if (casFile.fileExists()) {
+				if (casFile.openFile()) {
+					while (casFile.hasNext()) {
+						Row row = casFile.next();
 						
-						casNames.add(chemicalName);
+						String casNumber = casFile.get(row, "CASNumber", true).trim();
+						String chemicalName = casFile.get(row, "ChemicalName", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
+						String synonyms = casFile.get(row, "Synonyms", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
+						String[] synonymSplit = synonyms.split("[|]");
+						
+						if (!casNumber.equals("")) {
+							casNumber = uniformCASNumber(casNumber);
+							List<String> casNames = new ArrayList<String>();
+							
+							casNames.add(chemicalName);
 
-						for (String synonym : synonymSplit) {
-							if (!casNames.contains(synonym)) {
-								casNames.add(synonym);
+							for (String synonym : synonymSplit) {
+								if (!casNames.contains(synonym)) {
+									casNames.add(synonym);
+								}
 							}
-						}
-						
-						String modifiedName = modifyName(chemicalName);
-						if (!casNames.contains(modifiedName)) {
-							casNames.add(modifiedName);
-						}
-
-						for (String synonym : synonymSplit) {
-							modifiedName = modifyName(synonym);
+							
+							String modifiedName = modifyName(chemicalName);
 							if (!casNames.contains(modifiedName)) {
 								casNames.add(modifiedName);
 							}
-						}
-						
-						/*
-						for (String synonym : synonymSplit) {
-							String synonymNoSpaces = synonym.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-							if (!synonymNoSpaces.equals("")) {
-								//casNames.add(synonymNoSpaces);
-								casNames.add(synonym);
-								casNames.add(modifyName(synonym));
+
+							for (String synonym : synonymSplit) {
+								modifiedName = modifyName(synonym);
+								if (!casNames.contains(modifiedName)) {
+									casNames.add(modifiedName);
+								}
 							}
+							
+							/*
+							for (String synonym : synonymSplit) {
+								String synonymNoSpaces = synonym.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+								if (!synonymNoSpaces.equals("")) {
+									//casNames.add(synonymNoSpaces);
+									casNames.add(synonym);
+									casNames.add(modifyName(synonym));
+								}
+							}
+							
+							String chemicalNameNoSpaces = chemicalName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", ""); 
+							if (!chemicalNameNoSpaces.equals("")) {
+								casNames.add(chemicalNameNoSpaces);
+								casNames.add(modifyName(chemicalName));
+							}
+							*/
+							externalCASSynonymsMap.put(casNumber, casNames);
 						}
-						
-						String chemicalNameNoSpaces = chemicalName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", ""); 
-						if (!chemicalNameNoSpaces.equals("")) {
-							casNames.add(chemicalNameNoSpaces);
-							casNames.add(modifyName(chemicalName));
-						}
-						*/
-						casMap.put(casNumber, casNames);
 					}
+				}
+				else {
+					ok = false;
 				}
 			}
 			else {
-				ok = false;
+				System.out.println("         No CAS File found.");
 			}
+			
+			System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		}
 		else {
-			System.out.println("         No CAS File found.");
+			System.out.println(DrugMapping.getCurrentTime() + "     No CAS file used.");
 		}
-		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
 		return ok;
 	}
@@ -1165,41 +1193,114 @@ public class GenericMapping extends Mapping {
 	
 	
 	private Integer matchIngredientsByCASNumber() {
-		Integer matchedByCASName = 0;
+		Integer matchedByCDMCASName = 0;
+		Integer matchedByExternalCASName = 0;
 		Integer multipleMappings = 0;
-		
-		System.out.println(DrugMapping.getCurrentTime() + "     Match ingredients by CAS number ...");
-		
-		for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
-			if (sourceIngredient.getMatchingIngredient() == null) {
 
-				boolean matchFound = false;
-				boolean multipleMapping = false;
-				
-				for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
-					Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
-					String casNumber = sourceIngredient.getCASNumber();
-					if (casNumber != null) {
-						
-						List<String> casNames = casMap.get(casNumber);
-						if (casNames != null) {
+		if (cdmCASIngredientMap.size() > 0) {
+			System.out.println(DrugMapping.getCurrentTime() + "     Match ingredients by CDM CAS number ...");
+			
+			for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+				if (sourceIngredient.getMatchingIngredient() == null) {
+					
+					String casNr = sourceIngredient.getCASNumber();
+					if (casNr != null) {
+						CDMIngredient cdmIngredient = cdmCASIngredientMap.get(casNr);
+						if (cdmIngredient != null) {
+							ingredientMap.put(sourceIngredient, cdmIngredient);
+							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+							sourceIngredient.setMatchString("CDM CAS");
+							matchedByCDMCASName++;
+						}
+					}
+				}
+			}
+			
+			String header = "IngredientCode";
+			header += "," + "IngredientName";
+			header += "," + "concept_id";
+			header += "," + "concept_name";
+			PrintWriter casIngredientMappingFile = openOutputFile("IngredientMapping by CAS.csv", header);
+			if (casIngredientMappingFile != null) {
+				List<SourceIngredient> sourceIngredients = new ArrayList<SourceIngredient>();
+				for (SourceDrug sourceDrug : sourceDrugs) {
+					for (SourceIngredient sourceIngredient: sourceDrug.getIngredients()) {
+						if (!sourceIngredients.contains(sourceIngredient)) {
+							sourceIngredients.add(sourceIngredient);
+						}
+					}
+				}
+				Collections.sort(sourceIngredients, new Comparator<SourceIngredient>() {
+
+					@Override
+					public int compare(SourceIngredient sourceingredient1, SourceIngredient sourceingredient2) {
+						return sourceingredient1.getIngredientName().compareTo(sourceingredient2.getIngredientName());
+					}
+				});
+				for (SourceIngredient sourceIngredient : sourceIngredients) {
+					String record = "\"" + sourceIngredient.getIngredientCode() + "\"";
+					record += "," + "\"" + sourceIngredient.getIngredientName() + "\"";
+					String concept_id = sourceIngredient.getMatchingIngredient();
+					if (concept_id != null) {
+						CDMIngredient cdmIngredient = cdmIngredients.get(concept_id);
+						record += "," + "\"" + concept_id + "\"";
+						record += "," + "\"" + (cdmIngredient == null ? "" : cdmIngredient.getConceptName()) + "\"";
+					}
+					else {
+						record += ",";
+						record += ",";
+					}
+					casIngredientMappingFile.println(record);
+				}
+				casIngredientMappingFile.close();
+			}
+
+			report.add("Source ingredients mapped by CDM CAS number: " + matchedByCDMCASName + " (" + Long.toString(Math.round(((double) matchedByCDMCASName / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
+			System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		}
+		else {
+			System.out.println(DrugMapping.getCurrentTime() + "     No CDM CAS mapping found.");
+		}
+		
+		
+		if (externalCASSynonymsMap != null) {
+			System.out.println(DrugMapping.getCurrentTime() + "     Match ingredients by external CAS number ...");
+			
+			for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+				if (sourceIngredient.getMatchingIngredient() == null) {
+
+					boolean matchFound = false;
+					boolean multipleMapping = false;
+					
+					for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
+						Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
+						String casNumber = sourceIngredient.getCASNumber();
+						if (casNumber != null) {
 							
-							for (String casName : casNames) {
+							List<String> casNames = externalCASSynonymsMap.get(casNumber);
+							if (casNames != null) {
 								
-								Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(casName);
-								if (matchedCDMIngredients != null) {
-									if (matchedCDMIngredients.size() == 1) {
-										CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
-										ingredientMap.put(sourceIngredient, cdmIngredient);
-										sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
-										sourceIngredient.setMatchString("CAS: " + ingredientNameIndexName + " " + casName);
-										matchFound = true;
-										matchedByCASName++;
-										break;
+								for (String casName : casNames) {
+									
+									Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(casName);
+									if (matchedCDMIngredients != null) {
+										if (matchedCDMIngredients.size() == 1) {
+											CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
+											ingredientMap.put(sourceIngredient, cdmIngredient);
+											sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
+											sourceIngredient.setMatchString("External CAS: " + ingredientNameIndexName + " " + casName);
+											matchFound = true;
+											matchedByExternalCASName++;
+											break;
+										}
+										else {
+											multipleMapping = true;
+											multipleMappings++;
+										}
 									}
-									else {
-										multipleMapping = true;
-										multipleMappings++;
+									
+									if (matchFound || multipleMapping) {
+										break;
 									}
 								}
 								
@@ -1207,46 +1308,42 @@ public class GenericMapping extends Mapping {
 									break;
 								}
 							}
-							
-							if (matchFound || multipleMapping) {
-								break;
+						}
+					}
+					
+					/*
+					String casNumber = sourceIngredient.getCASNumber();
+					if (casNumber != null) {
+						List<String> casNames = casMap.get(casNumber);
+						if (casNames != null) {
+							Set<CDMIngredient>matchedCDMIngredients = new HashSet<CDMIngredient>();
+							String matchingCASname = null;
+							for (String casName : casNames) {
+								Set<CDMIngredient> casNameIngredients = cdmIngredientNameIndex.get(casName);
+								if (casNameIngredients != null) {
+									matchedCDMIngredients.addAll(casNameIngredients);
+									matchingCASname = casName;
+								}
+							}
+							if (matchedCDMIngredients.size() == 1) {
+								CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
+								ingredientMap.put(sourceIngredient, cdmIngredient);
+								sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+								sourceIngredient.setMatchString("CAS: " + matchingCASname);
+								matchedByCASName++;
+							}
+							else {
+								multipleMappings++;
 							}
 						}
 					}
+					*/
 				}
-				
-				/*
-				String casNumber = sourceIngredient.getCASNumber();
-				if (casNumber != null) {
-					List<String> casNames = casMap.get(casNumber);
-					if (casNames != null) {
-						Set<CDMIngredient>matchedCDMIngredients = new HashSet<CDMIngredient>();
-						String matchingCASname = null;
-						for (String casName : casNames) {
-							Set<CDMIngredient> casNameIngredients = cdmIngredientNameIndex.get(casName);
-							if (casNameIngredients != null) {
-								matchedCDMIngredients.addAll(casNameIngredients);
-								matchingCASname = casName;
-							}
-						}
-						if (matchedCDMIngredients.size() == 1) {
-							CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
-							ingredientMap.put(sourceIngredient, cdmIngredient);
-							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-							sourceIngredient.setMatchString("CAS: " + matchingCASname);
-							matchedByCASName++;
-						}
-						else {
-							multipleMappings++;
-						}
-					}
-				}
-				*/
 			}
-		}
 
-		report.add("Source ingredients mapped by CAS number: " + matchedByCASName + " (" + Long.toString(Math.round(((double) matchedByCASName / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+			report.add("Source ingredients mapped by external CAS number: " + matchedByExternalCASName + " (" + Long.toString(Math.round(((double) matchedByExternalCASName / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
+			System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		}
 		
 		return multipleMappings;
 	}

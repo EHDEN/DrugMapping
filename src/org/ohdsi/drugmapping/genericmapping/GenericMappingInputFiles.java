@@ -57,9 +57,9 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										new FileColumnDefinition(
 												"IngredientCode",
 												new String[] {
-														"This is the local code of the ingredient of the drug.",
-														"This column is optional."
-												}
+														"This is the local code of the ingredient of the drug."
+												},
+												false
 										),
 										new FileColumnDefinition(
 												"IngredientNameEnglish",
@@ -91,8 +91,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 						new FileDefinition(
 								"CAS File",
 								new String[] {
-										"This file should contain CAS numbers with their chemical name an synonyms.",
-										"This file is optional."
+										"This file should contain CAS numbers with their chemical name an synonyms."
 						  		},
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
@@ -113,7 +112,8 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"This is a list of synonyms for the chemicl name separated by a '|' character."
 												}
 										)
-								}
+								},
+								false
 						),
 						new FileDefinition(
 								"Manual Mappings File",
