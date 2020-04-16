@@ -110,12 +110,14 @@ public class MainFrame {
 		JMenuBar menuBar = createMenu();
 		frame.setJMenuBar(menuBar);
 
-		
-		// Database settings
-		JPanel databasePanel = new JPanel(new GridLayout(0, 1));
-		databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Database"));
-		database = new CDMDatabase();
-		databasePanel.add(database);
+		JPanel databasePanel = null;
+		if (!DrugMapping.special.equals("ZINDEX")) {
+			// Database settings
+			databasePanel = new JPanel(new GridLayout(0, 1));
+			databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Database"));
+			database = new CDMDatabase();
+			databasePanel.add(database);
+		}
 		
 		JPanel level1Frame = new JPanel(new BorderLayout());
 		level1Frame.setBorder(BorderFactory.createEmptyBorder());
@@ -166,7 +168,9 @@ public class MainFrame {
 	
 		
 		// Build frame
-		frame.add(databasePanel, BorderLayout.NORTH);
+		if (databasePanel != null) {
+			frame.add(databasePanel, BorderLayout.NORTH);
+		}
 		frame.add(level1Frame, BorderLayout.CENTER);
 		level1Frame.add(filePanel, BorderLayout.NORTH);
 		level1Frame.add(level2Frame, BorderLayout.CENTER);
@@ -204,27 +208,29 @@ public class MainFrame {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu file = new JMenu("File");
 		
-		JMenuItem loadDatabaseSettingsMenuItem = new JMenuItem("Load Database Settings");
-		loadDatabaseSettingsMenuItem.setToolTipText("Load Database Settings");
-		loadDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
+		if (!DrugMapping.special.equals("ZINDEX")) {
+			JMenuItem loadDatabaseSettingsMenuItem = new JMenuItem("Load Database Settings");
+			loadDatabaseSettingsMenuItem.setToolTipText("Load Database Settings");
+			loadDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				loadDatabaseSettingsFile();
-			}
-		});
-		file.add(loadDatabaseSettingsMenuItem);
-		
-		JMenuItem saveDatabaseSettingsMenuItem = new JMenuItem("Save Database Settings");
-		saveDatabaseSettingsMenuItem.setToolTipText("Save Database Settings");
-		saveDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					loadDatabaseSettingsFile();
+				}
+			});
+			file.add(loadDatabaseSettingsMenuItem);
+			
+			JMenuItem saveDatabaseSettingsMenuItem = new JMenuItem("Save Database Settings");
+			saveDatabaseSettingsMenuItem.setToolTipText("Save Database Settings");
+			saveDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				saveDatabaseSettingsFile();
-			}
-		});
-		file.add(saveDatabaseSettingsMenuItem);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					saveDatabaseSettingsFile();
+				}
+			});
+			file.add(saveDatabaseSettingsMenuItem);
+		}
 		
 		JMenuItem loadFileSettingsMenuItem = new JMenuItem("Load File Settings");
 		loadFileSettingsMenuItem.setToolTipText("Load File Settings");
@@ -247,28 +253,30 @@ public class MainFrame {
 			}
 		});
 		file.add(saveFileSettingsMenuItem);
-		
-		JMenuItem loadGeneralSettingsMenuItem = new JMenuItem("Load General Settings");
-		loadGeneralSettingsMenuItem.setToolTipText("Load General Settings");
-		loadGeneralSettingsMenuItem.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				loadGeneralSettingsFile();
-			}
-		});
-		file.add(loadGeneralSettingsMenuItem);
-		
-		JMenuItem saveGeneralSettingsMenuItem = new JMenuItem("Save General Settings");
-		saveGeneralSettingsMenuItem.setToolTipText("Save General Settings");
-		saveGeneralSettingsMenuItem.addActionListener(new ActionListener() {
+		if (!DrugMapping.special.equals("ZINDEX")) {
+			JMenuItem loadGeneralSettingsMenuItem = new JMenuItem("Load General Settings");
+			loadGeneralSettingsMenuItem.setToolTipText("Load General Settings");
+			loadGeneralSettingsMenuItem.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				saveGeneralSettingsFile();
-			}
-		});
-		file.add(saveGeneralSettingsMenuItem);
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					loadGeneralSettingsFile();
+				}
+			});
+			file.add(loadGeneralSettingsMenuItem);
+			
+			JMenuItem saveGeneralSettingsMenuItem = new JMenuItem("Save General Settings");
+			saveGeneralSettingsMenuItem.setToolTipText("Save General Settings");
+			saveGeneralSettingsMenuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					saveGeneralSettingsFile();
+				}
+			});
+			file.add(saveGeneralSettingsMenuItem);
+		}
 		
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setToolTipText("Exit application");

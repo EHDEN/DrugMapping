@@ -4,19 +4,36 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
-import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.utilities.files.Row;
 
 public class ZIndexConversion extends Mapping {
+	private static final boolean IGNORE_EMPTY_GPK_NAMES   = false;
+	private static final boolean IGNORE_STARRED_GPK_NAMES = false;
+	
 	private static final String DIGITS = "1234567890";
 	private static final String NUMBER_CHARS = "1234567890,.";
+	
+	private static final int GPK_ColumnCount      = 12;
+	private static final int GPK_GPKCode          =  0;
+	private static final int GPK_MemoCode         =  1;
+	private static final int GPK_LabelName        =  2;
+	private static final int GPK_ShortName        =  3;
+	private static final int GPK_FullName         =  4;
+	private static final int GPK_ATCCode          =  5;
+	private static final int GPK_GSKCode          =  6;
+	private static final int GPK_DDDPerHPKUnit    =  7;
+	private static final int GPK_PrescriptionDays =  8;
+	private static final int GPK_HPKMG            =  9;
+	private static final int GPK_HPKMGUnit        = 10;
+	private static final int GPK_PharmForm        = 11;
 
 	private static final int GSK_ColumnCount = 8;
 	private static final int GSK_GSKCode     = 0;
@@ -44,35 +61,58 @@ public class ZIndexConversion extends Mapping {
 	private static final int GPKIPCI_CasNr       = 7;
 	private static final int GPKIPCI_BaseName    = 8;
 	private static final int GPKIPCI_Formula     = 9;
+	
+	private static final int OUTPUT_ColumnCount           = 14;
+	private static final int OUTPUT_SourceCode            =  0;
+	private static final int OUTPUT_SourceName            =  1;
+	private static final int OUTPUT_SourceATCCode         =  2;
+	private static final int OUTPUT_SourceFormulation     =  3;
+	private static final int OUTPUT_SourceCount           =  4;
+	private static final int OUTPUT_IngredientNameStatus  =  5;
+	private static final int OUTPUT_IngredientCode        =  6;
+	private static final int OUTPUT_IngredientName        =  7;
+	private static final int OUTPUT_IngredientNameEnglish =  8;
+	private static final int OUTPUT_Dosage                =  9;
+	private static final int OUTPUT_DosageUnit            = 10;
+	private static final int OUTPUT_OrgDosage             = 11;
+	private static final int OUTPUT_OrgDosageUnit         = 12;
+	private static final int OUTPUT_CASNumber             = 13;
 
+	private boolean IPCIDerivation = false;
+	private List<Integer> gpkList = new ArrayList<Integer>();
+	private Map<Integer, String[]> gpkMap = new HashMap<Integer, String[]>();
 	private Map<Integer, List<String[]>> gskMap = new HashMap<Integer, List<String[]>>();
 	private Map<Integer, String[]> gnkMap = new HashMap<Integer, String[]>();
 	private Map<String, Integer> gnkNameMap = new HashMap<String, Integer>();
 	private Map<String, Integer> gpkStatisticsMap = new HashMap<String, Integer>();
 	private List<String> wordsToRemove = new ArrayList<String>();
+	private Map<String, String> ingredientNameTranslation = new HashMap<String, String>();
 	private Map<String, List<String[]>> gpkIPCIMap = new HashMap<String, List<String[]>>();
+	private Map<Integer, List<String[]>> outputMap = new HashMap<Integer, List<String[]>>();
 
 	
-	public ZIndexConversion(CDMDatabase database, InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile, InputFile gpkIPCIFile) {
+	public ZIndexConversion(InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile, InputFile ingredientNameTranslationFile, InputFile gpkIPCIFile) {
 		
 		boolean ok = true;
 
 		System.out.println(DrugMapping.getCurrentTime() + " Converting ZIndex Files ...");
 		
+		
+		// Load GSK file
 		if (ok && gskFile.openFile()) {
 			System.out.println("  Loading ZIndex GSK File ...");
 			while (gskFile.hasNext()) {
 				Row row = gskFile.next();
 
 				String[] record = new String[GSK_ColumnCount];
-				record[GSK_GSKCode]       = gskFile.get(row, "GSKCode", true);
-				record[GSK_PartNumber]    = gskFile.get(row, "PartNumber", true);
-				record[GSK_Type]          = gskFile.get(row, "Type", true);
-				record[GSK_Amount]        = gskFile.get(row, "Amount", true);
-				record[GSK_AmountUnit]    = gskFile.get(row, "AmountUnit", true);
-				record[GSK_GNKCode]       = gskFile.get(row, "GNKCode", true);
-				record[GSK_GenericName]   = gskFile.get(row, "GenericName", true);
-				record[GSK_CASNumber]     = gskFile.get(row, "CASNumber", true);
+				record[GSK_GSKCode]       = gskFile.get(row, "GSKCode", true).trim();
+				record[GSK_PartNumber]    = gskFile.get(row, "PartNumber", true).trim();
+				record[GSK_Type]          = gskFile.get(row, "Type", true).trim();
+				record[GSK_Amount]        = gskFile.get(row, "Amount", true).trim();
+				record[GSK_AmountUnit]    = gskFile.get(row, "AmountUnit", true).trim();
+				record[GSK_GNKCode]       = gskFile.get(row, "GNKCode", true).trim();
+				record[GSK_GenericName]   = gskFile.get(row, "GenericName", true).trim();
+				record[GSK_CASNumber]     = gskFile.get(row, "CASNumber", true).trim();
 
 				record[GSK_CASNumber] = GenericMapping.uniformCASNumber(record[GSK_CASNumber]);
 
@@ -91,16 +131,17 @@ public class ZIndexConversion extends Mapping {
 			ok = false;
 		}
 		
-
+	
+		// Load GNK file
 		if (ok && gnkFile.openFile()) {
 			System.out.println("  Loading ZIndex GNK File ...");
 			while (gnkFile.hasNext()) {
 				Row row = gnkFile.next();
 
 				String[] record = new String[GNK_ColumnCount];
-				record[GNK_GNKCode]     = gnkFile.get(row, "GNKCode", true);
-				record[GNK_Description] = gnkFile.get(row, "Description", true);
-				record[GNK_CASCode]     = gnkFile.get(row, "CASCode", true);
+				record[GNK_GNKCode]     = gnkFile.get(row, "GNKCode", true).trim();
+				record[GNK_Description] = gnkFile.get(row, "Description", true).trim();
+				record[GNK_CASCode]     = gnkFile.get(row, "CASCode", true).trim();
 
 				record[GNK_CASCode] = GenericMapping.uniformCASNumber(record[GNK_CASCode]);
 
@@ -112,6 +153,11 @@ public class ZIndexConversion extends Mapping {
 				else {
 					System.out.println("  ERROR: Duplicate GNK name '" + record[GNK_Description] + "' (" + gnkNameMap.get(record[GNK_Description]) + " <-> " + record[GNK_GNKCode] + ")");
 					ok = false;
+				}
+				
+				// Store ingredient name for translation
+				if (!record[GNK_Description].equals("")) {
+					ingredientNameTranslation.put(record[GNK_Description], null);
 				}
 			}
 			System.out.println("  Done");
@@ -146,7 +192,7 @@ public class ZIndexConversion extends Mapping {
 		}
 		
 
-		if (ok && wordsToRemoveFile.openFile()) {
+		if (ok && (wordsToRemoveFile != null) && wordsToRemoveFile.openFile(true)) {
 			System.out.println("  Loading ZIndex Words To Ignore File ...");
 			List<List<String>> wordsFoundToRemove = new ArrayList<List<String>>();
 			while (wordsToRemoveFile.hasNext()) {
@@ -235,6 +281,9 @@ public class ZIndexConversion extends Mapping {
 
 		if (ok && gpkIPCIFile.openFile()) {
 			System.out.println("  Loading ZIndex GPK IPCI Compositions File ...");
+			
+			IPCIDerivation = true;
+			
 			while (gpkIPCIFile.hasNext()) {
 				Row row = gpkIPCIFile.next();
 
@@ -256,89 +305,94 @@ public class ZIndexConversion extends Mapping {
 					gpkIPCIMap.put(record[GPKIPCI_GPKCode], gpkIPCIParts);
 				}
 				gpkIPCIParts.add(record);
+				
+				// Store ingredient name for translation
+				if (!record[GPKIPCI_GNKName].equals("")) {
+					ingredientNameTranslation.put(record[GPKIPCI_GNKName], null);
+				}
 			}
 			System.out.println("  Done");
 		}
 		
-
+		
+		// Load GPK file
 		if (ok && gpkFile.openFile()) {
-			System.out.println("  Creating ZIndex GPK Full File ...");
+			System.out.println("  Loading ZIndex GPK File ...");
+			while (gpkFile.hasNext()) {
+				Row row = gpkFile.next();
 
-			String gpkFullFileName = DrugMapping.getBasePath() + "/ZIndex - GPK Full.csv";
-			try {
-				PrintWriter gpkFullFile = new PrintWriter(new File(gpkFullFileName));
-				
-				String header = "SourceCode";
-				header += "," + "SourceName";
-				header += "," + "SourceATCCode";
-				header += "," + "SourceFormulation";
-				header += "," + "SourceCount";
+				String[] gpk = new String[GPK_ColumnCount];
+				gpk[GPK_GPKCode]          = gpkFile.get(row, "GPKCode", true).trim();
+				gpk[GPK_MemoCode]         = gpkFile.get(row, "MemoCode", true).trim();
+				gpk[GPK_LabelName]        = gpkFile.get(row, "LabelName", true).trim();
+				gpk[GPK_ShortName]        = gpkFile.get(row, "ShortName", true).trim();
+				gpk[GPK_FullName]         = gpkFile.get(row, "FullName", true).trim();
+				gpk[GPK_ATCCode]          = gpkFile.get(row, "ATCCode", true).trim();
+				gpk[GPK_GSKCode]          = gpkFile.get(row, "GSKCode", true).trim();
+				gpk[GPK_DDDPerHPKUnit]    = gpkFile.get(row, "DDDPerHPKUnit", true).trim();
+				gpk[GPK_PrescriptionDays] = gpkFile.get(row, "PrescriptionDays", true).trim();
+				gpk[GPK_HPKMG]            = gpkFile.get(row, "HPKMG", true).trim().toUpperCase();
+				gpk[GPK_HPKMGUnit]        = gpkFile.get(row, "HPKMGUnit", true).trim().toUpperCase();
+				gpk[GPK_PharmForm]        = gpkFile.get(row, "PharmForm", true).trim().toUpperCase().replaceAll("\"", "\"\"").replaceAll("\"", "\"\"");
 
-				header += "," + "IngredientNameStatus";
-				header += "," + "IngredientCode";
-				header += "," + "IngredientName";
-				header += "," + "IngredientNameEnglish";
-				header += "," + "Dosage";
-				header += "," + "DosageUnit";
-				header += "," + "OrgDosage";
-				header += "," + "OrgDosageUnit";
-				header += "," + "CASNumber";
+				String gpkCodeString = gpk[GPK_GPKCode];
+				String labelName = gpk[GPK_LabelName];
+				String shortName = gpk[GPK_ShortName];
+				String fullName = gpk[GPK_FullName];
+				String atcCode = gpk[GPK_ATCCode];
+				String gskCodeString = gpk[GPK_GSKCode];
+				String hpkAmount = gpk[GPK_HPKMG];
+				String hpkUnit = gpk[GPK_HPKMGUnit];
+				String pharmForm = gpk[GPK_PharmForm];
+
+				Integer gpkCode = Integer.valueOf(gpk[GPK_GPKCode]);
+				gpkList.add(gpkCode);
+				gpkMap.put(gpkCode, gpk);
 				
-				gpkFullFile.println(header);
+				String name = fullName;
+				if (name.equals("")) name = labelName;
+				if (name.equals("")) name = shortName;
+				Integer gskCode = gskCodeString.equals("") ? null : Integer.valueOf(gskCodeString);
 				
-				while (gpkFile.hasNext()) {
-					Row row = gpkFile.next();
-					String fullName = gpkFile.get(row, "FullName", true).trim().toUpperCase();
-					String labelName = gpkFile.get(row, "LabelName", true).trim().toUpperCase();
-					String shortName = gpkFile.get(row, "ShortName", true).trim().toUpperCase();
-					String name = fullName;
-					if (name.equals("")) name = labelName;
-					if (name.equals("")) name = shortName;
-					String gpkCode = gpkFile.get(row, "GPKCode", true);
+				List<String[]> gpkIPCIIngredients = gpkIPCIMap.get(gpkCodeString);
+				if (gpkIPCIIngredients != null) {
+					// Overruled by IPCI derivation
+					List<String[]> outputIngredients = new ArrayList<String[]>();
 					
-					List<String[]> gpkIPCIIngredients = gpkIPCIMap.get(gpkCode);
-					if (gpkIPCIIngredients != null) {
-						// Overruled by IPCI derivation
-						
-						String gpkRecord = gpkCode;
-						gpkRecord += "," + "\"" + name.replaceAll("\"", "\"\"") + "\"";
-						gpkRecord += "," + gpkFile.get(row, "ATCCode", true);
-						gpkRecord += "," + "\"" + gpkFile.get(row, "PharmForm", true).replaceAll("\"", "\"\"") + "\"";
-						gpkRecord += "," + (gpkStatisticsMap.containsKey(gpkCode) ? gpkStatisticsMap.get(gpkCode) : "0");
-						
-						for (String[] gpkIPCIIngredient : gpkIPCIIngredients) {
-							String gpkIngredientRecord = gpkRecord;
-							gpkIngredientRecord += "," + "ZIndexIPCI";
-							gpkIngredientRecord += "," + "\"" + gpkIPCIIngredient[GPKIPCI_GNKCode] + "\"";
-							gpkIngredientRecord += "," + "\"" + gpkIPCIIngredient[GPKIPCI_GNKName].replaceAll("\"", "\"\"") + "\"";
-							gpkIngredientRecord += ",";
-							gpkIngredientRecord += "," + "\"" + gpkIPCIIngredient[GPKIPCI_Amount] + "\"";
-							gpkIngredientRecord += "," + "\"" + gpkIPCIIngredient[GPKIPCI_AmountUnit] + "\"";
-							gpkIngredientRecord += ",";
-							gpkIngredientRecord += ",";
-							gpkIngredientRecord += "," + GenericMapping.uniformCASNumber(gpkIPCIIngredient[GPKIPCI_CasNr]);
+					for (String[] gpkIPCIIngredient : gpkIPCIIngredients) {
+						String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+						gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+						gpkIngredientRecord[OUTPUT_SourceName]            = name;
+						gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+						gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+						gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+						gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndexIPCI";
+						gpkIngredientRecord[OUTPUT_IngredientCode]        = gpkIPCIIngredient[GPKIPCI_GNKCode];
+						gpkIngredientRecord[OUTPUT_IngredientName]        = gpkIPCIIngredient[GPKIPCI_GNKName];
+						gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+						gpkIngredientRecord[OUTPUT_Dosage]                = gpkIPCIIngredient[GPKIPCI_Amount];
+						gpkIngredientRecord[OUTPUT_DosageUnit]            = gpkIPCIIngredient[GPKIPCI_AmountUnit];
+						gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+						gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+						gpkIngredientRecord[OUTPUT_CASNumber]             = GenericMapping.uniformCASNumber(gpkIPCIIngredient[GPKIPCI_CasNr]);
 
-							gpkFullFile.println(gpkIngredientRecord);
+						if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+							ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
 						}
+
+						outputIngredients.add(gpkIngredientRecord);
 					}
-					else {
-						String hpkAmount = gpkFile.get(row, "HPKMG", true).trim();
-						String hpkUnit = gpkFile.get(row, "HPKMGUnit", true).trim();
-						
+					
+					outputMap.put(gpkCode, outputIngredients);
+				}
+				else {
+					if (!IPCIDerivation) {
 						// Ignore empty names and names that start with a '*'
-						if ((!name.equals("")) && (!name.substring(0, 1).equals("*"))) {
-							
-							String gpkRecord = gpkCode;
-							gpkRecord += "," + "\"" + name.replaceAll("\"", "\"\"") + "\"";
-							gpkRecord += "," + gpkFile.get(row, "ATCCode", true);
-							gpkRecord += "," + "\"" + gpkFile.get(row, "PharmForm", true).replaceAll("\"", "\"\"") + "\"";
-							gpkRecord += "," + (gpkStatisticsMap.containsKey(gpkCode) ? gpkStatisticsMap.get(gpkCode) : "0");
+						if ((IGNORE_EMPTY_GPK_NAMES || (!name.equals(""))) && (IGNORE_STARRED_GPK_NAMES || (!name.substring(0, 1).equals("*")))) {
 							
 							List<String[]> gskList = null;
 							
-							if (!gpkFile.get(row, "GSKCode", true).equals("")) {
-								int gskCode = Integer.valueOf(gpkFile.get(row, "GSKCode", true));
-								
+							if (!gskCodeString.equals("")) {
 								gskList = gskMap.get(gskCode);
 								if (gskList != null) {
 									// Remove non-active ingredients
@@ -352,7 +406,7 @@ public class ZIndexConversion extends Mapping {
 
 									if (gskList.size() == 0) {
 										gskList = null;
-										System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gpkFile.get(row, "GSKCode", true) + ") found for GPK " + gpkFile.get(row, "GPKCode", true));
+										System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gskCodeString + ") found for GPK " + gpkCodeString);
 									}
 								}
 							}
@@ -416,6 +470,8 @@ public class ZIndexConversion extends Mapping {
 												ingredientAmountUnits.add(null);
 											}
 										}
+
+										List<String[]> outputIngredients = new ArrayList<String[]>();
 										for (int ingredientNr = 0; ingredientNr < shortNameSplit.length; ingredientNr++) {
 											String ingredientName = ingredientNames.get(ingredientNr);
 											
@@ -430,35 +486,60 @@ public class ZIndexConversion extends Mapping {
 												Integer gnkCode = gnkNameMap.get(ingredientName);
 												if (gnkCode != null) {
 													String[] gnkRecord = gnkMap.get(gnkCode);
-													String gpkGskRecord = gpkRecord;
-													gpkGskRecord += "," + "Mapped to GNK";
-													gpkGskRecord += "," + "\"" + gnkCode + "\"";
-													gpkGskRecord += "," + "\"" + ingredientName + "\"";
-													gpkGskRecord += ",";
-													gpkGskRecord += "," + "\"" + amount + "\"";
-													gpkGskRecord += "," + "\"" + amountUnit + "\"";
-													gpkGskRecord += ",";
-													gpkGskRecord += ",";
-													gpkGskRecord += "," + gnkRecord[GNK_CASCode];
-													gpkFullFile.println(gpkGskRecord);
+													
+													String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+													gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+													gpkIngredientRecord[OUTPUT_SourceName]            = name;
+													gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+													gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+													gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+													gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Mapped to GNK";
+													gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
+													gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+													gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+													gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+													gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+													gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+													gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+													gpkIngredientRecord[OUTPUT_CASNumber]             = gnkRecord[GNK_CASCode];
+
+													if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+														ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+													}
+
+													outputIngredients.add(gpkIngredientRecord);
 												}
 												else {
-													String gpkGskRecord = gpkRecord;
-													gpkGskRecord += "," + "Extracted";
-													gpkGskRecord += ",";
-													gpkGskRecord += "," + "\"" + ingredientName.trim() + "\"";
-													gpkGskRecord += ",";
-													gpkGskRecord += "," + "\"" + amount + "\"";
-													gpkGskRecord += "," + "\"" + amountUnit + "\"";
-													gpkGskRecord += ",";
-													gpkGskRecord += ",";
-													gpkGskRecord += ",";
-													gpkFullFile.println(gpkGskRecord);
+													String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+													gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+													gpkIngredientRecord[OUTPUT_SourceName]            = name;
+													gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+													gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+													gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+													gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Extracted";
+													gpkIngredientRecord[OUTPUT_IngredientCode]        = "";
+													gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+													gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+													gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+													gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+													gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+													gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+													gpkIngredientRecord[OUTPUT_CASNumber]             = "";
+
+													if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+														ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+													}
+
+													outputIngredients.add(gpkIngredientRecord);
 												}
 											}
 										}
+										
+										outputMap.put(gpkCode, outputIngredients);
 									}
 									else {
+										List<String[]> outputIngredients = new ArrayList<String[]>();
+										
 										//name = cleanupExtractedIngredientName(name);
 										String ingredientName = shortName;
 										
@@ -495,36 +576,61 @@ public class ZIndexConversion extends Mapping {
 											Integer gnkCode = gnkNameMap.get(ingredientName);
 											if (gnkCode != null) {
 												String[] gnkRecord = gnkMap.get(gnkCode);
-												String gpkGskRecord = gpkRecord;
-												gpkGskRecord += "," + "Mapped to GNK";
-												gpkGskRecord += "," + "\"" + gnkCode + "\"";
-												gpkGskRecord += "," + "\"" + ingredientName + "\"";
-												gpkGskRecord += ",";
-												gpkGskRecord += "," + "\"" + amount + "\"";
-												gpkGskRecord += "," + "\"" + amountUnit + "\"";
-												gpkGskRecord += ",";
-												gpkGskRecord += ",";
-												gpkGskRecord += "," + gnkRecord[GNK_CASCode];
-												gpkFullFile.println(gpkGskRecord);
+
+												String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+												gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+												gpkIngredientRecord[OUTPUT_SourceName]            = name;
+												gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+												gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+												gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+												gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Mapped to GNK";
+												gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
+												gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+												gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+												gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+												gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+												gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+												gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+												gpkIngredientRecord[OUTPUT_CASNumber]             = gnkRecord[GNK_CASCode];
+
+												if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+													ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+												}
+
+												outputIngredients.add(gpkIngredientRecord);
 											}
 											else {
-												String gpkGskRecord = gpkRecord;
-												gpkGskRecord += "," + "Extracted";
-												gpkGskRecord += ",";
-												gpkGskRecord += "," + "\"" + ingredientName + "\"";
-												gpkGskRecord += ",";
-												gpkGskRecord += "," + "\"" + amount + "\"";
-												gpkGskRecord += "," + "\"" + amountUnit + "\"";
-												gpkGskRecord += ",";
-												gpkGskRecord += ",";
-												gpkGskRecord += ",";
-												gpkFullFile.println(gpkGskRecord);
+												String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+												gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+												gpkIngredientRecord[OUTPUT_SourceName]            = name;
+												gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+												gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+												gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+												gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Extracted";
+												gpkIngredientRecord[OUTPUT_IngredientCode]        = "";
+												gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+												gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+												gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+												gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+												gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+												gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+												gpkIngredientRecord[OUTPUT_CASNumber]             = "";
+
+												if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+													ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+												}
+
+												outputIngredients.add(gpkIngredientRecord);
 											}
 										}
+										
+										outputMap.put(gpkCode, outputIngredients);
 									}
 								}
 							}
 							else {
+								List<String[]> outputIngredients = new ArrayList<String[]>();
+								
 								for (String[] gskObject : gskList) {
 									String amount = gskObject[GSK_Amount];
 									String amountUnit = gskObject[GSK_AmountUnit];
@@ -582,43 +688,357 @@ public class ZIndexConversion extends Mapping {
 									if (!gskObject[GSK_GenericName].substring(0, 1).equals("*")) {
 										// Cleanup ZIndex ingredient name
 										String genericName = cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
-										
-										String gpkGskRecord = gpkRecord;
-										gpkGskRecord += "," + "ZIndex";
-										gpkGskRecord += "," + "\"" + gnkCode + "\"";
-										gpkGskRecord += "," + (genericName != null ? "\"" + genericName + "\"" : "\"" + gskObject[GSK_GenericName].replaceAll("\"", "\"\"") + "\"");
-										gpkGskRecord += ",";
-										gpkGskRecord += "," + "\"" + amount + "\"";
-										gpkGskRecord += "," + "\"" + amountUnit + "\"";
-										gpkGskRecord += "," + "\"" + gskObject[GSK_Amount] + "\"";
-										gpkGskRecord += "," + "\"" + gskObject[GSK_AmountUnit] + "\"";
-										gpkGskRecord += "," + gskObject[GSK_CASNumber];
 
-										gpkFullFile.println(gpkGskRecord);
+										String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+										gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+										gpkIngredientRecord[OUTPUT_SourceName]            = name;
+										gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+										gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+										gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+										gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndex";
+										gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
+										gpkIngredientRecord[OUTPUT_IngredientName]        = genericName != null ? genericName : gskObject[GSK_GenericName].replaceAll("\"", "\"\"");
+										gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+										gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+										gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+										gpkIngredientRecord[OUTPUT_OrgDosage]             = gskObject[GSK_Amount];
+										gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = gskObject[GSK_AmountUnit];
+										gpkIngredientRecord[OUTPUT_CASNumber]             = gskObject[GSK_CASNumber];
+
+										if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+											ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+										}
+
+										outputIngredients.add(gpkIngredientRecord);
 									}
 									else {
-										String gpkGskRecord = gpkRecord;
-										gpkGskRecord += "," + "ZIndex";
-										gpkGskRecord += "," + "\"" + gnkCode + "\"";
-										gpkGskRecord += ",";
-										gpkGskRecord += ",";
-										gpkGskRecord += "," + "\"" + amount + "\"";
-										gpkGskRecord += "," + "\"" + amountUnit + "\"";
-										gpkGskRecord += "," + "\"" + gskObject[GSK_Amount] + "\"";
-										gpkGskRecord += "," + "\"" + gskObject[GSK_AmountUnit] + "\"";
-										gpkGskRecord += "," + gskObject[GSK_CASNumber];
+										String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+										gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+										gpkIngredientRecord[OUTPUT_SourceName]            = name;
+										gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+										gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+										gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+										gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndex";
+										gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
+										gpkIngredientRecord[OUTPUT_IngredientName]        = "";
+										gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+										gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+										gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+										gpkIngredientRecord[OUTPUT_OrgDosage]             = gskObject[GSK_Amount];
+										gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = gskObject[GSK_AmountUnit];
+										gpkIngredientRecord[OUTPUT_CASNumber]             = gskObject[GSK_CASNumber];
 
-										gpkFullFile.println(gpkGskRecord);
+										outputIngredients.add(gpkIngredientRecord);
 									}
 								}
+								
+								outputMap.put(gpkCode, outputIngredients);
+							}
+						}
+					}
+					else {
+						List<String[]> gskList = null;
+						
+						if (!gpkFile.get(row, "GSKCode", true).equals("")) {
+							gskList = gskMap.get(gskCode);
+							if (gskList != null) {
+								// Remove non-active ingredients
+								List<String[]> remove = new ArrayList<String[]>();
+								for (String[] gskObject : gskList) {
+									if (!gskObject[GSK_Type].equals("W")) {
+										remove.add(gskObject);
+									}
+								}
+								gskList.removeAll(remove);
+
+								if (gskList.size() == 0) {
+									gskList = null;
+									System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gskCodeString + ") found for GPK " + gpkCodeString);
+								}
+							}
+						}
+
+						if (gskList == null) {
+							List<String[]> outputIngredients = new ArrayList<String[]>();
+
+							String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+							gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+							gpkIngredientRecord[OUTPUT_SourceName]            = name;
+							gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+							gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+							gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+							gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndex";
+							gpkIngredientRecord[OUTPUT_IngredientCode]        = "";
+							gpkIngredientRecord[OUTPUT_IngredientName]        = "";
+							gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+							gpkIngredientRecord[OUTPUT_Dosage]                = "";
+							gpkIngredientRecord[OUTPUT_DosageUnit]            = "";
+							gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+							gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+							gpkIngredientRecord[OUTPUT_CASNumber]             = "";
+							
+							outputMap.put(gpkCode, outputIngredients);
+						}
+						else {
+							List<String[]> outputIngredients = new ArrayList<String[]>();
+							
+							//name = cleanupExtractedIngredientName(name);
+							String ingredientName = shortName;
+							
+							if (ingredientName != null) {
+								String amount = "";
+								String amountUnit = "";
+
+								String doseString = getDoseString(fullName);
+								String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
+								if (doseStringSplit != null) {
+									String denominatorUnit = "";
+									if (doseString.contains("/")) {
+										doseString = doseStringSplit[0];
+										denominatorUnit = (doseStringSplit.length > 1 ? doseStringSplit[1] : "").trim();
+									}
+									String numberChars = NUMBER_CHARS;
+									for (int charNr = 0; charNr < doseString.length(); charNr++) {
+										if (numberChars.indexOf(doseString.charAt(charNr)) < 0) {
+											break;
+										}
+										amount += doseString.charAt(charNr);
+									}
+									amount = amount.replace(",", ".");
+									amountUnit = doseString.substring(amount.length());
+									if ((!amountUnit.equals("")) && (amountUnit.substring(0, 1).equals("-"))) { // Solve things like 5-WATER
+										amount = "";
+										amountUnit = "";
+									}
+									else {
+										amountUnit = amountUnit + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit);
+									}
+								}
+								
+								Integer gnkCode = gnkNameMap.get(ingredientName);
+								if (gnkCode != null) {
+									String[] gnkRecord = gnkMap.get(gnkCode);
+
+									String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+									gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+									gpkIngredientRecord[OUTPUT_SourceName]            = name;
+									gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+									gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+									gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+									gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Mapped to GNK";
+									gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
+									gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+									gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+									gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+									gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+									gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+									gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+									gpkIngredientRecord[OUTPUT_CASNumber]             = gnkRecord[GNK_CASCode];
+
+									if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+										ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+									}
+
+									outputIngredients.add(gpkIngredientRecord);
+								}
+								else {
+									String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
+									gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
+									gpkIngredientRecord[OUTPUT_SourceName]            = name;
+									gpkIngredientRecord[OUTPUT_SourceATCCode]         = atcCode;
+									gpkIngredientRecord[OUTPUT_SourceFormulation]     = pharmForm;
+									gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
+									gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Extracted";
+									gpkIngredientRecord[OUTPUT_IngredientCode]        = "";
+									gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+									gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
+									gpkIngredientRecord[OUTPUT_Dosage]                = amount;
+									gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
+									gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
+									gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
+									gpkIngredientRecord[OUTPUT_CASNumber]             = "";
+
+									if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
+										ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
+									}
+
+									outputIngredients.add(gpkIngredientRecord);
+								}
+							}
+							
+							outputMap.put(gpkCode, outputIngredients);
+						}
+					}
+				}
+			}
+			System.out.println("  Done");
+		}
+		else {
+			System.out.println("  ERROR: Cannot load GPK file '" + gpkFile.getFileName() + "'");
+			ok = false;
+		}
+		
+
+		if (ok && (gpkList.size() > 0)) {
+			// Load translation file
+			System.out.println("  Loading Ingredient Name Translation File ...");
+			boolean newFile = false;
+			Map<String, String> originalIngredientNameTranslation = new HashMap<String, String>();
+			if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.openFile(true)) {
+				while (ingredientNameTranslationFile.hasNext()) {
+					Row row = ingredientNameTranslationFile.next();
+					
+					String sourceIngredientName = ingredientNameTranslationFile.get(row, "SourceIngredientName", true).trim();
+					String englishIngredientName = ingredientNameTranslationFile.get(row, "EnglishIngredientName", true).trim();
+					
+					if (!sourceIngredientName.equals("")) {
+						if ((ingredientNameTranslation.get(sourceIngredientName) != null) && (!ingredientNameTranslation.get(sourceIngredientName).equals(englishIngredientName))) {
+							System.out.println("    ERROR: Different translations for '" + sourceIngredientName + "': '" + englishIngredientName + "' and '" + ingredientNameTranslation.get(sourceIngredientName) + "'");
+							ok = false;
+						}
+						else {
+							originalIngredientNameTranslation.put(sourceIngredientName, englishIngredientName);
+							if (!ingredientNameTranslation.containsKey(sourceIngredientName)) { // Not used anymore
+								System.out.println("    WARNING: Source ingredient name '" + sourceIngredientName + "' ('" + englishIngredientName + "') is not used anymore. Will be removed.");
+								newFile = true;
+							}
+							else {
+								ingredientNameTranslation.put(sourceIngredientName, englishIngredientName);
 							}
 						}
 					}
 				}
-				gpkFullFile.close();
 			}
-			catch (FileNotFoundException e) {
-				System.out.println("  ERROR: Cannot create output file '" + gpkFullFileName + "'");
+			else {
+				System.out.println("    No translation file found.");
+				newFile = true;
+				ok = false;
+			}
+
+			boolean backupOk = true;
+			if (newFile) {
+				if (originalIngredientNameTranslation.size() > 0) {
+					// Backup last translation
+					String fileName = ingredientNameTranslationFile.getFileName();
+					String date = DrugMapping.getCurrentDate();
+					String baseFileName = fileName + " " + date;
+					String extension = "";
+					int extensionIndex = fileName.lastIndexOf(File.separator) + fileName.substring(fileName.lastIndexOf(File.separator)).lastIndexOf(".");
+					if (extensionIndex > -1) {
+						baseFileName = fileName.substring(0, extensionIndex) + " " + date;
+						extension =  fileName.substring(extensionIndex);
+					}
+					// Find first free backup file name of today
+					fileName = null;
+					for (int backupNr = 1; backupNr < 100; backupNr++) {
+						String backupNrString = "00"+ Integer.toString(backupNr);
+						backupNrString = backupNrString.substring(backupNrString.length() - 2);
+						fileName = baseFileName + " " + backupNrString + extension;
+						if (!(new File(fileName)).exists()) {
+							break;
+						}
+					}
+					
+					if (fileName != null) {
+						try {
+							PrintWriter translationFile = new PrintWriter(new File(fileName));
+							System.out.println("    Writing backup of current translation file to: " + fileName);
+
+							translationFile.println("SourceIngredientName,EnglishIngredientName");
+							
+							List<String> sortedSourceIngredientNames = new ArrayList<String>();
+							sortedSourceIngredientNames.addAll(originalIngredientNameTranslation.keySet());
+							Collections.sort(sortedSourceIngredientNames);
+							for (String sourceIngredientName : sortedSourceIngredientNames) {
+								translationFile.println("\"" + sourceIngredientName + "\"," + (originalIngredientNameTranslation.get(sourceIngredientName) == null ? "" : "\"" + originalIngredientNameTranslation.get(sourceIngredientName) + "\""));
+							}
+							translationFile.close();
+						}
+						catch (FileNotFoundException e) {
+							System.out.println("  ERROR: Cannot create backup file '" + fileName + "'");
+						}
+					}
+					else {
+						System.out.println("  ERROR: No free backup file found.");
+						backupOk = false;
+					}
+					
+				}
+				
+				if (backupOk) {
+					// Create translation file
+					String fileName = DrugMapping.getBasePath() + "/ZIndex - Ingredient Name Translation.csv";
+					if (ingredientNameTranslationFile != null) {
+						fileName = ingredientNameTranslationFile.getFileName();
+					}
+					try {
+						PrintWriter translationFile = new PrintWriter(new File(fileName));
+						System.out.println("    Writing translation file to: " + fileName);
+						System.out.println("    Please add the missing translations.");
+
+						translationFile.println("SourceIngredientName,EnglishIngredientName");
+						
+						List<String> sortedSourceIngredientNames = new ArrayList<String>();
+						sortedSourceIngredientNames.addAll(ingredientNameTranslation.keySet());
+						Collections.sort(sortedSourceIngredientNames);
+						for (String sourceIngredientName : sortedSourceIngredientNames) {
+							translationFile.println("\"" + sourceIngredientName + "\"," + (ingredientNameTranslation.get(sourceIngredientName) == null ? "" : "\"" + ingredientNameTranslation.get(sourceIngredientName) + "\""));
+						}
+						translationFile.close();
+					}
+					catch (FileNotFoundException e) {
+						System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
+					}
+				}
+			}
+			System.out.println("  Done");
+
+			
+			// Write output file
+			if (ok && (outputMap.size() > 0)) {
+				String gpkFullFileName = DrugMapping.getBasePath() + "/ZIndex - GPK Full.csv";
+				try {
+					PrintWriter gpkFullFile = new PrintWriter(new File(gpkFullFileName));
+					
+					String header = "SourceCode";
+					header += "," + "SourceName";
+					header += "," + "SourceATCCode";
+					header += "," + "SourceFormulation";
+					header += "," + "SourceCount";
+					header += "," + "IngredientNameStatus";
+					header += "," + "IngredientCode";
+					header += "," + "IngredientName";
+					header += "," + "IngredientNameEnglish";
+					header += "," + "Dosage";
+					header += "," + "DosageUnit";
+					header += "," + "OrgDosage";
+					header += "," + "OrgDosageUnit";
+					header += "," + "CASNumber";
+					
+					gpkFullFile.println(header);
+					
+					for (Integer gpkCode : gpkList) {
+						List<String[]> outputIngredients = outputMap.get(gpkCode);
+						for (String[] outputIngredient : outputIngredients) {
+							if (outputIngredient[OUTPUT_IngredientName].equals("")) {
+								outputIngredient[OUTPUT_IngredientNameEnglish] = "";
+							}
+							else {
+								String translation = ingredientNameTranslation.get(outputIngredient[OUTPUT_IngredientName]);
+								outputIngredient[OUTPUT_IngredientNameEnglish] = translation == null ? "" : translation;
+							}
+							String record = "";
+							for (int column = 0; column < OUTPUT_ColumnCount; column++) {
+								record += (column == 0 ? "" : ",") + "\"" + outputIngredient[column] + "\"";
+							}
+							gpkFullFile.println(record);
+						}
+					}
+					gpkFullFile.close();
+				}
+				catch (FileNotFoundException e) {
+					System.out.println("  ERROR: Cannot create output file '" + gpkFullFileName + "'");
+				}
 			}
 		}
 		else {

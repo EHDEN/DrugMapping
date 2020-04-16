@@ -216,6 +216,28 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 														"This is the word to remove."
 												}
 										)
+								},
+								false
+						),
+						new FileDefinition(
+								"ZIndex Ingredient Name Translation File",
+								new String[] {
+										"This file should contain the translation from the source",
+										"ingredient names to English.",
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"SourceIngredientName",
+												new String[] {
+														"This is the ingredient name in the source language."
+												}
+										),
+										new FileColumnDefinition(
+												"EnglishIngredientName",
+												new String[] {
+														"This is the ingredient name in English."
+												}
+										)
 								}
 						),
 						new FileDefinition(
@@ -291,7 +313,8 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 														"ingredient."
 												}
 										)
-								}
+								},
+								false
 						)
 				)
 			);
