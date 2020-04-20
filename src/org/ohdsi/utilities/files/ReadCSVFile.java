@@ -112,7 +112,7 @@ public class ReadCSVFile implements Iterable<List<String>> {
 	private class CSVFileIterator implements Iterator<List<String>> {
 		private static final int BUFFERSIZE = 4194304; // 4 MB
 		private char[]	buffer = new char[BUFFERSIZE]; // 4 MB
-		private char[]	peekBuffer = null; // 4 MB
+		private char[]	peekBuffer = null;
 		private int bufferPosition = 0;
 		private int numberRead;
 		private int peekNumberRead;
@@ -167,10 +167,8 @@ public class ReadCSVFile implements Iterable<List<String>> {
 		
 		private List<String> readLine() throws IOException {
 			int columnNr = 0;
-			boolean quoted = false;
-			boolean quoteOpen1 = false;
-			boolean quoteOpen2 = false;
-			boolean quoteClose1 = false;
+			boolean delimitedText = false;
+			boolean doubleTextDelimiter = false;
 			List<String> line = new ArrayList<String>();
 			if (numberRead != -1) {
 				line.add("");
@@ -197,64 +195,45 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						}
 					}
 					if ((textDelimiter != ((char) 0)) && (buffer[bufferPosition] == textDelimiter)) {
-						if (quoted) {
-							if (quoteOpen1) {
-								if (quoteOpen2) {
-									if (quoteClose1) {
-										line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); // Set close quote
-										quoteOpen1 = false;
-										quoteOpen2 = false;
-										quoteClose1 = false;
-									}
-									else {
-										if (peekNextChar() == textDelimiter) {
-											quoteClose1 = true;
-										}
-										else {
-											throw new IOException("Incomplete string closing quote in line " + Long.toString(lineNr));
-										}
-									}
-								}
-								else {
-									quoteOpen2 = true;
-								}
+						if (delimitedText) {
+							if (doubleTextDelimiter) {
+								doubleTextDelimiter = false;
 							}
 							else if (peekNextChar() == textDelimiter) {
-								line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); // Set open quote
-								quoteOpen1 = true;
+								doubleTextDelimiter = true;
+								line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); // Add textDelimiter to line
 							}
-							else if ((peekNextChar() == delimiter) || (peekNextChar() == '\r') || (peekNextChar() == '\r')) {
-								quoted = false;
+							else if ((peekNextChar() == ((char) 0)) || (peekNextChar() == delimiter) || (peekNextChar() == '\r') || (peekNextChar() == '\n')) {
+								delimitedText = false;
 							}
 							else {
 								throw new IOException("Characters following field closing quote in line " + Long.toString(lineNr));
 							}
-							
 						}
 						else if (line.get(columnNr).length() > 0) {
 							throw new IOException("Unquoted field containing quote in line " + Long.toString(lineNr));
 						}
 						else {
-							quoted = true;
+							delimitedText = true;
 						} 
 					}
 					else if (buffer[bufferPosition] == delimiter) {
-						if (quoted) {
+						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
 						else {
 							line.add("");
 							columnNr++;
-							quoted = false;
+							delimitedText = false;
 						}
 					}
 					else if (buffer[bufferPosition] == '\r') {
-						if (quoted) {
+						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
 					}
 					else if (buffer[bufferPosition] == '\n') {
-						if (quoted) {
+						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
 						else {
@@ -278,8 +257,8 @@ public class ReadCSVFile implements Iterable<List<String>> {
 			return line;
 		}
 		
-		private char peekNextChar() {
-			Character character = null;
+		private Character peekNextChar() {
+			char character = (char) 0;
 			if ((bufferPosition + 1) == numberRead) {
 				try {
 					if (peekBuffer == null) {
