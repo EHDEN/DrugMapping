@@ -94,13 +94,15 @@ public class ZIndexConversion extends Mapping {
 	public ZIndexConversion(InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile, InputFile ingredientNameTranslationFile, InputFile gpkIPCIFile) {
 		
 		boolean ok = true;
+		
+		String translationType = null; 
 
 		System.out.println(DrugMapping.getCurrentTime() + " Converting ZIndex Files ...");
 		
 		
 		// Load GSK file
 		if (ok && gskFile.openFile()) {
-			System.out.println("  Loading ZIndex GSK File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GSK File ...");
 			while (gskFile.hasNext()) {
 				Row row = gskFile.next();
 
@@ -124,7 +126,7 @@ public class ZIndexConversion extends Mapping {
 				}
 				gskList.add(record);
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		else {
 			System.out.println("  ERROR: Cannot load GSK file '" + gskFile.getFileName() + "'");
@@ -134,7 +136,7 @@ public class ZIndexConversion extends Mapping {
 	
 		// Load GNK file
 		if (ok && gnkFile.openFile()) {
-			System.out.println("  Loading ZIndex GNK File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GNK File ...");
 			while (gnkFile.hasNext()) {
 				Row row = gnkFile.next();
 
@@ -160,7 +162,7 @@ public class ZIndexConversion extends Mapping {
 					ingredientNameTranslation.put(record[GNK_Description], null);
 				}
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		else {
 			System.out.println("  ERROR: Cannot load GNK file '" + gnkFile.getFileName() + "'");
@@ -169,7 +171,7 @@ public class ZIndexConversion extends Mapping {
 		
 
 		if (ok && gpkStatsFile.openFile()) {
-			System.out.println("  Loading ZIndex GPK Statistics File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GPK Statistics File ...");
 			while (gpkStatsFile.hasNext()) {
 				Row row = gpkStatsFile.next();
 
@@ -184,7 +186,7 @@ public class ZIndexConversion extends Mapping {
 				catch (NumberFormatException e) {
 				}
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		else {
 			System.out.println("  ERROR: Cannot load GNK file '" + gnkFile.getFileName() + "'");
@@ -193,7 +195,7 @@ public class ZIndexConversion extends Mapping {
 		
 
 		if (ok && (wordsToRemoveFile != null) && wordsToRemoveFile.openFile(true)) {
-			System.out.println("  Loading ZIndex Words To Ignore File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex Words To Ignore File ...");
 			List<List<String>> wordsFoundToRemove = new ArrayList<List<String>>();
 			while (wordsToRemoveFile.hasNext()) {
 				Row row = wordsToRemoveFile.next();
@@ -271,7 +273,7 @@ public class ZIndexConversion extends Mapping {
 					System.out.println("    " + word);
 				}
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		else {
 			System.out.println("  ERROR: Cannot load  Words To Ignore file '" + wordsToRemoveFile.getFileName() + "'");
@@ -280,7 +282,7 @@ public class ZIndexConversion extends Mapping {
 		
 
 		if (ok && gpkIPCIFile.openFile()) {
-			System.out.println("  Loading ZIndex GPK IPCI Compositions File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GPK IPCI Compositions File ...");
 			
 			IPCIDerivation = true;
 			
@@ -311,13 +313,13 @@ public class ZIndexConversion extends Mapping {
 					ingredientNameTranslation.put(record[GPKIPCI_GNKName], null);
 				}
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		
 		
 		// Load GPK file
 		if (ok && gpkFile.openFile()) {
-			System.out.println("  Loading ZIndex GPK File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GPK File ...");
 			while (gpkFile.hasNext()) {
 				Row row = gpkFile.next();
 
@@ -697,7 +699,7 @@ public class ZIndexConversion extends Mapping {
 										gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
 										gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndex";
 										gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
-										gpkIngredientRecord[OUTPUT_IngredientName]        = genericName != null ? genericName : gskObject[GSK_GenericName].replaceAll("\"", "\"\"");
+										gpkIngredientRecord[OUTPUT_IngredientName]        = genericName != null ? genericName : gskObject[GSK_GenericName];
 										gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 										gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 										gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
@@ -871,7 +873,7 @@ public class ZIndexConversion extends Mapping {
 					}
 				}
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		else {
 			System.out.println("  ERROR: Cannot load GPK file '" + gpkFile.getFileName() + "'");
@@ -881,10 +883,16 @@ public class ZIndexConversion extends Mapping {
 
 		if (ok && (gpkList.size() > 0)) {
 			// Load translation file
-			System.out.println("  Loading Ingredient Name Translation File ...");
+			System.out.println(DrugMapping.getCurrentTime() + "   Loading Ingredient Name Translation File ...");
 			boolean newFile = false;
 			Map<String, String> originalIngredientNameTranslation = new HashMap<String, String>();
 			if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.openFile(true)) {
+				if (ingredientNameTranslationFile.getFileName().contains("Google")) {
+					translationType = "Google";
+				}
+				if (ingredientNameTranslationFile.getFileName().contains("Amazon")) {
+					translationType = "Amazon";
+				}
 				while (ingredientNameTranslationFile.hasNext()) {
 					Row row = ingredientNameTranslationFile.next();
 					
@@ -910,7 +918,7 @@ public class ZIndexConversion extends Mapping {
 				}
 			}
 			else {
-				System.out.println("    No translation file found.");
+				System.out.println("  WARING: No translation file found.");
 				newFile = true;
 				ok = false;
 			}
@@ -942,7 +950,7 @@ public class ZIndexConversion extends Mapping {
 					if (fileName != null) {
 						try {
 							PrintWriter translationFile = new PrintWriter(new File(fileName));
-							System.out.println("    Writing backup of current translation file to: " + fileName);
+							System.out.println(DrugMapping.getCurrentTime() + "     Writing backup of current translation file to: " + fileName);
 
 							translationFile.println("SourceIngredientName,EnglishIngredientName");
 							
@@ -950,9 +958,12 @@ public class ZIndexConversion extends Mapping {
 							sortedSourceIngredientNames.addAll(originalIngredientNameTranslation.keySet());
 							Collections.sort(sortedSourceIngredientNames);
 							for (String sourceIngredientName : sortedSourceIngredientNames) {
-								translationFile.println("\"" + sourceIngredientName + "\"," + (originalIngredientNameTranslation.get(sourceIngredientName) == null ? "" : "\"" + originalIngredientNameTranslation.get(sourceIngredientName) + "\""));
+								String record = escapeFieldValue(sourceIngredientName);
+								record += "," + escapeFieldValue(originalIngredientNameTranslation.get(sourceIngredientName));
+								translationFile.println(record);
 							}
 							translationFile.close();
+							System.out.println(DrugMapping.getCurrentTime() + "     Done");
 						}
 						catch (FileNotFoundException e) {
 							System.out.println("  ERROR: Cannot create backup file '" + fileName + "'");
@@ -973,8 +984,8 @@ public class ZIndexConversion extends Mapping {
 					}
 					try {
 						PrintWriter translationFile = new PrintWriter(new File(fileName));
-						System.out.println("    Writing translation file to: " + fileName);
-						System.out.println("    Please add the missing translations.");
+						System.out.println(DrugMapping.getCurrentTime() + "     Writing translation file to: " + fileName);
+						System.out.println("  WARNING: Please add the missing translations.");
 
 						translationFile.println("SourceIngredientName,EnglishIngredientName");
 						
@@ -982,21 +993,26 @@ public class ZIndexConversion extends Mapping {
 						sortedSourceIngredientNames.addAll(ingredientNameTranslation.keySet());
 						Collections.sort(sortedSourceIngredientNames);
 						for (String sourceIngredientName : sortedSourceIngredientNames) {
-							translationFile.println("\"" + sourceIngredientName + "\"," + (ingredientNameTranslation.get(sourceIngredientName) == null ? "" : "\"" + ingredientNameTranslation.get(sourceIngredientName) + "\""));
+							String record = escapeFieldValue(sourceIngredientName);
+							record += "," + escapeFieldValue(ingredientNameTranslation.get(sourceIngredientName));
+							translationFile.println(record);
 						}
 						translationFile.close();
+						System.out.println(DrugMapping.getCurrentTime() + "     Done");
 					}
 					catch (FileNotFoundException e) {
 						System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
 					}
 				}
 			}
-			System.out.println("  Done");
+			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 
 			
 			// Write output file
 			if (ok && (outputMap.size() > 0)) {
-				String gpkFullFileName = DrugMapping.getBasePath() + "/ZIndex - GPK Full.csv";
+				String gpkFullFileName = DrugMapping.getBasePath() + "/" + DrugMapping.getCurrentDate() + " ZIndex" + (IPCIDerivation ? " IPCI" : "") + " - GPK Full" + (translationType == null ? "" : " - " + translationType) + ".csv";
+				System.out.println(DrugMapping.getCurrentTime() + "   Writing out to: " + gpkFullFileName);
+				
 				try {
 					PrintWriter gpkFullFile = new PrintWriter(new File(gpkFullFileName));
 					
@@ -1019,19 +1035,25 @@ public class ZIndexConversion extends Mapping {
 					
 					for (Integer gpkCode : gpkList) {
 						List<String[]> outputIngredients = outputMap.get(gpkCode);
-						for (String[] outputIngredient : outputIngredients) {
-							if (outputIngredient[OUTPUT_IngredientName].equals("")) {
-								outputIngredient[OUTPUT_IngredientNameEnglish] = "";
+						if (outputIngredients != null) {
+							for (String[] outputIngredient : outputIngredients) {
+								if (outputIngredient[OUTPUT_IngredientName].equals("")) {
+									outputIngredient[OUTPUT_IngredientNameEnglish] = "";
+								}
+								else {
+									String translation = ingredientNameTranslation.get(outputIngredient[OUTPUT_IngredientName]);
+									outputIngredient[OUTPUT_IngredientNameEnglish] = translation == null ? "" : translation;
+								}
+								String record = "";
+								for (int column = 0; column < OUTPUT_ColumnCount; column++) {
+									record += (column == 0 ? "" : ",") + escapeFieldValue(outputIngredient[column]);
+								}
+								gpkFullFile.println(record);
 							}
-							else {
-								String translation = ingredientNameTranslation.get(outputIngredient[OUTPUT_IngredientName]);
-								outputIngredient[OUTPUT_IngredientNameEnglish] = translation == null ? "" : translation;
-							}
-							String record = "";
-							for (int column = 0; column < OUTPUT_ColumnCount; column++) {
-								record += (column == 0 ? "" : ",") + "\"" + outputIngredient[column] + "\"";
-							}
-							gpkFullFile.println(record);
+						}
+						else {
+							//FIXME gpkCode == 999
+							System.out.println("ERROR");
 						}
 					}
 					gpkFullFile.close();
@@ -1039,6 +1061,10 @@ public class ZIndexConversion extends Mapping {
 				catch (FileNotFoundException e) {
 					System.out.println("  ERROR: Cannot create output file '" + gpkFullFileName + "'");
 				}
+				System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			}
+			else {
+				System.out.println("  ERROR: No output to write.");
 			}
 		}
 		else {
@@ -1069,6 +1095,17 @@ public class ZIndexConversion extends Mapping {
 		else {
 			return 0;
 		}
+	}
+	
+	
+	private String escapeFieldValue(String value) {
+		if (value == null) {
+			value = "";
+		}
+		else if (value.contains(",") || value.contains("\"")) {
+			value = "\"" + value.replaceAll("\"", "\"\"") + "\"";
+		}
+		return value;
 	}
 	
 	

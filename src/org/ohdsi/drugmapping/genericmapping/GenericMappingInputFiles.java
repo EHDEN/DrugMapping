@@ -138,7 +138,8 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"the source drug should be mapped to."
 												}
 										)
-								}
+								},
+								false
 						)
 				)
 			);

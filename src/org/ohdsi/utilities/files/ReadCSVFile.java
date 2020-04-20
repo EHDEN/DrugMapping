@@ -112,12 +112,19 @@ public class ReadCSVFile implements Iterable<List<String>> {
 	private class CSVFileIterator implements Iterator<List<String>> {
 		private static final int BUFFERSIZE = 4194304; // 4 MB
 		private char[]	buffer = new char[BUFFERSIZE]; // 4 MB
+		private char[]	peekBuffer = null; // 4 MB
 		private int bufferPosition = 0;
 		private int numberRead;
+		private int peekNumberRead;
 		private List<String> nextLine;
+		private long lineNr = 1L;
 
 		public CSVFileIterator() {
-			nextLine = readLine();
+			try {
+				nextLine = readLine();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			if (nextLine == null) {
 				EOF = true;
 				try {
@@ -136,7 +143,11 @@ public class ReadCSVFile implements Iterable<List<String>> {
 
 		public List<String> next() {
 			List<String> line = nextLine;
-			nextLine = readLine();
+			try {
+				nextLine = readLine();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			if (nextLine == null) {
 				EOF = true;
 				try {
@@ -154,9 +165,12 @@ public class ReadCSVFile implements Iterable<List<String>> {
 			System.err.println("Unimplemented method 'remove' called");
 		}
 		
-		private List<String> readLine() {
+		private List<String> readLine() throws IOException {
 			int columnNr = 0;
 			boolean quoted = false;
+			boolean quoteOpen1 = false;
+			boolean quoteOpen2 = false;
+			boolean quoteClose1 = false;
 			List<String> line = new ArrayList<String>();
 			if (numberRead != -1) {
 				line.add("");
@@ -165,7 +179,14 @@ public class ReadCSVFile implements Iterable<List<String>> {
 				while ((!EOF) && (!EOL)) {
 					if (bufferPosition == numberRead) {
 						try {
-							numberRead = streamReader.read(buffer, 0, BUFFERSIZE);
+							if (peekBuffer == null) {
+								numberRead = streamReader.read(buffer, 0, BUFFERSIZE);
+							}
+							else {
+								buffer = peekBuffer;
+								numberRead = peekNumberRead;
+								peekBuffer = null;
+							}
 							if (numberRead == -1) {
 								EOF = true;
 								break;
@@ -176,11 +197,45 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						}
 					}
 					if ((textDelimiter != ((char) 0)) && (buffer[bufferPosition] == textDelimiter)) {
-						if ((!quoted) && line.get(columnNr).length() > 0) {
-							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
+						if (quoted) {
+							if (quoteOpen1) {
+								if (quoteOpen2) {
+									if (quoteClose1) {
+										line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); // Set close quote
+										quoteOpen1 = false;
+										quoteOpen2 = false;
+										quoteClose1 = false;
+									}
+									else {
+										if (peekNextChar() == textDelimiter) {
+											quoteClose1 = true;
+										}
+										else {
+											throw new IOException("Incomplete string closing quote in line " + Long.toString(lineNr));
+										}
+									}
+								}
+								else {
+									quoteOpen2 = true;
+								}
+							}
+							else if (peekNextChar() == textDelimiter) {
+								line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); // Set open quote
+								quoteOpen1 = true;
+							}
+							else if ((peekNextChar() == delimiter) || (peekNextChar() == '\r') || (peekNextChar() == '\r')) {
+								quoted = false;
+							}
+							else {
+								throw new IOException("Characters following field closing quote in line " + Long.toString(lineNr));
+							}
+							
+						}
+						else if (line.get(columnNr).length() > 0) {
+							throw new IOException("Unquoted field containing quote in line " + Long.toString(lineNr));
 						}
 						else {
-							quoted = !quoted;
+							quoted = true;
 						} 
 					}
 					else if (buffer[bufferPosition] == delimiter) {
@@ -204,6 +259,7 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						}
 						else {
 							EOL = true;
+							lineNr++;
 						}
 					}
 					else {
@@ -220,6 +276,27 @@ public class ReadCSVFile implements Iterable<List<String>> {
 			}
 			
 			return line;
+		}
+		
+		private char peekNextChar() {
+			Character character = null;
+			if ((bufferPosition + 1) == numberRead) {
+				try {
+					if (peekBuffer == null) {
+						peekBuffer = new char[BUFFERSIZE];
+						peekNumberRead = streamReader.read(peekBuffer, 0, BUFFERSIZE);
+					}
+					if (peekNumberRead != -1) {
+						character = peekBuffer[0];
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				character = buffer[bufferPosition + 1];
+			}
+			return character;
 		}
 	}
 
