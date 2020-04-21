@@ -183,8 +183,8 @@ public class GenericMapping extends Mapping {
 	private List<String> cdmIngredientNameIndexNameList = new ArrayList<String>();
 	private Map<String, Map<String, Set<CDMIngredient>>> cdmIngredientNameIndexMap = new HashMap<String, Map<String, Set<CDMIngredient>>>();
 	
-	private Map<SourceDrug, Map<Integer, Map<Integer, List<String>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, Map<Integer, List<String>>>>(); // SourceDrug, Mapping, Mapping result, List of options
-	//private Map<SourceDrug, Map<Integer, List<Map<Integer, List<String>>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<String>>>>>(); // SourceDrug, Mapping, List of Mapping result, List of options
+	//TODO private Map<SourceDrug, Map<Integer, Map<Integer, List<String>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, Map<Integer, List<String>>>>(); // SourceDrug, Mapping, Mapping result, List of options
+	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<String>>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<String>>>>>(); // SourceDrug, Mapping, List of Mapping result, List of options
 	private Map<Integer, Set<SourceDrug>> notUniqueMapping = new HashMap<Integer, Set<SourceDrug>>();
 	
 	private Map<Integer, Map<Integer, Long>> counters;
@@ -1394,16 +1394,21 @@ public class GenericMapping extends Mapping {
 					else {
 						int mapping = 0;
 						while (mappingTypeDescriptions.containsKey(mapping)) {
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 							}
-							Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-							if (mappingTypeResults == null) {
-								mappingTypeResults = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, mappingTypeResults);
+							
+							List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+							if (mappingTypeResultsList == null) {
+								mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+								Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+								mappingTypeResultsList.add(mappingTypeResults);
+								sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 							}
+							
+							Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(0);
 							
 							List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 100) + 2); // <mapping>DOUBLE_INGREDIENT_MAPPING
 							if (mappingSourceIngredients == null) {
@@ -1424,16 +1429,21 @@ public class GenericMapping extends Mapping {
 				else {
 					int mapping = 0;
 					while (mappingTypeDescriptions.containsKey(mapping)) {
-						Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+						Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 						if (sourceDrugMappingResult == null) {
-							sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+							sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 							sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 						}
-						Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-						if (mappingTypeResults == null) {
-							mappingTypeResults = new HashMap<Integer, List<String>>();
-							sourceDrugMappingResult.put(mapping, mappingTypeResults);
+						
+						List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+						if (mappingTypeResultsList == null) {
+							mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+							Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+							mappingTypeResultsList.add(mappingTypeResults);
+							sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 						}
+						
+						Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(0);
 						
 						List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 100) + 1); // <mapping>UNMAPPED_SOURCE_INGREDIENTS
 						if (mappingSourceIngredients == null) {
@@ -1454,16 +1464,21 @@ public class GenericMapping extends Mapping {
 			else {
 				int mapping = 0;
 				while (mappingTypeDescriptions.containsKey(mapping)) {
-					Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+					Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 					if (sourceDrugMappingResult == null) {
-						sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+						sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 						sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 					}
-					Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-					if (mappingTypeResults == null) {
-						mappingTypeResults = new HashMap<Integer, List<String>>();
-						sourceDrugMappingResult.put(mapping, mappingTypeResults);
+					
+					List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+					if (mappingTypeResultsList == null) {
+						mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+						Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+						mappingTypeResultsList.add(mappingTypeResults);
+						sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 					}
+					
+					Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(0);
 					
 					List<String> mappingSourceIngredients = mappingTypeResults.get((mapping * 100) + 0); // <mapping>NO_SOURCE_INGREDIENTS
 					if (mappingSourceIngredients == null) {
@@ -1557,16 +1572,21 @@ public class GenericMapping extends Mapping {
 								}
 							}
 
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
+							
+							List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+							if (mappingTypeResultsList == null) {
+								mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+								Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+								mappingTypeResultsList.add(mappingTypeResults);
+								sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 							}
+							
+							Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 							
 							List<String> rejectedForms = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM);
 							if (rejectedForms == null) {
@@ -1627,16 +1647,21 @@ public class GenericMapping extends Mapping {
 								}
 							}
 
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
+							
+							List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+							if (mappingTypeResultsList == null) {
+								mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+								Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+								mappingTypeResultsList.add(mappingTypeResults);
+								sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 							}
+							
+							Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 							rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
 							
 							if (matchingCDMDrugs.size() == 1) {
@@ -1689,17 +1714,22 @@ public class GenericMapping extends Mapping {
 										}
 										if ((remove.size() > 0) && (matchingCDMDrugsWithTwoUnits.size() != remove.size())) {
 											matchingCDMDrugsWithTwoUnits.removeAll(remove);
-											
+
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+												mappingTypeResultsList.add(mappingTypeResults);
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(0);
 											
 											List<String> multipleMappings = rejectedForMapping.get(resultType);
 											if (multipleMappings == null) {
@@ -1749,17 +1779,22 @@ public class GenericMapping extends Mapping {
 										}
 										if ((remove.size() > 0) && (matchingCDMDrugsWithTwoUnits.size() != remove.size())) {
 											matchingCDMDrugsWithTwoUnits.removeAll(remove);
-											
+
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+												mappingTypeResultsList.add(mappingTypeResults);
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(0);
 											
 											List<String> multipleMappings = rejectedForMapping.get(resultType);
 											if (multipleMappings == null) {
@@ -1795,14 +1830,19 @@ public class GenericMapping extends Mapping {
 
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
 										
 										List<String> multipleMappings = rejectedForMapping.get(resultType);
 										if (multipleMappings == null) {
@@ -1824,14 +1864,19 @@ public class GenericMapping extends Mapping {
 									else {
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
 										
 										List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING);
 										if (multipleMappings == null) {
@@ -1868,17 +1913,22 @@ public class GenericMapping extends Mapping {
 											}
 											if ((remove.size() > 0) && (matchingCDMDrugsWithOneUnit.size() != remove.size())) {
 												matchingCDMDrugsWithOneUnit.removeAll(remove);
-												
+
 												sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 												if (sourceDrugMappingResult == null) {
-													sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+													sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 													sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 												}
-												rejectedForMapping = sourceDrugMappingResult.get(mapping);
-												if (rejectedForMapping == null) {
-													rejectedForMapping = new HashMap<Integer, List<String>>();
-													sourceDrugMappingResult.put(mapping, rejectedForMapping);
+												
+												mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+												if (mappingTypeResultsList == null) {
+													mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+													Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+													mappingTypeResultsList.add(mappingTypeResults);
+													sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 												}
+												
+												rejectedForMapping = mappingTypeResultsList.get(0);
 												
 												List<String> multipleMappings = rejectedForMapping.get(resultType);
 												if (multipleMappings == null) {
@@ -1927,17 +1977,22 @@ public class GenericMapping extends Mapping {
 											}
 											if ((remove.size() > 0) && (matchingCDMDrugsWithOneUnit.size() != remove.size())) {
 												matchingCDMDrugsWithOneUnit.removeAll(remove);
-												
+
 												sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 												if (sourceDrugMappingResult == null) {
-													sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+													sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 													sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 												}
-												rejectedForMapping = sourceDrugMappingResult.get(mapping);
-												if (rejectedForMapping == null) {
-													rejectedForMapping = new HashMap<Integer, List<String>>();
-													sourceDrugMappingResult.put(mapping, rejectedForMapping);
+												
+												mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+												if (mappingTypeResultsList == null) {
+													mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+													Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+													mappingTypeResultsList.add(mappingTypeResults);
+													sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 												}
+												
+												rejectedForMapping = mappingTypeResultsList.get(0);
 												
 												List<String> multipleMappings = rejectedForMapping.get(resultType);
 												if (multipleMappings == null) {
@@ -1973,14 +2028,19 @@ public class GenericMapping extends Mapping {
 
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+												mappingTypeResultsList.add(mappingTypeResults);
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(0);
 											
 											List<String> multipleMappings = rejectedForMapping.get(resultType);
 											if (multipleMappings == null) {
@@ -2003,14 +2063,19 @@ public class GenericMapping extends Mapping {
 										else {
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+												mappingTypeResultsList.add(mappingTypeResults);
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(0);
 											
 											List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING);
 											if (multipleMappings == null) {
@@ -2031,16 +2096,22 @@ public class GenericMapping extends Mapping {
 						}
 					}
 					else {
-						Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+						Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 						if (sourceDrugMappingResult == null) {
-							sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+							sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 							sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 						}
-						Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-						if (rejectedForMapping == null) {
-							rejectedForMapping = new HashMap<Integer, List<String>>();
-							sourceDrugMappingResult.put(mapping, rejectedForMapping);
+						
+						List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+						if (mappingTypeResultsList == null) {
+							mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+							Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+							mappingTypeResultsList.add(mappingTypeResults);
+							sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 						}
+						
+						Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
+						
 						List<String> emptyList = new ArrayList<String>();
 						emptyList.add(" ");
 						rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS, emptyList);
@@ -2059,17 +2130,22 @@ public class GenericMapping extends Mapping {
 			}
 			
 			if (finalMapping != null) {
-				Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+
+				Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 				if (sourceDrugMappingResult == null) {
-					sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+					sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 					sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 				}
 				
-				Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-				if (mappingTypeResults == null) {
-					mappingTypeResults = new HashMap<Integer, List<String>>();
-					sourceDrugMappingResult.put(mapping, mappingTypeResults);
+				List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+				if (mappingTypeResultsList == null) {
+					mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+					Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+					mappingTypeResultsList.add(mappingTypeResults);
+					sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 				}
+				
+				Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(0);
 
 				// Set mapping if it has the current mapping type.
 				// The mapping type can be different in case of a manual mapping.
@@ -2194,16 +2270,22 @@ public class GenericMapping extends Mapping {
 							}
 							
 							// Save the rejected drugs
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
+							
+							List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+							if (mappingTypeResultsList == null) {
+								mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+								Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+								mappingTypeResultsList.add(mappingTypeResults);
+								sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 							}
+							
+							Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
+
 							rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
 
 							if (matchingCDMDrugs.size() > 1) {
@@ -2226,17 +2308,22 @@ public class GenericMapping extends Mapping {
 									}
 									if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
 										matchingCDMDrugs.removeAll(remove);
-										
+
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
 										
 										List<String> multipleMappings = rejectedForMapping.get(resultType);
 										if (multipleMappings == null) {
@@ -2285,17 +2372,22 @@ public class GenericMapping extends Mapping {
 									}
 									if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
 										matchingCDMDrugs.removeAll(remove);
-										
+
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
 										
 										List<String> multipleMappings = rejectedForMapping.get(resultType);
 										if (multipleMappings == null) {
@@ -2331,14 +2423,19 @@ public class GenericMapping extends Mapping {
 
 									sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 									if (sourceDrugMappingResult == null) {
-										sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+										sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 										sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 									}
-									rejectedForMapping = sourceDrugMappingResult.get(mapping);
-									if (rejectedForMapping == null) {
-										rejectedForMapping = new HashMap<Integer, List<String>>();
-										sourceDrugMappingResult.put(mapping, rejectedForMapping);
+									
+									mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+									if (mappingTypeResultsList == null) {
+										mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+										Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+										mappingTypeResultsList.add(mappingTypeResults);
+										sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 									}
+									
+									rejectedForMapping = mappingTypeResultsList.get(0);
 									
 									List<String> multipleMappings = rejectedForMapping.get(resultType);
 									if (multipleMappings == null) {
@@ -2391,14 +2488,19 @@ public class GenericMapping extends Mapping {
 									else {
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
 										
 										List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING);
 										if (multipleMappings == null) {
@@ -2419,16 +2521,22 @@ public class GenericMapping extends Mapping {
 										automaticMapping = matchingCDMDrugs.get(0);
 									}
 									else {
+
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
 										
 										List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING);
 										if (multipleMappings == null) {
@@ -2447,32 +2555,44 @@ public class GenericMapping extends Mapping {
 							}
 						}
 						else {
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
+							
+							List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+							if (mappingTypeResultsList == null) {
+								mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+								Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+								mappingTypeResultsList.add(mappingTypeResults);
+								sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 							}
+							
+							Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
+							
 							List<String> emptyList = new ArrayList<String>();
 							emptyList.add(" ");
 							rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS, emptyList);
 						}
 					}
 					else {
-						Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+						Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 						if (sourceDrugMappingResult == null) {
-							sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+							sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 							sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 						}
-						Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-						if (rejectedForMapping == null) {
-							rejectedForMapping = new HashMap<Integer, List<String>>();
-							sourceDrugMappingResult.put(mapping, rejectedForMapping);
+						
+						List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+						if (mappingTypeResultsList == null) {
+							mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+							Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+							mappingTypeResultsList.add(mappingTypeResults);
+							sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 						}
+						
+						Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
+						
 						List<String> emptyList = new ArrayList<String>();
 						emptyList.add(" ");
 						rejectedForMapping.put(CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG, emptyList);
@@ -2491,17 +2611,21 @@ public class GenericMapping extends Mapping {
 			}
 			
 			if (finalMapping != null) {
-				Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+				Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 				if (sourceDrugMappingResult == null) {
-					sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+					sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 					sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 				}
 				
-				Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-				if (mappingTypeResults == null) {
-					mappingTypeResults = new HashMap<Integer, List<String>>();
-					sourceDrugMappingResult.put(mapping, mappingTypeResults);
+				List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+				if (mappingTypeResultsList == null) {
+					mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+					Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+					mappingTypeResultsList.add(mappingTypeResults);
+					sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 				}
+				
+				Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(0);
 
 				// Set mapping if it has the current mapping type.
 				// The mapping type can be different in case of a manual mapping.
@@ -2605,17 +2729,21 @@ public class GenericMapping extends Mapping {
 									cdmDrugsMissingForm.add(cdmDrug);
 								}
 							}
-
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
+							
+							List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+							if (mappingTypeResultsList == null) {
+								mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+								Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+								mappingTypeResultsList.add(mappingTypeResults);
+								sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 							}
+							
+							Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 							
 							List<String> rejectedForms = rejectedForMapping.get(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM);
 							if (rejectedForms == null) {
@@ -2659,17 +2787,21 @@ public class GenericMapping extends Mapping {
 								}
 								if ((remove.size() > 0) && (cdmDrugsWithIngredients.size() != remove.size())) {
 									cdmDrugsWithIngredients.removeAll(remove);
-									
-									Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+									Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 									if (sourceDrugMappingResult == null) {
-										sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+										sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 										sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 									}
-									Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-									if (rejectedForMapping == null) {
-										rejectedForMapping = new HashMap<Integer, List<String>>();
-										sourceDrugMappingResult.put(mapping, rejectedForMapping);
+									
+									List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+									if (mappingTypeResultsList == null) {
+										mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+										Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+										mappingTypeResultsList.add(mappingTypeResults);
+										sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 									}
+									
+									Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 									
 									List<String> multipleMappings = rejectedForMapping.get(resultType);
 									if (multipleMappings == null) {
@@ -2718,17 +2850,21 @@ public class GenericMapping extends Mapping {
 								}
 								if ((remove.size() > 0) && (cdmDrugsWithIngredients.size() != remove.size())) {
 									cdmDrugsWithIngredients.removeAll(remove);
-									
-									Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+									Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 									if (sourceDrugMappingResult == null) {
-										sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+										sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 										sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 									}
-									Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-									if (rejectedForMapping == null) {
-										rejectedForMapping = new HashMap<Integer, List<String>>();
-										sourceDrugMappingResult.put(mapping, rejectedForMapping);
+									
+									List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+									if (mappingTypeResultsList == null) {
+										mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+										Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+										mappingTypeResultsList.add(mappingTypeResults);
+										sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 									}
+									
+									Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 									
 									List<String> multipleMappings = rejectedForMapping.get(resultType);
 									if (multipleMappings == null) {
@@ -2768,17 +2904,21 @@ public class GenericMapping extends Mapping {
 									}
 								}
 								cdmDrugsWithIngredients.removeAll(remove);
-								
-								Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+								Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 								if (sourceDrugMappingResult == null) {
-									sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+									sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 									sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 								}
-								Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-								if (rejectedForMapping == null) {
-									rejectedForMapping = new HashMap<Integer, List<String>>();
-									sourceDrugMappingResult.put(mapping, rejectedForMapping);
+								
+								List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+								if (mappingTypeResultsList == null) {
+									mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+									Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+									mappingTypeResultsList.add(mappingTypeResults);
+									sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 								}
+								
+								Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 								
 								List<String> multipleMappings = rejectedForMapping.get(resultType);
 								if (multipleMappings == null) {
@@ -2809,16 +2949,21 @@ public class GenericMapping extends Mapping {
 								automaticMapping = matchingCDMDrugs.get(0);
 							}
 							else if (matchingCDMDrugs.size() > 1) {
-								Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+								Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 								if (sourceDrugMappingResult == null) {
-									sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+									sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 									sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 								}
-								Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-								if (rejectedForMapping == null) {
-									rejectedForMapping = new HashMap<Integer, List<String>>();
-									sourceDrugMappingResult.put(mapping, rejectedForMapping);
+								
+								List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+								if (mappingTypeResultsList == null) {
+									mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+									Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+									mappingTypeResultsList.add(mappingTypeResults);
+									sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 								}
+								
+								Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
 								
 								List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING);
 								if (multipleMappings == null) {
@@ -2836,16 +2981,22 @@ public class GenericMapping extends Mapping {
 						}
 					}
 					else {
-						Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+						Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 						if (sourceDrugMappingResult == null) {
-							sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+							sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 							sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 						}
-						Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-						if (rejectedForMapping == null) {
-							rejectedForMapping = new HashMap<Integer, List<String>>();
-							sourceDrugMappingResult.put(mapping, rejectedForMapping);
+						
+						List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+						if (mappingTypeResultsList == null) {
+							mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+							Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+							mappingTypeResultsList.add(mappingTypeResults);
+							sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 						}
+						
+						Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
+						
 						List<String> emptyList = new ArrayList<String>();
 						emptyList.add(" ");
 						rejectedForMapping.put(CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS, emptyList);
@@ -2864,17 +3015,21 @@ public class GenericMapping extends Mapping {
 			}
 			
 			if (finalMapping != null) {
-				Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+				Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 				if (sourceDrugMappingResult == null) {
-					sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+					sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 					sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 				}
 				
-				Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-				if (mappingTypeResults == null) {
-					mappingTypeResults = new HashMap<Integer, List<String>>();
-					sourceDrugMappingResult.put(mapping, mappingTypeResults);
+				List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+				if (mappingTypeResultsList == null) {
+					mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+					Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+					mappingTypeResultsList.add(mappingTypeResults);
+					sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 				}
+				
+				Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(0);
 
 				// Set mapping if it has the current mapping type.
 				// The mapping type can be different in case of a manual mapping.
@@ -3601,7 +3756,7 @@ public class GenericMapping extends Mapping {
 			
 			for (SourceDrug sourceDrug : sourceDrugs) {
 				String mappingStatus = manualMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
-				Map<Integer, Map<Integer, List<String>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
+				Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
 				
 				if (sourceDrugMappings == null) {
 					System.out.println("ERROR: " + sourceDrug);
@@ -3609,47 +3764,46 @@ public class GenericMapping extends Mapping {
 
 				mappingType = 0;
 				while (mappingTypeDescriptions.containsKey(mappingType)) {
-					Map<Integer, List<String>> mappingResult = sourceDrugMappings.get(mappingType);
-					if (mappingResult != null) {
-						// Get the MAPPED result type value for the current mapping type
-						int mappingResultType = (100 * mappingType);
-						int mappedResultType = mappingResultType;
-						while (mappingResultDescriptions.containsKey(mappingResultType)) {
-							mappedResultType = mappingResultType;
-							mappingResultType++;
-						}
-
-						// Write the result records
-						mappingResultType = (100 * mappingType);
-						while (mappingResultDescriptions.containsKey(mappingResultType)) {
-							String record = mappingStatus;
-							record += "," + sourceDrug;
-							record += "," + mappingTypeDescriptions.get(mappingType);
-							record += "," + mappingResultDescriptions.get(mappingResultType);
-							
-							counters.get(mappingType).put(mappingResultType, counters.get(mappingType).get(mappingResultType) + 1);
-							dataCoverage.get(mappingType).put(mappingResultType, dataCoverage.get(mappingType).get(mappingResultType) + sourceDrug.getCount());
-							//TODO
-							/*
-							counters.get(MAPPING_TYPE_COUNT).put(MAPPING_RESULTS_COUNT, counters.get(MAPPING_TYPE_COUNT).get(MAPPING_RESULTS_COUNT) + 1);
-							dataCoverage.get(MAPPING_TYPE_COUNT).put(MAPPING_RESULTS_COUNT, dataCoverage.get(MAPPING_TYPE_COUNT).get(MAPPING_RESULTS_COUNT) + sourceDrug.getCount());
-							*/
-							
-							List<String> results = mappingResult.get(mappingResultType);
-							if ((results != null) && (results.size() > 0)) {
-								if (mappingResultType == mappedResultType) {
-									record += "," + results.get(0);
-								}
-								else {
-									Collections.sort(results);
-									for (String result : results) {
-										record += "," + "\"" + result.replaceAll("\"", "") + "\"";
-									}
-								}
-								drugMappingFile.println(record);
+					List< Map<Integer, List<String>>> mappingResultList = sourceDrugMappings.get(mappingType);
+					if (mappingResultList != null) {
+						//TODO go through list
+						Map<Integer, List<String>> mappingResult = mappingResultList.get(0);
+						if (mappingResult != null) {
+							// Get the MAPPED result type value for the current mapping type
+							int mappingResultType = (100 * mappingType);
+							int mappedResultType = mappingResultType;
+							while (mappingResultDescriptions.containsKey(mappingResultType)) {
+								mappedResultType = mappingResultType;
+								mappingResultType++;
 							}
-							
-							mappingResultType++;
+
+							// Write the result records
+							mappingResultType = (100 * mappingType);
+							while (mappingResultDescriptions.containsKey(mappingResultType)) {
+								String record = mappingStatus;
+								record += "," + sourceDrug;
+								record += "," + mappingTypeDescriptions.get(mappingType);
+								record += "," + mappingResultDescriptions.get(mappingResultType);
+								
+								counters.get(mappingType).put(mappingResultType, counters.get(mappingType).get(mappingResultType) + 1);
+								dataCoverage.get(mappingType).put(mappingResultType, dataCoverage.get(mappingType).get(mappingResultType) + sourceDrug.getCount());
+								
+								List<String> results = mappingResult.get(mappingResultType);
+								if ((results != null) && (results.size() > 0)) {
+									if (mappingResultType == mappedResultType) {
+										record += "," + results.get(0);
+									}
+									else {
+										Collections.sort(results);
+										for (String result : results) {
+											record += "," + "\"" + result.replaceAll("\"", "") + "\"";
+										}
+									}
+									drugMappingFile.println(record);
+								}
+								
+								mappingResultType++;
+							}
 						}
 					}
 					mappingType++;
@@ -3688,19 +3842,19 @@ public class GenericMapping extends Mapping {
 			dataCountTotal += sourceDrug.getCount();
 						
 			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_MAPPING) != null) {
-				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_MAPPING).get(CLINICAL_DRUG_MAPPING_MAPPED) != null) {
+				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_MAPPING).get(0).get(CLINICAL_DRUG_MAPPING_MAPPED) != null) {
 					mappingClinicalDrugs++;
 					dataCoverageClinicalDrugs += sourceDrug.getCount();
 				}
 			}
 			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_COMP_MAPPING) != null) {
-				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_COMP_MAPPING).get(CLINICAL_DRUG_COMP_MAPPING_MAPPED) != null) {
+				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_COMP_MAPPING).get(0).get(CLINICAL_DRUG_COMP_MAPPING_MAPPED) != null) {
 					mappingClinicalDrugComps++;
 					dataCoverageClinicalDrugComps += sourceDrug.getCount();
 				}
 			}
 			if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING) != null) {
-				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING).get(CLINICAL_DRUG_FORM_MAPPING_MAPPED) != null) {
+				if (sourceDrugMappingResults.get(sourceDrug).get(CLINICAL_DRUG_FORM_MAPPING).get(0).get(CLINICAL_DRUG_FORM_MAPPING_MAPPED) != null) {
 					mappingClinicalDrugForms++;
 					dataCoverageClinicalDrugForms += sourceDrug.getCount();
 				}
@@ -3725,22 +3879,6 @@ public class GenericMapping extends Mapping {
 			report.add("");
 			report.add("No datacoverage counts available.");
 		}
-		//TODO
-		/*
-		report.add("");
-		for (int mappingType = 0; mappingType < MAPPING_TYPE_COUNT; mappingType++) {
-			for (int mappingResultType = 0; mappingResultType < MAPPING_RESULTS_COUNT; mappingResultType++) {
-				report.add("Source drugs with " + mappingTypeDescriptions.get(mappingType) + " " + mappingResultDescriptions.get(mappingResultType) + ": " + Long.toString(counters.get(mappingType).get(mappingResultType)) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) counters.get(mappingType).get(mappingResultType) / (double) sourceDrugs.size()) * 100)) + "%)");
-			}
-		}
-
-		report.add("");
-		for (int mappingType = 0; mappingType < MAPPING_TYPE_COUNT; mappingType++) {
-			for (int mappingResultType = 0; mappingResultType < MAPPING_RESULTS_COUNT; mappingResultType++) {
-				report.add("DataCoverage of source drugs with " + mappingTypeDescriptions.get(mappingType) + " " + mappingResultDescriptions.get(mappingResultType) + ": " + Long.toString(dataCoverage.get(mappingType).get(mappingResultType)) + " of " + dataCoverage.get(MAPPING_TYPE_COUNT).get(MAPPING_RESULTS_COUNT) + " (" + Long.toString(Math.round(((double) dataCoverage.get(mappingType).get(mappingResultType) / (double) dataCoverage.get(MAPPING_TYPE_COUNT).get(MAPPING_RESULTS_COUNT)) * 100)) + "%)");
-			}
-		}
-		*/
 		
 		
 		System.out.println();
