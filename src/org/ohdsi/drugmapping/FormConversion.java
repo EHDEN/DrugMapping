@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.ohdsi.databases.QueryParameters;
@@ -110,81 +111,87 @@ public class FormConversion {
 		File formFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
 		if (formFile.exists()) {
 			status = STATE_OK;
-			ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
 			
-			Iterator<Row> formConversionFileIterator = formConversionFile.iterator();
-			Set<String> formConcepts = formConversionFile.getColumns();
-			if (formConcepts != null) {
-				while (formConversionFileIterator.hasNext()) {
-					Row row = formConversionFileIterator.next();
-					
-					if (!conceptNamesRead) {
-						conceptNamesRead = true;
-						formMapDate = row.get("Local form", true).replace('/', '-');
-					}
-					else {
-						String sourceForm = row.get("Local form", true);
-						if (!sourceForm.trim().equals("")) {
-							oldSourceForms.add(sourceForm);
-							
-							if (!sourceFormNames.contains(sourceForm)) {
-								System.out.println("    WARNING: Source form '" + sourceForm + "' no longer exists!");
+			try {
+				ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
+				
+				Iterator<Row> formConversionFileIterator = formConversionFile.iterator();
+				Set<String> formConcepts = formConversionFile.getColumns();
+				if (formConcepts != null) {
+					while (formConversionFileIterator.hasNext()) {
+						Row row = formConversionFileIterator.next();
+						
+						if (!conceptNamesRead) {
+							conceptNamesRead = true;
+							formMapDate = row.get("Local form", true).replace('/', '-');
+						}
+						else {
+							String sourceForm = row.get("Local form", true);
+							if (!sourceForm.trim().equals("")) {
+								oldSourceForms.add(sourceForm);
+								
 								if (!sourceFormNames.contains(sourceForm)) {
-									sourceFormNames.add(sourceForm);
+									System.out.println("    WARNING: Source form '" + sourceForm + "' no longer exists!");
+									if (!sourceFormNames.contains(sourceForm)) {
+										sourceFormNames.add(sourceForm);
+									}
 								}
-							}
-							
-							String mappingLine = "        " + sourceForm;
-							
-							Set<String> sourceFormMapping = formConversionMap.get(sourceForm);
-							if (sourceFormMapping == null) {
-								sourceFormMapping = new HashSet<String>();
-								formConversionMap.put(sourceForm, sourceFormMapping);
-							}
-							for (String concept_id : formConcepts) {
-								oldCDMForms.add(concept_id);
-								if (!concept_id.equals("Local form")) {
-									if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
-										String cell = row.get(concept_id, true).trim();
-										if (!cell.equals("")) {
-											sourceFormMapping.add(concept_id);
-											mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
+								
+								String mappingLine = "        " + sourceForm;
+								
+								Set<String> sourceFormMapping = formConversionMap.get(sourceForm);
+								if (sourceFormMapping == null) {
+									sourceFormMapping = new HashSet<String>();
+									formConversionMap.put(sourceForm, sourceFormMapping);
+								}
+								for (String concept_id : formConcepts) {
+									oldCDMForms.add(concept_id);
+									if (!concept_id.equals("Local form")) {
+										if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
+											String cell = row.get(concept_id, true).trim();
+											if (!cell.equals("")) {
+												sourceFormMapping.add(concept_id);
+												mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
+											}
+										}
+										else {
+											System.out.println("    WARNING: CDM form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
 										}
 									}
-									else {
-										System.out.println("    WARNING: CDM form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
-									}
 								}
+								System.out.println(mappingLine);
 							}
-							System.out.println(mappingLine);
 						}
 					}
-				}
-				
-				for (String sourceForm : sourceFormNames) {
-					if (!oldSourceForms.contains(sourceForm)) {
-						if (!newSourceForms) {
-							System.out.println("    NEW SOURCE FORMS FOUND:");
+					
+					for (String sourceForm : sourceFormNames) {
+						if (!oldSourceForms.contains(sourceForm)) {
+							if (!newSourceForms) {
+								System.out.println("    NEW SOURCE FORMS FOUND:");
+							}
+							newSourceForms = true;
 						}
-						newSourceForms = true;
 					}
-				}
 
-				for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
-					if (!oldCDMForms.contains(cdmForm)) {
-						if (!newCDMForms) {
-							System.out.println("    NEW CDM FORMS FOUND:");
+					for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
+						if (!oldCDMForms.contains(cdmForm)) {
+							if (!newCDMForms) {
+								System.out.println("    NEW CDM FORMS FOUND:");
+							}
+							newCDMForms = true;
 						}
-						newCDMForms = true;
+					}
+					
+					if (newSourceForms || newCDMForms) {
+						status = STATE_CRITICAL;
+					}
+					else {
+						status = STATE_OK;
 					}
 				}
-				
-				if (newSourceForms || newCDMForms) {
-					status = STATE_CRITICAL;
-				}
-				else {
-					status = STATE_OK;
-				}
+			}
+			catch (NoSuchElementException fileException) {
+				System.out.println("  ERROR: " + fileException.getMessage());
 			}
 		}
 		else {

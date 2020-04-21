@@ -7,6 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -113,6 +115,29 @@ public class InputFile extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				defineFile(currentInputFile);
 			}
+		});
+		
+		fileLabel.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (fileSelectCheckBox.isEnabled()) {
+					fileSelectCheckBox.setSelected(!fileSelectCheckBox.isSelected());
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {}
+			
 		});
 		
 		DrugMapping.disableWhenRunning(fileSelectButton);
@@ -241,7 +266,7 @@ public class InputFile extends JPanel {
 			}
 			else {
 				if (!suppressError) {
-					System.out.println("Cannot read file '" + getFileName() + "'!");
+					JOptionPane.showMessageDialog(null, "Cannot read file '" + getFileName() + "'!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}

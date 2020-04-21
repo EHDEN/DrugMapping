@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.ohdsi.databases.QueryParameters;
@@ -110,87 +111,93 @@ public class UnitConversion {
 		File unitFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
 		if (unitFile.exists()) {
 			status = STATE_OK;
-			ReadCSVFileWithHeader unitConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
+			
+			try {
+				ReadCSVFileWithHeader unitConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
 
-			Iterator<Row> unitConversionFileIterator = unitConversionFile.iterator();
-			Set<String> unitConcepts = unitConversionFile.getColumns();
-			if (unitConcepts != null) {
-				while (unitConversionFileIterator.hasNext()) {
-					Row row = unitConversionFileIterator.next();
-					
-					if (!conceptNamesRead) {
-						conceptNamesRead = true;
-						unitMapDate = row.get("Local unit", true).replace('/', '-');
-					}
-					else {
-						String sourceUnit = row.get("Local unit", true);
-						oldSourceUnits.add(sourceUnit);
-
-						String mappingLine = "        " + sourceUnit;
-						if (!sourceUnitNames.contains(sourceUnit)) {
-							mappingLine = "    WARNING: Source unit '" + sourceUnit + "' no longer exists!";
-							if (!sourceUnitNames.contains(sourceUnit)) {
-								sourceUnitNames.add(sourceUnit);
-							}
-						}
+				Iterator<Row> unitConversionFileIterator = unitConversionFile.iterator();
+				Set<String> unitConcepts = unitConversionFile.getColumns();
+				if (unitConcepts != null) {
+					while (unitConversionFileIterator.hasNext()) {
+						Row row = unitConversionFileIterator.next();
 						
-						Map<String, Double> sourceUnitFactors = unitConversionMap.get(sourceUnit);
-						if (sourceUnitFactors == null) {
-							sourceUnitFactors = new HashMap<String, Double>();
-							unitConversionMap.put(sourceUnit, sourceUnitFactors);
+						if (!conceptNamesRead) {
+							conceptNamesRead = true;
+							unitMapDate = row.get("Local unit", true).replace('/', '-');
 						}
-						for (String concept_id : unitConcepts) {
-							if (!concept_id.equals("Local unit")) {
-								oldCDMUnits.add(concept_id);
-								if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
-									String factorString = row.get(concept_id, true).trim();
-									if (!factorString.equals("")) {
-										try {
-											double factor = Double.parseDouble(factorString);
-											sourceUnitFactors.put(concept_id, factor);
-											mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdmUnitConceptIdToNameMap.get(concept_id) + "\")";
-										}
-										catch (NumberFormatException e) {
-											System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
-											status = STATE_ERROR;
+						else {
+							String sourceUnit = row.get("Local unit", true);
+							oldSourceUnits.add(sourceUnit);
+
+							String mappingLine = "        " + sourceUnit;
+							if (!sourceUnitNames.contains(sourceUnit)) {
+								mappingLine = "    WARNING: Source unit '" + sourceUnit + "' no longer exists!";
+								if (!sourceUnitNames.contains(sourceUnit)) {
+									sourceUnitNames.add(sourceUnit);
+								}
+							}
+							
+							Map<String, Double> sourceUnitFactors = unitConversionMap.get(sourceUnit);
+							if (sourceUnitFactors == null) {
+								sourceUnitFactors = new HashMap<String, Double>();
+								unitConversionMap.put(sourceUnit, sourceUnitFactors);
+							}
+							for (String concept_id : unitConcepts) {
+								if (!concept_id.equals("Local unit")) {
+									oldCDMUnits.add(concept_id);
+									if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
+										String factorString = row.get(concept_id, true).trim();
+										if (!factorString.equals("")) {
+											try {
+												double factor = Double.parseDouble(factorString);
+												sourceUnitFactors.put(concept_id, factor);
+												mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdmUnitConceptIdToNameMap.get(concept_id) + "\")";
+											}
+											catch (NumberFormatException e) {
+												System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
+												status = STATE_ERROR;
+											}
 										}
 									}
-								}
-								else {
-									System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+									else {
+										System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+									}
 								}
 							}
+							System.out.println(mappingLine);
 						}
-						System.out.println(mappingLine);
 					}
-				}
-				
-				for (String sourceUnit : sourceUnitNames) {
-					if (!oldSourceUnits.contains(sourceUnit)) {
-						if (!newSourceUnits) {
-							System.out.println("    NEW SOURCE UNITS FOUND:");
+					
+					for (String sourceUnit : sourceUnitNames) {
+						if (!oldSourceUnits.contains(sourceUnit)) {
+							if (!newSourceUnits) {
+								System.out.println("    NEW SOURCE UNITS FOUND:");
+							}
+							System.out.println("        " + sourceUnit);
+							newSourceUnits = true;
 						}
-						System.out.println("        " + sourceUnit);
-						newSourceUnits = true;
 					}
-				}
 
-				for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
-					if (!oldCDMUnits.contains(cdmUnit)) {
-						if (!newCDMUnits) {
-							System.out.println("    NEW CDM UNITS FOUND:");
+					for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
+						if (!oldCDMUnits.contains(cdmUnit)) {
+							if (!newCDMUnits) {
+								System.out.println("    NEW CDM UNITS FOUND:");
+							}
+							System.out.println("        " + cdmUnit);
+							newCDMUnits = true;
 						}
-						System.out.println("        " + cdmUnit);
-						newCDMUnits = true;
+					}
+					
+					if (newSourceUnits || newCDMUnits) {
+						status = STATE_CRITICAL;
+					}
+					else {
+						status = STATE_OK;
 					}
 				}
-				
-				if (newSourceUnits || newCDMUnits) {
-					status = STATE_CRITICAL;
-				}
-				else {
-					status = STATE_OK;
-				}
+			}
+			catch (NoSuchElementException fileException) {
+				System.out.println("  ERROR: " + fileException.getMessage());
 			}
 		}
 		else {

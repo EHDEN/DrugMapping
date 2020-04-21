@@ -257,17 +257,19 @@ public class DrugMapping {
 	
 	
 	private void logFileSettings(String fileId, InputFile file) {
-		System.out.println("Input File: " + fileId);
-		System.out.println("  Filename: " + file.getFileName());
-		System.out.println("  Field delimiter: '" + file.getFieldDelimiter() + "'");
-		System.out.println("  Text qualifier: '" + file.getTextQualifier() + "'");
-		System.out.println("  Fields:");
-		List<String> columns = file.getColumns();
-		Map<String, String> columnMapping = file.getColumnMapping();
-		for (String column : columns) {
-			System.out.println("    " + column + " -> " + columnMapping.get(column));
+		if (file.getFileName() != null) {
+			System.out.println("Input File: " + fileId);
+			System.out.println("  Filename: " + file.getFileName());
+			System.out.println("  Field delimiter: '" + file.getFieldDelimiter() + "'");
+			System.out.println("  Text qualifier: '" + file.getTextQualifier() + "'");
+			System.out.println("  Fields:");
+			List<String> columns = file.getColumns();
+			Map<String, String> columnMapping = file.getColumnMapping();
+			for (String column : columns) {
+				System.out.println("    " + column + " -> " + columnMapping.get(column));
+			}
+			System.out.println();
 		}
-		System.out.println();
 	}
 	
 	

@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ReadCSVFile implements Iterable<List<String>> {
 	protected InputStreamReader	streamReader;
@@ -112,26 +113,24 @@ public class ReadCSVFile implements Iterable<List<String>> {
 	private class CSVFileIterator implements Iterator<List<String>> {
 		private static final int BUFFERSIZE = 4194304; // 4 MB
 		private char[]	buffer = new char[BUFFERSIZE]; // 4 MB
-		private char[]	peekBuffer = null;
 		private int bufferPosition = 0;
 		private int numberRead;
-		private int peekNumberRead;
 		private List<String> nextLine;
+		private long recordNr = 0L;
 		private long lineNr = 1L;
 
 		public CSVFileIterator() {
 			try {
 				nextLine = readLine();
-			} catch (IOException e1) {
-				e1.printStackTrace();
+			} catch (IOException readLineException) {
+				System.out.println(readLineException.getMessage());
 			}
 			if (nextLine == null) {
 				EOF = true;
 				try {
 					streamReader.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (IOException streamReaderException) {
+					System.out.println(streamReaderException.getMessage());
 				}
 			}
 
@@ -141,20 +140,19 @@ public class ReadCSVFile implements Iterable<List<String>> {
 			return !EOF;
 		}
 
-		public List<String> next() {
+		public List<String> next() throws NoSuchElementException {
 			List<String> line = nextLine;
 			try {
 				nextLine = readLine();
-			} catch (IOException e1) {
-				e1.printStackTrace();
+			} catch (IOException readLineException) {
+				throw new NoSuchElementException(readLineException.getMessage());
 			}
 			if (nextLine == null) {
 				EOF = true;
 				try {
 					streamReader.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} catch (IOException streamReaderException) {
+					throw new NoSuchElementException(streamReaderException.getMessage());
 				}
 			}
 
@@ -167,51 +165,44 @@ public class ReadCSVFile implements Iterable<List<String>> {
 		
 		private List<String> readLine() throws IOException {
 			int columnNr = 0;
+			long charPosition = 0L;
 			boolean delimitedText = false;
-			boolean doubleTextDelimiter = false;
+			boolean wasDelimitedText = false;
 			List<String> line = new ArrayList<String>();
 			if (numberRead != -1) {
+				recordNr++;
 				line.add("");
 				boolean EOF = false;
 				boolean EOL = false;
 				while ((!EOF) && (!EOL)) {
 					if (bufferPosition == numberRead) {
 						try {
-							if (peekBuffer == null) {
-								numberRead = streamReader.read(buffer, 0, BUFFERSIZE);
-							}
-							else {
-								buffer = peekBuffer;
-								numberRead = peekNumberRead;
-								peekBuffer = null;
-							}
-							if (numberRead == -1) {
-								EOF = true;
-								break;
-							}
-							bufferPosition = 0;
-						} catch (IOException e) {
-							e.printStackTrace();
+							numberRead = streamReader.read(buffer, 0, BUFFERSIZE);
+						} catch (IOException streamReaderException) {
+							throw new IOException(streamReaderException);
 						}
+						if (numberRead == -1) {
+							if (delimitedText) {
+								throw new IOException("Unclosed delimited field  (text delimiter = " + textDelimiter + ") at end of file");
+							}
+							EOF = true;
+							break;
+						}
+						bufferPosition = 0;
 					}
+					charPosition++;
 					if ((textDelimiter != ((char) 0)) && (buffer[bufferPosition] == textDelimiter)) {
-						if (delimitedText) {
-							if (doubleTextDelimiter) {
-								doubleTextDelimiter = false;
-							}
-							else if (peekNextChar() == textDelimiter) {
-								doubleTextDelimiter = true;
-								line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); // Add textDelimiter to line
-							}
-							else if ((peekNextChar() == ((char) 0)) || (peekNextChar() == delimiter) || (peekNextChar() == '\r') || (peekNextChar() == '\n')) {
-								delimitedText = false;
-							}
-							else {
-								throw new IOException("Characters following field closing quote in line " + Long.toString(lineNr));
-							}
+						if (delimitedText) { // End of delimited text value or first of double text delimiter inside delimited value
+							delimitedText = false;
+							wasDelimitedText = true;
+						}
+						else if (wasDelimitedText) { // Add textDelimiter that was contained in value 
+							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]); 
+							delimitedText = true;
+							wasDelimitedText = false;
 						}
 						else if (line.get(columnNr).length() > 0) {
-							throw new IOException("Unquoted field containing quote in line " + Long.toString(lineNr));
+							throw new IOException("Undelimited field containing text delimiter (" + textDelimiter + ") in record " + Long.toString(recordNr) + " at line " + Long.toString(lineNr) + " position " + Long.toString(charPosition));
 						}
 						else {
 							delimitedText = true;
@@ -226,11 +217,13 @@ public class ReadCSVFile implements Iterable<List<String>> {
 							columnNr++;
 							delimitedText = false;
 						}
+						wasDelimitedText = false;
 					}
 					else if (buffer[bufferPosition] == '\r') {
 						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
+						wasDelimitedText = false;
 					}
 					else if (buffer[bufferPosition] == '\n') {
 						if (delimitedText) {
@@ -238,11 +231,18 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						}
 						else {
 							EOL = true;
-							lineNr++;
 						}
+						wasDelimitedText = false;
+						lineNr++;
+						charPosition = 0L;
 					}
 					else {
-						line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
+						if (wasDelimitedText) {
+							throw new IOException("Characters following field closing text delimiter (" + textDelimiter + ") in record " + Long.toString(recordNr) + " at line " + Long.toString(lineNr) + " position " + Long.toString(charPosition));
+						}
+						else {
+							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
+						}
 					}
 					bufferPosition++;
 				}
@@ -253,29 +253,8 @@ public class ReadCSVFile implements Iterable<List<String>> {
 			else {
 				line = null;
 			}
-			
+
 			return line;
-		}
-		
-		private Character peekNextChar() {
-			char character = (char) 0;
-			if ((bufferPosition + 1) == numberRead) {
-				try {
-					if (peekBuffer == null) {
-						peekBuffer = new char[BUFFERSIZE];
-						peekNumberRead = streamReader.read(peekBuffer, 0, BUFFERSIZE);
-					}
-					if (peekNumberRead != -1) {
-						character = peekBuffer[0];
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			else {
-				character = buffer[bufferPosition + 1];
-			}
-			return character;
 		}
 	}
 

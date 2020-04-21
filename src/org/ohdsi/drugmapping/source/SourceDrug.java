@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ohdsi.drugmapping.cdm.CDMDrug;
-
 public class SourceDrug {
 	private static boolean error = false;
 	
@@ -27,7 +25,6 @@ public class SourceDrug {
 	private String formulation = null;
 	private Long count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
-	private CDMDrug mappedDrug = null;
 	
 	
 	public static void init() {
@@ -209,11 +206,6 @@ public class SourceDrug {
 	
 	public Long getCount() {
 		return count;
-	}
-	
-	
-	public CDMDrug getMappedDrug() {
-		return mappedDrug;
 	}
 	
 	

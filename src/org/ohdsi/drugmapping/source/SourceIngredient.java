@@ -68,7 +68,7 @@ public class SourceIngredient {
 		this.ingredientNameEnglish = ingredientNameEnglish.equals("") ? null : ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
 		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish == null ? "" : this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 		
 		Map<Integer, List<String>> matchNameMap = new HashMap<Integer, List<String>>();
 		int maxNameLength = 0;
