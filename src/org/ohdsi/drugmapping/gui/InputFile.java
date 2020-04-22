@@ -219,6 +219,11 @@ public class InputFile extends JPanel {
 	}
 	
 	
+	public void setSelected(boolean selected) {
+		fileSelectCheckBox.setSelected(selected);
+	}
+	
+	
 	public boolean fileExists() {
 		boolean exists = false;
 		if (getFileName() != null) {
@@ -313,6 +318,7 @@ public class InputFile extends JPanel {
 		settings.add(labelText + ".filename=" + fileName);
 		settings.add(labelText + ".fieldDelimiter=" + fieldDelimiter);
 		settings.add(labelText + ".textQualifier=" + textQualifier);
+		settings.add(labelText + ".selected=" + (isSelected() ? "Yes" : "No"));
 		for (String column : getColumns()) {
 			settings.add(labelText + ".column." + column + "=" + (columnMapping.get(column) == null ? "" : columnMapping.get(column)));
 		}
@@ -338,6 +344,7 @@ public class InputFile extends JPanel {
 						if (settingPathSplit[1].equals("filename")) setFileName(value);
 						else if (settingPathSplit[1].equals("fieldDelimiter")) setFieldDelimiter(value);
 						else if (settingPathSplit[1].equals("textQualifier")) setTextQualifier(value);
+						else if (settingPathSplit[1].equals("selected")) setSelected(value.toUpperCase().equals("YES"));
 						else {
 							// Unknown setting
 						}

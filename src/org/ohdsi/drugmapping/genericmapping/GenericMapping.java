@@ -19,6 +19,7 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.FormConversion;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.UnitConversion;
+import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.cdm.CDMDrug;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
@@ -37,6 +38,7 @@ public class GenericMapping extends Mapping {
 	private static int CLINICAL_DRUG_MAPPING      = 0;
 	private static int CLINICAL_DRUG_COMP_MAPPING = 1;
 	private static int CLINICAL_DRUG_FORM_MAPPING = 2;
+	private static int INGREDIENT_MAPPING         = 3;
 	
 	private static Map<Integer, String> mappingTypeDescriptions;
 	static {
@@ -44,6 +46,7 @@ public class GenericMapping extends Mapping {
 		mappingTypeDescriptions.put(CLINICAL_DRUG_MAPPING     , "ClinicalDrug Mapping");
 		mappingTypeDescriptions.put(CLINICAL_DRUG_COMP_MAPPING, "ClinicalDrugComp Mapping");
 		mappingTypeDescriptions.put(CLINICAL_DRUG_FORM_MAPPING, "ClinicalDrugForm Mapping");
+		mappingTypeDescriptions.put(INGREDIENT_MAPPING        , "Ingredient Mapping");
 	}
 	
 	// Mapping result types.
@@ -99,6 +102,17 @@ public class GenericMapping extends Mapping {
 	private static int CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                       = 212; // A mapping to a single clinical drug form or a failing mapping is overruled by a manual mapping.
 	private static int CLINICAL_DRUG_FORM_MAPPING_MAPPED                                  = 213; // The final mapping of the source drug to a clinical drug form.
 
+	private static int INGREDIENT_MAPPING_REJECTED_BY_STRENGTH                            = 300; // The CDM clinical drug comps rejected because they have a different strength than the source drug.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                   = 301; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm vocabulary.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE         = 302; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm Extension vocabulary.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE              = 303; // The CDM clinical drug comps rejected because they do not have the latest valid start date.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE              = 304; // The CDM clinical drug comps rejected because they do not have the oldest valid start date.
+	private static int INGREDIENT_MAPPING_NO_UNIQUE_MAPPING                               = 305; // One or more ingredients have several clinical drug comps or ingredients they could be mapped to.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE                    = 306; // The CDM clinical drug comps rejected because the first one found is taken.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE                     = 307; // The CDM clinical drug comps rejected because the last one found is taken.
+	private static int INGREDIENT_MAPPING_OVERRULED_MAPPING                               = 308; // A mapping to a single clinical drug comp, ingredient or a failing mapping is overruled by a manual mapping.
+	private static int INGREDIENT_MAPPING_MAPPED                                          = 309; // The final mapping of a source drug ingredient to a clinical drug comp or ingredient.
+
 	private static Map<Integer, String> mappingResultDescriptions;
 	static {
 		mappingResultDescriptions = new HashMap<Integer, String>();
@@ -115,8 +129,8 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                           , "No unique mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE                , "Rejected because first is used");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE                 , "Rejected because last is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_MAPPED                                      , "Mapped");
 		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                           , "Overruled mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_MAPPED                                      , "Mapped");
 
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS                  , "No source ingredients");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS            , "Unmapped source ingredients");
@@ -131,8 +145,8 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                      , "No unique mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_FIRST_PREFERENCE           , "Rejected because first is used");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LAST_PREFERENCE            , "Rejected because last is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED                                 , "Mapped");
 		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                      , "Overruled mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED                                 , "Mapped");
 
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS                  , "No source ingredients");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS            , "Unmapped source ingredients");
@@ -146,8 +160,19 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                      , "No unique mapping");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FIRST_PREFERENCE           , "Rejected because first is used");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LAST_PREFERENCE            , "Rejected because last is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED                                 , "Mapped");
 		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                      , "Overruled mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED                                 , "Mapped");
+
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_STRENGTH                           , "Rejected by strength");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                  , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE        , "Rejected by RxNorm Extension preference");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE             , "Rejected by latest valid start date");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE             , "Rejected by oldest valid start date");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING                              , "No unique mapping");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE                   , "Rejected because first is used");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE                    , "Rejected because last is used");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_OVERRULED_MAPPING                              , "Overruled mapping");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_MAPPED                                         , "Mapped");
 	}
 	
 	private Set<String> forms = new HashSet<String>();
@@ -183,7 +208,6 @@ public class GenericMapping extends Mapping {
 	private List<String> cdmIngredientNameIndexNameList = new ArrayList<String>();
 	private Map<String, Map<String, Set<CDMIngredient>>> cdmIngredientNameIndexMap = new HashMap<String, Map<String, Set<CDMIngredient>>>();
 	
-	//TODO private Map<SourceDrug, Map<Integer, Map<Integer, List<String>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, Map<Integer, List<String>>>>(); // SourceDrug, Mapping, Mapping result, List of options
 	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<String>>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<String>>>>>(); // SourceDrug, Mapping, List of Mapping result, List of options
 	private Map<Integer, Set<SourceDrug>> notUniqueMapping = new HashMap<Integer, Set<SourceDrug>>();
 	
@@ -371,6 +395,9 @@ public class GenericMapping extends Mapping {
 		
 		// Match source drugs to Clinical Drug Forms
 		ok = ok && matchClinicalDrugForms();
+		
+		// Match source drug ingredients to Clinical Drug Comps or Ingredients
+		ok = ok && matchClinicalDrugCompsIngredients();
 
 		// Save mapping
 		if (ok) saveMapping();
@@ -1393,7 +1420,7 @@ public class GenericMapping extends Mapping {
 					}
 					else {
 						int mapping = 0;
-						while (mappingTypeDescriptions.containsKey(mapping)) {
+						while ((mapping != INGREDIENT_MAPPING) && mappingTypeDescriptions.containsKey(mapping)) {
 							Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 							if (sourceDrugMappingResult == null) {
 								sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
@@ -1428,7 +1455,7 @@ public class GenericMapping extends Mapping {
 				}
 				else {
 					int mapping = 0;
-					while (mappingTypeDescriptions.containsKey(mapping)) {
+					while ((mapping != INGREDIENT_MAPPING) && mappingTypeDescriptions.containsKey(mapping)) {
 						Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 						if (sourceDrugMappingResult == null) {
 							sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
@@ -1463,7 +1490,7 @@ public class GenericMapping extends Mapping {
 			}
 			else {
 				int mapping = 0;
-				while (mappingTypeDescriptions.containsKey(mapping)) {
+				while ((mapping != INGREDIENT_MAPPING) && mappingTypeDescriptions.containsKey(mapping)) {
 					Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 					if (sourceDrugMappingResult == null) {
 						sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
@@ -2233,7 +2260,7 @@ public class GenericMapping extends Mapping {
 						}
 						
 						// Find CDM Clinical Drug Comps with corresponding ingredient strengths
-						if (cdmDrugCompsWithIngredients.size() > 0) {
+						if ((cdmDrugCompsWithIngredients != null) && (cdmDrugCompsWithIngredients.size() > 0)) {
 							List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();
 							List<String> rejectedDrugs = new ArrayList<String>();
 							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
@@ -3062,15 +3089,18 @@ public class GenericMapping extends Mapping {
 		return ok;
 	}
 	
-/*	
+	
 	private boolean matchClinicalDrugCompsIngredients() {
 		boolean ok = true;
-		int mapping = CLINICAL_DRUG_MAPPING;
+		int mapping = INGREDIENT_MAPPING;
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Match source drug ingredients to Clinical Drug Comps and Ingredients ...");
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
-			CDMDrug automaticMapping = null;
+			List<CDMConcept> automaticMappings = new ArrayList<CDMConcept>();
+			for (int automaticMappingNr = 0; automaticMappingNr < sourceDrug.getComponents().size(); automaticMappingNr++) {
+				automaticMappings.add(null);
+			}
 
 			boolean earlierNotUniqueMapping = false;
 			for (int mappingType : notUniqueMapping.keySet()) {
@@ -3079,220 +3109,113 @@ public class GenericMapping extends Mapping {
 					break;
 				}
 			}
+			
 			if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
-				List<SourceIngredient> sourceDrugIngredients = sourceDrug.getIngredients();
-				
-				if (sourceDrugIngredients.size() > 0) {
+				List<SourceDrugComponent> sourceDrugComponents = sourceDrug.getComponents();
+				if (sourceDrugComponents.size() > 0) {
 					// Find CDM Clinical Drug Comps with corresponding ingredients
-					for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
-						
-					}
-					
-					
-					
-					
-					
-					
-					List<CDMDrug> cdmDrugsWithIngredients = null;
-					for (CDMIngredient cdmIngredient : sourceDrugCDMIngredients) {
-						List<CDMDrug> cdmDrugsWithIngredient = cdmDrugsContainingIngredient.get(cdmIngredient);
-						if (cdmDrugsWithIngredient != null) {
-							if (cdmDrugsWithIngredients == null) {
-								// Initially add all drugs with the first ingredient
-								cdmDrugsWithIngredients = new ArrayList<CDMDrug>();
-								cdmDrugsWithIngredients.addAll(cdmDrugsWithIngredient);
-							}
-							else {
-								// Remove all drugs that do not have the current ingredient.
-								Set<CDMDrug> cdmDrugsMissingIngredient = new HashSet<CDMDrug>();
-								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-									if (!cdmDrug.getIngredients().contains(cdmIngredient)) {
-										cdmDrugsMissingIngredient.add(cdmDrug);
-									}
-								}
-								cdmDrugsWithIngredients.removeAll(cdmDrugsMissingIngredient);
-								if (cdmDrugsWithIngredients.size() == 0) {
-									break;
-								}
-							}
-						}
-						else {
-							cdmDrugsWithIngredients = new ArrayList<CDMDrug>();
-							break;
-						}
-					}
+					for (int componentNr = 0; componentNr < sourceDrugComponents.size(); componentNr++) {
+						SourceDrugComponent sourceDrugComponent = sourceDrugComponents.get(componentNr);
+						SourceIngredient sourceDrugIngredient = sourceDrugComponent.getIngredient();
+						String cdmIngredientConceptId = sourceDrugIngredient.getMatchingIngredient();
+ 						if (cdmIngredientConceptId != null) {
+							CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
+							List<CDMDrug> cdmDrugCompsWithIngredients = cdmDrugCompsContainingIngredient.get(cdmIngredient);
 
-					// Remove all drugs that do not have the same number of ingredients as the source drug
-					Set<CDMDrug> cdmDrugsTooManyIngredients = new HashSet<CDMDrug>();
-					for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-						if (cdmDrug.getIngredients().size() != sourceDrugCDMIngredients.size()) {
-							cdmDrugsTooManyIngredients.add(cdmDrug);
-						}
-					}
-					cdmDrugsWithIngredients.removeAll(cdmDrugsTooManyIngredients);
-					
-					// Find CDM Clinical Drugs with corresponding formulation
-					if (cdmDrugsWithIngredients.size() > 0) {
-						if (sourceDrug.getFormulation() != null) {
-							String sourceDrugForm = sourceDrug.getFormulation(); 
-							Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
-							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								Set<String> cdmDrugForms = cdmDrug.getForms();
-								boolean formFound = false;
-								for (String cdmDrugForm : cdmDrugForms) {
-									if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm)) {
-										formFound = true;
+							// Find CDM Clinical Drug Comps with corresponding ingredient strengths
+							if ((cdmDrugCompsWithIngredients != null) && (cdmDrugCompsWithIngredients.size() > 0)) {
+								List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();
+								List<String> rejectedDrugs = new ArrayList<String>();
+								Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
+								
+								List<Double> strengthDeviationPercentages = new ArrayList<Double>();
+								
+								// Try deviation percentage from 0.0 to maximumStrengthDeviationPercentage with steps of 0.1
+								Double percentage = 0.0;
+								while (percentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) {
+									strengthDeviationPercentages.add(percentage);
+									percentage += 0.1;
+								}
+
+								for (Double strengthDeviationPercentage : strengthDeviationPercentages) {
+									matchingCDMDrugs = new ArrayList<CDMDrug>();
+									rejectedDrugs = new ArrayList<String>();
+									
+									for (CDMDrug cdmDrug : cdmDrugCompsWithIngredients) {
+										if (sourceDrug.getComponents().size() == cdmDrug.getIngredientStrengths().size()) {
+											List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), strengthDeviationPercentage);
+											if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
+												matchingCDMDrugs.add(cdmDrug);
+												matchingIngredientsMap.put(cdmDrug, matchingIngredients);
+											}
+											else {
+												rejectedDrugs.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
+											}
+										}
+									}
+									
+									if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
 										break;
 									}
 								}
-								if (!formFound) {
-									cdmDrugsMissingForm.add(cdmDrug);
-								}
-							}
-
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
-							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
-							}
-							
-							List<String> rejectedForms = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM);
-							if (rejectedForms == null) {
-								rejectedForms = new ArrayList<String>();
-								rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM, rejectedForms);
-							}
-							for (CDMDrug cdmDrug : cdmDrugsMissingForm) {
-								String formsDescription = "";
-								for (String cdmDrugFormConceptId : cdmDrug.getForms()) {
-									if (!formsDescription.equals("")) {
-										formsDescription += " | ";
-									}
-									formsDescription += formConversionsMap.getCDMFormConceptName(cdmDrugFormConceptId) + " (" + cdmDrugFormConceptId + ")";
-								}
-								String cdmDrugDescription = cdmDrug.toString() + ": " + formsDescription;
-								if (!rejectedForms.contains(cdmDrugDescription)) {
-									rejectedForms.add(cdmDrugDescription);
-								}
-							}
-							
-							cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
-						}
-						
-						// Find CDM Clinical Drugs with corresponding ingredient strengths
-						if (cdmDrugsWithIngredients.size() > 0) {
-							List<CDMDrug> matchingCDMDrugs = new ArrayList<CDMDrug>();
-							List<String> rejectedDrugs = new ArrayList<String>();
-							Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
-							
-							List<Double> strengthDeviationPercentages = new ArrayList<Double>();
-
-							// Try deviation percentage from 0.0 to maximumStrengthDeviationPercentage with steps of 0.1
-							Double percentage = 0.0;
-							while (percentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) {
-								strengthDeviationPercentages.add(percentage);
-								percentage += 0.1;
-							}
-
-							for (Double strengthDeviationPercentage : strengthDeviationPercentages) {
-								matchingCDMDrugs = new ArrayList<CDMDrug>();
-								rejectedDrugs = new ArrayList<String>();
 								
-								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-									if (sourceDrug.getComponents().size() == cdmDrug.getIngredientStrengths().size()) {
-										List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), strengthDeviationPercentage);
-										if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
-											matchingCDMDrugs.add(cdmDrug);
-											matchingIngredientsMap.put(cdmDrug, matchingIngredients);
-										}
-										else {
-											rejectedDrugs.add(cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription());
-										}
-									}
+								// Save the rejected drugs
+								Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+								if (sourceDrugMappingResult == null) {
+									sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+									sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 								}
 								
-								if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
-									break;
+								List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+								if (mappingTypeResultsList == null) {
+									mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+									for (int ingredientNr = 0; ingredientNr < sourceDrugComponents.size(); ingredientNr++) {
+										mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+									}
+									sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 								}
-							}
+								
+								Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(componentNr);
 
-							Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-							if (sourceDrugMappingResult == null) {
-								sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-								sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
-							}
-							Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-							if (rejectedForMapping == null) {
-								rejectedForMapping = new HashMap<Integer, List<String>>();
-								sourceDrugMappingResult.put(mapping, rejectedForMapping);
-							}
-							rejectedForMapping.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
-							
-							if (matchingCDMDrugs.size() == 1) {
-								automaticMapping = matchingCDMDrugs.get(0);
-							}
-							else if (matchingCDMDrugs.size() > 1) {
-								// Discard drugs without strength units
-								List<CDMDrug> matchingCDMDrugsWithTwoUnits = new ArrayList<CDMDrug>();
-								List<CDMDrug> matchingCDMDrugsWithOneUnit = new ArrayList<CDMDrug>();
-								for (CDMDrug matchingCDMDrug : matchingCDMDrugs) {
-									List<CDMIngredientStrength> strengths = matchingCDMDrug.getIngredientStrengths();
-									boolean twoUnitsFoundForAllIngredients = true;
-									boolean oneUnitFoundForAllIngredients = true;
-									for (CDMIngredientStrength strength : strengths) {
-										if (strength.getNumeratorDosageUnit() != null) {
-											if (strength.getDenominatorDosageUnit() == null) {
-												twoUnitsFoundForAllIngredients = false;
-											}
-										}
-										else {
-											twoUnitsFoundForAllIngredients = false;
-											oneUnitFoundForAllIngredients = false;
-											break;
-										}
-									}
-									if (twoUnitsFoundForAllIngredients) {
-										matchingCDMDrugsWithTwoUnits.add(matchingCDMDrug);
-									}
-									else if (oneUnitFoundForAllIngredients) {
-										matchingCDMDrugsWithOneUnit.add(matchingCDMDrug);
-									}
-								}
-								if (matchingCDMDrugsWithTwoUnits.size() > 1) {
+								rejectedForMapping.put(INGREDIENT_MAPPING_REJECTED_BY_STRENGTH, rejectedDrugs);
+
+								if (matchingCDMDrugs.size() > 1) {
 									String vocabulary_id = null;
 									int resultType = -1;
 									if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
 										vocabulary_id = "RxNorm";
-										resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE;
+										resultType = INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE;
 									}
 									else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
 										vocabulary_id = "RxNorm Extension";
-										resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE;
+										resultType = INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE;
 									}
 									if (vocabulary_id != null) {
 										List<CDMDrug> remove = new ArrayList<CDMDrug>();
-										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
+										for (CDMDrug cdmDrug : matchingCDMDrugs) {
 											if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
 												remove.add(cdmDrug);
 											}
 										}
-										if ((remove.size() > 0) && (matchingCDMDrugsWithTwoUnits.size() != remove.size())) {
-											matchingCDMDrugsWithTwoUnits.removeAll(remove);
-											
+										if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
+											matchingCDMDrugs.removeAll(remove);
+
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												for (int ingredientNr = 0; ingredientNr < sourceDrugComponents.size(); ingredientNr++) {
+													mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+												}
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(componentNr);
 											
 											List<String> multipleMappings = rejectedForMapping.get(resultType);
 											if (multipleMappings == null) {
@@ -3307,14 +3230,13 @@ public class GenericMapping extends Mapping {
 											}
 										}
 									}
-									if ((matchingCDMDrugsWithTwoUnits.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No"))) {
+									if ((matchingCDMDrugs.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No"))) {
 										boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
-										resultType = latest ? CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE : CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE;
-										
+										resultType = latest ? INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE : INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE;
 										List<CDMDrug> remove = new ArrayList<CDMDrug>();
 										List<CDMDrug> lastDrugs = new ArrayList<CDMDrug>();
 										int lastDate = -1;
-										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
+										for (CDMDrug cdmDrug : matchingCDMDrugs) {
 											try {
 												Integer date = Integer.parseInt(cdmDrug.getValidStartDate().replaceAll("-",""));
 												if (lastDate == -1) {
@@ -3340,19 +3262,25 @@ public class GenericMapping extends Mapping {
 												remove.add(cdmDrug);
 											}
 										}
-										if ((remove.size() > 0) && (matchingCDMDrugsWithTwoUnits.size() != remove.size())) {
-											matchingCDMDrugsWithTwoUnits.removeAll(remove);
-											
+										if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
+											matchingCDMDrugs.removeAll(remove);
+
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												for (int ingredientNr = 0; ingredientNr < sourceDrugComponents.size(); ingredientNr++) {
+													mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+												}
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(componentNr);
 											
 											List<String> multipleMappings = rejectedForMapping.get(resultType);
 											if (multipleMappings == null) {
@@ -3367,35 +3295,41 @@ public class GenericMapping extends Mapping {
 											}
 										}
 									}
-									if ((matchingCDMDrugsWithTwoUnits.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None"))) {
+									if ((matchingCDMDrugs.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None"))) {
 										resultType = -1;
 										List<CDMDrug> remove = new ArrayList<CDMDrug>();
 										if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("First")) {
-											automaticMapping = matchingCDMDrugsWithTwoUnits.get(0);
-											resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE;
-											for (int nr = 1; nr < matchingCDMDrugsWithTwoUnits.size(); nr++) {
-												remove.add(matchingCDMDrugsWithTwoUnits.get(nr));
+											automaticMappings.set(componentNr, matchingCDMDrugs.get(0));
+											resultType = INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE;
+											for (int nr = 1; nr < matchingCDMDrugs.size(); nr++) {
+												remove.add(matchingCDMDrugs.get(nr));
 											}
 										}
 										else {
-											automaticMapping = matchingCDMDrugsWithTwoUnits.get(matchingCDMDrugsWithTwoUnits.size() - 1);
-											resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE;
-											for (int nr = 0; nr < (matchingCDMDrugsWithTwoUnits.size() - 1); nr++) {
-												remove.add(matchingCDMDrugsWithTwoUnits.get(nr));
+											automaticMappings.set(componentNr, matchingCDMDrugs.get(matchingCDMDrugs.size() - 1));
+											resultType = INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE;
+											for (int nr = 0; nr < (matchingCDMDrugs.size() - 1); nr++) {
+												remove.add(matchingCDMDrugs.get(nr));
 											}
 										}
-										matchingCDMDrugsWithTwoUnits.removeAll(remove);
+										matchingCDMDrugs.removeAll(remove);
 
 										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											for (int ingredientNr = 0; ingredientNr < sourceDrugComponents.size(); ingredientNr++) {
+												mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+											}
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(componentNr);
 										
 										List<String> multipleMappings = rejectedForMapping.get(resultType);
 										if (multipleMappings == null) {
@@ -3410,207 +3344,101 @@ public class GenericMapping extends Mapping {
 										}
 									}
 								}
-								if (matchingCDMDrugsWithTwoUnits.size() > 0) {
-									if (matchingCDMDrugsWithTwoUnits.size() == 1) {
-										automaticMapping = matchingCDMDrugsWithTwoUnits.get(0);
-									}
-									else {
-										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-										if (sourceDrugMappingResult == null) {
-											sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
-										}
-										rejectedForMapping = sourceDrugMappingResult.get(mapping);
-										if (rejectedForMapping == null) {
-											rejectedForMapping = new HashMap<Integer, List<String>>();
-											sourceDrugMappingResult.put(mapping, rejectedForMapping);
-										}
-										
-										List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING);
-										if (multipleMappings == null) {
-											multipleMappings = new ArrayList<String>();
-											rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
-										}
-										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
-											String cdmDrugDescription = cdmDrug.toString();
-											if (!multipleMappings.contains(cdmDrugDescription)) {
-												multipleMappings.add(cdmDrugDescription);
-											}
-										}
-										notUniqueMapping.get(mapping).add(sourceDrug);
-									}
+								
+								if (matchingCDMDrugs.size() == 1) {
+									automaticMappings.set(componentNr, matchingCDMDrugs.get(0));
 								}
-								else {
-									if (matchingCDMDrugsWithOneUnit.size() > 1) {
-										String vocabulary_id = null;
-										int resultType = -1;
-										if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
-											vocabulary_id = "RxNorm";
-											resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE;
-										}
-										else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
-											vocabulary_id = "RxNorm Extension";
-											resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE;
-										}
-										if (vocabulary_id != null) {
-											List<CDMDrug> remove = new ArrayList<CDMDrug>();
-											for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
-												if (!cdmDrug.getVocabularyId().equals(vocabulary_id)) {
-													remove.add(cdmDrug);
-												}
-											}
-											if ((remove.size() > 0) && (matchingCDMDrugsWithOneUnit.size() != remove.size())) {
-												matchingCDMDrugsWithOneUnit.removeAll(remove);
-												
-												sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-												if (sourceDrugMappingResult == null) {
-													sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-													sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
-												}
-												rejectedForMapping = sourceDrugMappingResult.get(mapping);
-												if (rejectedForMapping == null) {
-													rejectedForMapping = new HashMap<Integer, List<String>>();
-													sourceDrugMappingResult.put(mapping, rejectedForMapping);
-												}
-												
-												List<String> multipleMappings = rejectedForMapping.get(resultType);
-												if (multipleMappings == null) {
-													multipleMappings = new ArrayList<String>();
-													rejectedForMapping.put(resultType, multipleMappings);
-												}
-												for (CDMDrug cdmDrug : remove) {
-													String cdmDrugDescription = cdmDrug.toString();
-													if (!multipleMappings.contains(cdmDrugDescription)) {
-														multipleMappings.add(cdmDrugDescription);
-													}
-												}
-											}
-										}
-										if ((matchingCDMDrugsWithOneUnit.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No"))) {
-											boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
-											resultType = latest ? CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE : CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE;
-											List<CDMDrug> remove = new ArrayList<CDMDrug>();
-											List<CDMDrug> lastDrugs = new ArrayList<CDMDrug>();
-											int lastDate = -1;
-											for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
-												try {
-													Integer date = Integer.parseInt(cdmDrug.getValidStartDate().replaceAll("-",""));
-													if (lastDate == -1) {
-														lastDrugs.add(cdmDrug);
-														lastDate = date;
-													}
-													else {
-														if (latest ? (date > lastDate) : (date < lastDate)) {
-															remove.addAll(lastDrugs);
-															lastDrugs.clear();
-															lastDrugs.add(cdmDrug);
-															lastDate = date;
-														}
-														else if (date == lastDate) {
-															lastDrugs.add(cdmDrug);
-														}
-														else {
-															remove.add(cdmDrug);
-														}
-													}
-												}
-												catch (NumberFormatException e) {
-													remove.add(cdmDrug);
-												}
-											}
-											if ((remove.size() > 0) && (matchingCDMDrugsWithOneUnit.size() != remove.size())) {
-												matchingCDMDrugsWithOneUnit.removeAll(remove);
-												
-												sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-												if (sourceDrugMappingResult == null) {
-													sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-													sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
-												}
-												rejectedForMapping = sourceDrugMappingResult.get(mapping);
-												if (rejectedForMapping == null) {
-													rejectedForMapping = new HashMap<Integer, List<String>>();
-													sourceDrugMappingResult.put(mapping, rejectedForMapping);
-												}
-												
-												List<String> multipleMappings = rejectedForMapping.get(resultType);
-												if (multipleMappings == null) {
-													multipleMappings = new ArrayList<String>();
-													rejectedForMapping.put(resultType, multipleMappings);
-												}
-												for (CDMDrug cdmDrug : remove) {
-													String cdmDrugDescription = cdmDrug.toString();
-													if (!multipleMappings.contains(cdmDrugDescription)) {
-														multipleMappings.add(cdmDrugDescription);
-													}
-												}
-											}
-										}
-										if ((matchingCDMDrugsWithOneUnit.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None"))) {
-											resultType = -1;
-											List<CDMDrug> remove = new ArrayList<CDMDrug>();
-											if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("First")) {
-												automaticMapping = matchingCDMDrugsWithOneUnit.get(0);
-												resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE;
-												for (int nr = 1; nr < matchingCDMDrugsWithOneUnit.size(); nr++) {
-													remove.add(matchingCDMDrugsWithOneUnit.get(nr));
+								else if (matchingCDMDrugs.size() > 1) {
+									// Discard drugs without strength units
+									List<CDMDrug> matchingCDMDrugsWithTwoUnits = new ArrayList<CDMDrug>();
+									List<CDMDrug> matchingCDMDrugsWithOneUnit = new ArrayList<CDMDrug>();
+									for (CDMDrug matchingCDMDrug : matchingCDMDrugs) {
+										List<CDMIngredientStrength> strengths = matchingCDMDrug.getIngredientStrengths();
+										boolean twoUnitsFoundForAllIngredients = true;
+										boolean oneUnitFoundForAllIngredients = true;
+										for (CDMIngredientStrength strength : strengths) {
+											if (strength.getNumeratorDosageUnit() != null) {
+												if (strength.getDenominatorDosageUnit() == null) {
+													twoUnitsFoundForAllIngredients = false;
 												}
 											}
 											else {
-												automaticMapping = matchingCDMDrugsWithOneUnit.get(matchingCDMDrugsWithOneUnit.size() - 1);
-												resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE;
-												for (int nr = 0; nr < (matchingCDMDrugsWithOneUnit.size() - 1); nr++) {
-													remove.add(matchingCDMDrugsWithOneUnit.get(nr));
-												}
+												twoUnitsFoundForAllIngredients = false;
+												oneUnitFoundForAllIngredients = false;
+												break;
 											}
-											matchingCDMDrugsWithOneUnit.removeAll(remove);
-
+										}
+										if (twoUnitsFoundForAllIngredients) {
+											matchingCDMDrugsWithTwoUnits.add(matchingCDMDrug);
+										}
+										else if (oneUnitFoundForAllIngredients) {
+											matchingCDMDrugsWithOneUnit.add(matchingCDMDrug);
+										}
+									}
+									if (matchingCDMDrugsWithTwoUnits.size() > 0) {
+										if (matchingCDMDrugsWithTwoUnits.size() == 1) {
+											automaticMappings.set(componentNr, matchingCDMDrugs.get(0));
+										}
+										else {
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												for (int ingredientNr = 0; ingredientNr < sourceDrugComponents.size(); ingredientNr++) {
+													mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+												}
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
 											
-											List<String> multipleMappings = rejectedForMapping.get(resultType);
+											rejectedForMapping = mappingTypeResultsList.get(componentNr);
+											
+											List<String> multipleMappings = rejectedForMapping.get(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING);
 											if (multipleMappings == null) {
 												multipleMappings = new ArrayList<String>();
-												rejectedForMapping.put(resultType, multipleMappings);
+												rejectedForMapping.put(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
 											}
-											for (CDMDrug cdmDrug : remove) {
+											for (CDMDrug cdmDrug : matchingCDMDrugs) {
 												String cdmDrugDescription = cdmDrug.toString();
 												if (!multipleMappings.contains(cdmDrugDescription)) {
 													multipleMappings.add(cdmDrugDescription);
 												}
 											}
+											notUniqueMapping.get(mapping).add(sourceDrug);
 										}
 									}
-
-									if (matchingCDMDrugsWithOneUnit.size() > 0) {
+									else {
 										if (matchingCDMDrugsWithOneUnit.size() == 1) {
-											automaticMapping = matchingCDMDrugsWithOneUnit.get(0);
+											automaticMappings.set(componentNr, matchingCDMDrugs.get(0));
 										}
 										else {
 											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 											if (sourceDrugMappingResult == null) {
-												sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
 												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
 											}
-											rejectedForMapping = sourceDrugMappingResult.get(mapping);
-											if (rejectedForMapping == null) {
-												rejectedForMapping = new HashMap<Integer, List<String>>();
-												sourceDrugMappingResult.put(mapping, rejectedForMapping);
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												for (int ingredientNr = 0; ingredientNr < sourceDrugComponents.size(); ingredientNr++) {
+													mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+												}
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 											}
 											
-											List<String> multipleMappings = rejectedForMapping.get(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING);
+											rejectedForMapping = mappingTypeResultsList.get(componentNr);
+											
+											List<String> multipleMappings = rejectedForMapping.get(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING);
 											if (multipleMappings == null) {
 												multipleMappings = new ArrayList<String>();
-												rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
+												rejectedForMapping.put(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING, multipleMappings);
 											}
-											for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
+											for (CDMDrug cdmDrug : matchingCDMDrugs) {
 												String cdmDrugDescription = cdmDrug.toString();
 												if (!multipleMappings.contains(cdmDrugDescription)) {
 													multipleMappings.add(cdmDrugDescription);
@@ -3622,79 +3450,81 @@ public class GenericMapping extends Mapping {
 								}
 							}
 						}
-					}
-					else {
-						Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-						if (sourceDrugMappingResult == null) {
-							sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-							sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+						
+						// Try mapping to CDM Ingredient
+						if (automaticMappings.get(componentNr) == null) {
+							if (sourceDrugIngredient.getMatchingIngredient() != null) {
+								CDMIngredient cdmIngredient = cdmIngredients.get(sourceDrugIngredient.getMatchingIngredient());
+								automaticMappings.set(componentNr, cdmIngredient);
+							}
 						}
-						Map<Integer, List<String>> rejectedForMapping = sourceDrugMappingResult.get(mapping);
-						if (rejectedForMapping == null) {
-							rejectedForMapping = new HashMap<Integer, List<String>>();
-							sourceDrugMappingResult.put(mapping, rejectedForMapping);
-						}
-						List<String> emptyList = new ArrayList<String>();
-						emptyList.add(" ");
-						rejectedForMapping.put(CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS, emptyList);
 					}
 				}
 			}
 
 			// Check for manual mapping and set final mapping.
-			CDMDrug overruledMapping = null;
-			CDMDrug finalMapping = automaticMapping;
-			CDMDrug manualMapping = manualMappings.get(sourceDrug);
-			if (manualMapping != null) {
-				// There is a manual mapping.
-				overruledMapping = finalMapping;
-				finalMapping = manualMapping;
-			}
-			
-			if (finalMapping != null) {
-				Map<Integer, Map<Integer, List<String>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
-				if (sourceDrugMappingResult == null) {
-					sourceDrugMappingResult = new HashMap<Integer, Map<Integer, List<String>>>();
-					sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+			for (int automatedMappingNr = 0; automatedMappingNr < automaticMappings.size(); automatedMappingNr++) {
+				CDMConcept automaticMapping = automaticMappings.get(automatedMappingNr);
+				CDMConcept overruledMapping = null;
+				CDMConcept finalMapping = automaticMapping;
+				CDMDrug manualMapping = manualMappings.get(sourceDrug);
+				if (manualMapping != null) {
+					// There is a manual mapping.
+					overruledMapping = finalMapping;
+					finalMapping = manualMapping;
 				}
 				
-				Map<Integer, List<String>> mappingTypeResults = sourceDrugMappingResult.get(mapping);
-				if (mappingTypeResults == null) {
-					mappingTypeResults = new HashMap<Integer, List<String>>();
-					sourceDrugMappingResult.put(mapping, mappingTypeResults);
-				}
-
-				// Set mapping if it has the current mapping type.
-				// The mapping type can be different in case of a manual mapping.
-				if (finalMapping.getConceptClassId().equals("Clinical Drug")) {
-					mappedSourceDrugs.add(sourceDrug);
+				if (finalMapping != null) {
+					Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+					if (sourceDrugMappingResult == null) {
+						sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+						sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+					}
 					
-					List<String> acceptedMappingList = mappingTypeResults.get(CLINICAL_DRUG_MAPPING_MAPPED);
-					if (acceptedMappingList == null) {
-						acceptedMappingList = new ArrayList<String>();
-						mappingTypeResults.put(CLINICAL_DRUG_MAPPING_MAPPED, acceptedMappingList);
+					List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+					if (mappingTypeResultsList == null) {
+						mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+						for (int ingredientNr = 0; ingredientNr < automaticMappings.size(); ingredientNr++) {
+							mappingTypeResultsList.add(new HashMap<Integer, List<String>>());
+						}
+						sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 					}
-					acceptedMappingList.add(finalMapping.toString());
-				}
-				
-				if (overruledMapping != null) {
-					List<String> overruledMappingList = mappingTypeResults.get(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING);
-					if (overruledMappingList == null) {
-						overruledMappingList = new ArrayList<String>();
-						mappingTypeResults.put(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING, overruledMappingList);
+					
+					Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(automatedMappingNr);
+
+					// Set mapping if it has the current mapping type.
+					// The mapping type can be different in case of a manual mapping.
+					if (finalMapping.getConceptClassId().equals("Clinical Drug Comp") || finalMapping.getConceptClassId().equals("Ingredient")) {
+						mappedSourceDrugs.add(sourceDrug);
+						
+						List<String> acceptedMappingList = mappingTypeResults.get(INGREDIENT_MAPPING_MAPPED);
+						if (acceptedMappingList == null) {
+							acceptedMappingList = new ArrayList<String>();
+							mappingTypeResults.put(INGREDIENT_MAPPING_MAPPED, acceptedMappingList);
+						}
+						acceptedMappingList.add(finalMapping.toString());
 					}
-					overruledMappingList.add(overruledMapping.toString());
+					
+					if (overruledMapping != null) {
+						List<String> overruledMappingList = mappingTypeResults.get(INGREDIENT_MAPPING_OVERRULED_MAPPING);
+						if (overruledMappingList == null) {
+							overruledMappingList = new ArrayList<String>();
+							mappingTypeResults.put(INGREDIENT_MAPPING_OVERRULED_MAPPING, overruledMappingList);
+						}
+						overruledMappingList.add(overruledMapping.toString());
+					}
 				}
 			}
+
 		}
 
-		report.add("Source drugs mapped to multiple CDM Clinical Drugs: " + notUniqueMapping.get(mapping).size() + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) notUniqueMapping.get(mapping).size() / (double) sourceDrugs.size()) * 100)) + "%)");
+		report.add("Source drugs mapped to multiple CDM Clinical Drug Comp or CDM Ingredient combinations: " + notUniqueMapping.get(mapping).size() + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) notUniqueMapping.get(mapping).size() / (double) sourceDrugs.size()) * 100)) + "%)");
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
 		return ok;
 	}
-*/	
+	
 	
 	private void saveMapping() {
 		// Save ingredient mapping
@@ -3734,6 +3564,7 @@ public class GenericMapping extends Mapping {
 		
 		String header = "MappingStatus";
 		header += "," + SourceDrug.getHeader();
+		header += "," + SourceIngredient.getHeader();
 		header += "," + "MappingType";
 		header += "," + "MappingResult";
 		header += "," + "Results";
@@ -3765,44 +3596,54 @@ public class GenericMapping extends Mapping {
 				mappingType = 0;
 				while (mappingTypeDescriptions.containsKey(mappingType)) {
 					List< Map<Integer, List<String>>> mappingResultList = sourceDrugMappings.get(mappingType);
-					if (mappingResultList != null) {
-						//TODO go through list
-						Map<Integer, List<String>> mappingResult = mappingResultList.get(0);
-						if (mappingResult != null) {
-							// Get the MAPPED result type value for the current mapping type
-							int mappingResultType = (100 * mappingType);
-							int mappedResultType = mappingResultType;
-							while (mappingResultDescriptions.containsKey(mappingResultType)) {
-								mappedResultType = mappingResultType;
-								mappingResultType++;
+					if ((mappingResultList != null) && (mappingResultList.size() > 0)) {
+						Set<Integer> counted = new HashSet<Integer>();
+						for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
+							Map<Integer, List<String>> mappingResult = mappingResultList.get(ingredientNr); 
+							String sourceIngredientString = "*,*,*,*"; // Mapping on source drug
+							if (mappingType == INGREDIENT_MAPPING) {   // Mapping on source drug ingredients
+								sourceIngredientString = sourceDrug.getIngredients().get(ingredientNr).toString();
 							}
-
-							// Write the result records
-							mappingResultType = (100 * mappingType);
-							while (mappingResultDescriptions.containsKey(mappingResultType)) {
-								String record = mappingStatus;
-								record += "," + sourceDrug;
-								record += "," + mappingTypeDescriptions.get(mappingType);
-								record += "," + mappingResultDescriptions.get(mappingResultType);
-								
-								counters.get(mappingType).put(mappingResultType, counters.get(mappingType).get(mappingResultType) + 1);
-								dataCoverage.get(mappingType).put(mappingResultType, dataCoverage.get(mappingType).get(mappingResultType) + sourceDrug.getCount());
-								
-								List<String> results = mappingResult.get(mappingResultType);
-								if ((results != null) && (results.size() > 0)) {
-									if (mappingResultType == mappedResultType) {
-										record += "," + results.get(0);
-									}
-									else {
-										Collections.sort(results);
-										for (String result : results) {
-											record += "," + "\"" + result.replaceAll("\"", "") + "\"";
-										}
-									}
-									drugMappingFile.println(record);
+							if (mappingResult != null) {
+								// Get the MAPPED result type value for the current mapping type
+								int mappingResultType = (100 * mappingType);
+								int mappedResultType = mappingResultType;
+								while (mappingResultDescriptions.containsKey(mappedResultType)) {
+									mappedResultType = mappingResultType;
+									mappingResultType++;
 								}
-								
-								mappingResultType++;
+
+								// Write the result records
+								mappingResultType = (100 * mappingType);
+								while (mappingResultDescriptions.containsKey(mappingResultType)) {
+									String record = mappingStatus;
+									record += "," + sourceDrug;
+									record += "," + sourceIngredientString;
+									record += "," + mappingTypeDescriptions.get(mappingType);
+									record += "," + mappingResultDescriptions.get(mappingResultType);
+									
+									List<String> results = mappingResult.get(mappingResultType);
+									if ((results != null) && (results.size() > 0)) {
+										if (mappingResultType == mappedResultType) {
+											record += "," + results.get(0);
+										}
+										else {
+											Collections.sort(results);
+											for (String result : results) {
+												record += "," + "\"" + result.replaceAll("\"", "") + "\"";
+											}
+										}
+										drugMappingFile.println(record);
+									}
+									
+									if (!counted.contains(mappingResultType)) {
+										counters.get(mappingType).put(mappingResultType, counters.get(mappingType).get(mappingResultType) + 1);
+										dataCoverage.get(mappingType).put(mappingResultType, dataCoverage.get(mappingType).get(mappingResultType) + sourceDrug.getCount());
+										counted.add(mappingResultType);
+									}
+									
+									mappingResultType++;
+								}
 							}
 						}
 					}
@@ -3819,6 +3660,8 @@ public class GenericMapping extends Mapping {
 	
 	private void finalReport() {
 		Long dataCountTotal = 0L;
+		Long dataCoverageTotal = 0L;
+		Long mappingTotal = 0L;
 		Long dataCoverageIngredients = 0L;
 		Long mappingClinicalDrugs = 0L;
 		Long dataCoverageClinicalDrugs = 0L;
@@ -3826,6 +3669,8 @@ public class GenericMapping extends Mapping {
 		Long dataCoverageClinicalDrugComps = 0L;
 		Long mappingClinicalDrugForms = 0L;
 		Long dataCoverageClinicalDrugForms = 0L;
+		Long mappingClinicalDrugCompsIngredients = 0L;
+		Long dataCoverageClinicalDrugCompsIngredients = 0L;
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			boolean allIngredientsMapped = true;
@@ -3859,13 +3704,29 @@ public class GenericMapping extends Mapping {
 					dataCoverageClinicalDrugForms += sourceDrug.getCount();
 				}
 			}
+			if (sourceDrugMappingResults.get(sourceDrug).get(INGREDIENT_MAPPING) != null) {
+				List<Map<Integer, List<String>>> mappingResultsList = sourceDrugMappingResults.get(sourceDrug).get(INGREDIENT_MAPPING);
+				if (mappingResultsList != null) {
+					for (Map<Integer, List<String>> mappingResult : mappingResultsList) {
+						if (mappingResult.get(INGREDIENT_MAPPING_MAPPED) != null) {
+							mappingClinicalDrugCompsIngredients++;
+							dataCoverageClinicalDrugCompsIngredients += sourceDrug.getCount();
+							break;
+						}
+					}
+				}
+			}
 		}
+		
+		dataCoverageTotal = dataCoverageClinicalDrugs + dataCoverageClinicalDrugComps + dataCoverageClinicalDrugForms + dataCoverageClinicalDrugCompsIngredients;
+		mappingTotal = mappingClinicalDrugs + mappingClinicalDrugComps + mappingClinicalDrugForms + mappingClinicalDrugCompsIngredients;
 		
 		report.add("");
 		report.add("Source drugs mapped to single CDM Clinical Drug: " + Long.toString(mappingClinicalDrugs) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) mappingClinicalDrugs / (double) sourceDrugs.size()) * 100)) + "%)");
 		report.add("Source drugs mapped to single CDM Clinical Drug Comp: " + Long.toString(mappingClinicalDrugComps) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) mappingClinicalDrugComps / (double) sourceDrugs.size()) * 100)) + "%)");
 		report.add("Source drugs mapped to single CDM Clinical Drug Form: " + Long.toString(mappingClinicalDrugForms) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) mappingClinicalDrugForms / (double) sourceDrugs.size()) * 100)) + "%)");
-		report.add("Total Source drugs mapped: " + (mappingClinicalDrugs + mappingClinicalDrugComps + mappingClinicalDrugForms) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) (mappingClinicalDrugs + mappingClinicalDrugComps + mappingClinicalDrugForms) / (double) sourceDrugs.size()) * 100)) + "%)");
+		report.add("Source drugs mapped to single CDM Clinical Drug Comp/Ingredient: " + Long.toString(mappingClinicalDrugCompsIngredients) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) mappingClinicalDrugCompsIngredients / (double) sourceDrugs.size()) * 100)) + "%)");
+		report.add("Total Source drugs mapped: " + (mappingTotal) + " of " + sourceDrugs.size() + " (" + Long.toString(Math.round(((double) (mappingTotal) / (double) sourceDrugs.size()) * 100)) + "%)");
 		
 		if (dataCountTotal != 0) {
 			report.add("");
@@ -3873,7 +3734,8 @@ public class GenericMapping extends Mapping {
 			report.add("Datacoverage CDM Clinical Drug mapping: " + dataCoverageClinicalDrugs + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugs / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug Comp mapping: " + dataCoverageClinicalDrugComps + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugComps / (double) dataCountTotal) * 100)) + "%)");
 			report.add("Datacoverage CDM Clinical Drug Form mapping: " + dataCoverageClinicalDrugForms + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugForms / (double) dataCountTotal) * 100)) + "%)");
-			report.add("Total datacoverage drug mapping: " + (dataCoverageClinicalDrugs + dataCoverageClinicalDrugComps + dataCoverageClinicalDrugForms) + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) (dataCoverageClinicalDrugs + dataCoverageClinicalDrugComps + dataCoverageClinicalDrugForms) / (double) dataCountTotal) * 100)) + "%)");
+			report.add("Datacoverage CDM Clinical Drug Comp/Ingredient mapping: " + dataCoverageClinicalDrugCompsIngredients + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) dataCoverageClinicalDrugCompsIngredients / (double) dataCountTotal) * 100)) + "%)");
+			report.add("Total datacoverage drug mapping: " + (dataCoverageTotal) + " of " + dataCountTotal + " (" + Long.toString(Math.round(((double) (dataCoverageTotal) / (double) dataCountTotal) * 100)) + "%)");
 		}
 		else {
 			report.add("");
