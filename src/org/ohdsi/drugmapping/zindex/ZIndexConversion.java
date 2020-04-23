@@ -1028,8 +1028,8 @@ public class ZIndexConversion extends Mapping {
 									sortedSourceIngredientNames.addAll(originalIngredientNameTranslation.keySet());
 									Collections.sort(sortedSourceIngredientNames);
 									for (String sourceIngredientName : sortedSourceIngredientNames) {
-										String record = escapeFieldValue(sourceIngredientName);
-										record += "," + escapeFieldValue(originalIngredientNameTranslation.get(sourceIngredientName));
+										String record = DrugMapping.escapeFieldValue(sourceIngredientName);
+										record += "," + DrugMapping.escapeFieldValue(originalIngredientNameTranslation.get(sourceIngredientName));
 										translationFile.println(record);
 									}
 									translationFile.close();
@@ -1063,8 +1063,8 @@ public class ZIndexConversion extends Mapping {
 								sortedSourceIngredientNames.addAll(ingredientNameTranslation.keySet());
 								Collections.sort(sortedSourceIngredientNames);
 								for (String sourceIngredientName : sortedSourceIngredientNames) {
-									String record = escapeFieldValue(sourceIngredientName);
-									record += "," + escapeFieldValue(ingredientNameTranslation.get(sourceIngredientName));
+									String record = DrugMapping.escapeFieldValue(sourceIngredientName);
+									record += "," + DrugMapping.escapeFieldValue(ingredientNameTranslation.get(sourceIngredientName));
 									translationFile.println(record);
 								}
 								translationFile.close();
@@ -1121,7 +1121,7 @@ public class ZIndexConversion extends Mapping {
 									}
 									String record = "";
 									for (int column = 0; column < OUTPUT_ColumnCount; column++) {
-										record += (column == 0 ? "" : ",") + escapeFieldValue(outputIngredient[column]);
+										record += (column == 0 ? "" : ",") + DrugMapping.escapeFieldValue(outputIngredient[column]);
 									}
 									gpkFullFile.println(record);
 								}
@@ -1156,7 +1156,7 @@ public class ZIndexConversion extends Mapping {
 										
 										String record = "";
 										for (int column = 0; column < OUTPUT_ColumnCount; column++) {
-											record += (column == 0 ? "" : ",") + escapeFieldValue(gpkIngredientRecord[column]);
+											record += (column == 0 ? "" : ",") + DrugMapping.escapeFieldValue(gpkIngredientRecord[column]);
 										}
 										gpkFullFile.println(record);
 									}
@@ -1203,17 +1203,6 @@ public class ZIndexConversion extends Mapping {
 		else {
 			return 0;
 		}
-	}
-	
-	
-	private String escapeFieldValue(String value) {
-		if (value == null) {
-			value = "";
-		}
-		else if (value.contains(",") || value.contains("\"")) {
-			value = "\"" + value.replaceAll("\"", "\"\"") + "\"";
-		}
-		return value;
 	}
 	
 	

@@ -2,6 +2,7 @@ package org.ohdsi.drugmapping.cdm;
 
 import java.io.PrintWriter;
 
+import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMConcept {
@@ -139,12 +140,12 @@ public class CDMConcept {
 	public String toString() {
 		
 		String description = (concept_id == null ? "null" : concept_id);
-		description += "," + "\"" + (concept_name == null ? "null" : concept_name) + "\"";
+		description += "," + DrugMapping.escapeFieldValue(concept_name == null ? "null" : concept_name);
 		description += "," + (domain_id == null ? "null" : domain_id);
 		description += "," + (vocabulary_id == null ? "null" : vocabulary_id);
 		description += "," + (concept_class_id == null ? "null" : concept_class_id);
 		description += "," + (standard_concept == null ? "null" : standard_concept);
-		description += "," + "\"" + (concept_code == null ? "null" : concept_code) + "\"";
+		description += "," + DrugMapping.escapeFieldValue(concept_code == null ? "null" : concept_code);
 		description += "," + (valid_start_date == null ? "null" : valid_start_date);
 		description += "," + (valid_end_date == null ? "null" : valid_end_date);
 		description += "," + (invalid_reason == null ? "null" : invalid_reason);

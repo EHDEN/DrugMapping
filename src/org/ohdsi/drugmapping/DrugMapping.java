@@ -55,6 +55,17 @@ public class DrugMapping {
 	}
 	
 	
+	public static String escapeFieldValue(String value) {
+		if (value == null) {
+			value = "";
+		}
+		else if (value.contains(",") || value.contains("\"")) {
+			value = "\"" + value.replaceAll("\"", "\"\"") + "\"";
+		}
+		return value;
+	}
+	
+	
 	private static String getOutputVersion(String logFileName) {
 		String version = "";
 		

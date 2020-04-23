@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 
 public class SourceIngredient {
@@ -233,20 +234,20 @@ public class SourceIngredient {
 	
 	
 	public String toString() {
-		String description = (ingredientCode == null ? "" : "\"" + ingredientCode + "\"");
-		description += "," + (ingredientName == null ? "" : "\"" + ingredientName + "\"");
-		description += "," + (ingredientNameEnglish == null ? "" : "\"" + ingredientNameEnglish + "\"");
-		description += "," + (casNumber == null ? "" : "\"" + casNumber + "\"");
+		String description = (ingredientCode == null ? "" : DrugMapping.escapeFieldValue(ingredientCode));
+		description += "," + (ingredientName == null ? "" : DrugMapping.escapeFieldValue(ingredientName));
+		description += "," + (ingredientNameEnglish == null ? "" : DrugMapping.escapeFieldValue(ingredientNameEnglish));
+		description += "," + (casNumber == null ? "" : DrugMapping.escapeFieldValue(casNumber));
 		return description;
 	}
 	
 	
 	public String toMatchString() {
-		String description = (ingredientCode == null ? "" : "\"" + ingredientCode + "\"");
-		description += "," + (ingredientName == null ? "" : "\"" + ingredientName + "\"");
-		description += "," + (ingredientNameEnglish == null ? "" : "\"" + ingredientNameEnglish + "\"");
-		description += "," + (casNumber == null ? "" : "\"" + casNumber + "\"");
-		description += "," + "\"" + matchString + "\"";
+		String description = (ingredientCode == null ? "" : DrugMapping.escapeFieldValue(ingredientCode));
+		description += "," + (ingredientName == null ? "" : DrugMapping.escapeFieldValue(ingredientName));
+		description += "," + (ingredientNameEnglish == null ? "" : DrugMapping.escapeFieldValue(ingredientNameEnglish));
+		description += "," + (casNumber == null ? "" : DrugMapping.escapeFieldValue(casNumber));
+		description += "," + DrugMapping.escapeFieldValue(matchString);
 		return description;
 	}
 	

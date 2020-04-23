@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.DrugMapping;
+
 public class SourceDrug {
 	private static boolean error = false;
 	
@@ -331,10 +333,10 @@ public class SourceDrug {
 	
 	
 	public String toString() {
-		String description = (code == null ? "" : "\"" + code + "\"");
-		description += "," + (name == null ? "" : "\"" + name + "\"");
-		description += "," + (atcCode == null ? "" : atcCode);
-		description += "," + (formulation == null ? "" : "\"" + formulation + "\"");
+		String description = (code == null ? "" : DrugMapping.escapeFieldValue(code));
+		description += "," + (name == null ? "" : DrugMapping.escapeFieldValue(name));
+		description += "," + (atcCode == null ? "" : DrugMapping.escapeFieldValue(atcCode));
+		description += "," + (formulation == null ? "" : DrugMapping.escapeFieldValue(formulation));
 		description += "," + (count == null ? "" : count);
 		return description;
 	}

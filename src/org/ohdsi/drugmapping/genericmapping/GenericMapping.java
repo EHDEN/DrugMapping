@@ -3463,6 +3463,9 @@ public class GenericMapping extends Mapping {
 			}
 
 			// Check for manual mapping and set final mapping.
+			boolean mapped = false;
+			List<String> finalMappings = new ArrayList<String>();
+			List<String> overruledMappings = new ArrayList<String>();
 			for (int automatedMappingNr = 0; automatedMappingNr < automaticMappings.size(); automatedMappingNr++) {
 				CDMConcept automaticMapping = automaticMappings.get(automatedMappingNr);
 				CDMConcept overruledMapping = null;
@@ -3473,8 +3476,31 @@ public class GenericMapping extends Mapping {
 					overruledMapping = finalMapping;
 					finalMapping = manualMapping;
 				}
-				
-				if (finalMapping != null) {
+				// Set mapping if it has the current mapping type.
+				// The mapping type can be different in case of a manual mapping.
+				if ((finalMapping == null) || finalMapping.getConceptClassId().equals("Clinical Drug Comp") || finalMapping.getConceptClassId().equals("Ingredient")) {
+					if (finalMapping != null) {
+						finalMappings.add(finalMapping.toString());
+						mapped = true;
+					}
+					else {
+						finalMappings.add("");
+					}
+					if (overruledMapping != null) {
+						overruledMappings.add(overruledMapping.toString());
+					}
+					else {
+						overruledMappings.add("");
+					}
+				}
+				else {
+					finalMappings.add("");
+					overruledMappings.add("");
+				}
+			}
+
+			if (mapped) {
+				for (int finalMappingNr = 0; finalMappingNr < finalMappings.size(); finalMappingNr++) {
 					Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
 					if (sourceDrugMappingResult == null) {
 						sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
@@ -3490,29 +3516,23 @@ public class GenericMapping extends Mapping {
 						sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
 					}
 					
-					Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(automatedMappingNr);
+					Map<Integer, List<String>> mappingTypeResults = mappingTypeResultsList.get(finalMappingNr);
 
-					// Set mapping if it has the current mapping type.
-					// The mapping type can be different in case of a manual mapping.
-					if (finalMapping.getConceptClassId().equals("Clinical Drug Comp") || finalMapping.getConceptClassId().equals("Ingredient")) {
-						mappedSourceDrugs.add(sourceDrug);
-						
-						List<String> acceptedMappingList = mappingTypeResults.get(INGREDIENT_MAPPING_MAPPED);
-						if (acceptedMappingList == null) {
-							acceptedMappingList = new ArrayList<String>();
-							mappingTypeResults.put(INGREDIENT_MAPPING_MAPPED, acceptedMappingList);
-						}
-						acceptedMappingList.add(finalMapping.toString());
-					}
+					mappedSourceDrugs.add(sourceDrug);
 					
-					if (overruledMapping != null) {
-						List<String> overruledMappingList = mappingTypeResults.get(INGREDIENT_MAPPING_OVERRULED_MAPPING);
-						if (overruledMappingList == null) {
-							overruledMappingList = new ArrayList<String>();
-							mappingTypeResults.put(INGREDIENT_MAPPING_OVERRULED_MAPPING, overruledMappingList);
-						}
-						overruledMappingList.add(overruledMapping.toString());
+					List<String> acceptedMappingList = mappingTypeResults.get(INGREDIENT_MAPPING_MAPPED);
+					if (acceptedMappingList == null) {
+						acceptedMappingList = new ArrayList<String>();
+						mappingTypeResults.put(INGREDIENT_MAPPING_MAPPED, acceptedMappingList);
 					}
+					acceptedMappingList.add(finalMappings.get(finalMappingNr));
+
+					List<String> overruledMappingList = mappingTypeResults.get(INGREDIENT_MAPPING_OVERRULED_MAPPING);
+					if (overruledMappingList == null) {
+						overruledMappingList = new ArrayList<String>();
+						mappingTypeResults.put(INGREDIENT_MAPPING_OVERRULED_MAPPING, overruledMappingList);
+					}
+					overruledMappingList.add(overruledMappings.get(finalMappingNr));
 				}
 			}
 
@@ -3608,7 +3628,7 @@ public class GenericMapping extends Mapping {
 								// Get the MAPPED result type value for the current mapping type
 								int mappingResultType = (100 * mappingType);
 								int mappedResultType = mappingResultType;
-								while (mappingResultDescriptions.containsKey(mappedResultType)) {
+								while (mappingResultDescriptions.containsKey(mappingResultType)) {
 									mappedResultType = mappingResultType;
 									mappingResultType++;
 								}
@@ -3616,11 +3636,11 @@ public class GenericMapping extends Mapping {
 								// Write the result records
 								mappingResultType = (100 * mappingType);
 								while (mappingResultDescriptions.containsKey(mappingResultType)) {
-									String record = mappingStatus;
+									String record = DrugMapping.escapeFieldValue(mappingStatus);
 									record += "," + sourceDrug;
 									record += "," + sourceIngredientString;
-									record += "," + mappingTypeDescriptions.get(mappingType);
-									record += "," + mappingResultDescriptions.get(mappingResultType);
+									record += "," + DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
+									record += "," + DrugMapping.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
 									List<String> results = mappingResult.get(mappingResultType);
 									if ((results != null) && (results.size() > 0)) {
@@ -3630,7 +3650,7 @@ public class GenericMapping extends Mapping {
 										else {
 											Collections.sort(results);
 											for (String result : results) {
-												record += "," + "\"" + result.replaceAll("\"", "") + "\"";
+												record += "," + DrugMapping.escapeFieldValue(result);
 											}
 										}
 										drugMappingFile.println(record);
