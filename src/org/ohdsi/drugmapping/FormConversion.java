@@ -123,10 +123,10 @@ public class FormConversion {
 						
 						if (!conceptNamesRead) {
 							conceptNamesRead = true;
-							formMapDate = row.get("Local form", true).replace('/', '-');
+							formMapDate = row.get("Local form \\ CDM form", true).replace('/', '-');
 						}
 						else {
-							String sourceForm = row.get("Local form", true);
+							String sourceForm = row.get("Local form \\ CDM form", true);
 							if (!sourceForm.trim().equals("")) {
 								oldSourceForms.add(sourceForm);
 								
@@ -146,7 +146,7 @@ public class FormConversion {
 								}
 								for (String concept_id : formConcepts) {
 									oldCDMForms.add(concept_id);
-									if (!concept_id.equals("Local form")) {
+									if (!concept_id.equals("Local form \\ CDM form")) {
 										if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
 											String cell = row.get(concept_id, true).trim();
 											if (!cell.equals("")) {
@@ -247,7 +247,7 @@ public class FormConversion {
 			try {
 				PrintWriter formFileWriter = new PrintWriter(formFile);
 
-				String header1 = "Local form";
+				String header1 = "Local form \\ CDM form";
 				String header2 = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
 				for (String concept_name : cdmFormConceptNames) {
 					header1 += "," + cdmFormNameToConceptIdMap.get(concept_name);

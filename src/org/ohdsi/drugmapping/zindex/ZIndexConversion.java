@@ -14,6 +14,7 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.utilities.StringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class ZIndexConversion extends Mapping {
@@ -111,14 +112,14 @@ public class ZIndexConversion extends Mapping {
 						Row row = gskFile.next();
 
 						String[] record = new String[GSK_ColumnCount];
-						record[GSK_GSKCode]       = gskFile.get(row, "GSKCode", true).trim();
-						record[GSK_PartNumber]    = gskFile.get(row, "PartNumber", true).trim();
-						record[GSK_Type]          = gskFile.get(row, "Type", true).trim();
-						record[GSK_Amount]        = gskFile.get(row, "Amount", true).trim();
-						record[GSK_AmountUnit]    = gskFile.get(row, "AmountUnit", true).trim();
-						record[GSK_GNKCode]       = gskFile.get(row, "GNKCode", true).trim();
-						record[GSK_GenericName]   = gskFile.get(row, "GenericName", true).trim();
-						record[GSK_CASNumber]     = gskFile.get(row, "CASNumber", true).trim();
+						record[GSK_GSKCode]       = StringUtilities.removeExtraSpaces(gskFile.get(row, "GSKCode", true));
+						record[GSK_PartNumber]    = StringUtilities.removeExtraSpaces(gskFile.get(row, "PartNumber", true));
+						record[GSK_Type]          = StringUtilities.removeExtraSpaces(gskFile.get(row, "Type", true).trim());
+						record[GSK_Amount]        = StringUtilities.removeExtraSpaces(gskFile.get(row, "Amount", true));
+						record[GSK_AmountUnit]    = StringUtilities.removeExtraSpaces(gskFile.get(row, "AmountUnit", true));
+						record[GSK_GNKCode]       = StringUtilities.removeExtraSpaces(gskFile.get(row, "GNKCode", true));
+						record[GSK_GenericName]   = StringUtilities.removeExtraSpaces(gskFile.get(row, "GenericName", true));
+						record[GSK_CASNumber]     = StringUtilities.removeExtraSpaces(gskFile.get(row, "CASNumber", true));
 
 						record[GSK_CASNumber] = GenericMapping.uniformCASNumber(record[GSK_CASNumber]);
 
@@ -153,9 +154,9 @@ public class ZIndexConversion extends Mapping {
 						Row row = gnkFile.next();
 
 						String[] record = new String[GNK_ColumnCount];
-						record[GNK_GNKCode]     = gnkFile.get(row, "GNKCode", true).trim();
-						record[GNK_Description] = gnkFile.get(row, "Description", true).trim();
-						record[GNK_CASCode]     = gnkFile.get(row, "CASCode", true).trim();
+						record[GNK_GNKCode]     = StringUtilities.removeExtraSpaces(gnkFile.get(row, "GNKCode", true));
+						record[GNK_Description] = StringUtilities.removeExtraSpaces(gnkFile.get(row, "Description", true));
+						record[GNK_CASCode]     = StringUtilities.removeExtraSpaces(gnkFile.get(row, "CASCode", true));
 
 						record[GNK_CASCode] = GenericMapping.uniformCASNumber(record[GNK_CASCode]);
 
@@ -196,8 +197,8 @@ public class ZIndexConversion extends Mapping {
 					while (gpkStatsFile.hasNext()) {
 						Row row = gpkStatsFile.next();
 
-						String gpkCode  = gpkStatsFile.get(row, "GPKCode", true).trim();
-						String gpkCount = gpkStatsFile.get(row, "GPKCount", true).trim();
+						String gpkCode  = StringUtilities.removeExtraSpaces(gpkStatsFile.get(row, "GPKCode", true));
+						String gpkCount = StringUtilities.removeExtraSpaces(gpkStatsFile.get(row, "GPKCount", true));
 						
 						Integer count = null;
 						try {
@@ -333,16 +334,16 @@ public class ZIndexConversion extends Mapping {
 							Row row = gpkIPCIFile.next();
 
 							String[] record = new String[GPKIPCI_ColumnCount];
-							record[GPKIPCI_GPKCode]    = gpkIPCIFile.get(row, "GPK", true).trim();
-							record[GPKIPCI_PartNr]     = gpkIPCIFile.get(row, "PartNr", true).trim();
-							record[GPKIPCI_Type]       = gpkIPCIFile.get(row, "Typ", true).trim();
-							record[GPKIPCI_Amount]     = gpkIPCIFile.get(row, "Amount", true).trim();
-							record[GPKIPCI_AmountUnit] = gpkIPCIFile.get(row, "AmountUnit", true).trim();
-							record[GPKIPCI_GNKCode]    = gpkIPCIFile.get(row, "GNK", true).trim();
-							record[GPKIPCI_GNKName]    = gpkIPCIFile.get(row, "GnkName", true).trim();
-							record[GPKIPCI_CasNr]      = gpkIPCIFile.get(row, "CASNr", true).trim();
-							record[GPKIPCI_BaseName]   = gpkIPCIFile.get(row, "BaseName", true).trim();
-							record[GPKIPCI_Formula]    = gpkIPCIFile.get(row, "Formula", true).trim();
+							record[GPKIPCI_GPKCode]    = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "GPK", true));
+							record[GPKIPCI_PartNr]     = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "PartNr", true));
+							record[GPKIPCI_Type]       = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "Typ", true));
+							record[GPKIPCI_Amount]     = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "Amount", true));
+							record[GPKIPCI_AmountUnit] = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "AmountUnit", true));
+							record[GPKIPCI_GNKCode]    = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "GNK", true));
+							record[GPKIPCI_GNKName]    = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "GnkName", true));
+							record[GPKIPCI_CasNr]      = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "CASNr", true));
+							record[GPKIPCI_BaseName]   = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "BaseName", true));
+							record[GPKIPCI_Formula]    = StringUtilities.removeExtraSpaces(gpkIPCIFile.get(row, "Formula", true));
 							
 							List<String[]> gpkIPCIParts = gpkIPCIMap.get(record[GPKIPCI_GPKCode]);
 							if (gpkIPCIParts == null) {
@@ -379,18 +380,18 @@ public class ZIndexConversion extends Mapping {
 						Row row = gpkFile.next();
 
 						String[] gpk = new String[GPK_ColumnCount];
-						gpk[GPK_GPKCode]          = gpkFile.get(row, "GPKCode", true).trim();
-						gpk[GPK_MemoCode]         = gpkFile.get(row, "MemoCode", true).trim();
-						gpk[GPK_LabelName]        = gpkFile.get(row, "LabelName", true).trim();
-						gpk[GPK_ShortName]        = gpkFile.get(row, "ShortName", true).trim();
-						gpk[GPK_FullName]         = gpkFile.get(row, "FullName", true).trim();
-						gpk[GPK_ATCCode]          = gpkFile.get(row, "ATCCode", true).trim();
-						gpk[GPK_GSKCode]          = gpkFile.get(row, "GSKCode", true).trim();
-						gpk[GPK_DDDPerHPKUnit]    = gpkFile.get(row, "DDDPerHPKUnit", true).trim();
-						gpk[GPK_PrescriptionDays] = gpkFile.get(row, "PrescriptionDays", true).trim();
-						gpk[GPK_HPKMG]            = gpkFile.get(row, "HPKMG", true).trim().toUpperCase();
-						gpk[GPK_HPKMGUnit]        = gpkFile.get(row, "HPKMGUnit", true).trim().toUpperCase();
-						gpk[GPK_PharmForm]        = gpkFile.get(row, "PharmForm", true).trim().toUpperCase().replaceAll("\"", "\"\"").replaceAll("\"", "\"\"");
+						gpk[GPK_GPKCode]          = StringUtilities.removeExtraSpaces(gpkFile.get(row, "GPKCode", true));
+						gpk[GPK_MemoCode]         = StringUtilities.removeExtraSpaces(gpkFile.get(row, "MemoCode", true));
+						gpk[GPK_LabelName]        = StringUtilities.removeExtraSpaces(gpkFile.get(row, "LabelName", true));
+						gpk[GPK_ShortName]        = StringUtilities.removeExtraSpaces(gpkFile.get(row, "ShortName", true));
+						gpk[GPK_FullName]         = StringUtilities.removeExtraSpaces(gpkFile.get(row, "FullName", true));
+						gpk[GPK_ATCCode]          = StringUtilities.removeExtraSpaces(gpkFile.get(row, "ATCCode", true));
+						gpk[GPK_GSKCode]          = StringUtilities.removeExtraSpaces(gpkFile.get(row, "GSKCode", true));
+						gpk[GPK_DDDPerHPKUnit]    = StringUtilities.removeExtraSpaces(gpkFile.get(row, "DDDPerHPKUnit", true));
+						gpk[GPK_PrescriptionDays] = StringUtilities.removeExtraSpaces(gpkFile.get(row, "PrescriptionDays", true));
+						gpk[GPK_HPKMG]            = StringUtilities.removeExtraSpaces(gpkFile.get(row, "HPKMG", true)).toUpperCase();
+						gpk[GPK_HPKMGUnit]        = StringUtilities.removeExtraSpaces(gpkFile.get(row, "HPKMGUnit", true)).toUpperCase();
+						gpk[GPK_PharmForm]        = StringUtilities.removeExtraSpaces(gpkFile.get(row, "PharmForm", true)).toUpperCase();
 
 						String gpkCodeString = gpk[GPK_GPKCode];
 						String labelName = gpk[GPK_LabelName];
@@ -488,7 +489,7 @@ public class ZIndexConversion extends Mapping {
 										String[] shortNameSplit = shortName.contains("/") ? shortName.split("/") :  shortName.split("\\+");
 										String doseString = getDoseString(fullName);
 										String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
-										String denominatorUnit = (((doseStringSplit != null) && (doseStringSplit.length > shortNameSplit.length)) ? doseStringSplit[shortNameSplit.length] : "").trim();
+										String denominatorUnit = StringUtilities.removeExtraSpaces((((doseStringSplit != null) && (doseStringSplit.length > shortNameSplit.length)) ? doseStringSplit[shortNameSplit.length] : ""));
 										
 										List<String> ingredientNames = new ArrayList<String>();
 										List<String> ingredientAmounts = new ArrayList<String>();
@@ -496,7 +497,7 @@ public class ZIndexConversion extends Mapping {
 										String lastAmountUnit = null;
 										for (int ingredientNr = 0; ingredientNr < shortNameSplit.length; ingredientNr++) {
 											String ingredientName = shortNameSplit[ingredientNr];
-											ingredientName = cleanupExtractedIngredientName(ingredientName);
+											ingredientName = StringUtilities.removeExtraSpaces(ingredientName); //CHANGED 2020-04-29 cleanupExtractedIngredientName(ingredientName);
 											if (ingredientName != null) {
 												ingredientNames.add(ingredientName);
 												
@@ -555,7 +556,7 @@ public class ZIndexConversion extends Mapping {
 													gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
 													gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Mapped to GNK";
 													gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
-													gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+													gpkIngredientRecord[OUTPUT_IngredientName]        = StringUtilities.removeExtraSpaces(ingredientName);
 													gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 													gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 													gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
@@ -578,7 +579,7 @@ public class ZIndexConversion extends Mapping {
 													gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
 													gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Extracted";
 													gpkIngredientRecord[OUTPUT_IngredientCode]        = "";
-													gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+													gpkIngredientRecord[OUTPUT_IngredientName]        = StringUtilities.removeExtraSpaces(ingredientName);
 													gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 													gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 													gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
@@ -609,7 +610,7 @@ public class ZIndexConversion extends Mapping {
 												String denominatorUnit = "";
 												if (doseString.contains("/")) {
 													doseString = doseStringSplit[0];
-													denominatorUnit = (doseStringSplit.length > 1 ? doseStringSplit[1] : "").trim();
+													denominatorUnit = StringUtilities.removeExtraSpaces((doseStringSplit.length > 1 ? doseStringSplit[1] : ""));
 												}
 												String numberChars = NUMBER_CHARS;
 												for (int charNr = 0; charNr < doseString.length(); charNr++) {
@@ -643,7 +644,7 @@ public class ZIndexConversion extends Mapping {
 												gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
 												gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Mapped to GNK";
 												gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
-												gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+												gpkIngredientRecord[OUTPUT_IngredientName]        = StringUtilities.removeExtraSpaces(ingredientName);
 												gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 												gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 												gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
@@ -666,7 +667,7 @@ public class ZIndexConversion extends Mapping {
 												gpkIngredientRecord[OUTPUT_SourceCount]           = (gpkStatisticsMap.containsKey(gpkCodeString) ? gpkStatisticsMap.get(gpkCodeString).toString() : "0");
 												gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "Extracted";
 												gpkIngredientRecord[OUTPUT_IngredientCode]        = "";
-												gpkIngredientRecord[OUTPUT_IngredientName]        = ingredientName.trim();
+												gpkIngredientRecord[OUTPUT_IngredientName]        = StringUtilities.removeExtraSpaces(ingredientName);
 												gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 												gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 												gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
@@ -691,7 +692,7 @@ public class ZIndexConversion extends Mapping {
 									String amountUnit = gskObject[GSK_AmountUnit];
 									// Extract unit from name
 									if (name.lastIndexOf(" ") >= 0) {
-										String strengthString = name.substring(name.lastIndexOf(" ")).trim();
+										String strengthString = StringUtilities.removeExtraSpaces(name.substring(name.lastIndexOf(" ")));
 										if (DIGITS.contains(strengthString.substring(0, 1))) {
 											String strengthValueString = ""; 
 											for (int charNr = 0; charNr < strengthString.length(); charNr++) {
@@ -702,7 +703,7 @@ public class ZIndexConversion extends Mapping {
 													break;
 												}
 											}
-											String strengthUnitString = strengthString.substring(strengthValueString.length()).trim();
+											String strengthUnitString = StringUtilities.removeExtraSpaces(strengthString.substring(strengthValueString.length()));
 											if (!
 													(
 															strengthUnitString.contains("1") ||
@@ -740,10 +741,10 @@ public class ZIndexConversion extends Mapping {
 									}
 									
 									
-									String gnkCode = gskObject[GSK_GNKCode].trim();
+									String gnkCode = gskObject[GSK_GNKCode];
 									if (!gskObject[GSK_GenericName].substring(0, 1).equals("*")) {
 										// Cleanup ZIndex ingredient name
-										String genericName = cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
+										String genericName = gskObject[GSK_GenericName]; //CHANGED 2020-04-29 cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
 
 										String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
 										gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
@@ -1019,8 +1020,8 @@ public class ZIndexConversion extends Mapping {
 							while (ingredientNameTranslationFile.hasNext()) {
 								Row row = ingredientNameTranslationFile.next();
 								
-								String sourceIngredientName = ingredientNameTranslationFile.get(row, "SourceIngredientName", true).trim();
-								String englishIngredientName = ingredientNameTranslationFile.get(row, "EnglishIngredientName", true).trim();
+								String sourceIngredientName = StringUtilities.removeExtraSpaces(ingredientNameTranslationFile.get(row, "SourceIngredientName", true));
+								String englishIngredientName = StringUtilities.removeExtraSpaces(ingredientNameTranslationFile.get(row, "EnglishIngredientName", true));
 								
 								if (!sourceIngredientName.equals("")) {
 									if ((ingredientNameTranslation.get(sourceIngredientName) != null) && (!ingredientNameTranslation.get(sourceIngredientName).equals(englishIngredientName))) {
@@ -1267,65 +1268,65 @@ public class ZIndexConversion extends Mapping {
 	
 	private String cleanupExtractedIngredientName(String ingredientName) {
 		for (String word : wordsToRemove) {
-			ingredientName = ingredientName.trim().replaceAll("  "," ");
-
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName);
+/*
 			ingredientName = ingredientName.replaceAll("\t", " ").trim();
-			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", ""));
 			
-			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", "").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", ""));
 
-			ingredientName = ingredientName.replaceAll("[\"][^\"]*[\"]", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" \\(.*\\) ", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" \\(.*\\)$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^\\(.*\\) ", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^\\(.*\\)$", "").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("[\"][^\"]*[\"]", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" \\(.*\\) ", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" \\(.*\\)$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^\\(.*\\) ", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^\\(.*\\)$", ""));
 			ingredientName = ingredientName.replaceAll("\\([)]*$", "").trim();
-			ingredientName = ingredientName.replaceAll("\\([^)]*$", "").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("\\([^)]*$", ""));
 			
-			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ", ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ", ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " "));
 
-			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " "));
 			
-			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ", ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " ").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ", ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " "));
 
-			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " ").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " "));
+*/
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("^" + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" " + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" " + word + ",", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("," + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("," + word + ",", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", " + word + " ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", " + word + ", ", " "));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", " + word + ",", " "));
 
-			ingredientName = ingredientName.replaceAll("^" + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" " + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(" " + word + ",", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("," + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("," + word + ",", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", " + word + " ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", " + word + ", ", " ").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", " + word + ",", " ").trim().replaceAll("  "," ");
-
-			ingredientName = ingredientName.replaceAll(" " + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll("," + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(", " + word + "$", "").trim().replaceAll("  "," ");
-			ingredientName = ingredientName.replaceAll(",$", "").trim().replaceAll("  "," ");
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(" " + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll("," + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(", " + word + "$", ""));
+			ingredientName = StringUtilities.removeExtraSpaces(ingredientName.replaceAll(",$", ""));
 			
 			if (ingredientName.endsWith(" " + word)) {
-				ingredientName = ingredientName.substring(0, ingredientName.length() - word.length()).trim().replaceAll("  "," ");
+				ingredientName = StringUtilities.removeExtraSpaces(ingredientName.substring(0, ingredientName.length() - word.length()));
 			}
 			else if ((ingredientName.startsWith(word + " "))) {
 				ingredientName = null;
@@ -1336,7 +1337,7 @@ public class ZIndexConversion extends Mapping {
 				break;
 			}
 			if (ingredientName != null) {
-				ingredientName = ingredientName.trim().replaceAll("  "," ");
+				ingredientName = StringUtilities.removeExtraSpaces(ingredientName);
 				if ((ingredientName.length() > 0) && (("(),".contains(ingredientName.substring(0, 1))) || (")".contains(ingredientName.substring(ingredientName.length() - 1))))) {
 					ingredientName = null;
 					break;

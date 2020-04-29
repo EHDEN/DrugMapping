@@ -568,6 +568,9 @@ public class GenericMapping extends Mapping {
 			System.out.println("First fill the unit conversion map in the file:");
 			System.out.println("");
 			System.out.println(DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "" + UnitConversion.FILENAME);
+			System.out.println("");
+			System.out.println("The cells should contain a value so that: Local unit = <cell value> * CDM unit");
+			System.out.println("");
 			ok = false;
 		}
 		
@@ -585,6 +588,9 @@ public class GenericMapping extends Mapping {
 			System.out.println("First fill the form conversion map in the file:");
 			System.out.println("");
 			System.out.println(DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "" + FormConversion.FILENAME);
+			System.out.println("");
+			System.out.println("Fill the cells of matching forms with an non-space character.");
+			System.out.println("");
 			ok = false;
 		}
 		
@@ -1199,12 +1205,12 @@ public class GenericMapping extends Mapping {
 				boolean matchFound = false;
 				boolean multipleMapping = false;
 				
-				for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
-					Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
+				for (String matchName : matchNameList) {
+					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
+					matchName = matchName.substring(matchName.indexOf(": ") + 2);
 					
-					for (String matchName : matchNameList) {
-						String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-						matchName = matchName.substring(matchName.indexOf(": ") + 2);
+					for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
+						Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
 						
 						Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(matchName);
 						if (matchedCDMIngredients != null) {

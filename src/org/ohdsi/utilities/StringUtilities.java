@@ -708,6 +708,16 @@ public class StringUtilities {
 //		return new String(result);
 	}
 	
+	public static String removeExtraSpaces(String string) {
+		String orgString;
+		string = string.trim();
+		do {
+			orgString = string;
+			string = orgString.replaceAll("  ", " ");
+		} while (string.length() != orgString.length());
+		return string;
+	}
+	
 	public static int caseInsensitiveIndexOf(String value, List<String> list) {
 		String queryLC = value.toLowerCase();
 		for (int i = 0; i < list.size(); i++) {

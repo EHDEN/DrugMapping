@@ -123,10 +123,10 @@ public class UnitConversion {
 						
 						if (!conceptNamesRead) {
 							conceptNamesRead = true;
-							unitMapDate = row.get("Local unit", true).replace('/', '-');
+							unitMapDate = row.get("Local unit \\ CDM unit", true).replace('/', '-');
 						}
 						else {
-							String sourceUnit = row.get("Local unit", true);
+							String sourceUnit = row.get("Local unit \\ CDM unit", true);
 							oldSourceUnits.add(sourceUnit);
 
 							String mappingLine = "        " + sourceUnit;
@@ -143,7 +143,7 @@ public class UnitConversion {
 								unitConversionMap.put(sourceUnit, sourceUnitFactors);
 							}
 							for (String concept_id : unitConcepts) {
-								if (!concept_id.equals("Local unit")) {
+								if (!concept_id.equals("Local unit \\ CDM unit")) {
 									oldCDMUnits.add(concept_id);
 									if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
 										String factorString = row.get(concept_id, true).trim();
@@ -253,7 +253,7 @@ public class UnitConversion {
 			try {
 				PrintWriter unitFileWriter = new PrintWriter(unitFile);
 
-				String header1 = "Local unit";
+				String header1 = "Local unit \\ CDM unit";
 				String header2 = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
 				for (String concept_name : cdmUnitConceptNames) {
 					header1 += "," + cdmUnitNameToConceptIdMap.get(concept_name);
