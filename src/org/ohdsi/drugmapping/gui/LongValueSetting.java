@@ -24,7 +24,7 @@ public class LongValueSetting extends Setting {
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
-		JLabel minimumUseCountLabel = new JLabel(label);
+		JLabel longValueLabel = new JLabel(label);
 		longValueField = new JTextField(6);
 		longValueField.getDocument().addDocumentListener(new DocumentListener() {
 			
@@ -56,7 +56,7 @@ public class LongValueSetting extends Setting {
 				}
 			}
 		});
-		add(minimumUseCountLabel);
+		add(longValueLabel);
 		add(longValueField);
 		initialize();
 	}

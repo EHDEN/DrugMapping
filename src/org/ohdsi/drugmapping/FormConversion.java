@@ -22,6 +22,7 @@ import java.util.Set;
 import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
+import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
@@ -130,7 +131,7 @@ public class FormConversion {
 							if (!sourceForm.trim().equals("")) {
 								oldSourceForms.add(sourceForm);
 								
-								if (!sourceFormNames.contains(sourceForm)) {
+								if ((!sourceFormNames.contains(sourceForm)) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
 									System.out.println("    WARNING: Source form '" + sourceForm + "' no longer exists!");
 									if (!sourceFormNames.contains(sourceForm)) {
 										sourceFormNames.add(sourceForm);
@@ -154,7 +155,7 @@ public class FormConversion {
 												mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
 											}
 										}
-										else {
+										else if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
 											System.out.println("    WARNING: CDM form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
 										}
 									}
@@ -167,8 +168,10 @@ public class FormConversion {
 					for (String sourceForm : sourceFormNames) {
 						if (!oldSourceForms.contains(sourceForm)) {
 							if (!newSourceForms) {
+								System.out.println();
 								System.out.println("    NEW SOURCE FORMS FOUND:");
 							}
+							System.out.println("        " + sourceForm);
 							newSourceForms = true;
 						}
 					}
@@ -176,8 +179,10 @@ public class FormConversion {
 					for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
 						if (!oldCDMForms.contains(cdmForm)) {
 							if (!newCDMForms) {
+								System.out.println();
 								System.out.println("    NEW CDM FORMS FOUND:");
 							}
+							System.out.println("        " + cdmForm);
 							newCDMForms = true;
 						}
 					}
@@ -195,7 +200,7 @@ public class FormConversion {
 			}
 		}
 		else {
-			System.out.println("    WARNING: No form conversion map found!");
+			System.out.println("    ERROR: No form conversion map found!");
 			status = STATE_NOT_FOUND;
 		}
 		

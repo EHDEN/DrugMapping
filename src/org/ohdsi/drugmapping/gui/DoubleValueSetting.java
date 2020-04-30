@@ -23,7 +23,7 @@ public class DoubleValueSetting extends Setting {
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
-		JLabel maximumStrengthDeviationLabel = new JLabel("Max. strength deviation percentage:");
+		JLabel doubleValueLabel = new JLabel(label);
 		doubleValueField = new JTextField(6);
 		doubleValueField.getDocument().addDocumentListener(new DocumentListener() {
 			
@@ -55,7 +55,7 @@ public class DoubleValueSetting extends Setting {
 				}
 			}
 		});
-		add(maximumStrengthDeviationLabel);
+		add(doubleValueLabel);
 		add(doubleValueField);
 		initialize();
 	}

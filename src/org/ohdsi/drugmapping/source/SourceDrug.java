@@ -270,6 +270,7 @@ public class SourceDrug {
 			allComponents.add(sourceComponent);
 		}
 		components.add(sourceComponent);
+		sourceIngredient.addCount(getCount());
 		return sourceIngredient;
 	}
 	

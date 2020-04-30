@@ -28,7 +28,7 @@ public class ChoiceValueSetting extends Setting {
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
-		JLabel preferenceRxNormLabel = new JLabel(label);
+		JLabel choiceValueLabel = new JLabel(label);
 		choiceRadioButtonGroup = new ButtonGroup();
 		for (String choice : choices) {
 			this.choices.add(choice);
@@ -45,7 +45,7 @@ public class ChoiceValueSetting extends Setting {
 			choiceRadioButtons.add(choiceRadioButton);
 			choiceRadioButtonGroup.add(choiceRadioButton);
 		}
-		add(preferenceRxNormLabel);
+		add(choiceValueLabel);
 		for (JRadioButton choiceRadioButton : choiceRadioButtons) {
 			add(choiceRadioButton);
 		}
@@ -75,7 +75,7 @@ public class ChoiceValueSetting extends Setting {
 				if (!possibleValues.equals("")) {
 					possibleValues += ", ";
 				}
-				possibleValues += choice;
+				possibleValues += "'" + choice + "'";
 			}
 			JOptionPane.showMessageDialog(null, "Illegal value for general setting '" + name + "!\nPossible values are: " + possibleValues + "\nCurrent value is: " + value, "Error", JOptionPane.ERROR_MESSAGE);
 		}

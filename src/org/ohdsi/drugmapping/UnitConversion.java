@@ -22,6 +22,7 @@ import java.util.Set;
 import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
+import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
@@ -130,7 +131,7 @@ public class UnitConversion {
 							oldSourceUnits.add(sourceUnit);
 
 							String mappingLine = "        " + sourceUnit;
-							if (!sourceUnitNames.contains(sourceUnit)) {
+							if ((!sourceUnitNames.contains(sourceUnit)) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
 								mappingLine = "    WARNING: Source unit '" + sourceUnit + "' no longer exists!";
 								if (!sourceUnitNames.contains(sourceUnit)) {
 									sourceUnitNames.add(sourceUnit);
@@ -159,7 +160,7 @@ public class UnitConversion {
 											}
 										}
 									}
-									else {
+									else if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
 										System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
 									}
 								}
@@ -171,6 +172,7 @@ public class UnitConversion {
 					for (String sourceUnit : sourceUnitNames) {
 						if (!oldSourceUnits.contains(sourceUnit)) {
 							if (!newSourceUnits) {
+								System.out.println();
 								System.out.println("    NEW SOURCE UNITS FOUND:");
 							}
 							System.out.println("        " + sourceUnit);
@@ -181,6 +183,7 @@ public class UnitConversion {
 					for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
 						if (!oldCDMUnits.contains(cdmUnit)) {
 							if (!newCDMUnits) {
+								System.out.println();
 								System.out.println("    NEW CDM UNITS FOUND:");
 							}
 							System.out.println("        " + cdmUnit);
@@ -201,7 +204,7 @@ public class UnitConversion {
 			}
 		}
 		else {
-			System.out.println("    WARNING: No unit conversion map found!");
+			System.out.println("    ERROR: No unit conversion map found!");
 			status = STATE_NOT_FOUND;
 		}
 		
@@ -316,7 +319,6 @@ public class UnitConversion {
 		
 		if ((sourceUnit != null) && (cdmUnit != null)) {
 			if (unitConversionMap.get(sourceUnit) == null) {
-				//TODO
 				System.out.println("ERROR: " + sourceUnit);
 			}
 			factor = unitConversionMap.get(sourceUnit).get(cdmUnit);

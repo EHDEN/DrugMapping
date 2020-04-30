@@ -367,10 +367,12 @@ public class GenericMapping extends Mapping {
 		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT)) && (!SourceDrug.errorOccurred());
 		
 		// Get unit conversion from local units to CDM units
-		ok = ok && getUnitConversion(database);
+		boolean unitsOk = ok && getUnitConversion(database);
 		
 		// Get form conversion from local forms to CDM forms
-		ok = ok && getFormConversion(database);
+		boolean formsOk = ok && getFormConversion(database);
+		
+		ok = ok && unitsOk && formsOk;
 		
 		// Get CDM Ingredients
 		ok = ok && getCDMData(database);		
@@ -429,7 +431,7 @@ public class GenericMapping extends Mapping {
 					SourceDrug.writeHeaderToFile(missingATCFile);
 				} 
 				catch (FileNotFoundException e) {
-					System.out.println("       WARNING: Cannot create output file '" + fileName + "'");
+					System.out.println("       ERROR: Cannot create output file '" + fileName + "'");
 					missingATCFile = null;
 				}
 				
@@ -501,7 +503,6 @@ public class GenericMapping extends Mapping {
 								}
 								else {
 									sourceIngredient = sourceDrug.AddIngredient(sourceIngredient, dosage, dosageUnit);
-									sourceIngredient.addCount(sourceDrug.getCount());
 								}
 								
 								String numeratorDosageUnit = sourceDrug.getIngredientNumeratorDosageUnit(sourceIngredient);
@@ -773,7 +774,7 @@ public class GenericMapping extends Mapping {
 
 			for (String ingredientName : ingredientNameIndex.keySet()) {
 				Set<CDMIngredient> ingredientNameIngredients = ingredientNameIndex.get(ingredientName);
-				if ((ingredientNameIngredients != null) && (ingredientNameIngredients.size() > 1)) {
+				if ((ingredientNameIngredients != null) && (ingredientNameIngredients.size() > 1) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
 					System.out.println("      WARNING: Multiple ingredients found for name '" + ingredientName + "' in " + ingredientNameIndexName + " index");
 					for (CDMIngredient cdmIngredient : ingredientNameIngredients) {
 						String ingredientDescription = cdmIngredient.toString();
@@ -1151,7 +1152,7 @@ public class GenericMapping extends Mapping {
 		
 		multipleMappings += matchIngredientsByATC();
 
-		report.add("Source ingredients mapped total : " + Integer.toString(ingredientMap.size()) + " (" + Long.toString(Math.round(((double) ingredientMap.size() / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
+		report.add("Source ingredients mapped total: " + Integer.toString(ingredientMap.size()) + " (" + Long.toString(Math.round(((double) ingredientMap.size() / (double) SourceDrug.getAllIngredients().size()) * 100)) + "%)");
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
@@ -3554,15 +3555,52 @@ public class GenericMapping extends Mapping {
 	
 	private void saveMapping() {
 		// Save ingredient mapping
-		PrintWriter ingredientMappingFile = openOutputFile("IngredientMapping Results.csv", SourceIngredient.getMatchHeader() + "," + CDMIngredient.getHeader());
+		PrintWriter ingredientMappingFile = openOutputFile("IngredientMapping Results.csv", SourceIngredient.getMatchHeader() + ",SourceCount," + CDMIngredient.getHeader());
 		
 		if (ingredientMappingFile != null) {
-			for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+			
+			// Sort the ingredients on use count descending.
+			List<SourceIngredient> sourceIngredients = new ArrayList<SourceIngredient>();
+			sourceIngredients.addAll(SourceDrug.getAllIngredients());
+			
+			Collections.sort(sourceIngredients, new Comparator<SourceIngredient>() {
+				@Override
+				public int compare(SourceIngredient ingredient1, SourceIngredient ingredient2) {
+					int countCompare = Long.compare(ingredient1.getCount() == null ? 0L : ingredient1.getCount(), ingredient2.getCount() == null ? 0L : ingredient2.getCount()); 
+					int compareResult = (countCompare == 0 ? (ingredient1.getIngredientCode() == null ? "" : ingredient1.getIngredientCode()).compareTo(ingredient2.getIngredientCode() == null ? "" : ingredient2.getIngredientCode()) : -countCompare);
+					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
+					return compareResult;
+					/*
+					int compare = -Long.compare(ingredient1.getCount(), ingredient2.getCount());
+					if (compare == 0) {
+						if (ingredient1.getIngredientCode() == null) {
+							if (ingredient2.getIngredientCode() == null) {
+								compare = 0;
+							}
+							else {
+								compare = 1;
+							}
+						}
+						else {
+							if (ingredient2.getIngredientCode() == null) {
+								compare = -1;
+							}
+							else {
+								compare = ingredient1.getIngredientCode().compareTo(ingredient2.getIngredientCode());
+							}
+						}
+					}
+					return 0;
+					*/
+				}
+			});
+			
+			for (SourceIngredient sourceIngredient : sourceIngredients) {
 				if (sourceIngredient.getMatchingIngredient() != null) {
-					ingredientMappingFile.println(sourceIngredient.toMatchString() + "," + cdmIngredients.get(sourceIngredient.getMatchingIngredient()));
+					ingredientMappingFile.println(sourceIngredient.toMatchString() + "," + sourceIngredient.getCount() + "," + cdmIngredients.get(sourceIngredient.getMatchingIngredient()));
 				}
 				else {
-					ingredientMappingFile.println(sourceIngredient.toMatchString() + "," + CDMIngredient.emptyRecord());
+					ingredientMappingFile.println(sourceIngredient.toMatchString() + "," + sourceIngredient.getCount() + "," + CDMIngredient.emptyRecord());
 				}
 			}
 			

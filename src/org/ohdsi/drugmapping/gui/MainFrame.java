@@ -45,6 +45,7 @@ public class MainFrame {
 	public static int PREFERENCE_RXNORM;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
 	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
+	public static int SUPPRESS_WARNINGS;
 	
 	private DrugMapping drugMapping;
 	private JFrame frame;
@@ -147,6 +148,7 @@ public class MainFrame {
 			PREFERENCE_RXNORM             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
 			PREFERENCE_PRIORITIZE_BY_DATE = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Latest", "Oldest", "No" }));
 			PREFERENCE_TAKE_FIRST_OR_LAST = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "Take first or last when multiple mappings left:", new String[] { "First", "Last", "None" }));
+			SUPPRESS_WARNINGS             = DrugMapping.settings.addSetting(new BooleanValueSetting(this, "suppressWarnings", "Suppress warnings:"));
 		}
 		
 		

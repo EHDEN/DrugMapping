@@ -108,4 +108,13 @@ public class GeneralSettings extends JPanel {
 		}
 		return value;
 	}
+	
+	
+	public Boolean getBooleanSetting(int index) {
+		Boolean value = null;
+		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_BOOLEAN) {
+			value = generalSettings.get(index).getValueAsString().equals("Yes");
+		}
+		return value;
+	}
 }

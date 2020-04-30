@@ -14,6 +14,7 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.utilities.StringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -465,7 +466,7 @@ public class ZIndexConversion extends Mapping {
 									}
 									gskList.removeAll(remove);
 
-									if (gskList.size() == 0) {
+									if ((gskList.size() == 0) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
 										gskList = null;
 										System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gskCodeString + ") found for GPK " + gpkCodeString);
 									}
@@ -867,7 +868,7 @@ public class ZIndexConversion extends Mapping {
 										}
 										gskList.removeAll(remove);
 
-										if (gskList.size() == 0) {
+										if ((gskList.size() == 0) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
 											gskList = null;
 											System.out.println("    WARNING: No active ingredient GSK records (GSKCode = " + gskCodeString + ") found for GPK " + gpkCodeString);
 										}
@@ -1030,7 +1031,7 @@ public class ZIndexConversion extends Mapping {
 									}
 									else {
 										originalIngredientNameTranslation.put(sourceIngredientName, englishIngredientName);
-										if (!ingredientNameTranslation.containsKey(sourceIngredientName)) { // Not used anymore
+										if (!ingredientNameTranslation.containsKey(sourceIngredientName) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) { // Not used anymore
 											System.out.println("    WARNING: Source ingredient name '" + sourceIngredientName + "' ('" + englishIngredientName + "') is not used anymore. Will be removed.");
 											newFile = true;
 										}
@@ -1115,7 +1116,7 @@ public class ZIndexConversion extends Mapping {
 							try {
 								PrintWriter translationFile = new PrintWriter(new File(fileName));
 								System.out.println(DrugMapping.getCurrentTime() + "     Writing translation file to: " + fileName);
-								System.out.println("  WARNING: Please add the missing translations.");
+								System.out.println("  ACTION REQUIRED: Please add the missing translations.");
 
 								translationFile.println("SourceIngredientName,EnglishIngredientName");
 								
