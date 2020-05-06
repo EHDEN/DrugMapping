@@ -237,9 +237,10 @@ public class DrugMapping {
 				logFileSettings("ZIndex GNK File", getFile("ZIndex GNK File"));
 				logFileSettings("ZIndex GPK Statistics File", getFile("ZIndex GPK Statistics File"));
 				logFileSettings("ZIndex Ignored Words File", getFile("ZIndex Ignored Words File"));
+				logFileSettings("ZIndex Non-Denomiator Units File", getFile("ZIndex Non-Denomiator Units File"));
 				logFileSettings("ZIndex Ingredient Name Translation File", getFile("ZIndex Ingredient Name Translation File"));
 				logFileSettings("ZIndex GPK IPCI Compositions File", getFile("ZIndex GPK IPCI Compositions File"));
-				new ZIndexConversion(getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"), getFile("ZIndex Ingredient Name Translation File"), getFile("ZIndex GPK IPCI Compositions File"));
+				new ZIndexConversion(getFile("ZIndex GPK File"), getFile("ZIndex GSK File"), getFile("ZIndex GNK File"), getFile("ZIndex GPK Statistics File"), getFile("ZIndex Ignored Words File"), getFile("ZIndex Non-Denomiator Units File"), getFile("ZIndex Ingredient Name Translation File"), getFile("ZIndex GPK IPCI Compositions File"));
 			}
 			else {
 				logDatabaseSettings(getDatabase());

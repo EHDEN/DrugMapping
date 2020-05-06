@@ -90,6 +90,12 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												new String[] {
 														"This is the pharmaceutical form of the drug."
 												}
+										),
+										new FileColumnDefinition(
+												"BasicUnit",
+												new String[] {
+														"This is the basic unit of the drug."
+												}
 										)
 								}
 						),
@@ -177,7 +183,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												}
 										),
 										new FileColumnDefinition(
-												"CASCode",
+												"CASNumber",
 												new String[] {
 														"This is the CAS number of the ingredient."
 												}
@@ -220,6 +226,21 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 								false
 						),
 						new FileDefinition(
+								"ZIndex Non-Denomiator Units File",
+								new String[] {
+										"This file should contain units are ignored as denominator.",
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"NonDenominatorUnit",
+												new String[] {
+														"This is the unit to be ignored."
+												}
+										)
+								},
+								false
+						),
+						new FileDefinition(
 								"ZIndex Ingredient Name Translation File",
 								new String[] {
 										"This file should contain the translation from the source",
@@ -248,19 +269,19 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 						  		},
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
-												"GPK",
+												"GPKCode",
 												new String[] {
 														"This is the GPK-code of the drug."
 												}
 										),
 										new FileColumnDefinition(
-												"PartNr",
+												"PartNumber",
 												new String[] {
 														"This is the ingredient number."
 												}
 										),
 										new FileColumnDefinition(
-												"Typ",
+												"Type",
 												new String[] {
 														"This is the type of the component",
 														"in this combination.",
@@ -283,19 +304,19 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												}
 										),
 										new FileColumnDefinition(
-												"GNK",
+												"GNKCode",
 												new String[] {
 														"This is the GNK-code."
 												}
 										),
 										new FileColumnDefinition(
-												"GnkName",
+												"GenericName",
 												new String[] {
 														"This is the description for the GNK-code."
 												}
 										),
 										new FileColumnDefinition(
-												"CASNr",
+												"CASNumber",
 												new String[] {
 														"This is the CAS number of the ingredient."
 												}
@@ -307,7 +328,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												}
 										),
 										new FileColumnDefinition(
-												"Formula",
+												"ChemicalFormula",
 												new String[] {
 														"This is the chemical formula of the",
 														"ingredient."
