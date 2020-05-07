@@ -474,7 +474,7 @@ public class ZIndexConversion extends Mapping {
 								if ((ingredientDenominatorUnit == null) && (gpkIPCIIngredients.size() > 1)) {
 									ingredientDenominatorUnit = basicUnit.equals("") ? null : (nonDenominatorUnits.contains(basicUnit) ? null : basicUnit);
 								}
-								String ingredientUnit = ingredientNumeratorUnit + (ingredientDenominatorUnit == null ? "" : "/" + ingredientDenominatorUnit);
+								String ingredientUnit = ingredientDenominatorUnit == null ? ingredientNumeratorUnit : (ingredientNumeratorUnit.equals("") ? ingredientDenominatorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit));
 								
 								String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
 								gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;
@@ -541,7 +541,7 @@ public class ZIndexConversion extends Mapping {
 									if ((ingredientDenominatorUnit == null) && (gskList.size() > 1)) {
 										ingredientDenominatorUnit = basicUnit.equals("") ? null : (nonDenominatorUnits.contains(basicUnit) ? null : basicUnit);
 									}
-									String amountUnit = ingredientNumeratorUnit + (ingredientDenominatorUnit == null ? "" : "/" + ingredientDenominatorUnit);
+									String amountUnit = ingredientDenominatorUnit == null ? ingredientNumeratorUnit : (ingredientNumeratorUnit.equals("") ? ingredientDenominatorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit));
 									
 									
 									// Extract unit from name
@@ -642,17 +642,21 @@ public class ZIndexConversion extends Mapping {
 							List<String> ingredientNames = new ArrayList<String>();
 							List<String> ingredientAmounts = new ArrayList<String>();
 							List<String> ingredientAmountUnits = new ArrayList<String>();
-							
-							if (!shortName.equals("")) {
-								if (shortName.contains("/") || shortName.contains("+")) {
-									String[] shortNameSplit = shortName.contains("/") ? shortName.split("/") :  shortName.split("\\+");
+
+							String ingredients = shortName;
+							if (ingredients.contains(" ") && (!ingredients.substring(0, 1).equals("*"))) {
+								ingredients = ingredients.substring(0, ingredients.lastIndexOf(" "));
+							}
+							if (!ingredients.equals("")) {
+								if (ingredients.contains("/") || ingredients.contains("+")) {
+									String[] ingredientsSplit = ingredients.contains("/") ? ingredients.split("/") :  ingredients.split("\\+");
 									String doseString = getDoseString(fullName);
 									String[] doseStringSplit = doseString != null ? doseString.split("/") : null;
-									String denominatorUnit = StringUtilities.removeExtraSpaces((((doseStringSplit != null) && (doseStringSplit.length > shortNameSplit.length)) ? doseStringSplit[shortNameSplit.length] : ""));
+									String denominatorUnit = StringUtilities.removeExtraSpaces((((doseStringSplit != null) && (doseStringSplit.length > ingredientsSplit.length)) ? doseStringSplit[ingredientsSplit.length] : ""));
 									String lastAmountUnit = null;
 									
-									for (int ingredientNr = 0; ingredientNr < shortNameSplit.length; ingredientNr++) {
-										String ingredientName = shortNameSplit[ingredientNr];
+									for (int ingredientNr = 0; ingredientNr < ingredientsSplit.length; ingredientNr++) {
+										String ingredientName = ingredientsSplit[ingredientNr];
 										ingredientName = StringUtilities.removeExtraSpaces(ingredientName); //CHANGED 2020-04-29 cleanupExtractedIngredientName(ingredientName);
 										if (ingredientName != null) {
 											ingredientNames.add(ingredientName);
@@ -695,13 +699,13 @@ public class ZIndexConversion extends Mapping {
 											if (amountUnit.equals("")) {
 												amountUnit = lastAmountUnit;
 											}
-											ingredientAmountUnits.set(ingredientNr, amountUnit + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit));
+											ingredientAmountUnits.set(ingredientNr, amountUnit.equals("") ? denominatorUnit : (denominatorUnit.equals("") ? amountUnit : amountUnit + "/" + denominatorUnit));
 										}
 									}
 								}
 								else {
 									//CHANGED 2020-04-29 ingredientName = cleanupExtractedIngredientName(name);
-									String ingredientName = shortName;
+									String ingredientName = ingredients;
 									
 									if (ingredientName != null) {
 										String amount = "";
@@ -729,7 +733,7 @@ public class ZIndexConversion extends Mapping {
 												amountUnit = "";
 											}
 											else {
-												amountUnit = amountUnit + (denominatorUnit.equals("") ? "" : "/" + denominatorUnit);
+												amountUnit = amountUnit.equals("") ? denominatorUnit : (denominatorUnit.equals("") ? amountUnit : amountUnit + "/" + denominatorUnit);
 											}
 										}
 										
@@ -1415,16 +1419,20 @@ public class ZIndexConversion extends Mapping {
 		}
 		
 		// Get the last part as dose information
-		String[] fullNameSplit = fullName.split(" ");
-		if ((fullNameSplit.length > 2) && (!fullNameSplit[fullNameSplit.length - 1].trim().equals("")) && (DIGITS.contains(fullNameSplit[fullNameSplit.length - 1].trim().substring(0, 1)))) {
-			doseString = fullNameSplit[fullNameSplit.length - 1].trim();
+		//OLD String[] fullNameSplit = fullName.split(" ");
+		//OLD if ((fullNameSplit.length > 2) && (!fullNameSplit[fullNameSplit.length - 1].trim().equals("")) && (DIGITS.contains(fullNameSplit[fullNameSplit.length - 1].trim().substring(0, 1)))) {
+		//OLD 	doseString = fullNameSplit[fullNameSplit.length - 1].trim();
+		//OLD }
+		int lastSpaceIndex = fullName.lastIndexOf(" ");
+		if (lastSpaceIndex > -1) {
+			doseString = fullName.substring(lastSpaceIndex + 1);
 		}
 		return doseString;
 	}
 	
 	
 	private List<String[]> matchIngredients(List<String[]> leadingDrug, List<String[]> matchingDrug) {
-		List<String[]> match = null;
+		List<String[]> match = leadingDrug;
 		if (leadingDrug.size() == matchingDrug.size()) {
 			int matchCount = 0;
 			match = new ArrayList<String[]>();
