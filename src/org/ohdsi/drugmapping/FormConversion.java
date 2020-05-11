@@ -43,6 +43,8 @@ public class FormConversion {
 	private Map<String, Set<String>> formConversionMap = new HashMap<String, Set<String>>();                   // Map from Source form to CDM form concept_name
 	
 	private int status = STATE_EMPTY;
+	private Set<String> oldSourceForms = new HashSet<String>();
+	private Set<String> oldCDMForms = new HashSet<String>();
 	
 	
 	public FormConversion(CDMDatabase database, Set<String> sourceForms) {
@@ -106,8 +108,6 @@ public class FormConversion {
 		boolean newSourceForms = false;
 		boolean newCDMForms = false;
 		boolean conceptNamesRead = false;
-		Set<String> oldSourceForms = new HashSet<String>();
-		Set<String> oldCDMForms = new HashSet<String>();
 		
 		File formFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
 		if (formFile.exists()) {
@@ -260,7 +260,13 @@ public class FormConversion {
 				}
 				formFileWriter.println(header1);
 				formFileWriter.println(header2);
-				for (String sourceFormName : sourceFormNames) {
+				Set<String> allSourceFormNamesSet = new HashSet<String>();
+				allSourceFormNamesSet.addAll(sourceFormNames);
+				allSourceFormNamesSet.addAll(oldSourceForms);
+				List<String> allSourceFormNames = new ArrayList<String>();
+				allSourceFormNames.addAll(allSourceFormNamesSet);
+				Collections.sort(allSourceFormNames);
+				for (String sourceFormName : allSourceFormNames) {
 					String record = "\"" + sourceFormName + "\""; 
 					Set<String> sourceFormMap = formConversionMap.get(sourceFormName);
 					if (sourceFormMap == null) {

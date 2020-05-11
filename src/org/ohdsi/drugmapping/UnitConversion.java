@@ -43,6 +43,8 @@ public class UnitConversion {
 	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();   // Map from Source unit to map from CDM unit concept_name to factor (CDM unit = Source unit * factor)
 	
 	private int status = STATE_EMPTY;
+	private Set<String> oldSourceUnits = new HashSet<String>();
+	private Set<String> oldCDMUnits = new HashSet<String>();
 	
 	
 	public UnitConversion(CDMDatabase database, Set<String> sourceUnits) {
@@ -106,8 +108,6 @@ public class UnitConversion {
 		boolean newSourceUnits = false;
 		boolean newCDMUnits = false;
 		boolean conceptNamesRead = false;
-		Set<String> oldSourceUnits = new HashSet<String>();
-		Set<String> oldCDMUnits = new HashSet<String>();
 		
 		File unitFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
 		if (unitFile.exists()) {
@@ -264,8 +264,13 @@ public class UnitConversion {
 				}
 				unitFileWriter.println(header1);
 				unitFileWriter.println(header2);
-				Collections.sort(sourceUnitNames);
-				for (String sourceUnitName : sourceUnitNames) {
+				Set<String> allSourceUnitNamesSet = new HashSet<String>();
+				allSourceUnitNamesSet.addAll(sourceUnitNames);
+				allSourceUnitNamesSet.addAll(oldSourceUnits);
+				List<String> allSourceUnitNames = new ArrayList<String>();
+				allSourceUnitNames.addAll(allSourceUnitNamesSet);
+				Collections.sort(allSourceUnitNames);
+				for (String sourceUnitName : allSourceUnitNames) {
 					String record = "\"" + sourceUnitName + "\""; 
 					Map<String, Double> sourceUnitMap = unitConversionMap.get(sourceUnitName);
 					for (String concept_name : cdmUnitConceptNames) {
