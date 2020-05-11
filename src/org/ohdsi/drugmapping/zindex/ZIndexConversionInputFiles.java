@@ -187,6 +187,18 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												new String[] {
 														"This is the CAS number of the ingredient."
 												}
+										),
+										new FileColumnDefinition(
+												"BaseName",
+												new String[] {
+														"This is the base name of the ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"ChemicalFormula",
+												new String[] {
+														"This is the chemical formula of the ingredient."
+												}
 										)
 								}
 						),
@@ -330,8 +342,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 										new FileColumnDefinition(
 												"ChemicalFormula",
 												new String[] {
-														"This is the chemical formula of the",
-														"ingredient."
+														"This is the chemical formula of the ingredient."
 												}
 										)
 								},

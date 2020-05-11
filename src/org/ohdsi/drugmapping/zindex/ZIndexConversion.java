@@ -51,10 +51,12 @@ public class ZIndexConversion extends Mapping {
 	private static final int GSK_GenericName = 6;
 	private static final int GSK_CASNumber   = 7;
 	
-	private static final int GNK_ColumnCount = 3;
-	private static final int GNK_GNKCode     = 0;
-	private static final int GNK_Description = 1;
-	private static final int GNK_CASCode     = 2;
+	private static final int GNK_ColumnCount     = 5;
+	private static final int GNK_GNKCode         = 0;
+	private static final int GNK_Description     = 1;
+	private static final int GNK_CASNumber       = 2;
+	private static final int GNK_BaseName        = 3;
+	private static final int GNK_ChemicalFormula = 4;
 
 	private static final int GPKIPCI_ColumnCount     = 10;
 	private static final int GPKIPCI_GPKCode         = 0;
@@ -158,11 +160,13 @@ public class ZIndexConversion extends Mapping {
 						Row row = gnkFile.next();
 
 						String[] record = new String[GNK_ColumnCount];
-						record[GNK_GNKCode]     = StringUtilities.removeExtraSpaces(gnkFile.get(row, "GNKCode", true));
-						record[GNK_Description] = StringUtilities.removeExtraSpaces(gnkFile.get(row, "Description", true));
-						record[GNK_CASCode]     = StringUtilities.removeExtraSpaces(gnkFile.get(row, "CASNumber", true));
+						record[GNK_GNKCode]         = StringUtilities.removeExtraSpaces(gnkFile.get(row, "GNKCode", true));
+						record[GNK_Description]     = StringUtilities.removeExtraSpaces(gnkFile.get(row, "Description", true));
+						record[GNK_CASNumber]       = StringUtilities.removeExtraSpaces(gnkFile.get(row, "CASNumber", true));
+						record[GNK_BaseName]        = StringUtilities.removeExtraSpaces(gnkFile.get(row, "BaseName", true));
+						record[GNK_ChemicalFormula] = StringUtilities.removeExtraSpaces(gnkFile.get(row, "ChemicalFormula", true));
 
-						record[GNK_CASCode] = GenericMapping.uniformCASNumber(record[GNK_CASCode]);
+						record[GNK_CASNumber]       = GenericMapping.uniformCASNumber(record[GNK_CASNumber]);
 
 						int gnkCode = Integer.valueOf(record[GNK_GNKCode]);
 						gnkMap.put(gnkCode, record);
@@ -767,7 +771,7 @@ public class ZIndexConversion extends Mapping {
 										gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
 										gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
 										gpkIngredientRecord[OUTPUT_OrgDosageUnit]         = "";
-										gpkIngredientRecord[OUTPUT_CASNumber]             = gnkCode == null ? "" : gnkRecord[GNK_CASCode];
+										gpkIngredientRecord[OUTPUT_CASNumber]             = gnkCode == null ? "" : gnkRecord[GNK_CASNumber];
 
 										if ((gpkIngredientRecord[OUTPUT_IngredientName] != null) && (!gpkIngredientRecord[OUTPUT_IngredientName].equals(""))) {
 											ingredientNameTranslation.put(gpkIngredientRecord[OUTPUT_IngredientName], null);
