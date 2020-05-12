@@ -121,7 +121,12 @@ public class SourceIngredient {
 				for (String matchName : nameLengthList) {
 					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
 					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					matchName = GenericMapping.modifyName(matchName);
+					while (matchName.contains(",")) 
+						matchName = matchName.replaceAll(",", "");
+					while (matchName.contains("-")) 
+						matchName = matchName.replaceAll("-", "");
+					while (matchName.contains(" ")) 
+						matchName = matchName.replaceAll(" ", "");
 					if (matchNames.add(matchName)) {
 						ingredientMatchingNames.add(matchType + matchName);
 					}
@@ -134,24 +139,6 @@ public class SourceIngredient {
 						ingredientMatchingNames.add(matchType + matchName);
 					}
 				}
-				/*
-				for (String matchName : nameLengthList) {
-					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					matchName = matchName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
-					}
-				}
-				for (String matchName : nameLengthList) {
-					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					matchName = GenericMapping.modifyName(matchName).replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
-					}
-				}
-				*/
 			}
 		}
 	}

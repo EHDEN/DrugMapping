@@ -229,7 +229,7 @@ public class ZIndexConversion extends Mapping {
 			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		
-
+/* SKIPPED BEGIN 2020-05-12
 		// Load Words To Ignore File
 		if (ok) {
 			if (wordsToRemoveFile != null) {
@@ -359,7 +359,7 @@ public class ZIndexConversion extends Mapping {
 				
 			}
 		}
-
+SKIPPED END 2020-05-12 */
 		
 		// Load GPK IPCI Compositions File
 		if (ok) {
@@ -788,6 +788,7 @@ public class ZIndexConversion extends Mapping {
 						}
 
 						List<String[]> outputIngredients = null;
+/* REPLACED BEGIN 2020-05-12
 						// If IPCI ingredients are found
 						if (ipciOutputIngredients != null) {
 							// If Z-Index ingredients are found
@@ -1030,6 +1031,18 @@ public class ZIndexConversion extends Mapping {
 								outputIngredients = zindexExtractedOutputIngredients;
 							}
 						}
+REPLACED END 2020-05-11 */
+/* REPLACED BY BEGIN 2020-05-11 */
+						outputIngredients = ipciOutputIngredients != null ? ipciOutputIngredients : zindexOutputIngredients;
+						if (outputIngredients != null) {
+							for (String[] outputIngredient : outputIngredients) {
+								outputIngredient[OUTPUT_DosageUnit] = outputIngredient[OUTPUT_DosageUnit].replaceAll("/ST", "");
+								if (outputIngredient[OUTPUT_DosageUnit].equals("ST")) {
+									outputIngredient[OUTPUT_DosageUnit] = "";
+								}
+							}
+						}
+/* REPLACED BY END 2020-05-11 */						
 						
 						// When output ingredients are found write them to the output
 						if (outputIngredients != null) {
