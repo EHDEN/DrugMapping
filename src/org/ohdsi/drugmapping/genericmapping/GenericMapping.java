@@ -640,7 +640,9 @@ public class GenericMapping extends Mapping {
 					String cdmIngredientNameNoSpaces = cdmIngredient.getConceptName();
 					if (cdmIngredientNameNoSpaces.contains("(")) {
 						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.substring(0, cdmIngredientNameNoSpaces.indexOf("(")).trim();
-					} 
+					}
+					
+/* REPLACE BEGIN 2020-05-13 */
 					while (cdmIngredientNameNoSpaces.contains(",")) 
 						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.replaceAll(",", "");
 					while (cdmIngredientNameNoSpaces.contains("-")) 
@@ -652,7 +654,61 @@ public class GenericMapping extends Mapping {
 					List<String> nameList = new ArrayList<String>();
 					nameList.add(cdmIngredient.getConceptName());
 					nameList.add(cdmIngredientNameNoSpaces);
+					nameList.add(cdmIngredientNameNoSpaces);
 					nameList.add(modifyName(cdmIngredientNameModified));
+/* REPLACE END 2020-05-13 */
+/* REPLACED BY BEGIN 2020-05-13
+
+					Map<Integer, List<String>> matchNameMap = new HashMap<Integer, List<String>>();
+					int maxNameLength = 0;
+					String[] cdmIngredientNameSplit = cdmIngredient.getConceptName().toUpperCase().split(" ");
+					for (int partNr = cdmIngredientNameSplit.length - 1; partNr >= 0; partNr--) {
+						String matchName = "";
+						for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
+							matchName += (matchNamePartNr > 0 ? " " : "") + cdmIngredientNameSplit[matchNamePartNr];
+						}
+						maxNameLength = Math.max(maxNameLength, partNr + 1);
+						List<String> currentLengthList = matchNameMap.get(partNr + 1);
+						if (currentLengthList == null) {
+							currentLengthList = new ArrayList<String>();
+							matchNameMap.put(partNr + 1, currentLengthList);
+						}
+						currentLengthList.add(matchName);
+					}
+
+					List<String> nameList = new ArrayList<String>();
+					nameList.add(cdmIngredient.getConceptName());
+					nameList.add(cdmIngredientNameNoSpaces);
+					nameList.add(cdmIngredientNameNoSpaces);
+					for (int nameLength = maxNameLength; nameLength >= 1; nameLength--) {
+						List<String> nameLengthList = matchNameMap.get(nameLength);
+						if (nameLengthList != null) {
+							Set<String> matchNames = new HashSet<String>();
+							for (String matchName : nameLengthList) {
+								if (matchNames.add(matchName)) {
+									nameList.add(matchName);
+								}
+							}
+							for (String matchName : nameLengthList) {
+								while (matchName.contains(",")) 
+									matchName = matchName.replaceAll(",", "");
+								while (matchName.contains("-")) 
+									matchName = matchName.replaceAll("-", "");
+								while (matchName.contains(" ")) 
+									matchName = matchName.replaceAll(" ", "");
+								if (matchNames.add(matchName)) {
+									nameList.add(matchName);
+								}
+							}
+							for (String matchName : nameLengthList) {
+								matchName = GenericMapping.modifyName(matchName);
+								if (matchNames.add(matchName)) {
+									nameList.add(matchName);
+								}
+							}
+						}
+					}
+/* REPLACED BY END 2020-05-13 */					
 					
 					for (String name : nameList) {
 						Set<CDMIngredient> existingCDMIngredients = cdmIngredientNameIndex.get(name);
