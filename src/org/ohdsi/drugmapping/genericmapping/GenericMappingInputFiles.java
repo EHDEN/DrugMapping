@@ -109,14 +109,88 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										new FileColumnDefinition(
 												"Synonyms",
 												new String[] {
-														"This is a list of synonyms for the chemicl name separated by a '|' character."
+														"This is a list of synonyms for the chemical name separated", 
+														"by a '|' character."
 												}
 										)
 								},
 								false
 						),
 						new FileDefinition(
-								"Manual Mappings File",
+								"Manual CAS Mappings File",
+								new String[] {
+										"This file should contain mappings of CAS numbers to CDM Ingredient concepts",
+										"that overrule the automatic CAS mapping."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"CASNumber",
+												new String[] {
+														"This is the CAS number of the substance."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_id",
+												new String[] {
+														"This is the CDM concept id of the ingredient the CAS number", 
+														"should be mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_name",
+												new String[] {
+														"This is the CDM concept name of the ingredient the CAS number", 
+														"should be mapped to."
+												}
+										)
+								},
+								false
+						),
+						new FileDefinition(
+								"Manual Ingedient Mappings - RxNorm File",
+								new String[] {
+										"This file should contain manual mappings of source ingredients to.",
+										"CDM Ingredient concepts."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"SourceCode",
+												new String[] {
+														"This is the code of the source ingredient.",
+														"When empty drugs starting with the SourceName are mapped."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceName",
+												new String[] {
+														"This is the name of the ingredient in the native language."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_id",
+												new String[] {
+														"This is the CDM concept id of the ingredient the ingredient", 
+														"should be mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_name",
+												new String[] {
+														"This is the CDM concept name of the ingredient the ingredient", 
+														"should be mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"Comment",
+												new String[] {
+														"Comment on the mapping."
+												}
+										)
+								},
+								false
+						),
+						new FileDefinition(
+								"Manual Drug Mappings File",
 								new String[] {
 										"This file should contain manual mappings from source drugs to",
 										"clinical drugs, clinical drug comps, or clinical drug forms",

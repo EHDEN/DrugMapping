@@ -57,6 +57,8 @@ public class InputFile extends JPanel {
 	private final String[] TEXT_QUALIFIERS  = new String[]{ "\"", "'", "None" };
 	private final String   CHAR_SET         = "ISO-8859-1";
 	
+	private final int FILE_LABEL_SIZE = 250;
+	
 	private FileDefinition fileDefinition;
 	private String labelText;
 	
@@ -90,8 +92,8 @@ public class InputFile extends JPanel {
 		fileSelectCheckBox.setEnabled(!fileDefinition.isRequired());
 		
 		fileLabelPanel = new JPanel(new BorderLayout());
-		fileLabelPanel.setMinimumSize(new Dimension(200, fileLabelPanel.getHeight()));
-		fileLabelPanel.setPreferredSize(new Dimension(200, fileLabelPanel.getHeight()));
+		fileLabelPanel.setMinimumSize(new Dimension(FILE_LABEL_SIZE, fileLabelPanel.getHeight()));
+		fileLabelPanel.setPreferredSize(new Dimension(FILE_LABEL_SIZE, fileLabelPanel.getHeight()));
 		fileLabel = new JLabel(labelText + ":");
 		fileLabelPanel.add(fileLabel, BorderLayout.WEST);
 		
@@ -391,8 +393,6 @@ public class InputFile extends JPanel {
 		
 		JTextField fileField = new JTextField(inputFile.getFileName());
 		fileField.setEditable(false);
-		fileLabelPanel.setMinimumSize(new Dimension(100, fileLabelPanel.getHeight()));
-		fileLabelPanel.setPreferredSize(new Dimension(100, fileLabelPanel.getHeight()));
 		
 		JButton fileButton = new JButton("Browse");
 

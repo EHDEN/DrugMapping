@@ -246,8 +246,11 @@ public class DrugMapping {
 				logDatabaseSettings(getDatabase());
 				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
 				logFileSettings("CAS File", getFile("CAS File"));
+				logFileSettings("Manual CAS Mappings File", getFile("Manual CAS Mappings File"));
+				logFileSettings("Manual Ingedient Mappings - RxNorm File", getFile("Manual Ingedient Mappings - RxNorm File"));
+				logFileSettings("Manual Drug Mappings File", getFile("Manual Drug Mappings File"));
 				logGeneralSettings();
-				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"), getFile("Manual Mappings File"));
+				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("CAS File"), getFile("Manual CAS Mappings File"), getFile("Manual Ingedient Mappings - RxNorm File"), getFile("Manual Drug Mappings File"));
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)

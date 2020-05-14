@@ -104,7 +104,7 @@ public class ReadCSVFileWithHeader implements Iterable<Row> {
 		private Map<String, Integer>	fieldName2ColumnIndex;
 
 		public RowIterator() {
-			iterator = new ReadCSVFile(inputstream, delimiter, textDelimiter, charSet).iterator();
+			iterator = new ReadCSVFile(inputstream, delimiter, textDelimiter, charSet).iteratorWithHeader();
 			fieldName2ColumnIndex = new HashMap<String, Integer>();
 			for (String header : iterator.next())
 				fieldName2ColumnIndex.put(header, fieldName2ColumnIndex.size());

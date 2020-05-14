@@ -102,7 +102,7 @@ public class MainFrame {
 	private JFrame createInterface() {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		frame.setSize(800, 600);
+		frame.setSize(1000, 800);
 		frame.setTitle("OHDSI Drug Mapping Tool");
 		MainFrame.setIcon(frame);
 		frame.setLocationRelativeTo(null);

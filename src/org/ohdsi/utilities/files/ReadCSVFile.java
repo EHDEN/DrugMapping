@@ -168,6 +168,7 @@ public class ReadCSVFile implements Iterable<List<String>> {
 			long charPosition = 0L;
 			boolean delimitedText = false;
 			boolean wasDelimitedText = false;
+			boolean textDelimiterInValue = false;
 			List<String> line = new ArrayList<String>();
 			if (numberRead != -1) {
 				recordNr++;
@@ -192,7 +193,12 @@ public class ReadCSVFile implements Iterable<List<String>> {
 					}
 					charPosition++;
 					if ((textDelimiter != ((char) 0)) && (buffer[bufferPosition] == textDelimiter)) {
-						if (delimitedText) { // End of delimited text value or first of double text delimiter inside delimited value
+						if (textDelimiterInValue) { 
+							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
+							textDelimiterInValue = false;
+							delimitedText = false;
+						}
+						else if (delimitedText) { // End of delimited text value or first of double text delimiter inside delimited value
 							delimitedText = false;
 							wasDelimitedText = true;
 						}
@@ -202,13 +208,14 @@ public class ReadCSVFile implements Iterable<List<String>> {
 							wasDelimitedText = false;
 						}
 						else if (line.get(columnNr).length() > 0) {
-							throw new IOException("Undelimited field containing text delimiter (" + textDelimiter + ") in record " + Long.toString(recordNr) + " at line " + Long.toString(lineNr) + " position " + Long.toString(charPosition));
+							textDelimiterInValue = true;
 						}
 						else {
 							delimitedText = true;
 						} 
 					}
 					else if (buffer[bufferPosition] == delimiter) {
+						textDelimiterInValue = false;
 						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
@@ -220,12 +227,14 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						wasDelimitedText = false;
 					}
 					else if (buffer[bufferPosition] == '\r') {
+						textDelimiterInValue = false;
 						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
 						wasDelimitedText = false;
 					}
 					else if (buffer[bufferPosition] == '\n') {
+						textDelimiterInValue = false;
 						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
@@ -237,12 +246,16 @@ public class ReadCSVFile implements Iterable<List<String>> {
 						charPosition = 0L;
 					}
 					else {
-						if (wasDelimitedText) {
+						if (textDelimiterInValue) {
+							throw new IOException("Not-doubled text delimiter (" + textDelimiter + ") in record " + Long.toString(recordNr) + " at line " + Long.toString(lineNr) + " position " + Long.toString(charPosition - 1));
+						}
+						else if (wasDelimitedText) {
 							throw new IOException("Characters following field closing text delimiter (" + textDelimiter + ") in record " + Long.toString(recordNr) + " at line " + Long.toString(lineNr) + " position " + Long.toString(charPosition));
 						}
 						else {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
+						textDelimiterInValue = false;
 					}
 					bufferPosition++;
 				}
@@ -256,10 +269,20 @@ public class ReadCSVFile implements Iterable<List<String>> {
 
 			return line;
 		}
+		
+		public void setRecordNr(long newValue) {
+			recordNr = newValue;
+		}
 	}
 
 	public Iterator<List<String>> iterator() {
 		return new CSVFileIterator();
+	}
+
+	public Iterator<List<String>> iteratorWithHeader() {
+		CSVFileIterator iterator = new CSVFileIterator();
+		iterator.setRecordNr(0);
+		return iterator;
 	}
 
 	public void setDelimiter(char delimiter) {
