@@ -1,5 +1,6 @@
-SELECT replaced_concept.concept_name,
-       ingredient.concept_id
+SELECT replaced_concept.concept_name replaced_concept_name,
+       replaced_concept.concept_id replaced_concept_id,
+       ingredient.concept_id replaced_by_concept_id
 FROM @vocab.concept_relationship replaced_by
   LEFT OUTER JOIN @vocab.concept replaced_concept
     ON replaced_by.concept_id_1 = replaced_concept.concept_id

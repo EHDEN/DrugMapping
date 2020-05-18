@@ -1,4 +1,5 @@
-SELECT drug.concept_name AS drug_name,
+SELECT drug.concept_id AS drug_concept_id,
+       drug.concept_name AS drug_concept_name,
        mapsto.concept_id AS mapsto_concept_id,
        synonym.concept_synonym_name AS drug_synonym_name
 FROM @vocab.concept_relationship relationship
