@@ -44,6 +44,7 @@ public class MainFrame {
 	public static int MAXIMUM_STRENGTH_DEVIATION;
 	public static int PREFERENCE_RXNORM;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
+	public static int PREFERENCE_PRIORITIZE_BY_CONCEPT_ID;
 	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
 	public static int SUPPRESS_WARNINGS;
 	
@@ -143,12 +144,13 @@ public class MainFrame {
 		if (!DrugMapping.special.equals("ZINDEX")) {
 			DrugMapping.settings = new GeneralSettings(this);
 			
-			MINIMUM_USE_COUNT             = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:"));
-			MAXIMUM_STRENGTH_DEVIATION    = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:"));
-			PREFERENCE_RXNORM             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }));
-			PREFERENCE_PRIORITIZE_BY_DATE = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Latest", "Oldest", "No" }));
-			PREFERENCE_TAKE_FIRST_OR_LAST = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "Take first or last when multiple mappings left:", new String[] { "First", "Last", "None" }));
-			SUPPRESS_WARNINGS             = DrugMapping.settings.addSetting(new BooleanValueSetting(this, "suppressWarnings", "Suppress warnings:"));
+			MINIMUM_USE_COUNT                   = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
+			MAXIMUM_STRENGTH_DEVIATION          = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
+			PREFERENCE_RXNORM                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
+			PREFERENCE_PRIORITIZE_BY_DATE       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Latest", "Oldest", "No" }, "No"));
+			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Prioritize by concept_id when multiple mappings found:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
+			PREFERENCE_TAKE_FIRST_OR_LAST       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "Take first or last when multiple mappings left:", new String[] { "First", "Last", "None" }, "None"));
+			SUPPRESS_WARNINGS                   = DrugMapping.settings.addSetting(new BooleanValueSetting(this, "suppressWarnings", "Suppress warnings:", false));
 		}
 		
 		
@@ -400,11 +402,11 @@ public class MainFrame {
 	
 	
 	private List<String> readSettingsFromFile() {
-		return readSettingsFromFile(getFile(new FileNameExtensionFilter("Settings Files", "ini"), true));
+		return readSettingsFromFile(getFile(new FileNameExtensionFilter("Settings Files", "ini"), true), true);
 	}
 	
 	
-	public List<String> readSettingsFromFile(String settingsFileName) {
+	public List<String> readSettingsFromFile(String settingsFileName, boolean mandatory) {
 		List<String> settings = new ArrayList<String>();
 		if (settingsFileName != null) {
 			try {
@@ -417,7 +419,9 @@ public class MainFrame {
 				settingsFileBufferedReader.close();
 			}
 			catch (IOException e) {
-				JOptionPane.showMessageDialog(frame, "Unable to read settings from file!", "Error", JOptionPane.ERROR_MESSAGE);
+				if (mandatory) {
+					JOptionPane.showMessageDialog(frame, "Unable to read settings from file!", "Error", JOptionPane.ERROR_MESSAGE);
+				}
 				settings = null;
 			}
 		}

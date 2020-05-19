@@ -142,16 +142,16 @@ public class DrugMapping {
 		mainFrame = new MainFrame(this);
 		
 		if (parameters.containsKey("databasesettings")) {
-			dbSettings = mainFrame.readSettingsFromFile(parameters.get("databasesettings"));
+			dbSettings = mainFrame.readSettingsFromFile(parameters.get("databasesettings"), true);
 		}
 		if (parameters.containsKey("password")) {
 			password = parameters.get("password");
 		}
 		if (parameters.containsKey("filesettings")) {
-			fileSettings = mainFrame.readSettingsFromFile(parameters.get("filesettings"));
+			fileSettings = mainFrame.readSettingsFromFile(parameters.get("filesettings"), true);
 		}
 		if (parameters.containsKey("generalsettings")) {
-			generalSettings = mainFrame.readSettingsFromFile(parameters.get("generalsettings"));
+			generalSettings = mainFrame.readSettingsFromFile(parameters.get("generalsettings"), false);
 		}
 		if (parameters.containsKey("path")) {
 			basePath = parameters.get("path");

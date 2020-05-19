@@ -16,10 +16,11 @@ public class BooleanValueSetting extends Setting {
 	Boolean value = null;
 	
 	
-	public BooleanValueSetting(MainFrame mainFrame, String name, String label) {
+	public BooleanValueSetting(MainFrame mainFrame, String name, String label, Boolean defaultValue) {
 		valueType = Setting.SETTING_TYPE_BOOLEAN;
 		this.name = name;
 		this.label = label;
+		this.value = defaultValue;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
@@ -45,7 +46,12 @@ public class BooleanValueSetting extends Setting {
 
 
 	public void initialize() {
-		setValue("No");
+		if (value != null) {
+			setValue(value ? "Yes" : "No");
+		}
+		else {
+			correct = false;
+		}
 	}
 
 	

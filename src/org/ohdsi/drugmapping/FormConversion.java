@@ -133,9 +133,7 @@ public class FormConversion {
 								
 								if ((!sourceFormNames.contains(sourceForm)) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
 									System.out.println("    WARNING: Source form '" + sourceForm + "' no longer exists!");
-									if (!sourceFormNames.contains(sourceForm)) {
-										sourceFormNames.add(sourceForm);
-									}
+									sourceFormNames.add(sourceForm);
 								}
 								
 								String mappingLine = "        " + sourceForm;

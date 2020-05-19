@@ -56,124 +56,140 @@ public class GenericMapping extends Mapping {
 	// Make sure that the MAPPED result type is the last one for each mapping type and
 	// that there is a gap between the last result type value of one mapping type and
 	// the first result type value of the next mapping type.
-	private static int CLINICAL_DRUG_MAPPING_NO_SOURCE_INGREDIENTS                        =   0; // The source drug has no ingredients
-	private static int CLINICAL_DRUG_MAPPING_UNMAPPED_SOURCE_INGREDIENTS                  =   1; // The source drug has unmapped ingredients
-	private static int CLINICAL_DRUG_MAPPING_DOUBLE_INGREDIENT_MAPPING                    =   2; // Two or more source drug ingredients are mapped to the same CDM ingredient.
-	private static int CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS           =   3; // There is no CDM clinical drug with matching ingredients.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                             =   4; // The CDM clinical drugs rejected because they have a different form than the source drug.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                         =   5; // The CDM clinical drugs rejected because they have a different strength than the source drug.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                =   6; // The CDM clinical drugs rejected because they are not in the preferred RxNorm vocabulary.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE      =   7; // The CDM clinical drugs rejected because they are not in the preferred RxNorm Extension vocabulary.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE           =   8; // The CDM clinical drugs rejected because they do not have the latest valid start date.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE           =   9; // The CDM clinical drugs rejected because they do not have the oldest recent valid start date.
-	private static int CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                            =  10; // There are several clinical drugs the source drug could be mapped to.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE                 =  11; // The CDM clinical drugs rejected because the first one found is taken.
-	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE                  =  12; // The CDM clinical drugs rejected because the last one found is taken.
-	private static int CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                            =  13; // A mapping to a single clinical drug or a failing mapping is overruled by a manual mapping.
-	private static int CLINICAL_DRUG_MAPPING_MAPPED                                       =  14; // The final mapping of the source drug to a clinical drug.
+	private static int CLINICAL_DRUG_MAPPING_NO_SOURCE_INGREDIENTS                          =   0; // The source drug has no ingredients
+	private static int CLINICAL_DRUG_MAPPING_UNMAPPED_SOURCE_INGREDIENTS                    =   1; // The source drug has unmapped ingredients
+	private static int CLINICAL_DRUG_MAPPING_DOUBLE_INGREDIENT_MAPPING                      =   2; // Two or more source drug ingredients are mapped to the same CDM ingredient.
+	private static int CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS             =   3; // There is no CDM clinical drug with matching ingredients.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                               =   4; // The CDM clinical drugs rejected because they have a different form than the source drug.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                           =   5; // The CDM clinical drugs rejected because they have a different strength than the source drug.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                  =   6; // The CDM clinical drugs rejected because they are not in the preferred RxNorm vocabulary.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE        =   7; // The CDM clinical drugs rejected because they are not in the preferred RxNorm Extension vocabulary.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE             =   8; // The CDM clinical drugs rejected because they do not have the latest valid start date.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE             =   9; // The CDM clinical drugs rejected because they do not have the oldest recent valid start date.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE      =  10; // The CDM clinical drugs rejected because they do not have the smallest concept_id.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE      =  11; // The CDM clinical drugs rejected because they do not have the greatest concept_id.
+	private static int CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                              =  12; // There are several clinical drugs the source drug could be mapped to.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE                   =  13; // The CDM clinical drugs rejected because the first one found is taken.
+	private static int CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE                    =  14; // The CDM clinical drugs rejected because the last one found is taken.
+	private static int CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                              =  15; // A mapping to a single clinical drug or a failing mapping is overruled by a manual mapping.
+	private static int CLINICAL_DRUG_MAPPING_MAPPED                                         =  16; // The final mapping of the source drug to a clinical drug.
 
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS                   = 100; // The source drug has no ingredients
-	private static int CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS             = 101; // The source drug has unmapped ingredients
-	private static int CLINICAL_DRUG_COMP_MAPPING_DOUBLE_INGREDIENT_MAPPING               = 102; // Two or more source drug ingredients are mapped to the same CDM ingredient.
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG               = 103; // The source drug should have only one ingredient to map to a CDM clinical drug comp.
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS      = 104; // There is no CDM clinical drug comp with matching ingredients.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH                    = 105; // The CDM clinical drug comps rejected because they have a different strength than the source drug.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE           = 106; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm vocabulary.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE = 107; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm Extension vocabulary.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE      = 108; // The CDM clinical drug comps rejected because they do not have the latest valid start date.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE      = 109; // The CDM clinical drug comps rejected because they do not have the oldest valid start date.
-	private static int CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                       = 110; // There are several clinical drug comps the source drug could be mapped to.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_FIRST_PREFERENCE            = 111; // The CDM clinical drug comps rejected because the first one found is taken.
-	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LAST_PREFERENCE             = 112; // The CDM clinical drug comps rejected because the last one found is taken.
-	private static int CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                       = 113; // A mapping to a single clinical drug comp or a failing mapping is overruled by a manual mapping.
-	private static int CLINICAL_DRUG_COMP_MAPPING_MAPPED                                  = 114; // The final mapping of the source drug to a clinical drug comp.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS                     = 100; // The source drug has no ingredients
+	private static int CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS               = 101; // The source drug has unmapped ingredients
+	private static int CLINICAL_DRUG_COMP_MAPPING_DOUBLE_INGREDIENT_MAPPING                 = 102; // Two or more source drug ingredients are mapped to the same CDM ingredient.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG                 = 103; // The source drug should have only one ingredient to map to a CDM clinical drug comp.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS        = 104; // There is no CDM clinical drug comp with matching ingredients.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH                      = 105; // The CDM clinical drug comps rejected because they have a different strength than the source drug.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE             = 106; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm vocabulary.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE   = 107; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm Extension vocabulary.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE        = 108; // The CDM clinical drug comps rejected because they do not have the latest valid start date.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE        = 109; // The CDM clinical drug comps rejected because they do not have the oldest valid start date.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE = 110; // The CDM clinical drug comps rejected because they do not have the smallest concept_id.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE = 111; // The CDM clinical drug comps rejected because they do not have the greatest concept_id.
+	private static int CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                         = 112; // There are several clinical drug comps the source drug could be mapped to.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_FIRST_PREFERENCE              = 113; // The CDM clinical drug comps rejected because the first one found is taken.
+	private static int CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LAST_PREFERENCE               = 114; // The CDM clinical drug comps rejected because the last one found is taken.
+	private static int CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                         = 115; // A mapping to a single clinical drug comp or a failing mapping is overruled by a manual mapping.
+	private static int CLINICAL_DRUG_COMP_MAPPING_MAPPED                                    = 116; // The final mapping of the source drug to a clinical drug comp.
 
-	private static int CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS                   = 200; // The source drug has no ingredients
-	private static int CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS             = 201; // The source drug has unmapped ingredients
-	private static int CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING               = 202; // Two or more source drug ingredients are mapped to the same CDM ingredient.
-	private static int CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS      = 203; // There is no CDM clinical drug form with matching ingredients.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                        = 204; // The CDM clinical drug forms rejected because they have a different form than the source drug.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_PREFERENCE           = 205; // The CDM clinical drug forms rejected because they are not in the preferred RxNorm vocabulary.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE = 206; // The CDM clinical drug forms rejected because they are not in the preferred RxNorm Extension vocabulary.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE      = 207; // The CDM clinical drug forms rejected because they do not have the latest valid start date.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE      = 208; // The CDM clinical drug forms rejected because they do not have the oldest valid start date.
-	private static int CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                       = 209; // There are several clinical drug forms the source drug could be mapped to.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FIRST_PREFERENCE            = 210; // The CDM clinical drug forms rejected because the first one found is taken.
-	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LAST_PREFERENCE             = 211; // The CDM clinical drug forms rejected because the last one found is taken.
-	private static int CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                       = 212; // A mapping to a single clinical drug form or a failing mapping is overruled by a manual mapping.
-	private static int CLINICAL_DRUG_FORM_MAPPING_MAPPED                                  = 213; // The final mapping of the source drug to a clinical drug form.
+	private static int CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS                     = 200; // The source drug has no ingredients
+	private static int CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS               = 201; // The source drug has unmapped ingredients
+	private static int CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING                 = 202; // Two or more source drug ingredients are mapped to the same CDM ingredient.
+	private static int CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS        = 203; // There is no CDM clinical drug form with matching ingredients.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                          = 204; // The CDM clinical drug forms rejected because they have a different form than the source drug.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_PREFERENCE             = 205; // The CDM clinical drug forms rejected because they are not in the preferred RxNorm vocabulary.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE   = 206; // The CDM clinical drug forms rejected because they are not in the preferred RxNorm Extension vocabulary.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE        = 207; // The CDM clinical drug forms rejected because they do not have the latest valid start date.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE        = 208; // The CDM clinical drug forms rejected because they do not have the oldest valid start date.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE = 209; // The CDM clinical drug forms rejected because they do not have the smallest concept_id.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE = 210; // The CDM clinical drug forms rejected because they do not have the greatest concept_id.
+	private static int CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                         = 211; // There are several clinical drug forms the source drug could be mapped to.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FIRST_PREFERENCE              = 212; // The CDM clinical drug forms rejected because the first one found is taken.
+	private static int CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LAST_PREFERENCE               = 213; // The CDM clinical drug forms rejected because the last one found is taken.
+	private static int CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                         = 214; // A mapping to a single clinical drug form or a failing mapping is overruled by a manual mapping.
+	private static int CLINICAL_DRUG_FORM_MAPPING_MAPPED                                    = 215; // The final mapping of the source drug to a clinical drug form.
 
-	private static int INGREDIENT_MAPPING_REJECTED_BY_STRENGTH                            = 300; // The CDM clinical drug comps rejected because they have a different strength than the source drug.
-	private static int INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                   = 301; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm vocabulary.
-	private static int INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE         = 302; // The CDM clinical drug comps rejected because they are not in the preferred RxNorm Extension vocabulary.
-	private static int INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE              = 303; // The CDM clinical drug comps rejected because they do not have the latest valid start date.
-	private static int INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE              = 304; // The CDM clinical drug comps rejected because they do not have the oldest valid start date.
-	private static int INGREDIENT_MAPPING_NO_UNIQUE_MAPPING                               = 305; // One or more ingredients have several clinical drug comps or ingredients they could be mapped to.
-	private static int INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE                    = 306; // The CDM clinical drug comps rejected because the first one found is taken.
-	private static int INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE                     = 307; // The CDM clinical drug comps rejected because the last one found is taken.
-	private static int INGREDIENT_MAPPING_OVERRULED_MAPPING                               = 308; // A mapping to a single clinical drug comp, ingredient or a failing mapping is overruled by a manual mapping.
-	private static int INGREDIENT_MAPPING_MAPPED                                          = 309; // The final mapping of a source drug ingredient to a clinical drug comp or ingredient.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_STRENGTH                              = 300; // The CDM ingredients rejected because they have a different strength than the source drug.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                     = 301; // The CDM ingredients rejected because they are not in the preferred RxNorm vocabulary.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE           = 302; // The CDM ingredients rejected because they are not in the preferred RxNorm Extension vocabulary.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE                = 303; // The CDM ingredients rejected because they do not have the latest valid start date.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE                = 304; // The CDM ingredients rejected because they do not have the oldest valid start date.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE         = 209; // The CDM ingredients rejected because they do not have the smallest concept_id.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE         = 210; // The CDM ingredients rejected because they do not have the greatest concept_id.
+	private static int INGREDIENT_MAPPING_NO_UNIQUE_MAPPING                                 = 305; // One or more ingredients have several clinical drug comps or ingredients they could be mapped to.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE                      = 306; // The CDM clinical drug comps rejected because the first one found is taken.
+	private static int INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE                       = 307; // The CDM clinical drug comps rejected because the last one found is taken.
+	private static int INGREDIENT_MAPPING_OVERRULED_MAPPING                                 = 308; // A mapping to a single clinical drug comp, ingredient or a failing mapping is overruled by a manual mapping.
+	private static int INGREDIENT_MAPPING_MAPPED                                            = 309; // The final mapping of a source drug ingredient to a clinical drug comp or ingredient.
 
 	private static Map<Integer, String> mappingResultDescriptions;
 	static {
-		mappingResultDescriptions = new HashMap<Integer, String>();
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_SOURCE_INGREDIENTS                       , "No source ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_UNMAPPED_SOURCE_INGREDIENTS                 , "Unmapped source ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_DOUBLE_INGREDIENT_MAPPING                   , "Double ingredient mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS          , "No drugs with matching ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                            , "Rejected by form");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                        , "Rejected by strength");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE               , "Rejected by RxNorm preference");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE     , "Rejected by RxNorm Extension preference");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE          , "Rejected by latest valid start date");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE          , "Rejected by oldest valid start date");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                           , "No unique mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE                , "Rejected because first is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE                 , "Rejected because last is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                           , "Overruled mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_MAPPED                                      , "Mapped");
+		mappingResultDescriptions = new HashMap<Integer  , String>();
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_SOURCE_INGREDIENTS                         , "No source ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_UNMAPPED_SOURCE_INGREDIENTS                   , "Unmapped source ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_DOUBLE_INGREDIENT_MAPPING                     , "Double ingredient mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS            , "No drugs with matching ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FORM                              , "Rejected by form");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_STRENGTH                          , "Rejected by strength");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                 , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE       , "Rejected by RxNorm Extension preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE            , "Rejected by latest valid start date");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE            , "Rejected by oldest valid start date");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE     , "Rejected by smallest concept_id");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE     , "Rejected by greatest concept_id");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_NO_UNIQUE_MAPPING                             , "No unique mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_FIRST_PREFERENCE                  , "Rejected because first is used");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_REJECTED_BY_LAST_PREFERENCE                   , "Rejected because last is used");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_OVERRULED_MAPPING                             , "Overruled mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_MAPPING_MAPPED                                        , "Mapped");
 
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS                  , "No source ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS            , "Unmapped source ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_DOUBLE_INGREDIENT_MAPPING              , "Double ingredient mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG              , "No single ingredient drug");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS     , "No drugs with matching ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH                   , "Rejected by strength");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE          , "Rejected by RxNorm preference");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE, "Rejected by RxNorm Extension preference");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE     , "Rejected by latest valid start date");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE     , "Rejected by oldest valid start date");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                      , "No unique mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_FIRST_PREFERENCE           , "Rejected because first is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LAST_PREFERENCE            , "Rejected because last is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                      , "Overruled mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED                                 , "Mapped");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_SOURCE_INGREDIENTS                    , "No source ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_UNMAPPED_SOURCE_INGREDIENTS              , "Unmapped source ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_DOUBLE_INGREDIENT_MAPPING                , "Double ingredient mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_SINGLE_INGREDIENT_DRUG                , "No single ingredient drug");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS       , "No drugs with matching ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_STRENGTH                     , "Rejected by strength");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_PREFERENCE            , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE  , "Rejected by RxNorm Extension preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE       , "Rejected by latest valid start date");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE       , "Rejected by oldest valid start date");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE, "Rejected by smallest concept_id");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE, "Rejected by greatest concept_id");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_NO_UNIQUE_MAPPING                        , "No unique mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_FIRST_PREFERENCE             , "Rejected because first is used");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_LAST_PREFERENCE              , "Rejected because last is used");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_OVERRULED_MAPPING                        , "Overruled mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_COMP_MAPPING_MAPPED                                   , "Mapped");
 
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS                  , "No source ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS            , "Unmapped source ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING              , "Double ingredient mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS     , "No drugs with matching ingredients");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                       , "Rejected by form");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_PREFERENCE          , "Rejected by RxNorm preference");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE, "Rejected by RxNorm Extension preference");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE     , "Rejected by latest valid start date");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE     , "Rejected by oldest valid start date");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                      , "No unique mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FIRST_PREFERENCE           , "Rejected because first is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LAST_PREFERENCE            , "Rejected because last is used");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                      , "Overruled mapping");
-		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED                                 , "Mapped");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_SOURCE_INGREDIENTS                    , "No source ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_UNMAPPED_SOURCE_INGREDIENTS              , "Unmapped source ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_DOUBLE_INGREDIENT_MAPPING                , "Double ingredient mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_DRUGS_WITH_MATCHING_INGREDIENTS       , "No drugs with matching ingredients");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FORM                         , "Rejected by form");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_PREFERENCE            , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE  , "Rejected by RxNorm Extension preference");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE       , "Rejected by latest valid start date");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE       , "Rejected by oldest valid start date");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE, "Rejected by smallest concept_id");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE, "Rejected by greatest concept_id");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_NO_UNIQUE_MAPPING                        , "No unique mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_FIRST_PREFERENCE             , "Rejected because first is used");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_LAST_PREFERENCE              , "Rejected because last is used");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_OVERRULED_MAPPING                        , "Overruled mapping");
+		mappingResultDescriptions.put(CLINICAL_DRUG_FORM_MAPPING_MAPPED                                   , "Mapped");
 
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_STRENGTH                           , "Rejected by strength");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                  , "Rejected by RxNorm preference");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE        , "Rejected by RxNorm Extension preference");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE             , "Rejected by latest valid start date");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE             , "Rejected by oldest valid start date");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING                              , "No unique mapping");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE                   , "Rejected because first is used");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE                    , "Rejected because last is used");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_OVERRULED_MAPPING                              , "Overruled mapping");
-		mappingResultDescriptions.put(INGREDIENT_MAPPING_MAPPED                                         , "Mapped");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_STRENGTH                             , "Rejected by strength");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_RXNORM_PREFERENCE                    , "Rejected by RxNorm preference");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_RXNORM_EXTENSION_PREFERENCE          , "Rejected by RxNorm Extension preference");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE               , "Rejected by latest valid start date");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE               , "Rejected by oldest valid start date");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE        , "Rejected by smallest concept_id");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE        , "Rejected by greatest concept_id");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_NO_UNIQUE_MAPPING                                , "No unique mapping");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_FIRST_PREFERENCE                     , "Rejected because first is used");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_REJECTED_BY_LAST_PREFERENCE                      , "Rejected because last is used");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_OVERRULED_MAPPING                                , "Overruled mapping");
+		mappingResultDescriptions.put(INGREDIENT_MAPPING_MAPPED                                           , "Mapped");
 	}
 	
 	private Set<String> forms = new HashSet<String>();
@@ -285,6 +301,10 @@ public class GenericMapping extends Mapping {
 		patternReplacement.put("[(]", " ");
 		patternReplacement.put("[)]", " ");
 		patternReplacement.put("_", " ");
+		patternReplacement.put("^", " ");
+		patternReplacement.put("'", " ");
+		patternReplacement.put("\\]'", " ");
+		patternReplacement.put("\\['", " ");
 
 		// Prevent these seperate letters to be patched
 		patternReplacement.put(" A ", "_A_");
@@ -379,7 +399,10 @@ public class GenericMapping extends Mapping {
 		// Get form conversion from local forms to CDM forms
 		boolean formsOk = ok && getFormConversion(database);
 		
-		ok = ok && unitsOk && formsOk;
+		// Get the ingredient name translation map
+		boolean translationOk = true; //ok && getIngredientnameTranslationMap();
+		
+		ok = ok && unitsOk && formsOk  && translationOk;
 		
 		// Get CDM Ingredients
 		ok = ok && getCDMData(database);		
@@ -612,6 +635,26 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
+	private boolean getIngredientnameTranslationMap() {
+		boolean ok = true;
+/*		
+		formConversionsMap = new FormConversion(database, forms);
+		if (formConversionsMap.getStatus() != FormConversion.STATE_OK) {
+			// If no form conversion is specified then stop.
+			System.out.println("");
+			System.out.println("First fill the form conversion map in the file:");
+			System.out.println("");
+			System.out.println(DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "" + FormConversion.FILENAME);
+			System.out.println("");
+			System.out.println("Fill the cells of matching forms with an non-space character.");
+			System.out.println("");
+			ok = false;
+		}
+*/		
+		return ok;
+	}
+	
+	
 	private boolean getCDMData(CDMDatabase database) {
 		boolean ok = true;
 		String fileName = "";
@@ -650,12 +693,12 @@ public class GenericMapping extends Mapping {
 					cdmIngredient = new CDMIngredient(queryRow, "");
 					cdmIngredients.put(cdmIngredient.getConceptId(), cdmIngredient);
 					cdmIngredientsList.add(cdmIngredient);
+					
+/* REPLACE BEGIN 2020-05-19 */
 					String cdmIngredientNameNoSpaces = cdmIngredient.getConceptName();
 					if (cdmIngredientNameNoSpaces.contains("(")) {
 						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.substring(0, cdmIngredientNameNoSpaces.indexOf("(")).trim();
 					}
-					
-/* REPLACE BEGIN 2020-05-13 */
 					while (cdmIngredientNameNoSpaces.contains(",")) 
 						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.replaceAll(",", "");
 					while (cdmIngredientNameNoSpaces.contains("-")) 
@@ -667,61 +710,13 @@ public class GenericMapping extends Mapping {
 					List<String> nameList = new ArrayList<String>();
 					nameList.add(cdmIngredient.getConceptName());
 					nameList.add(cdmIngredientNameNoSpaces);
-					nameList.add(cdmIngredientNameNoSpaces);
 					nameList.add(modifyName(cdmIngredientNameModified));
-/* REPLACE END 2020-05-13 */
-/* REPLACED BY BEGIN 2020-05-13
-
-					Map<Integer, List<String>> matchNameMap = new HashMap<Integer, List<String>>();
-					int maxNameLength = 0;
-					String[] cdmIngredientNameSplit = cdmIngredient.getConceptName().toUpperCase().split(" ");
-					for (int partNr = cdmIngredientNameSplit.length - 1; partNr >= 0; partNr--) {
-						String matchName = "";
-						for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
-							matchName += (matchNamePartNr > 0 ? " " : "") + cdmIngredientNameSplit[matchNamePartNr];
-						}
-						maxNameLength = Math.max(maxNameLength, partNr + 1);
-						List<String> currentLengthList = matchNameMap.get(partNr + 1);
-						if (currentLengthList == null) {
-							currentLengthList = new ArrayList<String>();
-							matchNameMap.put(partNr + 1, currentLengthList);
-						}
-						currentLengthList.add(matchName);
-					}
-
+/* REPLACE END 2020-05-19 */
+/* REPLACED BY BEGIN 2020-05-19 
 					List<String> nameList = new ArrayList<String>();
 					nameList.add(cdmIngredient.getConceptName());
-					nameList.add(cdmIngredientNameNoSpaces);
-					nameList.add(cdmIngredientNameNoSpaces);
-					for (int nameLength = maxNameLength; nameLength >= 1; nameLength--) {
-						List<String> nameLengthList = matchNameMap.get(nameLength);
-						if (nameLengthList != null) {
-							Set<String> matchNames = new HashSet<String>();
-							for (String matchName : nameLengthList) {
-								if (matchNames.add(matchName)) {
-									nameList.add(matchName);
-								}
-							}
-							for (String matchName : nameLengthList) {
-								while (matchName.contains(",")) 
-									matchName = matchName.replaceAll(",", "");
-								while (matchName.contains("-")) 
-									matchName = matchName.replaceAll("-", "");
-								while (matchName.contains(" ")) 
-									matchName = matchName.replaceAll(" ", "");
-								if (matchNames.add(matchName)) {
-									nameList.add(matchName);
-								}
-							}
-							for (String matchName : nameLengthList) {
-								matchName = GenericMapping.modifyName(matchName);
-								if (matchNames.add(matchName)) {
-									nameList.add(matchName);
-								}
-							}
-						}
-					}
-/* REPLACED BY END 2020-05-13 */					
+					nameList.add(modifyName(cdmIngredient.getConceptName()));
+/* REPLACED BY END 2020-05-19 */					
 					
 					for (String name : nameList) {
 						Set<CDMIngredient> existingCDMIngredients = cdmIngredientNameIndex.get(name);
@@ -1136,8 +1131,16 @@ public class GenericMapping extends Mapping {
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			if (cdmIngredient != null) {
-				cdmCASIngredientMap.put(cdmCASNr, cdmIngredient);
-				casCount++;
+//
+//
+//TODO DEPTROPINE MULTIPLE MAPPINGS
+//  39330 DEPTROPINE -> Mees: 37493803  Marcel: 37493798 				
+//
+//
+				if (cdmCASIngredientMap.get(cdmCASNr) == null) {
+					cdmCASIngredientMap.put(cdmCASNr, cdmIngredient);
+					casCount++;
+				}
 			}
 		}
 		
@@ -1689,12 +1692,12 @@ public class GenericMapping extends Mapping {
 							
 							for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
 								Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
+								boolean preferencesUsed = false;
 								
 								Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(matchName);
 								if (matchedCDMIngredients != null) {
 									if (matchedCDMIngredients.size() > 1) {
 										String vocabulary_id = null;
-										int resultType = -1;
 										if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
 											vocabulary_id = "RxNorm";
 										}
@@ -1702,6 +1705,7 @@ public class GenericMapping extends Mapping {
 											vocabulary_id = "RxNorm Extension";
 										}
 										if (vocabulary_id != null) {
+											preferencesUsed = true;
 											List<CDMIngredient> remove = new ArrayList<CDMIngredient>();
 											for (CDMIngredient ingredient : matchedCDMIngredients) {
 												if (!ingredient.getVocabularyId().equals(vocabulary_id)) {
@@ -1715,43 +1719,75 @@ public class GenericMapping extends Mapping {
 									}
 
 									if (matchedCDMIngredients.size() > 1) {
-										
-									}
-									if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No")) {
-										boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
-										List<CDMIngredient> remove = new ArrayList<CDMIngredient>();
-										List<CDMIngredient> lastIngredients = new ArrayList<CDMIngredient>();
-										int lastDate = -1;
-										for (CDMIngredient ingredient : matchedCDMIngredients) {
-											try {
-												Integer date = Integer.parseInt(ingredient.getValidStartDate().replaceAll("-",""));
-												if (lastDate == -1) {
-													lastIngredients.add(ingredient);
-													lastDate = date;
-												}
-												else {
-													if (latest ? (date > lastDate) : (date < lastDate)) {
-														remove.addAll(lastIngredients);
-														lastIngredients.clear();
+										if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No")) {
+											preferencesUsed = true;
+											boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
+											List<CDMIngredient> remove = new ArrayList<CDMIngredient>();
+											List<CDMIngredient> lastIngredients = new ArrayList<CDMIngredient>();
+											int lastDate = -1;
+											for (CDMIngredient ingredient : matchedCDMIngredients) {
+												try {
+													Integer date = Integer.parseInt(ingredient.getValidStartDate().replaceAll("-",""));
+													if (lastDate == -1) {
 														lastIngredients.add(ingredient);
 														lastDate = date;
 													}
-													else if (date == lastDate) {
-														lastIngredients.add(ingredient);
+													else {
+														if (latest ? (date > lastDate) : (date < lastDate)) {
+															remove.addAll(lastIngredients);
+															lastIngredients.clear();
+															lastIngredients.add(ingredient);
+															lastDate = date;
+														}
+														else if (date == lastDate) {
+															lastIngredients.add(ingredient);
+														}
+														else {
+															remove.add(ingredient);
+														}
+													}
+												}
+												catch (NumberFormatException e) {
+													remove.add(ingredient);
+												}
+											}
+											if ((remove.size() > 0) && (matchedCDMIngredients.size() != remove.size())) {
+												matchedCDMIngredients.removeAll(remove);
+											}
+										}
+									}
+									
+									if (matchedCDMIngredients.size() > 1) {
+										if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No")) {
+											preferencesUsed = true;
+											boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+											
+											List<CDMIngredient> remove = new ArrayList<CDMIngredient>();
+											CDMIngredient lastDrug = null;
+											int lastConceptId = Integer.MAX_VALUE; 
+											for (CDMIngredient cdmDrug : matchedCDMIngredients) {
+												if (lastDrug == null) {
+													lastDrug = cdmDrug;
+													lastConceptId = Integer.parseInt(cdmDrug.getConceptId()); 
+												}
+												else {
+													int conceptId = Integer.parseInt(cdmDrug.getConceptId());
+													if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+														lastConceptId = conceptId;
+														remove.add(lastDrug);
+														lastDrug = cdmDrug;
 													}
 													else {
-														remove.add(ingredient);
+														remove.add(cdmDrug);
 													}
 												}
 											}
-											catch (NumberFormatException e) {
-												remove.add(ingredient);
+											if ((remove.size() > 0) && (matchedCDMIngredients.size() != remove.size())) {
+												matchedCDMIngredients.removeAll(remove);
 											}
 										}
-										if ((remove.size() > 0) && (matchedCDMIngredients.size() != remove.size())) {
-											matchedCDMIngredients.removeAll(remove);
-										}
 									}
+									
 									
 									if (matchedCDMIngredients.size() > 1) {
 										String matchString = "Multiple mappings:";
@@ -1766,7 +1802,7 @@ public class GenericMapping extends Mapping {
 										cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
 										ingredientMap.put(sourceIngredient, cdmIngredient);
 										sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
-										sourceIngredient.setMatchString(matchType + ingredientNameIndexName + " " + matchName);
+										sourceIngredient.setMatchString(matchType + ingredientNameIndexName + " " + matchName + (preferencesUsed ? " - USED PREFERENCES" : ""));
 										matchFound = true;
 										matchedByName++;
 										break;
@@ -2262,6 +2298,62 @@ public class GenericMapping extends Mapping {
 											}
 										}
 									}
+									if ((matchingCDMDrugsWithTwoUnits.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No"))) {
+										boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+										resultType = oldest ? CLINICAL_DRUG_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : CLINICAL_DRUG_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+										
+										List<CDMDrug> remove = new ArrayList<CDMDrug>();
+										CDMDrug lastDrug = null;
+										int lastConceptId = Integer.MAX_VALUE; 
+										for (CDMDrug cdmDrug : matchingCDMDrugsWithTwoUnits) {
+											if (lastDrug == null) {
+												lastDrug = cdmDrug;
+												lastConceptId = Integer.parseInt(cdmDrug.getConceptId()); 
+											}
+											else {
+												int conceptId = Integer.parseInt(cdmDrug.getConceptId());
+												if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+													lastConceptId = conceptId;
+													remove.add(lastDrug);
+													lastDrug = cdmDrug;
+												}
+												else {
+													remove.add(cdmDrug);
+												}
+											}
+										}
+										if ((remove.size() > 0) && (matchingCDMDrugsWithTwoUnits.size() != remove.size())) {
+											matchingCDMDrugsWithTwoUnits.removeAll(remove);
+
+											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+											if (sourceDrugMappingResult == null) {
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+											}
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+												mappingTypeResultsList.add(mappingTypeResults);
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
+											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(0);
+											
+											List<String> multipleMappings = rejectedForMapping.get(resultType);
+											if (multipleMappings == null) {
+												multipleMappings = new ArrayList<String>();
+												rejectedForMapping.put(resultType, multipleMappings);
+											}
+											for (CDMDrug cdmDrug : remove) {
+												String cdmDrugDescription = cdmDrug.toString();
+												if (!multipleMappings.contains(cdmDrugDescription)) {
+													multipleMappings.add(cdmDrugDescription);
+												}
+											}
+										}
+									}
 									if ((matchingCDMDrugsWithTwoUnits.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None"))) {
 										resultType = -1;
 										List<CDMDrug> remove = new ArrayList<CDMDrug>();
@@ -2426,6 +2518,62 @@ public class GenericMapping extends Mapping {
 												}
 												catch (NumberFormatException e) {
 													remove.add(cdmDrug);
+												}
+											}
+											if ((remove.size() > 0) && (matchingCDMDrugsWithOneUnit.size() != remove.size())) {
+												matchingCDMDrugsWithOneUnit.removeAll(remove);
+
+												sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+												if (sourceDrugMappingResult == null) {
+													sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+													sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+												}
+												
+												mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+												if (mappingTypeResultsList == null) {
+													mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+													Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+													mappingTypeResultsList.add(mappingTypeResults);
+													sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
+												}
+												
+												rejectedForMapping = mappingTypeResultsList.get(0);
+												
+												List<String> multipleMappings = rejectedForMapping.get(resultType);
+												if (multipleMappings == null) {
+													multipleMappings = new ArrayList<String>();
+													rejectedForMapping.put(resultType, multipleMappings);
+												}
+												for (CDMDrug cdmDrug : remove) {
+													String cdmDrugDescription = cdmDrug.toString();
+													if (!multipleMappings.contains(cdmDrugDescription)) {
+														multipleMappings.add(cdmDrugDescription);
+													}
+												}
+											}
+										}
+										if ((matchingCDMDrugsWithOneUnit.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No"))) {
+											boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+											resultType = oldest ? CLINICAL_DRUG_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : CLINICAL_DRUG_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+
+											List<CDMDrug> remove = new ArrayList<CDMDrug>();
+											CDMDrug lastDrug = null;
+											int lastConceptId = Integer.MAX_VALUE; 
+											for (CDMDrug cdmDrug : matchingCDMDrugsWithOneUnit) {
+												if (lastDrug == null) {
+													lastDrug = cdmDrug;
+													lastConceptId = Integer.parseInt(cdmDrug.getConceptId()); 
+												}
+												else {
+													int conceptId = Integer.parseInt(cdmDrug.getConceptId());
+													if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+														lastConceptId = conceptId;
+														remove.add(lastDrug);
+														lastDrug = cdmDrug;
+													}
+													else {
+														remove.add(cdmDrug);
+													}
 												}
 											}
 											if ((remove.size() > 0) && (matchingCDMDrugsWithOneUnit.size() != remove.size())) {
@@ -2821,6 +2969,62 @@ public class GenericMapping extends Mapping {
 										}
 										catch (NumberFormatException e) {
 											remove.add(cdmDrug);
+										}
+									}
+									if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
+										matchingCDMDrugs.removeAll(remove);
+
+										sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+										if (sourceDrugMappingResult == null) {
+											sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+											sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+										}
+										
+										mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+										if (mappingTypeResultsList == null) {
+											mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+											Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+											mappingTypeResultsList.add(mappingTypeResults);
+											sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
+										}
+										
+										rejectedForMapping = mappingTypeResultsList.get(0);
+										
+										List<String> multipleMappings = rejectedForMapping.get(resultType);
+										if (multipleMappings == null) {
+											multipleMappings = new ArrayList<String>();
+											rejectedForMapping.put(resultType, multipleMappings);
+										}
+										for (CDMDrug cdmDrug : remove) {
+											String cdmDrugDescription = cdmDrug.toString();
+											if (!multipleMappings.contains(cdmDrugDescription)) {
+												multipleMappings.add(cdmDrugDescription);
+											}
+										}
+									}
+								}
+								if ((matchingCDMDrugs.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No"))) {
+									boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+									resultType = oldest ? CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : CLINICAL_DRUG_COMP_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+
+									List<CDMDrug> remove = new ArrayList<CDMDrug>();
+									CDMDrug lastDrug = null;
+									int lastConceptId = Integer.MAX_VALUE; 
+									for (CDMDrug cdmDrug : matchingCDMDrugs) {
+										if (lastDrug == null) {
+											lastDrug = cdmDrug;
+											lastConceptId = Integer.parseInt(cdmDrug.getConceptId()); 
+										}
+										else {
+											int conceptId = Integer.parseInt(cdmDrug.getConceptId());
+											if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+												lastConceptId = conceptId;
+												remove.add(lastDrug);
+												lastDrug = cdmDrug;
+											}
+											else {
+												remove.add(cdmDrug);
+											}
 										}
 									}
 									if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
@@ -3332,6 +3536,62 @@ public class GenericMapping extends Mapping {
 									}
 								}
 							}
+							if ((cdmDrugsWithIngredients.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No"))) {
+								boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+								resultType = oldest ? CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : CLINICAL_DRUG_FORM_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+
+								List<CDMDrug> remove = new ArrayList<CDMDrug>();
+								CDMDrug lastDrug = null;
+								int lastConceptId = Integer.MAX_VALUE; 
+								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+									if (lastDrug == null) {
+										lastDrug = cdmDrug;
+										lastConceptId = Integer.parseInt(cdmDrug.getConceptId()); 
+									}
+									else {
+										int conceptId = Integer.parseInt(cdmDrug.getConceptId());
+										if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+											lastConceptId = conceptId;
+											remove.add(lastDrug);
+											lastDrug = cdmDrug;
+										}
+										else {
+											remove.add(cdmDrug);
+										}
+									}
+								}
+								if ((remove.size() > 0) && (cdmDrugsWithIngredients.size() != remove.size())) {
+									cdmDrugsWithIngredients.removeAll(remove);
+
+									Map<Integer, List<Map<Integer, List<String>>>> sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+									if (sourceDrugMappingResult == null) {
+										sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+										sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+									}
+									
+									List<Map<Integer, List<String>>> mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+									if (mappingTypeResultsList == null) {
+										mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+										Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+										mappingTypeResultsList.add(mappingTypeResults);
+										sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
+									}
+									
+									Map<Integer, List<String>> rejectedForMapping = mappingTypeResultsList.get(0);
+									
+									List<String> multipleMappings = rejectedForMapping.get(resultType);
+									if (multipleMappings == null) {
+										multipleMappings = new ArrayList<String>();
+										rejectedForMapping.put(resultType, multipleMappings);
+									}
+									for (CDMDrug cdmDrug : remove) {
+										String cdmDrugDescription = cdmDrug.toString();
+										if (!multipleMappings.contains(cdmDrugDescription)) {
+											multipleMappings.add(cdmDrugDescription);
+										}
+									}
+								}
+							}
 							if ((cdmDrugsWithIngredients.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None"))) {
 								if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("First")) {
 									automaticMapping = cdmDrugsWithIngredients.get(0);
@@ -3707,6 +3967,62 @@ public class GenericMapping extends Mapping {
 											}
 											
 											rejectedForMapping = mappingTypeResultsList.get(componentNr);
+											
+											List<String> multipleMappings = rejectedForMapping.get(resultType);
+											if (multipleMappings == null) {
+												multipleMappings = new ArrayList<String>();
+												rejectedForMapping.put(resultType, multipleMappings);
+											}
+											for (CDMDrug cdmDrug : remove) {
+												String cdmDrugDescription = cdmDrug.toString();
+												if (!multipleMappings.contains(cdmDrugDescription)) {
+													multipleMappings.add(cdmDrugDescription);
+												}
+											}
+										}
+									}
+									if ((matchingCDMDrugs.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No"))) {
+										boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+										resultType = oldest ? INGREDIENT_MAPPING_REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : INGREDIENT_MAPPING_REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+
+										List<CDMDrug> remove = new ArrayList<CDMDrug>();
+										CDMDrug lastDrug = null;
+										int lastConceptId = Integer.MAX_VALUE; 
+										for (CDMDrug cdmDrug : matchingCDMDrugs) {
+											if (lastDrug == null) {
+												lastDrug = cdmDrug;
+												lastConceptId = Integer.parseInt(cdmDrug.getConceptId()); 
+											}
+											else {
+												int conceptId = Integer.parseInt(cdmDrug.getConceptId());
+												if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+													lastConceptId = conceptId;
+													remove.add(lastDrug);
+													lastDrug = cdmDrug;
+												}
+												else {
+													remove.add(cdmDrug);
+												}
+											}
+										}
+										if ((remove.size() > 0) && (matchingCDMDrugs.size() != remove.size())) {
+											matchingCDMDrugs.removeAll(remove);
+
+											sourceDrugMappingResult = sourceDrugMappingResults.get(sourceDrug);
+											if (sourceDrugMappingResult == null) {
+												sourceDrugMappingResult = new HashMap<Integer, List<Map<Integer, List<String>>>>();
+												sourceDrugMappingResults.put(sourceDrug, sourceDrugMappingResult);
+											}
+											
+											mappingTypeResultsList = sourceDrugMappingResult.get(mapping);
+											if (mappingTypeResultsList == null) {
+												mappingTypeResultsList = new ArrayList<Map<Integer, List<String>>>();
+												Map<Integer, List<String>> mappingTypeResults = new HashMap<Integer, List<String>>();
+												mappingTypeResultsList.add(mappingTypeResults);
+												sourceDrugMappingResult.put(mapping, mappingTypeResultsList);
+											}
+											
+											rejectedForMapping = mappingTypeResultsList.get(0);
 											
 											List<String> multipleMappings = rejectedForMapping.get(resultType);
 											if (multipleMappings == null) {

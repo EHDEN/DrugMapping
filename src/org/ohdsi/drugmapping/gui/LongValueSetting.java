@@ -14,13 +14,14 @@ public class LongValueSetting extends Setting {
 	private static final long serialVersionUID = 5333685802924611718L;
 
 	private JTextField longValueField = null;
-	private Long value;
+	private Long value = null;
 
 	
-	public LongValueSetting(MainFrame mainFrame, String name, String label) {
+	public LongValueSetting(MainFrame mainFrame, String name, String label, Long defaultValue) {
 		valueType = Setting.SETTING_TYPE_LONG;
 		this.name = name;
 		this.label = label;
+		this.value = defaultValue;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
@@ -63,7 +64,12 @@ public class LongValueSetting extends Setting {
 	
 
 	public void initialize() {
-		setValue(1L);
+		if (value != null) {
+			setValue(value);
+		}
+		else {
+			correct = false;
+		}
 	}
 	
 	

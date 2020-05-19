@@ -16,10 +16,11 @@ public class DoubleValueSetting extends Setting {
 	Double value;
 	
 	
-	public DoubleValueSetting(MainFrame mainFrame, String name, String label) {
+	public DoubleValueSetting(MainFrame mainFrame, String name, String label, Double defaultValue) {
 		valueType = Setting.SETTING_TYPE_DOUBLE;
 		this.name = name;
 		this.label = label;
+		this.value = defaultValue;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
@@ -55,6 +56,7 @@ public class DoubleValueSetting extends Setting {
 				}
 			}
 		});
+		setValue(defaultValue);
 		add(doubleValueLabel);
 		add(doubleValueField);
 		initialize();
@@ -62,7 +64,12 @@ public class DoubleValueSetting extends Setting {
 
 
 	public void initialize() {
-		setValue(0.0);
+		if (value != null) {
+			setValue(value);
+		}
+		else {
+			correct = false;
+		}
 	}
 
 	

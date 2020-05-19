@@ -21,10 +21,11 @@ public class ChoiceValueSetting extends Setting {
 	String value = null;
 	
 	
-	public ChoiceValueSetting(MainFrame mainFrame, String name, String label, String[] choices) {
+	public ChoiceValueSetting(MainFrame mainFrame, String name, String label, String[] choices, String defaultValue) {
 		valueType = Setting.SETTING_TYPE_STRING;
 		this.name = name;
 		this.label = label;
+		this.value = defaultValue;
 		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		setBorder(BorderFactory.createEmptyBorder());
@@ -45,6 +46,7 @@ public class ChoiceValueSetting extends Setting {
 			choiceRadioButtons.add(choiceRadioButton);
 			choiceRadioButtonGroup.add(choiceRadioButton);
 		}
+		setValue(defaultValue);
 		add(choiceValueLabel);
 		for (JRadioButton choiceRadioButton : choiceRadioButtons) {
 			add(choiceRadioButton);
@@ -54,7 +56,12 @@ public class ChoiceValueSetting extends Setting {
 
 
 	public void initialize() {
-		setValue(choices.get(choices.size() - 1));
+		if (value != null) {
+			setValue(value);
+		}
+		else {
+			correct = false;
+		}
 	}
 
 	
