@@ -17,6 +17,7 @@ import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.FormConversion;
+import org.ohdsi.drugmapping.IngredientNameTranslation;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.UnitConversion;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
@@ -200,13 +201,18 @@ public class GenericMapping extends Mapping {
 	private Map<SourceIngredient, String> manualIngredientCodeMappingRemarks = new HashMap<SourceIngredient, String>();
 	private Map<String, CDMIngredient> manualIngredientNameMappings = new HashMap<String, CDMIngredient>();
 	private Map<SourceDrug, CDMDrug> manualDrugMappings = new HashMap<SourceDrug, CDMDrug>();
+	
 	private UnitConversion unitConversionsMap = null;
 	private FormConversion formConversionsMap = null;
+	private IngredientNameTranslation ingredientNameTranslationMap = null;
+	
 	private Map<String, List<String>> externalCASSynonymsMap = null;
+	
 	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
 	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
 	private List<SourceDrug> sourceDrugsAllIngredientsMapped = new ArrayList<SourceDrug>();
 	private Map<SourceDrug, List<CDMIngredient>> sourceDrugsCDMIngredients = new HashMap<SourceDrug, List<CDMIngredient>>();
+	
 	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
 	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
 	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
@@ -398,11 +404,16 @@ public class GenericMapping extends Mapping {
 		
 		// Get form conversion from local forms to CDM forms
 		boolean formsOk = ok && getFormConversion(database);
-		
+
+		/* 2020-05-20 REPLACED BEGIN Translation */
+		ok = ok && unitsOk && formsOk;
+		/* 2020-05-20 REPLACED BEGIN Translation */
+		/* 2020-05-20 REPLACED BY BEGIN Translation
 		// Get the ingredient name translation map
-		boolean translationOk = true; //ok && getIngredientnameTranslationMap();
+		boolean translationOk = ok && getIngredientnameTranslationMap();
 		
-		ok = ok && unitsOk && formsOk  && translationOk;
+		ok = ok && unitsOk && formsOk && translationOk;
+		/* 2020-05-20 REPLACED BY END Translation */
 		
 		// Get CDM Ingredients
 		ok = ok && getCDMData(database);		
@@ -514,22 +525,30 @@ public class GenericMapping extends Mapping {
 
 						if (sourceDrug != null) {
 							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", false); 
-							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase(); 
+							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase();
+							/* 2020-05-20 REPLACE BEGIN Translation */
 							String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
+							/* 2020-05-20 REPLACE END Translation */
+							/* 2020-05-20 REPLACED BY BEGIN Translation 
+							String ingredientNameEnglish = null;
+							/* 2020-05-20 REPLACED BY END */
 							String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
 							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim().toUpperCase(); 
 							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true).trim();
 							
 							if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
-							while (ingredientName.contains("  "))        ingredientName        = ingredientName.replaceAll("  ", " ");
-							while (ingredientNameEnglish.contains("  ")) ingredientNameEnglish = ingredientNameEnglish.replaceAll("  ", " ");
-							while (dosage.contains("  "))                dosage                = dosage.replaceAll("  ", " ");
-							while (dosageUnit.contains("  "))            dosageUnit            = dosageUnit.replaceAll("  ", " ");
+							ingredientName        = StringUtilities.removeExtraSpaces(ingredientName);
+							ingredientNameEnglish = StringUtilities.removeExtraSpaces(ingredientNameEnglish);
+							/* 2020-05-20 REMOVED END Translation */
+							dosage                = StringUtilities.removeExtraSpaces(dosage);
+							dosageUnit            = StringUtilities.removeExtraSpaces(dosageUnit);
 							casNumber = uniformCASNumber(casNumber);
 
 							// Remove comma's
+							/* 2020-05-20 REMOVED BEGIN Translation 
 							ingredientName = ingredientName.replaceAll(",", " ").replaceAll("  ", " ");
 							ingredientNameEnglish = ingredientNameEnglish.replaceAll(",", " ").replaceAll("  ", " ");
+							/* 2020-05-20 REMOVED END Translation */
 
 							SourceIngredient sourceIngredient = null;
 							if (!ingredientName.equals("")) {
@@ -604,7 +623,7 @@ public class GenericMapping extends Mapping {
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "" + UnitConversion.FILENAME);
+			System.out.println(DrugMapping.getBasePath() + "/" + UnitConversion.FILENAME);
 			System.out.println("");
 			System.out.println("The cells should contain a value so that: Local unit = <cell value> * CDM unit");
 			System.out.println("");
@@ -624,7 +643,7 @@ public class GenericMapping extends Mapping {
 			System.out.println("");
 			System.out.println("First fill the form conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "" + FormConversion.FILENAME);
+			System.out.println(DrugMapping.getBasePath() + "/" + FormConversion.FILENAME);
 			System.out.println("");
 			System.out.println("Fill the cells of matching forms with an non-space character.");
 			System.out.println("");
@@ -634,25 +653,26 @@ public class GenericMapping extends Mapping {
 		return ok;
 	}
 	
-	
+	/* 2020-05-20 ADDED BEGIN Translation
 	private boolean getIngredientnameTranslationMap() {
 		boolean ok = true;
-/*		
-		formConversionsMap = new FormConversion(database, forms);
-		if (formConversionsMap.getStatus() != FormConversion.STATE_OK) {
-			// If no form conversion is specified then stop.
+		
+		ingredientNameTranslationMap = new IngredientNameTranslation();
+		if (ingredientNameTranslationMap.getStatus() != IngredientNameTranslation.STATE_OK) {
+			// If no ingredient name translation map is specified then stop.
 			System.out.println("");
-			System.out.println("First fill the form conversion map in the file:");
+			System.out.println("First fill the ingredient name translation map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "" + FormConversion.FILENAME);
+			System.out.println(DrugMapping.getBasePath() + "/" + IngredientNameTranslation.FILENAME);
 			System.out.println("");
-			System.out.println("Fill the cells of matching forms with an non-space character.");
+			System.out.println("Fill the missing translations marked with <NEW>.");
 			System.out.println("");
 			ok = false;
 		}
-*/		
+		
 		return ok;
 	}
+	/* 2020-05-20 ADDED END Translation */
 	
 	
 	private boolean getCDMData(CDMDatabase database) {
@@ -780,30 +800,32 @@ public class GenericMapping extends Mapping {
 			String cdmIngredientConceptId = queryRow.get("equivalent_concept_id", true).trim();
 			String drugNameSynonym = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			
-			String drugNameNoSpaces = drugConceptName;
-			if (drugNameNoSpaces.contains("(")) {
-				drugNameNoSpaces = drugNameNoSpaces.substring(0, drugNameNoSpaces.indexOf("(")).trim();
-			} 
-			while (drugNameNoSpaces.contains(",")) 
-				drugNameNoSpaces = drugNameNoSpaces.replaceAll(",", "");
-			while (drugNameNoSpaces.contains("-")) 
-				drugNameNoSpaces = drugNameNoSpaces.replaceAll("-", "");
-			while (drugNameNoSpaces.contains(" ")) 
-				drugNameNoSpaces = drugNameNoSpaces.replaceAll(" ", "");
-			
-			String drugNameSynonymNoSpaces = drugNameSynonym;
-			if (drugNameSynonymNoSpaces.contains("(")) {
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.substring(0, drugNameSynonymNoSpaces.indexOf("(")).trim();
-			} 
-			while (drugNameSynonymNoSpaces.contains(",")) 
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(",", "");
-			while (drugNameSynonymNoSpaces.contains("-")) 
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll("-", "");
-			while (drugNameSynonymNoSpaces.contains(" ")) 
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(" ", "");
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
 			if (cdmIngredient != null) {
+				String drugNameNoSpaces = drugConceptName;
+				if (drugNameNoSpaces.contains("(")) {
+					drugNameNoSpaces = drugNameNoSpaces.substring(0, drugNameNoSpaces.indexOf("(")).trim();
+				} 
+				while (drugNameNoSpaces.contains(",")) 
+					drugNameNoSpaces = drugNameNoSpaces.replaceAll(",", "");
+				while (drugNameNoSpaces.contains("-")) 
+					drugNameNoSpaces = drugNameNoSpaces.replaceAll("-", "");
+				while (drugNameNoSpaces.contains(" ")) 
+					drugNameNoSpaces = drugNameNoSpaces.replaceAll(" ", "");
+			
+				String drugNameSynonymNoSpaces = drugNameSynonym;
+				if (drugNameSynonymNoSpaces.contains("(")) {
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.substring(0, drugNameSynonymNoSpaces.indexOf("(")).trim();
+				} 
+				while (drugNameSynonymNoSpaces.contains(",")) 
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(",", "");
+				while (drugNameSynonymNoSpaces.contains("-")) 
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll("-", "");
+				while (drugNameSynonymNoSpaces.contains(" ")) 
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(" ", "");
+				
+				
 				List<String> nameList = new ArrayList<String>();
 				nameList.add(drugConceptName);
 				nameList.add(drugNameNoSpaces);
@@ -831,30 +853,31 @@ public class GenericMapping extends Mapping {
 			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id", true).trim();
 			String drugNameSynonym = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			
-			String drugNameNoSpaces = drugConceptName;
-			if (drugNameNoSpaces.contains("(")) {
-				drugNameNoSpaces = drugNameNoSpaces.substring(0, drugNameNoSpaces.indexOf("(")).trim();
-			} 
-			while (drugNameNoSpaces.contains(",")) 
-				drugNameNoSpaces = drugNameNoSpaces.replaceAll(",", "");
-			while (drugNameNoSpaces.contains("-")) 
-				drugNameNoSpaces = drugNameNoSpaces.replaceAll("-", "");
-			while (drugNameNoSpaces.contains(" ")) 
-				drugNameNoSpaces = drugNameNoSpaces.replaceAll(" ", "");
-			
-			String drugNameSynonymNoSpaces = drugNameSynonym;
-			if (drugNameSynonymNoSpaces.contains("(")) {
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.substring(0, drugNameSynonymNoSpaces.indexOf("(")).trim();
-			} 
-			while (drugNameSynonymNoSpaces.contains(",")) 
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(",", "");
-			while (drugNameSynonymNoSpaces.contains("-")) 
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll("-", "");
-			while (drugNameSynonymNoSpaces.contains(" ")) 
-				drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(" ", "");
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
 			if (cdmIngredient != null) {
+				String drugNameNoSpaces = drugConceptName;
+				if (drugNameNoSpaces.contains("(")) {
+					drugNameNoSpaces = drugNameNoSpaces.substring(0, drugNameNoSpaces.indexOf("(")).trim();
+				} 
+				while (drugNameNoSpaces.contains(",")) 
+					drugNameNoSpaces = drugNameNoSpaces.replaceAll(",", "");
+				while (drugNameNoSpaces.contains("-")) 
+					drugNameNoSpaces = drugNameNoSpaces.replaceAll("-", "");
+				while (drugNameNoSpaces.contains(" ")) 
+					drugNameNoSpaces = drugNameNoSpaces.replaceAll(" ", "");
+	
+				String drugNameSynonymNoSpaces = drugNameSynonym;
+				if (drugNameSynonymNoSpaces.contains("(")) {
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.substring(0, drugNameSynonymNoSpaces.indexOf("(")).trim();
+				} 
+				while (drugNameSynonymNoSpaces.contains(",")) 
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(",", "");
+				while (drugNameSynonymNoSpaces.contains("-")) 
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll("-", "");
+				while (drugNameSynonymNoSpaces.contains(" ")) 
+					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(" ", "");
+				
 				List<String> nameList = new ArrayList<String>();
 				nameList.add(drugConceptName);
 				nameList.add(drugNameNoSpaces);
@@ -883,21 +906,21 @@ public class GenericMapping extends Mapping {
 			String cdmReplacedByName      = queryRow.get("replaced_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			String cdmReplacedConceptId   = queryRow.get("replaced_concept_id", true);
 			String cdmReplacedByConceptId = queryRow.get("replaced_by_concept_id", true);
-
-			String cdmReplacedNameNoSpaces = cdmReplacedByName;
-			if (cdmReplacedNameNoSpaces.contains("(")) {
-				cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.substring(0, cdmReplacedNameNoSpaces.indexOf("(")).trim();
-			} 
-			while (cdmReplacedNameNoSpaces.contains(",")) 
-				cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll(",", "");
-			while (cdmReplacedNameNoSpaces.contains("-")) 
-				cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll("-", "");
-			while (cdmReplacedNameNoSpaces.contains(" ")) 
-				cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll(" ", "");
-			String cdmReplacedNameModified = modifyName(cdmReplacedByName);
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmReplacedByConceptId);
 			if (cdmIngredient != null) {
+				String cdmReplacedNameNoSpaces = cdmReplacedByName;
+				if (cdmReplacedNameNoSpaces.contains("(")) {
+					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.substring(0, cdmReplacedNameNoSpaces.indexOf("(")).trim();
+				} 
+				while (cdmReplacedNameNoSpaces.contains(",")) 
+					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll(",", "");
+				while (cdmReplacedNameNoSpaces.contains("-")) 
+					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll("-", "");
+				while (cdmReplacedNameNoSpaces.contains(" ")) 
+					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll(" ", "");
+				String cdmReplacedNameModified = modifyName(cdmReplacedByName);
+			
 				List<String> nameList = new ArrayList<String>();
 				if (!cdmReplacedByName.equals("")) {
 					nameList.add(cdmReplacedByName);
@@ -1130,17 +1153,94 @@ public class GenericMapping extends Mapping {
 			String cdmIngredientConceptId = queryRow.get("concept_id", true);
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-			if (cdmIngredient != null) {
-//
-//
-//TODO DEPTROPINE MULTIPLE MAPPINGS
-//  39330 DEPTROPINE -> Mees: 37493803  Marcel: 37493798 				
-//
-//
-				if (cdmCASIngredientMap.get(cdmCASNr) == null) {
-					cdmCASIngredientMap.put(cdmCASNr, cdmIngredient);
-					casCount++;
+			CDMIngredient previousIngredient = cdmCASIngredientMap.get(cdmCASNr);
+			
+			CDMIngredient preferredIngredient = null;
+			if (previousIngredient != null) {
+				if (preferredIngredient == null) {
+					if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("None")) {
+						String preferredVocabulary_id = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM);
+
+						if (cdmIngredient.getVocabularyId().equals(preferredVocabulary_id)) {
+							if (!previousIngredient.getVocabularyId().equals(preferredVocabulary_id)) {
+								preferredIngredient = cdmIngredient;
+							}
+						}
+						else if (previousIngredient.getVocabularyId().equals(preferredVocabulary_id)) {
+							preferredIngredient = previousIngredient;
+						}
+					}
 				}
+				if (preferredIngredient == null) {
+					if ((!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No"))) {
+						boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
+
+						Integer date = Integer.parseInt(cdmIngredient.getValidStartDate().replaceAll("-",""));
+						Integer previousDate = Integer.parseInt(previousIngredient.getValidStartDate().replaceAll("-",""));
+						
+						if (latest) {
+							if (date > previousDate) {
+								preferredIngredient = cdmIngredient;
+							}
+							else if (previousDate > date) {
+								preferredIngredient = lastCdmIngredient;
+							}
+						}
+						else {
+							if (date > previousDate) {
+								preferredIngredient = previousIngredient;
+							}
+							else if (previousDate > date) {
+								preferredIngredient = cdmIngredient;
+							}
+						}
+					}
+				}
+				if (preferredIngredient == null) {
+					if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No")) {
+						boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+						
+						Integer concept_id = Integer.parseInt(cdmIngredient.getConceptId());
+						Integer previousConcept_id = Integer.parseInt(previousIngredient.getConceptId());
+						
+						if (oldest) {
+							if (concept_id < previousConcept_id) {
+								preferredIngredient = cdmIngredient;
+							}
+							else if (previousConcept_id < concept_id) {
+								preferredIngredient = lastCdmIngredient;
+							}
+						}
+						else {
+							if (concept_id < previousConcept_id) {
+								preferredIngredient = lastCdmIngredient;
+							}
+							else if (previousConcept_id < concept_id) {
+								preferredIngredient = cdmIngredient;
+							}
+						}
+					}
+				}
+				if (preferredIngredient == null) {
+					if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None")) {
+						boolean first = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("First");
+						
+						if (first) {
+							preferredIngredient = lastCdmIngredient;
+						}
+						else {
+							preferredIngredient = cdmIngredient;
+						}
+					}
+				}
+			}
+			// Fall back to last
+			if (preferredIngredient == null) {
+				preferredIngredient = cdmIngredient;
+			}
+			if (cdmCASIngredientMap.get(cdmCASNr) == null) {
+				cdmCASIngredientMap.put(cdmCASNr, preferredIngredient);
+				casCount++;
 			}
 		}
 		
@@ -2233,6 +2333,7 @@ public class GenericMapping extends Mapping {
 											}
 										}
 									}
+										
 									if ((matchingCDMDrugsWithTwoUnits.size() > 1) && (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No"))) {
 										boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
 										resultType = latest ? CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE : CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE;

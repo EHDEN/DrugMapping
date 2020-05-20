@@ -56,13 +56,13 @@ public class IngredientNameTranslation {
 		readFromFile();
 		if (status == STATE_NOT_FOUND) {
 			System.out.println("    Creating empty ingredient name translation map ...");
-			writeFormTranslationToFile();
+			writeIngredientNameTranslationToFile();
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
 		if (status == STATE_CRITICAL) {
 			System.out.println("    Creating new ingredient name translation map ...");
-			writeFormTranslationToFile();
+			writeIngredientNameTranslationToFile();
 			System.out.println("    Done");
 		}
 		
@@ -75,17 +75,17 @@ public class IngredientNameTranslation {
 
 		boolean newSourceIngredientNames = false;
 		
-		File formFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
-		if (formFile.exists()) {
+		File translationFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
+		if (translationFile.exists()) {
 			status = STATE_OK;
 			
 			try {
-				ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
+				ReadCSVFileWithHeader ingredientNameTranslationFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
 				
-				Iterator<Row> formConversionFileIterator = formConversionFile.iterator();
+				Iterator<Row> translationFileIterator = ingredientNameTranslationFile.iterator();
 
-				while (formConversionFileIterator.hasNext()) {
-					Row row = formConversionFileIterator.next();
+				while (translationFileIterator.hasNext()) {
+					Row row = translationFileIterator.next();
 
 					String sourceIngredientName = row.get("SourceIngredientName", true);
 					String englishIngredientName = row.get("EnglishIngredientName", true);
@@ -135,10 +135,10 @@ public class IngredientNameTranslation {
 	}
 	
 	
-	private void writeFormTranslationToFile() {
-		String formFileName = DrugMapping.getBasePath() + "/" + FILENAME;
-		File formFile = new File(formFileName);
-		if (formFile.exists()) {
+	private void writeIngredientNameTranslationToFile() {
+		String translationFileName = DrugMapping.getBasePath() + "/" + FILENAME;
+		File translationFile = new File(translationFileName);
+		if (translationFile.exists()) {
 			// Backup old ingredient name translation map
 			String oldFileName = null;
 			File oldFile = null;
@@ -151,22 +151,22 @@ public class IngredientNameTranslation {
 				oldFile = new File(oldFileName);
 			} while (oldFile.exists());
 			try {
-				PrintWriter oldFormFileWriter = new PrintWriter(new File(oldFileName));
+				PrintWriter oldTranslationFileWriter = new PrintWriter(new File(oldFileName));
 				try {
-					BufferedReader oldFormFileReader = new BufferedReader(new InputStreamReader(new FileInputStream(formFileName)));
+					BufferedReader oldTranslationFileReader = new BufferedReader(new InputStreamReader(new FileInputStream(translationFileName)));
 					String line;
-					while ((line = oldFormFileReader.readLine()) != null) {
-						oldFormFileWriter.println(line);
+					while ((line = oldTranslationFileReader.readLine()) != null) {
+						oldTranslationFileWriter.println(line);
 					}
-					oldFormFileReader.close();
-					oldFormFileWriter.close();
+					oldTranslationFileReader.close();
+					oldTranslationFileWriter.close();
 				}
 				catch (FileNotFoundException e) {
-					System.out.println("    ERROR: Cannot find original ingredient name translation map '" + formFileName + "'!");
+					System.out.println("    ERROR: Cannot find original ingredient name translation map '" + translationFileName + "'!");
 					status = STATE_ERROR;
 				}
 				catch (IOException e) {
-					System.out.println("    ERROR: Reading original ingredient name translation map '" + formFileName + "'!");
+					System.out.println("    ERROR: Reading original ingredient name translation map '" + translationFileName + "'!");
 					status = STATE_ERROR;
 				}
 			} catch (FileNotFoundException e) {
@@ -177,11 +177,11 @@ public class IngredientNameTranslation {
 
 		if (status != STATE_ERROR) {
 			try {
-				PrintWriter formFileWriter = new PrintWriter(formFile);
+				PrintWriter translationFileWriter = new PrintWriter(translationFile);
 
 				String header = "SourceIngredientName";
 				header += "," + "EnglishIngredientName";
-				formFileWriter.println(header);
+				translationFileWriter.println(header);
 
 				Set<String> allIngredientNamesSet = new HashSet<String>();
 				allIngredientNamesSet.addAll(sourceIngredientNames);
@@ -196,11 +196,11 @@ public class IngredientNameTranslation {
 					}
 					String record = "\"" + sourceIngredientName + "\""; 
 					record += "," + "\"" + englishIngredientName + "\"";
-					formFileWriter.println(record);
+					translationFileWriter.println(record);
 				}
-				formFileWriter.close();
+				translationFileWriter.close();
 			} catch (FileNotFoundException e) {
-				System.out.println("    ERROR: Cannot create form conversion map '" + DrugMapping.getBasePath() + "/" + FILENAME + "'!");
+				System.out.println("    ERROR: Cannot create ingredient name translation map '" + DrugMapping.getBasePath() + "/" + FILENAME + "'!");
 				status = STATE_ERROR;
 			}
 		}
