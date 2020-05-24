@@ -2,6 +2,8 @@ package org.ohdsi.drugmapping;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ public class DrugMapping {
 	public static GeneralSettings settings = null;
 	public static String outputVersion = "";
 	public static String special = "";
+	public static Boolean autoStart = false;
 	
 	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
@@ -120,6 +123,7 @@ public class DrugMapping {
 		List<String> fileSettings = null;
 		List<String> generalSettings = null;
 		String logFileName = null;
+		autoStart = false;
 		special = parameters.get("special");
 		
 		if (special != null) {
@@ -164,6 +168,9 @@ public class DrugMapping {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		if (parameters.containsKey("autostart")) {
+			autoStart = parameters.get("autostart").toLowerCase().equals("yes");
 		}
 
 		File logFile;
@@ -215,6 +222,9 @@ public class DrugMapping {
 	
 	private void Show() {
 		mainFrame.show();
+		if (autoStart) {
+			StartMapping();
+		}
 	}
 	
 	

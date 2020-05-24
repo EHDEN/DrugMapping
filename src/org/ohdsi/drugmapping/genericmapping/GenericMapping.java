@@ -683,7 +683,7 @@ public class GenericMapping extends Mapping {
 		queryParameters.set("@vocab", database.getVocabSchema());
 	
 		// Connect to the database
-		RichConnection connection = database.getRichConnection(this.getClass());
+		RichConnection connection = database.getRichConnection(DrugMapping.class);
 		
 		// Load CDM ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredients ...");
@@ -702,7 +702,7 @@ public class GenericMapping extends Mapping {
 		
 		// Get RxNorm ingredients
 		CDMIngredient lastCdmIngredient = null;
-		for (Row queryRow : connection.queryResource("../cdm/GetRxNormIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetRxNormIngredients.sql", queryParameters)) {
 			String cdmIngredientConceptId = queryRow.get("concept_id", true).trim();
 			if ((lastCdmIngredient == null) || (!lastCdmIngredient.getConceptId().equals(cdmIngredientConceptId))) {
 				if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
@@ -794,7 +794,7 @@ public class GenericMapping extends Mapping {
 		// Get "%RxNorm eq" RxNorm Ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM '%RxNorm eq' RxNorm Ingredients ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetRxNormEquivalentIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetRxNormEquivalentIngredients.sql", queryParameters)) {
 			//String drugConceptId = queryRow.get("drug_concept_id", true).trim();
 			String drugConceptName = queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			String cdmIngredientConceptId = queryRow.get("equivalent_concept_id", true).trim();
@@ -847,7 +847,7 @@ public class GenericMapping extends Mapping {
 		// Get "Maps to" RxNorm Ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM 'Maps to' RxNorm Ingredients ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetMapsToRxNormIngredients.sql", queryParameters)) {
 			//String drugConceptId = queryRow.get("drug_concept_id", true).trim();
 			String drugConceptName = queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id", true).trim();
@@ -902,7 +902,7 @@ public class GenericMapping extends Mapping {
 		// Get RxNorm Clinical Drugs with Form and Ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM concepts replaced by RxNorm ingredients ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetConceptReplacedByRxNormIngredient.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetConceptReplacedByRxNormIngredient.sql", queryParameters)) {
 			String cdmReplacedByName      = queryRow.get("replaced_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			String cdmReplacedConceptId   = queryRow.get("replaced_concept_id", true);
 			String cdmReplacedByConceptId = queryRow.get("replaced_by_concept_id", true);
@@ -977,7 +977,7 @@ public class GenericMapping extends Mapping {
 		// Get RxNorm Clinical Drugs with Form and Ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drug_concept_id", true);
 			
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
@@ -1016,7 +1016,7 @@ public class GenericMapping extends Mapping {
 		// Get RxNorm Clinical Drugs with Form and Ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Comps with ingredients ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugCompsIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetRxNormClinicalDrugCompsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drugcomp_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugComp = cdmDrugComps.get(cdmDrugConceptId);
@@ -1050,7 +1050,7 @@ public class GenericMapping extends Mapping {
 		// Get RxNorm Clinical Drugs with Form and Ingredients
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetRxNormClinicalDrugFormsIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetRxNormClinicalDrugFormsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drugform_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugForm = cdmDrugForms.get(cdmDrugConceptId);
@@ -1115,7 +1115,7 @@ public class GenericMapping extends Mapping {
 		// Get CDM RxNorm Ingredient ATCs
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredient ATCs ...");
 		
-		for (Row queryRow : connection.queryResource("../cdm/GetRxNormIngredientATC.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetRxNormIngredientATC.sql", queryParameters)) {
 			String cdmIngredientConceptId = queryRow.get("concept_id", true);
 			String cdmIngredientATC = queryRow.get("atc", true);
 			
@@ -1148,7 +1148,7 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM CAS number to Ingredient mapping ...");
 		
 		Integer casCount = 0;
-		for (Row queryRow : connection.queryResource("../cdm/GetCASMapsToRxNormIngredients.sql", queryParameters)) {
+		for (Row queryRow : connection.queryResource("cdm/GetCASMapsToRxNormIngredients.sql", queryParameters)) {
 			String cdmCASNr = uniformCASNumber(queryRow.get("casnr", true));
 			String cdmIngredientConceptId = queryRow.get("concept_id", true);
 			

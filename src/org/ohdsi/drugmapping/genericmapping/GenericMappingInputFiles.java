@@ -194,8 +194,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								new String[] {
 										"This file should contain manual mappings from source drugs to",
 										"clinical drugs, clinical drug comps, or clinical drug forms",
-										"that overrule the automated mapping.",
-										"This file is optional."
+										"that overrule the automated mapping."
 						  		},
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(

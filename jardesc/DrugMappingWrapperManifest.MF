@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Class-Path: .
+Sealed: true
+Main-Class: org.ohdsi.drugmapping.wrapper.Wrapper
+Name: Wrapper
+Specification-Title: OHDSI DrugMapping Wrapper
+Specification-Vendor: Erasmus MC, Dept. of Medical Informatics
