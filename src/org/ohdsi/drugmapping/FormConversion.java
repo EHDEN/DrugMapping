@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
+import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
@@ -36,9 +37,6 @@ public class FormConversion {
 	public static String FILENAME = "DrugMapping - FormConversionMap.csv";
 	
 	private String formMapDate = null;
-	private Map<String, String> cdmFormNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM form concept_name to CDM form concept_id
-	private Map<String, String> cdmFormConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM form concept_id to CDM form concept_name
-	private List<String> cdmFormConceptNames = new ArrayList<String>();                                        // List of CDM form names for sorting
 	private List<String> sourceFormNames = new ArrayList<String>();                                            // List of source form names for sorting
 	private Map<String, Set<String>> formConversionMap = new HashMap<String, Set<String>>();                   // Map from Source form to CDM form concept_name
 	
@@ -47,54 +45,24 @@ public class FormConversion {
 	private Set<String> oldCDMForms = new HashSet<String>();
 	
 	
-	public FormConversion(CDMDatabase database, Set<String> sourceForms) {
+	public FormConversion(Set<String> sourceForms, CDM cdm) {
 		System.out.println(DrugMapping.getCurrentTime() + " Create Forms Conversion Map ...");
-
-		System.out.println("    Get CDM forms ...");
 		
 		sourceFormNames.addAll(sourceForms);
-		Collections.sort(sourceFormNames);
-		
-		QueryParameters queryParameters = new QueryParameters();
-		queryParameters.set("@vocab", database.getVocabSchema());
-	
-		// Connect to the database
-		RichConnection connection = database.getRichConnection(this.getClass());
-		
-		// Get CDM Forms
-		for (Row queryRow : connection.queryResource("cdm/GetCDMForms.sql", queryParameters)) {
-			
-			String concept_id   = queryRow.get("concept_id", true).trim();
-			String concept_name = queryRow.get("concept_name", true).trim();
-			
-			cdmFormNameToConceptIdMap.put(concept_name, concept_id);
-			cdmFormConceptIdToNameMap.put(concept_id, concept_name);
-			if (!cdmFormConceptNames.contains(concept_name)) {
-				cdmFormConceptNames.add(concept_name);
-			}
-		}
-		
-		// Close database connection
-		connection.close();
-		
-		Collections.sort(cdmFormConceptNames);
-		
-		//for (String concept_name : cdmFormConceptNames) {
-		//	System.out.println("        " + cdmFormNameToConceptIdMap.get(concept_name) + "," + concept_name);
-		//} 
+		Collections.sort(sourceFormNames); 
 		
 		System.out.println("    Done");
 
-		readFromFile();
+		readFromFile(cdm);
 		if (status == STATE_NOT_FOUND) {
 			System.out.println("    Creating empty form conversion map ...");
-			writeFormConversionsToFile();
+			writeFormConversionsToFile(cdm);
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
 		if (status == STATE_CRITICAL) {
 			System.out.println("    Creating new form conversion map ...");
-			writeFormConversionsToFile();
+			writeFormConversionsToFile(cdm);
 			System.out.println("    Done");
 		}
 		
@@ -102,7 +70,7 @@ public class FormConversion {
 	}
 	
 	
-	private void readFromFile() {
+	private void readFromFile(CDM cdm) {
 		System.out.println("    Get form conversion map from file " + DrugMapping.getBasePath() + "/" + FILENAME + " ...");
 
 		boolean newSourceForms = false;
@@ -146,15 +114,15 @@ public class FormConversion {
 								for (String concept_id : formConcepts) {
 									oldCDMForms.add(concept_id);
 									if (!concept_id.equals("Local form \\ CDM form")) {
-										if (cdmFormConceptIdToNameMap.keySet().contains(concept_id)) {
+										if (cdm.getCDMFormConceptIdToNameMap().keySet().contains(concept_id)) {
 											String cell = row.get(concept_id, true).trim();
 											if (!cell.equals("")) {
 												sourceFormMapping.add(concept_id);
-												mappingLine += "=" + concept_id + ",\"" + cdmFormConceptIdToNameMap.get(concept_id) + "\"";
+												mappingLine += "=" + concept_id + ",\"" + cdm.getCDMFormConceptIdToNameMap().get(concept_id) + "\"";
 											}
 										}
 										else if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
-											System.out.println("    WARNING: CDM form '" + cdmFormConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+											System.out.println("    WARNING: CDM form '" + cdm.getCDMFormConceptIdToNameMap().get(concept_id) + "' (" + concept_id + ") no longer exists!");
 										}
 									}
 								}
@@ -174,7 +142,7 @@ public class FormConversion {
 						}
 					}
 
-					for (String cdmForm : cdmFormConceptIdToNameMap.keySet()) {
+					for (String cdmForm : cdm.getCDMFormConceptIdToNameMap().keySet()) {
 						if (!oldCDMForms.contains(cdmForm)) {
 							if (!newCDMForms) {
 								System.out.println();
@@ -206,7 +174,7 @@ public class FormConversion {
 	}
 	
 	
-	private void writeFormConversionsToFile() {
+	private void writeFormConversionsToFile(CDM cdm) {
 		String formFileName = DrugMapping.getBasePath() + "/" + FILENAME;
 		File formFile = new File(formFileName);
 		if (formFile.exists()) {
@@ -252,8 +220,8 @@ public class FormConversion {
 
 				String header1 = "Local form \\ CDM form";
 				String header2 = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
-				for (String concept_name : cdmFormConceptNames) {
-					header1 += "," + cdmFormNameToConceptIdMap.get(concept_name);
+				for (String concept_name : cdm.getCDMFormConceptNames()) {
+					header1 += "," + cdm.getCDMFormConceptId(concept_name);
 					header2 += "," + "\"" + concept_name + "\"";
 				}
 				formFileWriter.println(header1);
@@ -270,8 +238,8 @@ public class FormConversion {
 					if (sourceFormMap == null) {
 						sourceFormMap = new HashSet<String>();
 					}
-					for (String concept_name : cdmFormConceptNames) {
-						String concept_id = cdmFormNameToConceptIdMap.get(concept_name);
+					for (String concept_name : cdm.getCDMFormConceptNames()) {
+						String concept_id = cdm.getCDMFormConceptId(concept_name);
 						record += "," + (sourceFormMap.contains(concept_id) ? "X" : "");
 					}
 					formFileWriter.println(record);
@@ -290,19 +258,14 @@ public class FormConversion {
 	}
 	
 	
-	public String getCDMFormConceptName(String cdmFormConceptId) {
-		return cdmFormConceptIdToNameMap.get(cdmFormConceptId);
-	}
-	
-	
-	public boolean matches(String sourceForm, String cdmForm) {
+	public boolean matches(String sourceForm, String cdmForm, CDM cdm) {
 		boolean matches = false;
 
 		if ((sourceForm != null) && sourceFormNames.contains(sourceForm)) {
 			if (cdmForm != null) {
-				if (cdmFormConceptNames.contains(cdmForm)) {
-					if (cdmFormNameToConceptIdMap.keySet().contains(cdmForm)) {
-						cdmForm = cdmFormNameToConceptIdMap.get(cdmForm);
+				if (cdm.getCDMFormConceptNames().contains(cdmForm)) {
+					if (cdm.getCDMFormNameToConceptIdMap().keySet().contains(cdmForm)) {
+						cdmForm = cdm.getCDMFormConceptName(cdmForm);
 					}
 					else {
 						cdmForm = null;

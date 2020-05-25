@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.ohdsi.drugmapping.DrugMapping;
-import org.ohdsi.drugmapping.genericmapping.GenericMapping;
-import org.ohdsi.utilities.StringUtilities;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class SourceIngredient {
 	
@@ -81,7 +80,7 @@ public class SourceIngredient {
 			String[] ingredientNameSplit = ingredientName.toUpperCase().split(" ");
 			/* 2020-05-19 REPLACE END */
 			/* 2020-05-19 REPLACE BY BEGIN 
-			String[] ingredientNameSplit = GenericMapping.modifyName(StringUtilities.removeExtraSpaces(GenericMapping.modifyName(ingredientName.toUpperCase()))).split(" ");
+			String[] ingredientNameSplit = DrugMappingStringUtilities.modifyName(StringUtilities.removeExtraSpaces(DrugMappingStringUtilities.modifyName(ingredientName.toUpperCase()))).split(" ");
 			/* 2020-05-19 REPLACE END */
 			for (int partNr = ingredientNameSplit.length - 1; partNr >= 0; partNr--) {
 				String matchName = "";
@@ -116,7 +115,7 @@ public class SourceIngredient {
 			String[] ingredientNameEnglishSplit = ingredientNameEnglish.toUpperCase().split(" ");
 			/* 2020-05-19 REPLACE END */
 			/* 2020-05-19 REPLACE BY BEGIN 
-			String[] ingredientNameEnglishSplit = GenericMapping.modifyName(StringUtilities.removeExtraSpaces(GenericMapping.modifyName(ingredientNameEnglish.toUpperCase()))).split(" ");
+			String[] ingredientNameEnglishSplit = DrugMappingStringUtilities.modifyName(StringUtilities.removeExtraSpaces(DrugMappingStringUtilities.modifyName(ingredientNameEnglish.toUpperCase()))).split(" ");
 			/* 2020-05-19 REPLACE END */
 			for (int partNr = ingredientNameEnglishSplit.length - 1; partNr >= 0; partNr--) {
 				String matchName = "";
@@ -177,7 +176,7 @@ public class SourceIngredient {
 				for (String matchName : nameLengthList) {
 					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
 					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					matchName = GenericMapping.modifyName(matchName);
+					matchName = DrugMappingStringUtilities.modifyName(matchName);
 					if (matchNames.add(matchName)) {
 						ingredientMatchingNames.add(matchType + matchName);
 					}

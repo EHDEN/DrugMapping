@@ -19,9 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.ohdsi.databases.QueryParameters;
-import org.ohdsi.databases.RichConnection;
-import org.ohdsi.drugmapping.gui.CDMDatabase;
+import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
@@ -36,9 +34,6 @@ public class UnitConversion {
 	public static String FILENAME = "DrugMapping - UnitConversionMap.csv";
 	
 	private String unitMapDate = null;
-	private Map<String, String> cdmUnitNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM unit concept_name to CDM unit concept_id
-	private Map<String, String> cdmUnitConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM unit concept_id to CDM unit concept_name
-	private List<String> cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting
 	private List<String> sourceUnitNames = new ArrayList<String>();                                            // List of source unit names for sorting
 	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();   // Map from Source unit to map from CDM unit concept_name to factor (CDM unit = Source unit * factor)
 	
@@ -47,54 +42,22 @@ public class UnitConversion {
 	private Set<String> oldCDMUnits = new HashSet<String>();
 	
 	
-	public UnitConversion(CDMDatabase database, Set<String> sourceUnits) {
+	public UnitConversion(Set<String> sourceUnits, CDM cdm) {
 		System.out.println(DrugMapping.getCurrentTime() + " Create Units Conversion Map ...");
-
-		System.out.println("    Get CDM units ...");
 		
 		sourceUnitNames.addAll(sourceUnits);
 		Collections.sort(sourceUnitNames);
-		
-		QueryParameters queryParameters = new QueryParameters();
-		queryParameters.set("@vocab", database.getVocabSchema());
-	
-		// Connect to the database
-		RichConnection connection = database.getRichConnection(this.getClass());
-		
-		// Get CDM Forms
-		for (Row queryRow : connection.queryResource("cdm/GetCDMUnits.sql", queryParameters)) {
-			
-			String concept_id   = queryRow.get("concept_id", true).trim();
-			String concept_name = queryRow.get("concept_name", true).trim();
-			
-			cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
-			cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
-			if (!cdmUnitConceptNames.contains(concept_name)) {
-				cdmUnitConceptNames.add(concept_name);
-			}
-		}
-		
-		// Close database connection
-		connection.close();
-		
-		Collections.sort(cdmUnitConceptNames);
-		
-		//for (String concept_name : cdmUnitConceptNames) {
-		//	System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
-		//} 
-		
-		System.out.println("    Done");
 
-		readFromFile();
+		readFromFile(cdm);
 		if (status == STATE_NOT_FOUND) {
 			System.out.println("    Creating empty unit conversion map ...");
-			writeUnitConversionsToFile();
+			writeUnitConversionsToFile(cdm);
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
 		else if (status == STATE_CRITICAL) {
 			System.out.println("    Creating new unit conversion map ...");
-			writeUnitConversionsToFile();
+			writeUnitConversionsToFile(cdm);
 			System.out.println("    Done");
 		}
 		
@@ -102,7 +65,7 @@ public class UnitConversion {
 	}
 	
 	
-	private void readFromFile() {
+	private void readFromFile(CDM cdm) {
 		System.out.println("    Get unit conversion map from file " + DrugMapping.getBasePath() + "/" + FILENAME + " ...");
 
 		boolean newSourceUnits = false;
@@ -146,22 +109,22 @@ public class UnitConversion {
 							for (String concept_id : unitConcepts) {
 								if (!concept_id.equals("Local unit \\ CDM unit")) {
 									oldCDMUnits.add(concept_id);
-									if (cdmUnitConceptIdToNameMap.keySet().contains(concept_id)) {
+									if (cdm.getCDMUnitConceptIdToNameMap().keySet().contains(concept_id)) {
 										String factorString = row.get(concept_id, true).trim();
 										if (!factorString.equals("")) {
 											try {
 												double factor = Double.parseDouble(factorString);
 												sourceUnitFactors.put(concept_id, factor);
-												mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdmUnitConceptIdToNameMap.get(concept_id) + "\")";
+												mappingLine += "=" + Double.toString(factor) + "*(" + concept_id + ",\"" + cdm.getCDMUnitConceptName(concept_id) + "\")";
 											}
 											catch (NumberFormatException e) {
-												System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") conversion!");
+												System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + cdm.getCDMUnitConceptName(concept_id) + "' (" + concept_id + ") conversion!");
 												status = STATE_ERROR;
 											}
 										}
 									}
 									else if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
-										System.out.println("    WARNING: CDM unit '" + cdmUnitConceptIdToNameMap.get(concept_id) + "' (" + concept_id + ") no longer exists!");
+										System.out.println("    WARNING: CDM unit '" + cdm.getCDMUnitConceptName(concept_id) + "' (" + concept_id + ") no longer exists!");
 									}
 								}
 							}
@@ -180,7 +143,7 @@ public class UnitConversion {
 						}
 					}
 
-					for (String cdmUnit : cdmUnitConceptIdToNameMap.keySet()) {
+					for (String cdmUnit : cdm.getCDMUnitConceptIdToNameMap().keySet()) {
 						if (!oldCDMUnits.contains(cdmUnit)) {
 							if (!newCDMUnits) {
 								System.out.println();
@@ -212,7 +175,7 @@ public class UnitConversion {
 	}
 	
 	
-	private void writeUnitConversionsToFile() {
+	private void writeUnitConversionsToFile(CDM cdm) {
 		String unitFileName = DrugMapping.getBasePath() + "/" + FILENAME;
 		File unitFile = new File(unitFileName);
 		if (unitFile.exists()) {
@@ -258,8 +221,8 @@ public class UnitConversion {
 
 				String header1 = "Local unit \\ CDM unit";
 				String header2 = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
-				for (String concept_name : cdmUnitConceptNames) {
-					header1 += "," + cdmUnitNameToConceptIdMap.get(concept_name);
+				for (String concept_name : cdm.getCDMUnitConceptNames()) {
+					header1 += "," + cdm.getCDMUnitConceptId(concept_name);
 					header2 += "," + "\"" + concept_name + "\"";
 				}
 				unitFileWriter.println(header1);
@@ -273,8 +236,8 @@ public class UnitConversion {
 				for (String sourceUnitName : allSourceUnitNames) {
 					String record = "\"" + sourceUnitName + "\""; 
 					Map<String, Double> sourceUnitMap = unitConversionMap.get(sourceUnitName);
-					for (String concept_name : cdmUnitConceptNames) {
-						String concept_id = cdmUnitNameToConceptIdMap.get(concept_name);
+					for (String concept_name : cdm.getCDMUnitConceptNames()) {
+						String concept_id = cdm.getCDMUnitConceptId(concept_name);
 						Double factor = null;
 						if (sourceUnitMap != null) {
 							factor = sourceUnitMap.get(concept_id);
@@ -297,19 +260,19 @@ public class UnitConversion {
 	}
 	
 	
-	public boolean compatibleUnits(String sourceUnit, String cdmUnit) {
-		return (getFactor(sourceUnit, cdmUnit) != null);
+	public boolean compatibleUnits(String sourceUnit, String cdmUnit, CDM cdm) {
+		return (getFactor(sourceUnit, cdmUnit, cdm) != null);
 	}
 	
 	
-	private Double getFactor(String sourceUnit, String cdmUnit) {
+	private Double getFactor(String sourceUnit, String cdmUnit, CDM cdm) {
 		Double factor = null;
 		
 		if ((sourceUnit != null) && sourceUnitNames.contains(sourceUnit)) {
 			if (cdmUnit != null) {
-				if (cdmUnitConceptNames.contains(cdmUnit)) {
-					if (cdmUnitNameToConceptIdMap.keySet().contains(cdmUnit)) {
-						cdmUnit = cdmUnitNameToConceptIdMap.get(cdmUnit);
+				if (cdm.getCDMUnitConceptNames().contains(cdmUnit)) {
+					if (cdm.getCDMUnitNameToConceptIdMap().keySet().contains(cdmUnit)) {
+						cdmUnit = cdm.getCDMUnitConceptId(cdmUnit);
 					}
 					else {
 						cdmUnit = null;
@@ -333,10 +296,10 @@ public class UnitConversion {
 	}
 	
 	
-	public boolean matches(String sourceUnit, Double sourceValue, String cdmUnit, Double cdmValue) {
+	public boolean matches(String sourceUnit, Double sourceValue, String cdmUnit, Double cdmValue, CDM cdm) {
 		boolean matches = false;
 		
-		Double factor = getFactor(sourceUnit, cdmUnit);
+		Double factor = getFactor(sourceUnit, cdmUnit, cdm);
 		if (factor != null) {
 			matches = (cdmValue == (sourceValue * factor));
 		}
@@ -345,11 +308,11 @@ public class UnitConversion {
 	}
 	
 	
-	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue, double deviationPercentage) {
+	public boolean matches(String sourceNumeratorUnit, Double sourceNumeratorValue, String sourceDenominatorUnit, Double sourceDenominatorValue, String cdmNumeratorUnit, Double cdmNumeratorValue, String cdmDenominatorUnit, Double cdmDenominatorValue, double deviationPercentage, CDM cdm) {
 		boolean matches = false;
 		
-		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit);
-		Double denominatorFactor = getFactor(sourceDenominatorUnit, cdmDenominatorUnit);
+		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit, cdm);
+		Double denominatorFactor = getFactor(sourceDenominatorUnit, cdmDenominatorUnit, cdm);
 		Double deviationFactor = deviationPercentage / 100.0;
 
 		if (numeratorFactor != null) {
