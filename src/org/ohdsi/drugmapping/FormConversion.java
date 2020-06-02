@@ -78,7 +78,7 @@ public class FormConversion {
 		boolean conceptNamesRead = false;
 		
 		File formFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
-		if (formFile.exists()) {
+		if (formFile.exists() && formFile.canRead()) {
 			status = STATE_OK;
 			
 			try {

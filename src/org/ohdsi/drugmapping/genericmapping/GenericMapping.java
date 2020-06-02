@@ -3739,9 +3739,10 @@ public class GenericMapping extends Mapping {
 		header += "," + "MappingResult";
 		header += "," + "Results";
 		
-		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
+		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping.csv", header);
+		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
 		
-		if (drugMappingFile != null) {
+		if ((drugMappingFile != null) && (drugMappingResultsFile != null)) {
 			System.out.println(DrugMapping.getCurrentTime() + "     Saving Drug Mapping Results ...");
 
 			// Sort source drugs on use count descending
@@ -3803,7 +3804,10 @@ public class GenericMapping extends Mapping {
 												record += "," + DrugMapping.escapeFieldValue(result);
 											}
 										}
-										drugMappingFile.println(record);
+										if (mappingResultType == mappedResultType) {
+											drugMappingFile.println(record);
+										}
+										drugMappingResultsFile.println(record);
 									}
 									
 									if (!counted.contains(mappingResultType)) {
@@ -3820,8 +3824,9 @@ public class GenericMapping extends Mapping {
 					mappingType++;
 				}
 			}
-			
+
 			DrugMappingFileUtilities.closeOutputFile(drugMappingFile);
+			DrugMappingFileUtilities.closeOutputFile(drugMappingResultsFile);
 			
 			System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		}

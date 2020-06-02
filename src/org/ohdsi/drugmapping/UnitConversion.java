@@ -178,7 +178,7 @@ public class UnitConversion {
 	private void writeUnitConversionsToFile(CDM cdm) {
 		String unitFileName = DrugMapping.getBasePath() + "/" + FILENAME;
 		File unitFile = new File(unitFileName);
-		if (unitFile.exists()) {
+		if (unitFile.exists()  & unitFile.canRead()) {
 			// Backup old unit conversion map
 			String oldUnitFileName = null;
 			File oldUnitFile = null;
