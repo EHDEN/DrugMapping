@@ -76,12 +76,7 @@ public class SourceIngredient {
 		Map<Integer, List<String>> matchNameMap = new HashMap<Integer, List<String>>();
 		int maxNameLength = 0;
 		if (!ingredientName.equals("")) {
-			/* 2020-05-19 REPLACE BEGIN */
 			String[] ingredientNameSplit = ingredientName.toUpperCase().split(" ");
-			/* 2020-05-19 REPLACE END */
-			/* 2020-05-19 REPLACE BY BEGIN 
-			String[] ingredientNameSplit = DrugMappingStringUtilities.modifyName(StringUtilities.removeExtraSpaces(DrugMappingStringUtilities.modifyName(ingredientName.toUpperCase()))).split(" ");
-			/* 2020-05-19 REPLACE END */
 			for (int partNr = ingredientNameSplit.length - 1; partNr >= 0; partNr--) {
 				String matchName = "";
 				for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
@@ -94,29 +89,14 @@ public class SourceIngredient {
 					matchNameMap.put(partNr + 1, currentLengthList);
 				}
 				currentLengthList.add("IngredientName: " + matchName);
-				/* 2020-05-19 ADD BEGIN */
 				if (!ingredientNameSplit[partNr].equals("EXTRACT")) {
-					/* 2020-05-20 REMOVED BEGIN 
-					maxNameLength = Math.max(maxNameLength, partNr + 2);
-					currentLengthList = matchNameMap.get(partNr + 2);
-					if (currentLengthList == null) {
-						currentLengthList = new ArrayList<String>();
-						matchNameMap.put(partNr + 2, currentLengthList);
-					}
-					/* 2020-05-20 REMOVED END */
 					currentLengthList.add("IngredientName: " + matchName + " EXTRACT");
 				}
-				/* 2020-05-19 ADD END */
 			}
 		}
 		
 		if (!ingredientNameEnglish.equals("")) {
-			/* 2020-05-19 REPLACE BEGIN */
 			String[] ingredientNameEnglishSplit = ingredientNameEnglish.toUpperCase().split(" ");
-			/* 2020-05-19 REPLACE END */
-			/* 2020-05-19 REPLACE BY BEGIN 
-			String[] ingredientNameEnglishSplit = DrugMappingStringUtilities.modifyName(StringUtilities.removeExtraSpaces(DrugMappingStringUtilities.modifyName(ingredientNameEnglish.toUpperCase()))).split(" ");
-			/* 2020-05-19 REPLACE END */
 			for (int partNr = ingredientNameEnglishSplit.length - 1; partNr >= 0; partNr--) {
 				String matchName = "";
 				for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
@@ -129,19 +109,9 @@ public class SourceIngredient {
 					matchNameMap.put(partNr + 1, currentLengthList);
 				}
 				currentLengthList.add("IngredientNameEnglish: " + matchName);
-				/* 2020-05-19 ADD BEGIN */
 				if (!ingredientNameEnglishSplit[partNr].equals("EXTRACT")) {
-					/* 2020-05-20 REMOVED BEGIN 
-					maxNameLength = Math.max(maxNameLength, partNr + 2);
-					currentLengthList = matchNameMap.get(partNr + 2);
-					if (currentLengthList == null) {
-						currentLengthList = new ArrayList<String>();
-						matchNameMap.put(partNr + 2, currentLengthList);
-					}
-					/* 2020-05-20 REMOVED BEGIN */
 					currentLengthList.add("IngredientName: " + matchName + " EXTRACT");
 				}
-				/* 2020-05-19 ADD END */
 			}
 		}
 		
@@ -156,22 +126,6 @@ public class SourceIngredient {
 						ingredientMatchingNames.add(matchType + matchName);
 					}
 				}
-
-				/* 2020-05-19 REMOVE BEGIN 
-				for (String matchName : nameLengthList) {
-					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					while (matchName.contains(",")) 
-						matchName = matchName.replaceAll(",", "");
-					while (matchName.contains("-")) 
-						matchName = matchName.replaceAll("-", "");
-					while (matchName.contains(" ")) 
-						matchName = matchName.replaceAll(" ", "");
-					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
-					}
-				}
-				/* 2020-05-19 REMOVE END */
 
 				for (String matchName : nameLengthList) {
 					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);

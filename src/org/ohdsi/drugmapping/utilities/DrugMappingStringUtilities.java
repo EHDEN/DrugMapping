@@ -20,123 +20,54 @@ public class DrugMappingStringUtilities {
 	
 	
 	public static String modifyName(String name) {
-		Map<String, String> patternReplacement = new HashMap<String, String>();
 		
 		name = " " + name.toUpperCase() + " ";
 		
-		List<String> patterns = new ArrayList<String>();
-		patterns.add("-");
-		patterns.add(",");
-		patterns.add("/");
-		patterns.add("[(]");
-		patterns.add("[)]");
-		patterns.add("_");
-		patterns.add("^");
-		patterns.add("'");
-		patterns.add("\\]");
-		patterns.add("\\[");
+		name = name.replaceAll("-", " ");
+		name = name.replaceAll(",", " ");
+		name = name.replaceAll("/", " ");
+		name = name.replaceAll("[(]", " ");
+		name = name.replaceAll("[)]", " ");
+		name = name.replaceAll("_", " ");
+		name = name.replaceAll("^", " ");
+		name = name.replaceAll("'", " ");
+		name = name.replaceAll("\\]", " ");
+		name = name.replaceAll("\\[", " ");
 
 		// Prevent these seperate letters to be patched
-		patterns.add(" A ");
-		patterns.add(" O ");
-		patterns.add(" E ");
-		patterns.add(" U ");
-		patterns.add(" P ");
-		patterns.add(" H ");
+		name = name.replaceAll(" A ", "_A_");
+		name = name.replaceAll(" O ", "_O_");
+		name = name.replaceAll(" E ", "_E_");
+		name = name.replaceAll(" U ", "_U_");
+		name = name.replaceAll(" P ", "_P_");
+		name = name.replaceAll(" H ", "_H_");
 
-		patterns.add("AAT");
-		patterns.add("OOT");
-		patterns.add("ZUUR");
-		patterns.add("AA");
-		patterns.add("OO");
-		patterns.add("EE");
-		patterns.add("UU");
-		patterns.add("TH");
-		patterns.add("AE");
-		patterns.add("EA");
-		patterns.add("PH");
-		patterns.add("S ");
-		patterns.add("E ");
-		//patterns.add(" ");
+		name = name.replaceAll("AAT", "ATE");
+		name = name.replaceAll("OOT", "OTE");
+		name = name.replaceAll("ZUUR", "ACID");
+		name = name.replaceAll("AA", "A");
+		name = name.replaceAll("OO", "O");
+		name = name.replaceAll("EE", "E");
+		name = name.replaceAll("UU", "U");
+		name = name.replaceAll("TH", "T");
+		name = name.replaceAll("AE", "A");
+		name = name.replaceAll("EA", "A");
+		name = name.replaceAll("PH", "F");
+		name = name.replaceAll("S ", " ");
+		name = name.replaceAll("E ", " ");
+//TODO		name = name.replaceAll("A ", " ");
+//TODO		name = name.replaceAll(" ", "");
 
-		patterns.add("_");
+		name = name.replaceAll("_", " ");
 
-		patterns.add("AA");
-		patterns.add("OO");
-		patterns.add("EE");
-		patterns.add("UU");
-		patterns.add("TH");
-		patterns.add("AE");
-		patterns.add("EA");
-		patterns.add("PH");
-		
-		patternReplacement.put("-", " ");
-		patternReplacement.put(",", " ");
-		patternReplacement.put("/", " ");
-		patternReplacement.put("[(]", " ");
-		patternReplacement.put("[)]", " ");
-		patternReplacement.put("_", " ");
-		patternReplacement.put("^", " ");
-		patternReplacement.put("'", " ");
-		patternReplacement.put("\\]", " ");
-		patternReplacement.put("\\[", " ");
-
-		// Prevent these seperate letters to be patched
-		patternReplacement.put(" A ", "_A_");
-		patternReplacement.put(" O ", "_O_");
-		patternReplacement.put(" E ", "_E_");
-		patternReplacement.put(" U ", "_U_");
-		patternReplacement.put(" P ", "_P_");
-		patternReplacement.put(" H ", "_H_");
-
-		patternReplacement.put("AAT", "ATE");
-		patternReplacement.put("OOT", "OTE");
-		patternReplacement.put("ZUUR", "ACID");
-		patternReplacement.put("AA", "A");
-		patternReplacement.put("OO", "O");
-		patternReplacement.put("EE", "E");
-		patternReplacement.put("UU", "U");
-		patternReplacement.put("TH", "T");
-		patternReplacement.put("AE", "A");
-		patternReplacement.put("EA", "A");
-		patternReplacement.put("PH", "F");
-		patternReplacement.put("S ", " ");
-		patternReplacement.put("E ", " ");
-		//patternReplacement.put(" ", "");
-
-		patternReplacement.put("_", " ");
-
-		patternReplacement.put("AA", "A");
-		patternReplacement.put("OO", "O");
-		patternReplacement.put("EE", "E");
-		patternReplacement.put("UU", "U");
-		patternReplacement.put("TH", "T");
-		patternReplacement.put("AE", "A");
-		patternReplacement.put("EA", "A");
-		patternReplacement.put("PH", "F");
-		
-		for (String pattern : patterns) {
-			if (pattern.substring(0, 1).equals("^")) {
-				if (pattern.substring(pattern.length() - 1).equals("$")) {
-					if (name.equals(pattern.substring(1, pattern.length() - 1))) {
-						name = patternReplacement.get(pattern);
-					}
-				}
-				else {
-					if ((name.length() >= pattern.length() - 1) && name.substring(0, pattern.length() - 1).equals(pattern.substring(1))) {
-						name = patternReplacement.get(pattern) + name.substring(pattern.length() - 1);
-					}
-				}
-			}
-			else if (pattern.substring(pattern.length() - 1).equals("$")) {
-				if ((name.length() >= pattern.length() - 1) && name.substring(name.length() - pattern.length() + 1).equals(pattern.substring(0, pattern.length() - 1))) {
-					name = name.substring(0, name.length() - pattern.length() + 1) + patternReplacement.get(pattern);
-				}
-			}
-			else {
-				name = name.replaceAll(pattern, patternReplacement.get(pattern));
-			}
-		}
+		name = name.replaceAll("AA", "A");
+		name = name.replaceAll("OO", "O");
+		name = name.replaceAll("EE", "E");
+		name = name.replaceAll("UU", "U");
+		name = name.replaceAll("TH", "T");
+		name = name.replaceAll("AE", "A");
+		name = name.replaceAll("EA", "A");
+		name = name.replaceAll("PH", "F");
 		
 		return name.trim();
 	}

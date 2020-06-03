@@ -2,6 +2,8 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -293,6 +295,13 @@ public class SourceDrug {
 			allComponents.add(sourceComponent);
 		}
 		components.add(sourceComponent);
+		// Keep the components sorted by ingredient code
+		Collections.sort(components, new Comparator<SourceDrugComponent>() {
+			@Override
+			public int compare(SourceDrugComponent component1, SourceDrugComponent component2) {
+				return component1.getIngredient().getIngredientCode().compareTo(component2.getIngredient().getIngredientCode());
+			}
+		});
 		sourceIngredient.addCount(getCount());
 		return sourceIngredient;
 	}

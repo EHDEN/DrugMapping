@@ -3676,28 +3676,6 @@ public class GenericMapping extends Mapping {
 					int compareResult = (countCompare == 0 ? (ingredient1.getIngredientCode() == null ? "" : ingredient1.getIngredientCode()).compareTo(ingredient2.getIngredientCode() == null ? "" : ingredient2.getIngredientCode()) : -countCompare);
 					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
 					return compareResult;
-					/*
-					int compare = -Long.compare(ingredient1.getCount(), ingredient2.getCount());
-					if (compare == 0) {
-						if (ingredient1.getIngredientCode() == null) {
-							if (ingredient2.getIngredientCode() == null) {
-								compare = 0;
-							}
-							else {
-								compare = 1;
-							}
-						}
-						else {
-							if (ingredient2.getIngredientCode() == null) {
-								compare = -1;
-							}
-							else {
-								compare = ingredient1.getIngredientCode().compareTo(ingredient2.getIngredientCode());
-							}
-						}
-					}
-					return 0;
-					*/
 				}
 			});
 			
@@ -3714,6 +3692,19 @@ public class GenericMapping extends Mapping {
 		}
 		
 		// Save drug mapping
+		
+		/* Debug bestand:
+		 * SourceCode
+		 * SourceName
+		 * SourceCount
+		 * SourceIngredientCode
+		 * SourceIngredientName
+		 * concept_id
+		 * concept_name
+		 * concept_class
+		 * Mapping_log
+		 */
+		
 		counters = new HashMap<Integer, Map<Integer, Long>>();
 		dataCoverage = new HashMap<Integer, Map<Integer, Long>>();
 
@@ -3737,9 +3728,24 @@ public class GenericMapping extends Mapping {
 		header += "," + SourceIngredient.getHeader();
 		header += "," + "MappingType";
 		header += "," + "MappingResult";
-		header += "," + "Results";
-		
+		header += "," + "concept_id";
+		header += "," + "concept_name";
+		header += "," + "domain_id";
+		header += "," + "vocabulary_id";
+		header += "," + "concept_class_id";
+		header += "," + "standard_concept";
+		header += "," + "concept_code";
+		header += "," + "valid_start_date";
+		header += "," + "valid_end_date";
+		header += "," + "invalid_reason	atc";
 		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping.csv", header);
+
+		header = "MappingStatus";
+		header += "," + SourceDrug.getHeader();
+		header += "," + SourceIngredient.getHeader();
+		header += "," + "MappingType";
+		header += "," + "MappingResult";
+		header += "," + "Results";
 		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
 		
 		if ((drugMappingFile != null) && (drugMappingResultsFile != null)) {
@@ -3793,19 +3799,18 @@ public class GenericMapping extends Mapping {
 									record += "," + DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
 									record += "," + DrugMapping.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
+									String drugMappingRecord = record;
 									List<String> results = mappingResult.get(mappingResultType);
 									if ((results != null) && (results.size() > 0)) {
 										if (mappingResultType == mappedResultType) {
-											record += "," + results.get(0);
+											drugMappingRecord += "," + results.get(0);
 										}
-										else {
-											Collections.sort(results);
-											for (String result : results) {
-												record += "," + DrugMapping.escapeFieldValue(result);
-											}
+										Collections.sort(results);
+										for (String result : results) {
+											record += "," + DrugMapping.escapeFieldValue(result);
 										}
 										if (mappingResultType == mappedResultType) {
-											drugMappingFile.println(record);
+											drugMappingFile.println(drugMappingRecord);
 										}
 										drugMappingResultsFile.println(record);
 									}
@@ -3984,6 +3989,11 @@ public class GenericMapping extends Mapping {
 		}
 		
 		return matchingIngredients;
+	}
+	
+	
+	private void selectConcept(List<CDMConcept> conceptList) {
+		
 	}
 	
 	
