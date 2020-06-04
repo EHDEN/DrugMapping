@@ -12,11 +12,12 @@ SELECT ingredient.concept_id,
 FROM @vocab.concept ingredient
   LEFT OUTER JOIN @vocab.concept_synonym synonym
     ON ingredient.concept_id = synonym.concept_id
-WHERE domain_id = 'Drug'
-AND   vocabulary_id LIKE 'RxNorm%'
-AND   concept_class_id = 'Ingredient'
-AND   standard_concept = 'S'
-AND   invalid_reason IS NULL
+WHERE ingredient.domain_id = 'Drug'
+AND   ingredient.vocabulary_id LIKE 'RxNorm%'
+AND   ingredient.concept_class_id = 'Ingredient'
+AND   ingredient.standard_concept = 'S'
+AND   ingredient.invalid_reason IS NULL
+-- Exclude orphan ingredients:
 --AND   ingredient.concept_id IN (
 --        SELECT DISTINCT ingredient_concept_id
 --        FROM @vocab.drug_strength strength

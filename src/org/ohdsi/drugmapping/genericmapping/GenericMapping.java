@@ -3692,19 +3692,6 @@ public class GenericMapping extends Mapping {
 		}
 		
 		// Save drug mapping
-		
-		/* Debug bestand:
-		 * SourceCode
-		 * SourceName
-		 * SourceCount
-		 * SourceIngredientCode
-		 * SourceIngredientName
-		 * concept_id
-		 * concept_name
-		 * concept_class
-		 * Mapping_log
-		 */
-		
 		counters = new HashMap<Integer, Map<Integer, Long>>();
 		dataCoverage = new HashMap<Integer, Map<Integer, Long>>();
 
@@ -3748,6 +3735,17 @@ public class GenericMapping extends Mapping {
 		header += "," + "Results";
 		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
 		
+		header = "SourceCode";
+		header += "," + "SourceName";
+		header += "," + "SourceCount";
+		header += "," + "SourceIngredientCode";
+		header += "," + "SourceIngredientName";
+		header += "," + "concept_id";
+		header += "," + "concept_name";
+		header += "," + "concept_class";
+		header += "," + "Mapping_log";
+		PrintWriter drugMappingDebugFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Debug.csv", header);
+		
 		if ((drugMappingFile != null) && (drugMappingResultsFile != null)) {
 			System.out.println(DrugMapping.getCurrentTime() + "     Saving Drug Mapping Results ...");
 
@@ -3778,8 +3776,11 @@ public class GenericMapping extends Mapping {
 						for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
 							Map<Integer, List<String>> mappingResult = mappingResultList.get(ingredientNr); 
 							String sourceIngredientString = "*,*,*,*"; // Mapping on source drug
+							String sourceIngredientDebugString = "*,*";
 							if (mappingType == INGREDIENT_MAPPING) {   // Mapping on source drug ingredients
 								sourceIngredientString = sourceDrug.getIngredients().get(ingredientNr).toString();
+								sourceIngredientDebugString = sourceDrug.getIngredients().get(ingredientNr).getIngredientCode();
+								sourceIngredientDebugString += "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientName();
 							}
 							if (mappingResult != null) {
 								// Get the MAPPED result type value for the current mapping type
@@ -3800,10 +3801,36 @@ public class GenericMapping extends Mapping {
 									record += "," + DrugMapping.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
 									String drugMappingRecord = record;
+									
+									String debugRecord = DrugMapping.escapeFieldValue(sourceDrug.getCode());
+									debugRecord += "," + DrugMapping.escapeFieldValue(sourceDrug.getName());
+									debugRecord += "," + DrugMapping.escapeFieldValue(sourceDrug.getCount().toString());
+									debugRecord += "," + sourceIngredientDebugString;
+									
 									List<String> results = mappingResult.get(mappingResultType);
 									if ((results != null) && (results.size() > 0)) {
 										if (mappingResultType == mappedResultType) {
 											drugMappingRecord += "," + results.get(0);
+
+											String conceptId = "";
+											String conceptName = "";
+											String conceptClass = "";
+											if (!results.get(0).equals("")) {
+												String[] conceptSplit = results.get(0).split(",");
+												conceptId = conceptSplit.length > 0 ? conceptSplit[0] : "";
+												conceptName = "";
+												if (conceptSplit.length >= 9) {
+													for (int namePart = 1; namePart < (conceptSplit.length - 7); namePart++) {
+														conceptName += (namePart > 1 ? "," : "") + conceptSplit[namePart];
+													}
+												}
+												conceptClass = conceptSplit[conceptSplit.length - 5];
+											}
+											
+											debugRecord += "," + DrugMapping.escapeFieldValue(conceptId);
+											debugRecord += "," + DrugMapping.escapeFieldValue(conceptName);
+											debugRecord += "," + DrugMapping.escapeFieldValue(conceptClass);
+											debugRecord += "," + DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType));;
 										}
 										Collections.sort(results);
 										for (String result : results) {
@@ -3811,6 +3838,7 @@ public class GenericMapping extends Mapping {
 										}
 										if (mappingResultType == mappedResultType) {
 											drugMappingFile.println(drugMappingRecord);
+											drugMappingDebugFile.println(debugRecord);
 										}
 										drugMappingResultsFile.println(record);
 									}
@@ -3832,6 +3860,7 @@ public class GenericMapping extends Mapping {
 
 			DrugMappingFileUtilities.closeOutputFile(drugMappingFile);
 			DrugMappingFileUtilities.closeOutputFile(drugMappingResultsFile);
+			DrugMappingFileUtilities.closeOutputFile(drugMappingDebugFile);
 			
 			System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		}

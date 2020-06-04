@@ -140,6 +140,78 @@ public class SourceIngredient {
 	}
 	
 	
+	private List<String> generateMatchingNames() {
+		List<String> matchingNames = new ArrayList<String>();
+		
+		Map<Integer, List<String>> matchNameMap = new HashMap<Integer, List<String>>();
+		int maxNameLength = 0;
+		if (!ingredientName.equals("")) {
+			String[] ingredientNameSplit = ingredientName.toUpperCase().split(" ");
+			for (int partNr = ingredientNameSplit.length - 1; partNr >= 0; partNr--) {
+				String matchName = "";
+				for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
+					matchName += (matchNamePartNr > 0 ? " " : "") + ingredientNameSplit[matchNamePartNr];
+				}
+				maxNameLength = Math.max(maxNameLength, partNr + 1);
+				List<String> currentLengthList = matchNameMap.get(partNr + 1);
+				if (currentLengthList == null) {
+					currentLengthList = new ArrayList<String>();
+					matchNameMap.put(partNr + 1, currentLengthList);
+				}
+				currentLengthList.add("IngredientName: " + matchName);
+				if (!ingredientNameSplit[partNr].equals("EXTRACT")) {
+					currentLengthList.add("IngredientName: " + matchName + " EXTRACT");
+				}
+			}
+		}
+		
+		if (!ingredientNameEnglish.equals("")) {
+			String[] ingredientNameEnglishSplit = ingredientNameEnglish.toUpperCase().split(" ");
+			for (int partNr = ingredientNameEnglishSplit.length - 1; partNr >= 0; partNr--) {
+				String matchName = "";
+				for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
+					matchName += (matchNamePartNr > 0 ? " " : "") + ingredientNameEnglishSplit[matchNamePartNr];
+				}
+				maxNameLength = Math.max(maxNameLength, partNr + 1);
+				List<String> currentLengthList = matchNameMap.get(partNr + 1);
+				if (currentLengthList == null) {
+					currentLengthList = new ArrayList<String>();
+					matchNameMap.put(partNr + 1, currentLengthList);
+				}
+				currentLengthList.add("IngredientNameEnglish: " + matchName);
+				if (!ingredientNameEnglishSplit[partNr].equals("EXTRACT")) {
+					currentLengthList.add("IngredientName: " + matchName + " EXTRACT");
+				}
+			}
+		}
+		
+		for (int nameLength = maxNameLength; nameLength >= 1; nameLength--) {
+			List<String> nameLengthList = matchNameMap.get(nameLength);
+			if (nameLengthList != null) {
+				Set<String> matchNames = new HashSet<String>();
+				for (String matchName : nameLengthList) {
+					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
+					matchName = matchName.substring(matchName.indexOf(": ") + 2);
+					if (matchNames.add(matchName)) {
+						ingredientMatchingNames.add(matchType + matchName);
+					}
+				}
+
+				for (String matchName : nameLengthList) {
+					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
+					matchName = matchName.substring(matchName.indexOf(": ") + 2);
+					matchName = DrugMappingStringUtilities.modifyName(matchName);
+					if (matchNames.add(matchName)) {
+						ingredientMatchingNames.add(matchType + matchName);
+					}
+				}
+			}
+		}
+		
+		return matchingNames;
+	}
+	
+	
 	public String getIngredientCode() {
 		return ingredientCode;
 	}
