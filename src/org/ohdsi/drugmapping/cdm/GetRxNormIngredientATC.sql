@@ -11,3 +11,5 @@ AND   ingredient.vocabulary_id LIKE 'RxNorm%'
 AND   ingredient.concept_class_id = 'Ingredient'
 AND   ingredient.standard_concept = 'S'
 AND   ingredient.invalid_reason IS NULL
+ORDER BY ingredient.concept_id,
+         atc.concept_code

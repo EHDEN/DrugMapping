@@ -1,10 +1,5 @@
 package org.ohdsi.drugmapping.utilities;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class DrugMappingStringUtilities {
 	
 
@@ -55,8 +50,10 @@ public class DrugMappingStringUtilities {
 		name = name.replaceAll("PH", "F");
 		name = name.replaceAll("S ", " ");
 		name = name.replaceAll("E ", " ");
-//TODO		name = name.replaceAll("A ", " ");
-//TODO		name = name.replaceAll(" ", "");
+/* ADDED BEGIN 2020-06-08 */
+		name = name.replaceAll("A ", " ");
+		name = name.replaceAll(" ", "");
+/* ADDED END 2020-06-08 */
 
 		name = name.replaceAll("_", " ");
 
@@ -69,7 +66,7 @@ public class DrugMappingStringUtilities {
 		name = name.replaceAll("EA", "A");
 		name = name.replaceAll("PH", "F");
 		
-		return name.trim();
+		return removeExtraSpaces(name).trim();
 	}
 
 }

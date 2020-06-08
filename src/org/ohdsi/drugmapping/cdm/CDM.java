@@ -27,14 +27,18 @@ public class CDM {
 	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
 	
 	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
-	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
+	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	private Map<String, Set<CDMIngredient>> cdmEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
 	private Map<String, Set<CDMIngredient>> cdmMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
-	private Map<String, Set<CDMIngredient>> cdmReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
+	private Map<String, Set<CDMIngredient>> cdmReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	private Map<String, CDMIngredient> cdmReplacedByIngredientConceptIdIndex = new HashMap<String, CDMIngredient>();
 	
 	private List<String> cdmIngredientNameIndexNameList = new ArrayList<String>();
@@ -297,31 +301,9 @@ public class CDM {
 					cdmIngredients.put(cdmIngredient.getConceptId(), cdmIngredient);
 					cdmIngredientsList.add(cdmIngredient);
 					
-					String cdmIngredientNameNoSpaces = cdmIngredient.getConceptName();
-					if (cdmIngredientNameNoSpaces.contains("(")) {
-						if (cdmIngredientNameNoSpaces.indexOf("(") == 0) {
-							cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.replaceAll("[(]", "").replaceAll("[)]", "");
-						}
-						else {
-							cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.substring(0, cdmIngredientNameNoSpaces.indexOf("(")).trim();
-						}
-					}
-					while (cdmIngredientNameNoSpaces.contains(",")) 
-						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.replaceAll(",", "");
-					while (cdmIngredientNameNoSpaces.contains("-")) 
-						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.replaceAll("-", "");
-					while (cdmIngredientNameNoSpaces.contains(" ")) 
-						cdmIngredientNameNoSpaces = cdmIngredientNameNoSpaces.replaceAll(" ", "");
-					String cdmIngredientNameModified = DrugMappingStringUtilities.modifyName(cdmIngredient.getConceptName());
-					String cdmIngredientNameModifiedNoSpaces = cdmIngredientNameModified.replaceAll(" ", "");
+					Set<String> nameSet = getMatchingNames(cdmIngredient.getConceptName());
 					
-					List<String> nameList = new ArrayList<String>();
-					nameList.add(cdmIngredient.getConceptName());
-					if (!nameList.contains(cdmIngredientNameModified))         nameList.add(cdmIngredientNameModified);
-					if (!nameList.contains(cdmIngredientNameNoSpaces))         nameList.add(cdmIngredientNameNoSpaces);
-					if (!nameList.contains(cdmIngredientNameModifiedNoSpaces)) nameList.add(cdmIngredientNameModifiedNoSpaces);
-					
-					for (String name : nameList) {
+					for (String name : nameSet) {
 						Set<CDMIngredient> existingCDMIngredients = cdmIngredientNameIndex.get(name);
 						if (existingCDMIngredients == null) {
 							existingCDMIngredients = new HashSet<CDMIngredient>();
@@ -334,23 +316,9 @@ public class CDM {
 			}
 			
 			String cdmIngredientSynonym = queryRow.get("concept_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String cdmIngredientSynonymNoSpaces = cdmIngredientSynonym;
-			if (cdmIngredientSynonymNoSpaces.contains("(")) {
-				cdmIngredientSynonymNoSpaces = cdmIngredientSynonymNoSpaces.substring(0, cdmIngredientSynonymNoSpaces.indexOf("(")).trim();
-			} 
-			while (cdmIngredientSynonymNoSpaces.contains(",")) 
-				cdmIngredientSynonymNoSpaces = cdmIngredientSynonymNoSpaces.replaceAll(",", "");
-			while (cdmIngredientSynonymNoSpaces.contains("-")) 
-				cdmIngredientSynonymNoSpaces = cdmIngredientSynonymNoSpaces.replaceAll("-", "");
-			while (cdmIngredientSynonymNoSpaces.contains(" ")) 
-				cdmIngredientSynonymNoSpaces = cdmIngredientSynonymNoSpaces.replaceAll(" ", "");
-
-			List<String> nameList = new ArrayList<String>();
-			nameList.add(cdmIngredientSynonym);
-			nameList.add(cdmIngredientSynonymNoSpaces);
-			nameList.add(DrugMappingStringUtilities.modifyName(cdmIngredientSynonym));
+			Set<String> nameSet = getMatchingNames(cdmIngredientSynonym);
 			
-			for (String name : nameList) {
+			for (String name : nameSet) {
 				Set<CDMIngredient> nameIngredients = cdmIngredientNameIndex.get(name); 
 				if (nameIngredients == null) {
 					nameIngredients = new HashSet<CDMIngredient>();
@@ -388,37 +356,10 @@ public class CDM {
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
 			if (cdmIngredient != null) {
-				String drugNameNoSpaces = drugConceptName;
-				if (drugNameNoSpaces.contains("(")) {
-					drugNameNoSpaces = drugNameNoSpaces.substring(0, drugNameNoSpaces.indexOf("(")).trim();
-				} 
-				while (drugNameNoSpaces.contains(",")) 
-					drugNameNoSpaces = drugNameNoSpaces.replaceAll(",", "");
-				while (drugNameNoSpaces.contains("-")) 
-					drugNameNoSpaces = drugNameNoSpaces.replaceAll("-", "");
-				while (drugNameNoSpaces.contains(" ")) 
-					drugNameNoSpaces = drugNameNoSpaces.replaceAll(" ", "");
-			
-				String drugNameSynonymNoSpaces = drugNameSynonym;
-				if (drugNameSynonymNoSpaces.contains("(")) {
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.substring(0, drugNameSynonymNoSpaces.indexOf("(")).trim();
-				} 
-				while (drugNameSynonymNoSpaces.contains(",")) 
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(",", "");
-				while (drugNameSynonymNoSpaces.contains("-")) 
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll("-", "");
-				while (drugNameSynonymNoSpaces.contains(" ")) 
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(" ", "");
+				Set<String> nameSet = getMatchingNames(drugConceptName);
+				nameSet.addAll(getMatchingNames(drugNameSynonym));
 				
-				
-				List<String> nameList = new ArrayList<String>();
-				nameList.add(drugConceptName);
-				nameList.add(drugNameNoSpaces);
-				nameList.add(drugNameSynonymNoSpaces);
-				nameList.add(DrugMappingStringUtilities.modifyName(drugConceptName));
-				nameList.add(DrugMappingStringUtilities.modifyName(drugNameSynonym));
-				
-				for (String name : nameList) {
+				for (String name : nameSet) {
 					Set<CDMIngredient> nameIngredients = cdmEquivalentIngredientNameIndex.get(name); 
 					if (nameIngredients == null) {
 						nameIngredients = new HashSet<CDMIngredient>();
@@ -438,43 +379,19 @@ public class CDM {
 		
 		for (Row queryRow : connection.queryResource("GetMapsToRxNormIngredients.sql", queryParameters)) {
 			//String drugConceptId = queryRow.get("drug_concept_id", true).trim();
-			String drugConceptName = queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String drugConceptName = queryRow.get("drug_concept_name", true);
+			String drugConceptClassId = queryRow.get("drug_concept_class_id", true).trim();
 			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id", true).trim();
-			String drugNameSynonym = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String drugNameSynonym = queryRow.get("drug_synonym_name", true);
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
 			if (cdmIngredient != null) {
-				String drugNameNoSpaces = drugConceptName;
-				if (drugNameNoSpaces.contains("(")) {
-					drugNameNoSpaces = drugNameNoSpaces.substring(0, drugNameNoSpaces.indexOf("(")).trim();
-				} 
-				while (drugNameNoSpaces.contains(",")) 
-					drugNameNoSpaces = drugNameNoSpaces.replaceAll(",", "");
-				while (drugNameNoSpaces.contains("-")) 
-					drugNameNoSpaces = drugNameNoSpaces.replaceAll("-", "");
-				while (drugNameNoSpaces.contains(" ")) 
-					drugNameNoSpaces = drugNameNoSpaces.replaceAll(" ", "");
-
-				String drugNameSynonymNoSpaces = drugNameSynonym;
-				if (drugNameSynonymNoSpaces.contains("(")) {
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.substring(0, drugNameSynonymNoSpaces.indexOf("(")).trim();
-				} 
-				while (drugNameSynonymNoSpaces.contains(",")) 
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(",", "");
-				while (drugNameSynonymNoSpaces.contains("-")) 
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll("-", "");
-				while (drugNameSynonymNoSpaces.contains(" ")) 
-					drugNameSynonymNoSpaces = drugNameSynonymNoSpaces.replaceAll(" ", "");
 				
-				List<String> nameList = new ArrayList<String>();
-				nameList.add(drugConceptName);
-				nameList.add(drugNameNoSpaces);
-				nameList.add(drugNameSynonymNoSpaces);
-				nameList.add(DrugMappingStringUtilities.modifyName(drugConceptName));
-				nameList.add(DrugMappingStringUtilities.modifyName(drugNameSynonym));
+				Set<String> nameSet = getMatchingNames(drugConceptName); 
+				nameSet.addAll(getMatchingNames(drugNameSynonym));
 				
-				for (String name : nameList) {
+				for (String name : nameSet) {
 					Set<CDMIngredient> nameIngredients = cdmMapsToIngredientNameIndex.get(name); 
 					if (nameIngredients == null) {
 						nameIngredients = new HashSet<CDMIngredient>();
@@ -499,30 +416,10 @@ public class CDM {
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmReplacedByConceptId);
 			if (cdmIngredient != null) {
-				String cdmReplacedNameNoSpaces = cdmReplacedByName;
-				if (cdmReplacedNameNoSpaces.contains("(")) {
-					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.substring(0, cdmReplacedNameNoSpaces.indexOf("(")).trim();
-				} 
-				while (cdmReplacedNameNoSpaces.contains(",")) 
-					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll(",", "");
-				while (cdmReplacedNameNoSpaces.contains("-")) 
-					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll("-", "");
-				while (cdmReplacedNameNoSpaces.contains(" ")) 
-					cdmReplacedNameNoSpaces = cdmReplacedNameNoSpaces.replaceAll(" ", "");
-				String cdmReplacedNameModified = DrugMappingStringUtilities.modifyName(cdmReplacedByName);
-			
-				List<String> nameList = new ArrayList<String>();
-				if (!cdmReplacedByName.equals("")) {
-					nameList.add(cdmReplacedByName);
-				}
-				if (!cdmReplacedNameNoSpaces.equals("")) {
-					nameList.add(cdmReplacedNameNoSpaces);
-				}
-				if (!cdmReplacedNameModified.equals("")) {
-					nameList.add(cdmReplacedNameModified);
-				}
 				
-				for (String name : nameList) {
+				Set<String> nameSet = getMatchingNames(cdmReplacedByName); 
+				
+				for (String name : nameSet) {
 					Set<CDMIngredient> nameIngredients = cdmReplacedByIngredientNameIndex.get(name); 
 					if (nameIngredients == null) {
 						nameIngredients = new HashSet<CDMIngredient>();
@@ -869,6 +766,48 @@ public class CDM {
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
+	
+	
+	/* REPLACED BEGIN 2020-06-08
+	private Set<String> getMatchingNames(String name) {
+		Set<String> nameSet = new HashSet<String>();
+		
+		String nameNoSpaces = name.replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+		if (nameNoSpaces.contains("(")) {
+			if (nameNoSpaces.indexOf("(") == 0) {
+				nameNoSpaces = nameNoSpaces.replaceAll("[(]", "").replaceAll("[)]", "");
+			}
+			else {
+				nameNoSpaces = nameNoSpaces.substring(0, nameNoSpaces.indexOf("(")).trim();
+			}
+		} 
+		while (nameNoSpaces.contains(",")) 
+			nameNoSpaces = nameNoSpaces.replaceAll(",", "");
+		while (nameNoSpaces.contains("-")) 
+			nameNoSpaces = nameNoSpaces.replaceAll("-", "");
+		while (nameNoSpaces.contains(" ")) 
+			nameNoSpaces = nameNoSpaces.replaceAll(" ", "");
+		
+		nameSet.add(name);
+		nameSet.add(nameNoSpaces);
+		nameSet.add(DrugMappingStringUtilities.modifyName(name));
+		nameSet.add(DrugMappingStringUtilities.modifyName(nameNoSpaces));
+		
+		return nameSet;
+	}
+	/* REPLACED END 2020-06-08 */
+	
+
+	/* REPLACED BY BEGIN 2020-06-08 */
+	private Set<String> getMatchingNames(String name) {
+		Set<String> nameSet = new HashSet<String>();
+		
+		nameSet.add(name);
+		nameSet.add(DrugMappingStringUtilities.modifyName(name));
+		
+		return nameSet;
+	}
+	/* REPLACED BY END 2020-06-08 */
 	
 	
 	private void writeIngredientsNameIndexToFile() {

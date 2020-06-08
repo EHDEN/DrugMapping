@@ -1,19 +1,18 @@
 package org.ohdsi.drugmapping.cdm;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.ohdsi.utilities.files.Row;
 
 public class CDMDrug extends CDMConcept {
-	private Set<String> formConceptIds = new HashSet<String>();
+	private List<String> formConceptIds = new ArrayList<String>();
 	private List<CDMIngredientStrength> ingredientStrengths = new ArrayList<CDMIngredientStrength>();
 	private List<CDMIngredient> ingredients = new ArrayList<CDMIngredient>(); 
-	private Map<String, Set<CDMIngredientStrength>> ingredientsMap = new HashMap<String, Set<CDMIngredientStrength>>();
+	private Map<String, List<CDMIngredientStrength>> ingredientsMap = new HashMap<String, List<CDMIngredientStrength>>();
 	
 	
 	public static String getHeader() {
@@ -49,11 +48,14 @@ public class CDMDrug extends CDMConcept {
 	
 	
 	public void addForm(String formConceptId) {
-		formConceptIds.add(formConceptId);
+		if (!formConceptIds.contains(formConceptId)) {
+			formConceptIds.add(formConceptId);
+			Collections.sort(formConceptIds);
+		}
 	}
 	
 	
-	public Set<String> getForms() {
+	public List<String> getForms() {
 		return formConceptIds;
 	}
 	
@@ -68,7 +70,7 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public Map<String, Set<CDMIngredientStrength>> getIngredientsMap() {
+	public Map<String, List<CDMIngredientStrength>> getIngredientsMap() {
 		return ingredientsMap;
 	}
 	
@@ -89,12 +91,21 @@ public class CDMDrug extends CDMConcept {
 		ingredientStrengths.add(ingredient);
 		ingredients.add(ingredient.getIngredient());
 		String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
-		Set<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
+		List<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
 		if (ingredientSet == null) {
-			ingredientSet = new HashSet<CDMIngredientStrength>();
+			ingredientSet = new ArrayList<CDMIngredientStrength>();
 			ingredientsMap.put(ingredientConceptId, ingredientSet);
 		}
-		ingredientSet.add(ingredient);
+		if (!ingredientSet.contains(ingredient)) {
+			ingredientSet.add(ingredient);
+			Collections.sort(ingredientSet, new Comparator<CDMIngredientStrength>() {
+
+				@Override
+				public int compare(CDMIngredientStrength ingredient1, CDMIngredientStrength ingredient2) {
+					return ingredient1.getIngredient().getConceptId().compareTo(ingredient2.getIngredient().getConceptId());
+				}
+			});
+		}
 	}
 	
 	

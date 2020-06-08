@@ -54,92 +54,21 @@ public class SourceIngredient {
 		if (ingredientCode != null) {
 			ingredientCode = ingredientCode.trim();
 		}
-		ingredientName = ingredientName.trim();
-		while (ingredientName.contains("  ")) {
-			ingredientName = ingredientName.replaceAll("  ", " ");
-		}
-		
-		ingredientNameEnglish = ingredientNameEnglish.trim();
-		while (ingredientNameEnglish.contains("  ")) {
-			ingredientNameEnglish = ingredientNameEnglish.replaceAll("  ", " ");
-		}
+		ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
+		ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish);
 
 		this.ingredientCode = ((ingredientCode == null) || ingredientCode.equals("")) ? null : ingredientCode;
 		this.ingredientName = ingredientName.equals("") ? null : ingredientName;
 		this.ingredientNameEnglish = ingredientNameEnglish.equals("") ? null : ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
 		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-		
-		ingredientMatchingNames = new ArrayList<String>();
 		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish == null ? "" : this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-		
-		Map<Integer, List<String>> matchNameMap = new HashMap<Integer, List<String>>();
-		int maxNameLength = 0;
-		if (!ingredientName.equals("")) {
-			String[] ingredientNameSplit = ingredientName.toUpperCase().split(" ");
-			for (int partNr = ingredientNameSplit.length - 1; partNr >= 0; partNr--) {
-				String matchName = "";
-				for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
-					matchName += (matchNamePartNr > 0 ? " " : "") + ingredientNameSplit[matchNamePartNr];
-				}
-				maxNameLength = Math.max(maxNameLength, partNr + 1);
-				List<String> currentLengthList = matchNameMap.get(partNr + 1);
-				if (currentLengthList == null) {
-					currentLengthList = new ArrayList<String>();
-					matchNameMap.put(partNr + 1, currentLengthList);
-				}
-				currentLengthList.add("IngredientName: " + matchName);
-				if (!ingredientNameSplit[partNr].equals("EXTRACT")) {
-					currentLengthList.add("IngredientName: " + matchName + " EXTRACT");
-				}
-			}
-		}
-		
-		if (!ingredientNameEnglish.equals("")) {
-			String[] ingredientNameEnglishSplit = ingredientNameEnglish.toUpperCase().split(" ");
-			for (int partNr = ingredientNameEnglishSplit.length - 1; partNr >= 0; partNr--) {
-				String matchName = "";
-				for (int matchNamePartNr = 0; matchNamePartNr <= partNr; matchNamePartNr++) {
-					matchName += (matchNamePartNr > 0 ? " " : "") + ingredientNameEnglishSplit[matchNamePartNr];
-				}
-				maxNameLength = Math.max(maxNameLength, partNr + 1);
-				List<String> currentLengthList = matchNameMap.get(partNr + 1);
-				if (currentLengthList == null) {
-					currentLengthList = new ArrayList<String>();
-					matchNameMap.put(partNr + 1, currentLengthList);
-				}
-				currentLengthList.add("IngredientNameEnglish: " + matchName);
-				if (!ingredientNameEnglishSplit[partNr].equals("EXTRACT")) {
-					currentLengthList.add("IngredientName: " + matchName + " EXTRACT");
-				}
-			}
-		}
-		
-		for (int nameLength = maxNameLength; nameLength >= 1; nameLength--) {
-			List<String> nameLengthList = matchNameMap.get(nameLength);
-			if (nameLengthList != null) {
-				Set<String> matchNames = new HashSet<String>();
-				for (String matchName : nameLengthList) {
-					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
-					}
-				}
 
-				for (String matchName : nameLengthList) {
-					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-					matchName = matchName.substring(matchName.indexOf(": ") + 2);
-					matchName = DrugMappingStringUtilities.modifyName(matchName);
-					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
-					}
-				}
-			}
-		}
+		ingredientMatchingNames = generateMatchingNames();
 	}
 	
 	
+	/* REPLACE BEGIN 2020-06-08 
 	private List<String> generateMatchingNames() {
 		List<String> matchingNames = new ArrayList<String>();
 		
@@ -193,7 +122,7 @@ public class SourceIngredient {
 					String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
 					matchName = matchName.substring(matchName.indexOf(": ") + 2);
 					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
+						matchingNames.add(matchType + matchName);
 					}
 				}
 
@@ -202,7 +131,7 @@ public class SourceIngredient {
 					matchName = matchName.substring(matchName.indexOf(": ") + 2);
 					matchName = DrugMappingStringUtilities.modifyName(matchName);
 					if (matchNames.add(matchName)) {
-						ingredientMatchingNames.add(matchType + matchName);
+						matchingNames.add(matchType + matchName);
 					}
 				}
 			}
@@ -210,6 +139,70 @@ public class SourceIngredient {
 		
 		return matchingNames;
 	}
+	/* REPLACE END 2020-06-08 */
+	
+	
+	/* REPLACED BY BEGIN 2020-06-08 */ 
+	private List<String> generateMatchingNames() {
+		List<String> matchingNames = new ArrayList<String>();
+		
+		String name = DrugMappingStringUtilities.removeExtraSpaces(ingredientName).toUpperCase();
+		String englishName = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish).toUpperCase();
+		String modifiedName = DrugMappingStringUtilities.modifyName(name);
+		String modifiedEnglishName = DrugMappingStringUtilities.modifyName(englishName);
+		List<String> reducedNames = getReducedNames(name);
+		List<String> reducedEnglishNames = getReducedNames(englishName);
+		List<String> reducedModifiedNames = getReducedNames(modifiedName);
+		List<String> reducedModifiedEnglishNames = getReducedNames(modifiedEnglishName);
+		
+		matchingNames.add(name);
+		matchingNames.add(englishName);
+		matchingNames.add(modifiedName);
+		matchingNames.add(modifiedEnglishName);
+		for (String reducedName : reducedNames) {
+			matchingNames.add("IngredientName: " + reducedName);
+		}
+		for (String reducedName : reducedNames) {
+			matchingNames.add("IngredientName: " + reducedName + " EXTRACT");
+		}
+		for (String reducedEnglishName : reducedEnglishNames) {
+			matchingNames.add("IngredientName: " + reducedEnglishName);
+		}
+		for (String reducedEnglishName : reducedEnglishNames) {
+			matchingNames.add("IngredientName: " + reducedEnglishName + " EXTRACT");
+		}
+		for (String reducedModifiedName : reducedModifiedNames) {
+			matchingNames.add("IngredientName: " + reducedModifiedName);
+		}
+		for (String reducedModifiedName : reducedModifiedNames) {
+			matchingNames.add("IngredientName: " + reducedModifiedName + " EXTRACT");
+		}
+		for (String reducedModifiedEnglishName : reducedModifiedEnglishNames) {
+			matchingNames.add("IngredientName: " + reducedModifiedEnglishName);
+		}
+		for (String reducedModifiedEnglishName : reducedModifiedEnglishNames) {
+			matchingNames.add("IngredientName: " + reducedModifiedEnglishName + " EXTRACT");
+		}
+		
+		return matchingNames;
+	}
+	
+	
+	private List<String> getReducedNames(String name) {
+		List<String> reducedNames = new ArrayList<String>();
+		
+		String[] nameSplit = name.split(" ");
+		for (int length = nameSplit.length; length > 0; length--) {
+			String reducedName = "";
+			for (int namePartNr = 0; namePartNr < length; namePartNr++) {
+				reducedName += (namePartNr > 0 ? " " : "") + nameSplit[namePartNr];
+			}
+			reducedNames.add(reducedName);
+		}
+		
+		return reducedNames;
+	}
+	/* REPLACED BY END 2020-06-08 */
 	
 	
 	public String getIngredientCode() {

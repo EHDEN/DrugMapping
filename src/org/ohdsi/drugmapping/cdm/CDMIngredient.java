@@ -3,17 +3,14 @@ package org.ohdsi.drugmapping.cdm;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredient extends CDMConcept {
 	private String atc = null;
 	
-	private Set<String> synonyms = new HashSet<String>();
-	private Set<String> synonymsNoSpaces = new HashSet<String>();
+	private List<String> synonyms = new ArrayList<String>();
+	private List<String> synonymsNoSpaces = new ArrayList<String>();
 	
 	
 	public static String getHeader() {
@@ -65,20 +62,27 @@ public class CDMIngredient extends CDMConcept {
 	}
 	
 	
-	public Set<String> getSynonyms() {
+	public List<String> getSynonyms() {
 		return synonyms;
 	}
 	
 	
-	public Set<String> getSynonymsNoSpaces() {
+	public List<String> getSynonymsNoSpaces() {
 		return synonymsNoSpaces;
 	}
 	
 	
 	public void addSynonym(String synonym) {
 		synonym = synonym.replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-		synonyms.add(synonym);
-		synonymsNoSpaces.add(synonym.replaceAll(" ", "").replaceAll("-", ""));
+		if (!synonyms.contains(synonym)) {
+			synonyms.add(synonym);
+			Collections.sort(synonyms);
+		}
+		String synonymNoSpaces = synonym.replaceAll(" ", "").replaceAll("-", "");
+		if (synonymsNoSpaces.contains(synonymNoSpaces)) {
+			synonymsNoSpaces.add(synonymNoSpaces);
+			Collections.sort(synonymsNoSpaces);
+		}
 	}
 	
 	
@@ -91,10 +95,7 @@ public class CDMIngredient extends CDMConcept {
 		String fullDescription = "";
 		String description = toString();
 		if (synonyms.size() > 0) {
-			List<String> orderedSynonyms = new ArrayList<String>();
-			orderedSynonyms.addAll(synonyms);
-			Collections.sort(orderedSynonyms);
-			for (String synonym : orderedSynonyms) {
+			for (String synonym : synonyms) {
 				if (!fullDescription.equals("")) {
 					fullDescription += "\r\n";
 				}
@@ -114,10 +115,7 @@ public class CDMIngredient extends CDMConcept {
 	public String toStringWithSynonymsSingleField() {
 		String description = "";
 		if (synonyms.size() > 0) {
-			List<String> orderedSynonyms = new ArrayList<String>();
-			orderedSynonyms.addAll(synonyms);
-			Collections.sort(orderedSynonyms);
-			for (String synonym : orderedSynonyms) {
+			for (String synonym : synonyms) {
 				if (!description.equals("")) {
 					description += ",";
 				}

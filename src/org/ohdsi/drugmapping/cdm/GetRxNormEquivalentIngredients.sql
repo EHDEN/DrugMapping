@@ -16,3 +16,6 @@ AND   equivalent.vocabulary_id LIKE 'RxNorm%'
 AND   equivalent.concept_class_id = 'Ingredient'
 AND   equivalent.standard_concept = 'S'
 AND   equivalent.invalid_reason IS NULL
+ORDER BY drug.concept_id,
+         synonym.concept_synonym_name,
+         equivalent.concept_id

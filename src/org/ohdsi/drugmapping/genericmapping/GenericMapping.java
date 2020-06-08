@@ -1418,7 +1418,7 @@ public class GenericMapping extends Mapping {
 							String sourceDrugForm = sourceDrug.getFormulation(); 
 							Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
 							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								Set<String> cdmDrugForms = cdmDrug.getForms();
+								List<String> cdmDrugForms = cdmDrug.getForms();
 								boolean formFound = false;
 								for (String cdmDrugForm : cdmDrugForms) {
 									if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm, cdm)) {
@@ -2745,7 +2745,7 @@ public class GenericMapping extends Mapping {
 							String sourceDrugForm = sourceDrug.getFormulation(); 
 							Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
 							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								Set<String> cdmDrugForms = cdmDrug.getForms();
+								List<String> cdmDrugForms = cdmDrug.getForms();
 								boolean formFound = false;
 								for (String cdmDrugForm : cdmDrugForms) {
 									if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm, cdm)) {
@@ -3958,7 +3958,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private List<CDMIngredientStrength> matchingIngredients(List<SourceDrugComponent> sourceDrugComponents, Map<String, Set<CDMIngredientStrength>> cdmIngredientsMap, Double strengthDeviationPercentage) {
+	private List<CDMIngredientStrength> matchingIngredients(List<SourceDrugComponent> sourceDrugComponents, Map<String, List<CDMIngredientStrength>> cdmIngredientsMap, Double strengthDeviationPercentage) {
 		List<CDMIngredientStrength> matchingIngredients = new ArrayList<CDMIngredientStrength>();
 		matchingIngredients = new ArrayList<CDMIngredientStrength>();
 		for (SourceDrugComponent sourceDrugComponent : sourceDrugComponents) {
@@ -3966,7 +3966,7 @@ public class GenericMapping extends Mapping {
 			if (sourceIngredient != null) {
 				String cdmIngredientConceptId = sourceIngredient.getMatchingIngredient();
 				if (cdmIngredientConceptId != null) {
-					Set<CDMIngredientStrength> matchingCDMIngredients = cdmIngredientsMap.get(cdmIngredientConceptId);
+					List<CDMIngredientStrength> matchingCDMIngredients = cdmIngredientsMap.get(cdmIngredientConceptId);
 					if (matchingCDMIngredients != null) {
 						if (strengthDeviationPercentage != null) {
 							boolean found = false;
@@ -4021,8 +4021,132 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private void selectConcept(List<CDMConcept> conceptList) {
+	private void selectConceptAndLog(int resultType) {
 		
+	}
+	
+	
+	private Map<Integer, List<CDMConcept>> selectConcept(List<CDMConcept> conceptList) {
+		Map<Integer, List<CDMConcept>> selectionLogMap = new HashMap<Integer, List<CDMConcept>>();
+		
+		for (int preference : MainFrame.preferenceCheckingOrder) {
+			if (conceptList.size() > 1) {
+				List<CDMConcept> remove;
+				if (preference == MainFrame.PREFERENCE_RXNORM) {
+					String vocabulary_id = null;
+					int resultType = -1;
+					if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+						vocabulary_id = "RxNorm";
+						resultType = CLINICAL_DRUG_MAPPING_REJECTED_BY_RXNORM_PREFERENCE;
+					}
+					else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
+						vocabulary_id = "RxNorm Extension";
+					}
+					remove = new ArrayList<CDMConcept>();
+					for (CDMConcept cdmConcept : conceptList) {
+						if (!cdmConcept.getVocabularyId().equals(vocabulary_id)) {
+							remove.add(cdmConcept);
+						}
+					}
+					if ((remove.size() > 0) && (conceptList.size() != remove.size())) {
+						conceptList.removeAll(remove);
+						selectionLogMap.put(MainFrame.PREFERENCE_RXNORM, remove);
+					}
+				}
+				else if (preference == MainFrame.PREFERENCE_PRIORITIZE_BY_DATE) {
+					if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No")) {
+						boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
+						int resultType = latest ? CLINICAL_DRUG_MAPPING_REJECTED_BY_LATEST_DATE_PREFERENCE : CLINICAL_DRUG_MAPPING_REJECTED_BY_OLDEST_DATE_PREFERENCE;
+						
+						remove = new ArrayList<CDMConcept>();
+						List<CDMConcept> lastConcepts = new ArrayList<CDMConcept>();
+						int lastDate = -1;
+						for (CDMConcept cdmConcept : conceptList) {
+							try {
+								Integer date = Integer.parseInt(cdmConcept.getValidStartDate().replaceAll("-",""));
+								if (lastDate == -1) {
+									lastConcepts.add(cdmConcept);
+									lastDate = date;
+								}
+								else {
+									if (latest ? (date > lastDate) : (date < lastDate)) {
+										remove.addAll(lastConcepts);
+										lastConcepts.clear();
+										lastConcepts.add(cdmConcept);
+										lastDate = date;
+									}
+									else if (date == lastDate) {
+										lastConcepts.add(cdmConcept);
+									}
+									else {
+										remove.add(cdmConcept);
+									}
+								}
+							}
+							catch (NumberFormatException e) {
+								remove.add(cdmConcept);
+							}
+						}
+						if ((remove.size() > 0) && (conceptList.size() != remove.size())) {
+							conceptList.removeAll(remove);
+							selectionLogMap.put(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE, remove);
+						}
+					}
+				}
+				else if (preference == MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID) {
+					if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No")) {
+						boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+						
+						remove = new ArrayList<CDMConcept>();
+						CDMConcept lastConcept = null;
+						int lastConceptId = Integer.MAX_VALUE; 
+						for (CDMConcept cdmConcept : conceptList) {
+							if (lastConcept == null) {
+								lastConcept = cdmConcept;
+								lastConceptId = Integer.parseInt(cdmConcept.getConceptId()); 
+							}
+							else {
+								int conceptId = Integer.parseInt(cdmConcept.getConceptId());
+								if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+									lastConceptId = conceptId;
+									remove.add(lastConcept);
+									lastConcept = cdmConcept;
+								}
+								else {
+									remove.add(cdmConcept);
+								}
+							}
+						}
+						if ((remove.size() > 0) && (conceptList.size() != remove.size())) {
+							conceptList.removeAll(remove);
+							selectionLogMap.put(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID, remove);
+						}
+					}
+				}
+				else if (preference == MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID) {
+					if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None")) {
+						remove = new ArrayList<CDMConcept>();
+						if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("First")) {
+							for (int nr = 1; nr < conceptList.size(); nr++) {
+								remove.add(conceptList.get(nr));
+							}
+						}
+						else {
+							for (int nr = 0; nr < (conceptList.size() - 1); nr++) {
+								remove.add(conceptList.get(nr));
+							}
+						}
+						conceptList.removeAll(remove);
+						selectionLogMap.put(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST, remove);
+					}
+				}
+			}
+			else {
+				break;
+			}
+		}
+		
+		return selectionLogMap;
 	}
 	
 	
