@@ -52,6 +52,8 @@ public class CDM {
 
 	private Map<String, CDMDrug> cdmDrugForms = new HashMap<String, CDMDrug>();
 	private Map<CDMIngredient, List<CDMDrug>> cdmDrugFormsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
+	
+	private Map<String, CDMConcept> cdmForms = new HashMap<String, CDMConcept>();
 
 	private Map<String, Set<CDMIngredient>> cdmATCIngredientMap = new HashMap<String, Set<CDMIngredient>>();
 
@@ -748,13 +750,13 @@ public class CDM {
 		// Get CDM Forms
 		for (Row queryRow : connection.queryResource("GetCDMForms.sql", queryParameters)) {
 			
-			String concept_id   = queryRow.get("concept_id", true).trim();
-			String concept_name = queryRow.get("concept_name", true).trim();
+			CDMConcept formConcept = new CDMConcept(queryRow, "");
 			
-			cdmFormNameToConceptIdMap.put(concept_name, concept_id);
-			cdmFormConceptIdToNameMap.put(concept_id, concept_name);
-			if (!cdmFormConceptNames.contains(concept_name)) {
-				cdmFormConceptNames.add(concept_name);
+			cdmForms.put(formConcept.getConceptId(), formConcept);
+			cdmFormNameToConceptIdMap.put(formConcept.getConceptName(), formConcept.getConceptId());
+			cdmFormConceptIdToNameMap.put(formConcept.getConceptId(), formConcept.getConceptName());
+			if (!cdmFormConceptNames.contains(formConcept.getConceptName())) {
+				cdmFormConceptNames.add(formConcept.getConceptName());
 			}
 		}
 		
