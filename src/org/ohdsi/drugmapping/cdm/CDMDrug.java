@@ -42,8 +42,8 @@ public class CDMDrug extends CDMConcept {
 	}
 	*/
 
-	public CDMDrug(Row queryRow, String prefix) {
-		super(queryRow, prefix);
+	public CDMDrug(CDM cdm, Row queryRow, String prefix) {
+		super(cdm, queryRow, prefix);
 	}
 	
 	

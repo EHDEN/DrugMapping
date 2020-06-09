@@ -5,6 +5,8 @@ import java.util.List;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredientStrength {
+	private CDM cdm = null;
+	
 	private String amount_value_string      = null;
 	private Double amount_value             = null;
 	private CDMConcept amount_unit          = null;
@@ -39,14 +41,15 @@ public class CDMIngredientStrength {
 	}
 	
 	
-	public CDMIngredientStrength(Row queryRow, String prefix, CDMIngredient ingredient) {
+	public CDMIngredientStrength(CDM cdm, Row queryRow, String prefix, CDMIngredient ingredient) {
+		this.cdm = cdm;
 		List<String> fieldNames = queryRow.getFieldNames();
 		if (fieldNames.contains(prefix + "amount_value"))                amount_value_string      = queryRow.get(prefix + "amount_value", true);
-		if (fieldNames.contains(prefix + "amount_unit_concept_id"))      amount_unit              = new CDMConcept(queryRow, prefix + "amount_unit_");
+		if (fieldNames.contains(prefix + "amount_unit_concept_id"))      amount_unit              = new CDMConcept(cdm, queryRow, prefix + "amount_unit_");
 		if (fieldNames.contains(prefix + "numerator_value"))             numerator_value_string   = queryRow.get(prefix + "numerator_value", true);
-		if (fieldNames.contains(prefix + "numerator_unit_concept_id"))   numerator_unit           = new CDMConcept(queryRow, prefix + "numerator_unit_");
+		if (fieldNames.contains(prefix + "numerator_unit_concept_id"))   numerator_unit           = new CDMConcept(cdm, queryRow, prefix + "numerator_unit_");
 		if (fieldNames.contains(prefix + "denominator_value"))           denominator_value_string = queryRow.get(prefix + "denominator_value", true);
-		if (fieldNames.contains(prefix + "denominator_unit_concept_id")) denominator_unit         = new CDMConcept(queryRow, prefix + "denominator_unit_");
+		if (fieldNames.contains(prefix + "denominator_unit_concept_id")) denominator_unit         = new CDMConcept(cdm, queryRow, prefix + "denominator_unit_");
 		if (fieldNames.contains(prefix + "box_size"))                    box_size                 = queryRow.get(prefix + "box_size", true);
 		
 		if ((amount_value_string != null) && (!amount_value_string.equals(""))) {

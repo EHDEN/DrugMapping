@@ -47,8 +47,6 @@ public class MainFrame {
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
 	public static int PREFERENCE_PRIORITIZE_BY_CONCEPT_ID;
 	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
-
-	public static Integer[] preferenceCheckingOrder = new Integer[] { PREFERENCE_RXNORM, PREFERENCE_PRIORITIZE_BY_DATE, PREFERENCE_PRIORITIZE_BY_CONCEPT_ID, PREFERENCE_TAKE_FIRST_OR_LAST };
 	
 	public static int SUPPRESS_WARNINGS;
 	

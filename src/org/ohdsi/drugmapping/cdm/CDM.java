@@ -72,8 +72,14 @@ public class CDM {
 	public CDM(CDMDatabase database, List<String> report) {
 		cdmIngredientNameIndexNameList.add("Ingredient");
 		cdmIngredientNameIndexMap.put("Ingredient", cdmIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("MapsToIngredient");
-		cdmIngredientNameIndexMap.put("MapsToIngredient", cdmMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("IngredientMapsToIngredient");
+		cdmIngredientNameIndexMap.put("IngredientMapsToIngredient", cdmIngredientMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("PreciseIngredientMapsToIngredient");
+		cdmIngredientNameIndexMap.put("PreciseIngredientMapsToIngredient", cdmPreciseIngredientMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SubstanceMapsToIngredient");
+		cdmIngredientNameIndexMap.put("SubstanceMapsToIngredient", cdmSubstanceMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("OtherMapsToIngredient");
+		cdmIngredientNameIndexMap.put("OtherMapsToIngredient", cdmOtherMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("ReplacedByIngredient");
 		cdmIngredientNameIndexMap.put("ReplacedByIngredient", cdmReplacedByIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("EquivalentToIngredient");
@@ -299,7 +305,7 @@ public class CDM {
 				}
 				CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 				if (cdmIngredient == null) {
-					cdmIngredient = new CDMIngredient(queryRow, "");
+					cdmIngredient = new CDMIngredient(this, queryRow, "");
 					cdmIngredients.put(cdmIngredient.getConceptId(), cdmIngredient);
 					cdmIngredientsList.add(cdmIngredient);
 					
@@ -365,7 +371,7 @@ public class CDM {
 					Set<CDMIngredient> nameIngredients = cdmEquivalentIngredientNameIndex.get(name); 
 					if (nameIngredients == null) {
 						nameIngredients = new HashSet<CDMIngredient>();
-						cdmMapsToIngredientNameIndex.put(name, nameIngredients);
+						cdmEquivalentIngredientNameIndex.put(name, nameIngredients);
 					}
 					nameIngredients.add(cdmIngredient);
 				}
@@ -392,12 +398,17 @@ public class CDM {
 				
 				Set<String> nameSet = getMatchingNames(drugConceptName); 
 				nameSet.addAll(getMatchingNames(drugNameSynonym));
+
+				Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmOtherMapsToIngredientNameIndex;
+				if (drugConceptClassId.equals("Ingredient"))              ingredientNameIndex = cdmIngredientMapsToIngredientNameIndex;
+				else if (drugConceptClassId.equals("Precise Ingredient")) ingredientNameIndex = cdmPreciseIngredientMapsToIngredientNameIndex;
+				else if (drugConceptClassId.equals("Substance"))          ingredientNameIndex = cdmSubstanceMapsToIngredientNameIndex;
 				
 				for (String name : nameSet) {
-					Set<CDMIngredient> nameIngredients = cdmMapsToIngredientNameIndex.get(name); 
+					Set<CDMIngredient> nameIngredients = ingredientNameIndex.get(name); 
 					if (nameIngredients == null) {
 						nameIngredients = new HashSet<CDMIngredient>();
-						cdmMapsToIngredientNameIndex.put(name, nameIngredients);
+						ingredientNameIndex.put(name, nameIngredients);
 					}
 					nameIngredients.add(cdmIngredient);
 				}
@@ -473,7 +484,7 @@ public class CDM {
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
 				if (cdmDrug == null) {
-					cdmDrug = new CDMDrug(queryRow, "drug_");
+					cdmDrug = new CDMDrug(this, queryRow, "drug_");
 					cdmDrugs.put(cdmDrug.getConceptId(), cdmDrug);
 				}
 				String cdmFormConceptId = queryRow.get("form_concept_id", true);
@@ -483,7 +494,7 @@ public class CDM {
 				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 					if (cdmIngredient != null) {
-						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(queryRow, "", cdmIngredient);
+						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 						cdmDrug.addIngredientStrength(cdmIngredientStrength);
 						
 						List<CDMDrug> drugsContainingIngredient = cdmDrugsContainingIngredient.get(cdmIngredient);
@@ -512,7 +523,7 @@ public class CDM {
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugComp = cdmDrugComps.get(cdmDrugConceptId);
 				if (cdmDrugComp == null) {
-					cdmDrugComp = new CDMDrug(queryRow, "drugcomp_");
+					cdmDrugComp = new CDMDrug(this, queryRow, "drugcomp_");
 					cdmDrugComps.put(cdmDrugComp.getConceptId(), cdmDrugComp);
 				}
 				
@@ -520,7 +531,7 @@ public class CDM {
 				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 					if (cdmIngredient != null) {
-						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(queryRow, "", cdmIngredient);
+						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 						cdmDrugComp.addIngredientStrength(cdmIngredientStrength);
 						
 						List<CDMDrug> drugsContainingIngredient = cdmDrugCompsContainingIngredient.get(cdmIngredient);
@@ -547,7 +558,7 @@ public class CDM {
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugForm = cdmDrugForms.get(cdmDrugConceptId);
 				if (cdmDrugForm == null) {
-					cdmDrugForm = new CDMDrug(queryRow, "drugform_");
+					cdmDrugForm = new CDMDrug(this, queryRow, "drugform_");
 					cdmDrugForms.put(cdmDrugForm.getConceptId(), cdmDrugForm);
 				}
 				
@@ -560,7 +571,7 @@ public class CDM {
 				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 					if (cdmIngredient != null) {
-						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(queryRow, "", cdmIngredient);
+						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 						cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
 						
 						List<CDMDrug> drugsContainingIngredient = cdmDrugFormsContainingIngredient.get(cdmIngredient);
@@ -750,7 +761,7 @@ public class CDM {
 		// Get CDM Forms
 		for (Row queryRow : connection.queryResource("GetCDMForms.sql", queryParameters)) {
 			
-			CDMConcept formConcept = new CDMConcept(queryRow, "");
+			CDMConcept formConcept = new CDMConcept(this, queryRow, "");
 			
 			cdmForms.put(formConcept.getConceptId(), formConcept);
 			cdmFormNameToConceptIdMap.put(formConcept.getConceptName(), formConcept.getConceptId());

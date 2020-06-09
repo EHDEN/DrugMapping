@@ -42,13 +42,13 @@ public class CDMIngredient extends CDMConcept {
 	}
 
 	
-	public CDMIngredient(Row queryRow, String prefix) {
-		super(queryRow, prefix);
+	public CDMIngredient(CDM cdm, Row queryRow, String prefix) {
+		super(cdm, queryRow, prefix);
 	}
 
 	
-	public CDMIngredient(String conceptId, String conceptName, String domainId, String vocabularyId, String conceptClassId, String standardConcept, String conceptCode, String validStartDate, String validEndDate, String invalidReason) {
-		super(conceptId, conceptName, domainId, vocabularyId, conceptClassId, standardConcept, conceptCode, validStartDate, validEndDate, invalidReason);
+	public CDMIngredient(CDM cdm, String conceptId, String conceptName, String domainId, String vocabularyId, String conceptClassId, String standardConcept, String conceptCode, String validStartDate, String validEndDate, String invalidReason) {
+		super(cdm, conceptId, conceptName, domainId, vocabularyId, conceptClassId, standardConcept, conceptCode, validStartDate, validEndDate, invalidReason);
 	}
 	
 	
@@ -126,6 +126,11 @@ public class CDMIngredient extends CDMConcept {
 		description += toString().replaceAll("\"", "'");
 		
 		return description;
+	}
+	
+	
+	public boolean isOrphan() {
+		return cdm.getCDMDrugsContainingIngredient().get(this) == null;
 	}
 
 }

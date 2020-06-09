@@ -6,6 +6,8 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMConcept {
+	protected CDM cdm = null;
+	
 	protected String concept_id       = null;
 	protected String concept_name     = null;
 	protected String domain_id        = null;
@@ -55,7 +57,9 @@ public class CDMConcept {
 	
 	
 	
-	public CDMConcept(Row queryRow, String prefix) {
+	public CDMConcept(CDM cdm, Row queryRow, String prefix) {
+		this.cdm = cdm;
+		
 		concept_id       = queryRow.get(prefix + "concept_id", true).trim();
 		concept_name     = queryRow.get(prefix + "concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 		domain_id        = queryRow.get(prefix + "domain_id", true).trim();
@@ -74,7 +78,9 @@ public class CDMConcept {
 	
 	
 	
-	public CDMConcept(String conceptId, String conceptName, String domainId, String vocabularyId, String conceptClassId, String standardConcept, String conceptCode, String validStartDate, String validEndDate, String invalidReason) {
+	public CDMConcept(CDM cdm, String conceptId, String conceptName, String domainId, String vocabularyId, String conceptClassId, String standardConcept, String conceptCode, String validStartDate, String validEndDate, String invalidReason) {
+		this.cdm = cdm;
+		
 		concept_id       = conceptId;
 		concept_name     = conceptName;
 		domain_id        = domainId;
