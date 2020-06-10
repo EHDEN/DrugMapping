@@ -50,10 +50,9 @@ public class DrugMappingStringUtilities {
 		name = name.replaceAll("PH", "F");
 		name = name.replaceAll("S ", " ");
 		name = name.replaceAll("E ", " ");
-/* ADDED BEGIN 2020-06-08 */
 		name = name.replaceAll("A ", " ");
+		name = name.replaceAll("O ", " ");
 		name = name.replaceAll(" ", "");
-/* ADDED END 2020-06-08 */
 
 		name = name.replaceAll("_", " ");
 

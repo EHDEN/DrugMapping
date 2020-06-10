@@ -31,8 +31,6 @@ public class CDM {
 	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	private Map<String, Set<CDMIngredient>> cdmEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
-	private Map<String, Set<CDMIngredient>> cdmMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	
 	private Map<String, Set<CDMIngredient>> cdmIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	private Map<String, Set<CDMIngredient>> cdmSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	private Map<String, Set<CDMIngredient>> cdmPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
@@ -72,18 +70,18 @@ public class CDM {
 	public CDM(CDMDatabase database, List<String> report) {
 		cdmIngredientNameIndexNameList.add("Ingredient");
 		cdmIngredientNameIndexMap.put("Ingredient", cdmIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("EquivalentToIngredient");
+		cdmIngredientNameIndexMap.put("EquivalentToIngredient", cdmEquivalentIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("IngredientMapsToIngredient");
 		cdmIngredientNameIndexMap.put("IngredientMapsToIngredient", cdmIngredientMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("PreciseIngredientMapsToIngredient");
 		cdmIngredientNameIndexMap.put("PreciseIngredientMapsToIngredient", cdmPreciseIngredientMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SubstanceMapsToIngredient");
 		cdmIngredientNameIndexMap.put("SubstanceMapsToIngredient", cdmSubstanceMapsToIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("OtherMapsToIngredient");
-		cdmIngredientNameIndexMap.put("OtherMapsToIngredient", cdmOtherMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("ReplacedByIngredient");
 		cdmIngredientNameIndexMap.put("ReplacedByIngredient", cdmReplacedByIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("EquivalentToIngredient");
-		cdmIngredientNameIndexMap.put("EquivalentToIngredient", cdmEquivalentIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("OtherMapsToIngredient");
+		cdmIngredientNameIndexMap.put("OtherMapsToIngredient", cdmOtherMapsToIngredientNameIndex);
 		
 		try {
 			QueryParameters queryParameters = new QueryParameters();
@@ -387,10 +385,10 @@ public class CDM {
 		
 		for (Row queryRow : connection.queryResource("GetMapsToRxNormIngredients.sql", queryParameters)) {
 			//String drugConceptId = queryRow.get("drug_concept_id", true).trim();
-			String drugConceptName = queryRow.get("drug_concept_name", true);
+			String drugConceptName = queryRow.get("drug_concept_name", true).trim().toUpperCase();
 			String drugConceptClassId = queryRow.get("drug_concept_class_id", true).trim();
 			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id", true).trim();
-			String drugNameSynonym = queryRow.get("drug_synonym_name", true);
+			String drugNameSynonym = queryRow.get("drug_synonym_name", true).trim().toUpperCase();
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
@@ -779,39 +777,8 @@ public class CDM {
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
-	
-	
-	/* REPLACED BEGIN 2020-06-08
-	private Set<String> getMatchingNames(String name) {
-		Set<String> nameSet = new HashSet<String>();
-		
-		String nameNoSpaces = name.replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-		if (nameNoSpaces.contains("(")) {
-			if (nameNoSpaces.indexOf("(") == 0) {
-				nameNoSpaces = nameNoSpaces.replaceAll("[(]", "").replaceAll("[)]", "");
-			}
-			else {
-				nameNoSpaces = nameNoSpaces.substring(0, nameNoSpaces.indexOf("(")).trim();
-			}
-		} 
-		while (nameNoSpaces.contains(",")) 
-			nameNoSpaces = nameNoSpaces.replaceAll(",", "");
-		while (nameNoSpaces.contains("-")) 
-			nameNoSpaces = nameNoSpaces.replaceAll("-", "");
-		while (nameNoSpaces.contains(" ")) 
-			nameNoSpaces = nameNoSpaces.replaceAll(" ", "");
-		
-		nameSet.add(name);
-		nameSet.add(nameNoSpaces);
-		nameSet.add(DrugMappingStringUtilities.modifyName(name));
-		nameSet.add(DrugMappingStringUtilities.modifyName(nameNoSpaces));
-		
-		return nameSet;
-	}
-	/* REPLACED END 2020-06-08 */
-	
 
-	/* REPLACED BY BEGIN 2020-06-08 */
+	
 	private Set<String> getMatchingNames(String name) {
 		Set<String> nameSet = new HashSet<String>();
 		
@@ -820,7 +787,6 @@ public class CDM {
 		
 		return nameSet;
 	}
-	/* REPLACED BY END 2020-06-08 */
 	
 	
 	private void writeIngredientsNameIndexToFile() {

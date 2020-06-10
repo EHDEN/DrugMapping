@@ -10,7 +10,7 @@ FROM   @vocab.concept_relationship relationship
   LEFT OUTER JOIN @vocab.concept_synonym synonym
     ON drug.concept_id = synonym.concept_id
 WHERE relationship.relationship_id ILIKE '%RxNorm eq'
-AND   drug.domain_id = 'Drug'
+-- AND   drug.domain_id = 'Drug'
 AND   equivalent.domain_id = 'Drug'
 AND   equivalent.vocabulary_id LIKE 'RxNorm%'
 AND   equivalent.concept_class_id = 'Ingredient'

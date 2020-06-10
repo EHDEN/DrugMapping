@@ -11,7 +11,7 @@ FROM @vocab.concept_relationship relationship
   LEFT OUTER JOIN @vocab.concept_synonym synonym
     ON drug.concept_id = synonym.concept_id
 WHERE relationship.relationship_id = 'Maps to'
-AND   drug.domain_id = 'Drug'
+--AND   drug.domain_id = 'Drug'
 AND   mapsto.domain_id = 'Drug'
 AND   mapsto.vocabulary_id LIKE 'RxNorm%'
 AND   mapsto.concept_class_id = 'Ingredient'

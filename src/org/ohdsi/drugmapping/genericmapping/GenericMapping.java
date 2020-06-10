@@ -100,14 +100,14 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(MAPPED                                        , "Mapped");
 	}
 	
-	private Set<String> forms = new HashSet<String>();
-	private Set<String> units = new HashSet<String>();
+	private Set<String> forms = null;
+	private Set<String> units = null;
 
-	private Map<String, CDMIngredient> manualCASMappings = new HashMap<String, CDMIngredient>();
-	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeMappings = new HashMap<SourceIngredient, CDMIngredient>();
-	private Map<SourceIngredient, String> manualIngredientCodeMappingRemarks = new HashMap<SourceIngredient, String>();
-	private Map<String, CDMIngredient> manualIngredientNameMappings = new HashMap<String, CDMIngredient>();
-	private Map<SourceDrug, CDMDrug> manualDrugMappings = new HashMap<SourceDrug, CDMDrug>();
+	private Map<String, CDMIngredient> manualCASMappings = null;
+	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeMappings = null;
+	private Map<SourceIngredient, String> manualIngredientCodeMappingRemarks = null;
+	private Map<String, CDMIngredient> manualIngredientNameMappings = null;
+	private Map<SourceDrug, CDMDrug> manualDrugMappings = null;
 	
 	private CDM cdm = null;
 	
@@ -117,31 +117,61 @@ public class GenericMapping extends Mapping {
 	
 	private Map<String, List<String>> externalCASSynonymsMap = null;
 	
-	private boolean preferencesUsed = false;
+	private List<SourceDrug> sourceDrugs = null;
+	private Map<String, SourceDrug> sourceDrugMap = null;
 	
-	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
-	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
+	private List<SourceDrug> sourceDrugsAllIngredientsMapped = null;
+	private Map<SourceDrug, List<CDMIngredient>> sourceDrugsCDMIngredients = null;
 	
-	private List<SourceDrug> sourceDrugsAllIngredientsMapped = new ArrayList<SourceDrug>();
-	private Map<SourceDrug, List<CDMIngredient>> sourceDrugsCDMIngredients = new HashMap<SourceDrug, List<CDMIngredient>>();
+	private Map<SourceIngredient, CDMIngredient> ingredientMap = null;
 	
-	private Map<SourceIngredient, CDMIngredient> ingredientMap = new HashMap<SourceIngredient, CDMIngredient>();
+	private Set<SourceDrug> mappedSourceDrugs = null;
+	private Map<String, Double> usedStrengthDeviationPercentageMap = null;
 	
-	private Set<SourceDrug> mappedSourceDrugs = new HashSet<SourceDrug>();
-	
-	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>>(); // SourceDrug, Mapping, List of Mapping result, List of options
-	private Map<Integer, Set<SourceDrug>> notUniqueMapping = new HashMap<Integer, Set<SourceDrug>>();
+	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingResults = null;
+	private Map<Integer, Set<SourceDrug>> notUniqueMapping = null;
 	
 	private Map<Integer, Map<Integer, Long>> counters;
 	private Map<Integer, Map<Integer, Long>> dataCoverage;
 	
-	private List<String> report = new ArrayList<String>();
+	private List<String> report = null;
+	
+	private boolean preferencesUsed = false;
+	private int maxResultConcepts = 0;
 	
 	
 		
 	
 	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile casFile, InputFile manualCASMappingFile, InputFile manualIngredientMappingFile, InputFile manualDrugMappingFile) {
 		boolean ok = true;
+		
+		forms = new HashSet<String>();
+		units = new HashSet<String>();
+
+		manualCASMappings = new HashMap<String, CDMIngredient>();
+		manualIngredientCodeMappings = new HashMap<SourceIngredient, CDMIngredient>();
+		manualIngredientCodeMappingRemarks = new HashMap<SourceIngredient, String>();
+		manualIngredientNameMappings = new HashMap<String, CDMIngredient>();
+		manualDrugMappings = new HashMap<SourceDrug, CDMDrug>();
+		
+		sourceDrugs = new ArrayList<SourceDrug>();
+		sourceDrugMap = new HashMap<String, SourceDrug>();
+		
+		sourceDrugsAllIngredientsMapped = new ArrayList<SourceDrug>();
+		sourceDrugsCDMIngredients = new HashMap<SourceDrug, List<CDMIngredient>>();
+		
+		ingredientMap = new HashMap<SourceIngredient, CDMIngredient>();
+		
+		mappedSourceDrugs = new HashSet<SourceDrug>();
+		usedStrengthDeviationPercentageMap = new HashMap<String, Double>();
+		
+		sourceDrugMappingResults = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>>(); // SourceDrug, Mapping, List of Mapping result, List of options
+		notUniqueMapping = new HashMap<Integer, Set<SourceDrug>>();
+		
+		report = new ArrayList<String>();
+		
+		preferencesUsed = false;
+		maxResultConcepts = 0;
 		
 		int mapping = 0;
 		while (mappingTypeDescriptions.containsKey(mapping)) {
@@ -946,33 +976,34 @@ public class GenericMapping extends Mapping {
 				}
 				
 				if (cdmIngredient == null) { // No manual mapping on ingredient code found
-					String sourceIngredientName = DrugMappingStringUtilities.removeExtraSpaces(sourceIngredient.getIngredientName()) + " XXX";
-					do {
-						sourceIngredientName = sourceIngredientName.substring(0, Math.max(sourceIngredientName.lastIndexOf(" "),Math.max(sourceIngredientName.lastIndexOf("/"), sourceIngredientName.lastIndexOf(","))));
-						cdmIngredient = manualIngredientNameMappings.get(sourceIngredientName);
-					} while ((cdmIngredient == null) && (sourceIngredientName.contains(" ") || sourceIngredientName.contains("/") || sourceIngredientName.contains(",")));
-					
-					if (cdmIngredient != null) { // Manual mapping on part ingredient name found
-						ingredientMap.put(sourceIngredient, cdmIngredient);
-						sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-						sourceIngredient.setMatchString("MANUAL NAME: " + sourceIngredientName);
-						matchedManualName++;
-					}
-					else {
-						List<String> matchNameList = sourceIngredient.getIngredientMatchingNames();
+					preferencesUsed = false;
+					boolean multipleMapping = false;
 
-						boolean matchFound = false;
-						boolean multipleMapping = false;
+					List<String> matchNameList = sourceIngredient.getIngredientMatchingNames();
+					for (String matchName : matchNameList) {
+						String matchType = matchName.substring(0, matchName.indexOf(": "));
+						matchName = matchName.substring(matchName.indexOf(": ") + 2);
 						
-						for (String matchName : matchNameList) {
-							String matchType = matchName.substring(0, matchName.indexOf(": ") + 2);
-							matchName = matchName.substring(matchName.indexOf(": ") + 2);
+						if (cdmIngredient != null) { // Manual mapping on part ingredient name found
+							ingredientMap.put(sourceIngredient, cdmIngredient);
+							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+							sourceIngredient.setMatchString("MANUAL NAME: " + matchName);
+							matchedManualName++;
+							break;
+						}
+						
+						List<String> matchList = new ArrayList<String>();
+						matchList.add(matchType + ": " + matchName);
+						matchList.add(matchType + " Standardized: " + DrugMappingStringUtilities.modifyName(matchName));
+
+						for (String ingredientNameIndexName : cdm.getCDMIngredientNameIndexNameList()) {
+							Map<String, Set<CDMIngredient>> ingredientNameIndex = cdm.getCDMIngredientNameIndexMap().get(ingredientNameIndexName);
 							
-							for (String ingredientNameIndexName : cdm.getCDMIngredientNameIndexNameList()) {
-								Map<String, Set<CDMIngredient>> ingredientNameIndex = cdm.getCDMIngredientNameIndexMap().get(ingredientNameIndexName);
-								preferencesUsed = false;
+							for (String searchName : matchList) {
+								matchType = searchName.substring(0, searchName.indexOf(": "));
+								searchName = searchName.substring(searchName.indexOf(": ") + 2);
 								
-								Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(matchName);
+								Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(searchName);
 								if (matchedCDMIngredients != null) {
 									if (matchedCDMIngredients.size() > 1) {
 										matchedCDMIngredients = selectConcept(matchedCDMIngredients);
@@ -991,21 +1022,18 @@ public class GenericMapping extends Mapping {
 										cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
 										ingredientMap.put(sourceIngredient, cdmIngredient);
 										sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
-										sourceIngredient.setMatchString(matchType + ingredientNameIndexName + " " + matchName + (preferencesUsed ? " - USED PREFERENCES" : ""));
-										matchFound = true;
+										sourceIngredient.setMatchString(matchType + ingredientNameIndexName + " " + searchName + (preferencesUsed ? " - USED PREFERENCES" : ""));
 										matchedByName++;
 										break;
 									}
 								}
-								
-								if (matchFound || multipleMapping) {
-									break;
-								}
 							}
-							
-							if (matchFound || multipleMapping) {
+							if ((cdmIngredient != null) || multipleMapping) {
 								break;
 							}
+						}
+						if ((cdmIngredient != null) || multipleMapping) {
+							break;
 						}
 					}
 				}
@@ -1181,6 +1209,7 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			CDMDrug automaticMapping = null;
+			Double usedStrengthDeviationPercentage = null;
 			
 			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 				List<CDMIngredient> sourceDrugCDMIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
@@ -1281,6 +1310,7 @@ public class GenericMapping extends Mapping {
 								}
 								
 								if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
+									usedStrengthDeviationPercentage = strengthDeviationPercentage;
 									break;
 								}
 							}
@@ -1369,6 +1399,7 @@ public class GenericMapping extends Mapping {
 				if (finalMapping.getConceptClassId().equals("Clinical Drug")) {
 					logMappingResult(sourceDrug, mapping, MAPPED, finalMapping);
 					mappedSourceDrugs.add(sourceDrug);
+					usedStrengthDeviationPercentageMap.put("Drug " + sourceDrug.getCode(), usedStrengthDeviationPercentage);
 				}
 				
 				if (overruledMapping != null) {
@@ -1394,6 +1425,7 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			CDMDrug automaticMapping = null;
+			Double usedStrengthDeviationPercentage = null;
 			
 			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 				boolean earlierNotUniqueMapping = false;
@@ -1472,6 +1504,7 @@ public class GenericMapping extends Mapping {
 								}
 								
 								if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
+									usedStrengthDeviationPercentage = strengthDeviationPercentage;
 									break;
 								}
 							}
@@ -1559,6 +1592,7 @@ public class GenericMapping extends Mapping {
 				if (finalMapping.getConceptClassId().equals("Clinical Drug Comp")) {
 					logMappingResult(sourceDrug, mapping, MAPPED, finalMapping);
 					mappedSourceDrugs.add(sourceDrug);
+					usedStrengthDeviationPercentageMap.put("Drug " + sourceDrug.getCode(), usedStrengthDeviationPercentage);
 				}
 				
 				if (overruledMapping != null) {
@@ -1734,11 +1768,13 @@ public class GenericMapping extends Mapping {
 				}
 			}
 			
+			List<Double> usedStrengthDeviationPercentage = new ArrayList<Double>();
 			if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
 				List<SourceDrugComponent> sourceDrugComponents = sourceDrug.getComponents();
 				if (sourceDrugComponents.size() > 0) {
 					// Find CDM Clinical Drug Comps with corresponding ingredients
 					for (int componentNr = 0; componentNr < sourceDrugComponents.size(); componentNr++) {
+						usedStrengthDeviationPercentage.add(null);
 						SourceDrugComponent sourceDrugComponent = sourceDrugComponents.get(componentNr);
 						SourceIngredient sourceDrugIngredient = sourceDrugComponent.getIngredient();
 						String cdmIngredientConceptId = sourceDrugIngredient.getMatchingIngredient();
@@ -1779,6 +1815,7 @@ public class GenericMapping extends Mapping {
 									}
 									
 									if ((matchingCDMDrugs != null) && (matchingCDMDrugs.size() > 0)) {
+										usedStrengthDeviationPercentage.set(componentNr, strengthDeviationPercentage);
 										break;
 									}
 								}
@@ -1892,8 +1929,12 @@ public class GenericMapping extends Mapping {
 
 			if (mapped) {
 				for (int finalMappingNr = 0; finalMappingNr < finalMappings.size(); finalMappingNr++) {
+					if (overruledMappings.get(finalMappingNr) != null) {
+						logMappingResult(sourceDrug, mapping, OVERRULED_MAPPING, overruledMappings.get(finalMappingNr), finalMappingNr);
+					}
 					logMappingResult(sourceDrug, mapping, MAPPED, finalMappings.get(finalMappingNr), finalMappingNr);
-					logMappingResult(sourceDrug, mapping, OVERRULED_MAPPING, overruledMappings.get(finalMappingNr), finalMappingNr);
+					SourceIngredient sourceDrugIngredient = sourceDrug.getIngredients().get(finalMappingNr);
+					usedStrengthDeviationPercentageMap.put("Ingredient " + sourceDrug.getCode() + "," + sourceDrugIngredient.getIngredientCode(), usedStrengthDeviationPercentage.get(finalMappingNr));
 					mappedSourceDrugs.add(sourceDrug);
 				}
 			}
@@ -1940,6 +1981,56 @@ public class GenericMapping extends Mapping {
 			ingredientMappingFile.close();
 		}
 		
+		String header = "SourceIngredientCode";
+		header += "," + "SourceIngredientName";
+		header += "," + "SourceRecordCount";
+		header += "," + "concept_id";
+		header += "," + "concept_name";
+		header += "," + "concept_vocabulary_id";
+		header += "," + "concept_class_id";
+		header += "," + "MatchLog";
+		PrintWriter ingredientMappingDebugFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Debug.csv", header);
+		if (ingredientMappingDebugFile != null) {
+			
+			// Sort the ingredients on use count descending.
+			List<SourceIngredient> sourceIngredients = new ArrayList<SourceIngredient>();
+			sourceIngredients.addAll(SourceDrug.getAllIngredients());
+			
+			Collections.sort(sourceIngredients, new Comparator<SourceIngredient>() {
+				@Override
+				public int compare(SourceIngredient ingredient1, SourceIngredient ingredient2) {
+					int compareResult = (ingredient1.getIngredientName() == null ? "" : ingredient1.getIngredientName()).compareTo(ingredient2.getIngredientName() == null ? "" : ingredient2.getIngredientName());
+					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
+					return compareResult;
+				}
+			});
+			
+			for (SourceIngredient sourceIngredient : sourceIngredients) {
+				CDMIngredient cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
+				
+				String record = sourceIngredient.getIngredientCode();
+				record += "," + DrugMapping.escapeFieldValue(sourceIngredient.getIngredientName());
+				record += "," + sourceIngredient.getCount();
+				if (cdmIngredient != null) {
+					record += "," + cdmIngredient.getConceptId();
+					record += "," + DrugMapping.escapeFieldValue(cdmIngredient.getConceptName());
+					record += "," + cdmIngredient.getVocabularyId();
+					record += "," + cdmIngredient.getConceptClassId();
+					record += "," + DrugMapping.escapeFieldValue(sourceIngredient.getMatchString());
+				}
+				else {
+					record += ",";
+					record += ",";
+					record += ",";
+					record += ",";
+					record += ",";
+				}
+				ingredientMappingDebugFile.println(record);
+			}
+			
+			ingredientMappingDebugFile.close();
+		}
+		
 		// Save drug mapping
 		counters = new HashMap<Integer, Map<Integer, Long>>();
 		dataCoverage = new HashMap<Integer, Map<Integer, Long>>();
@@ -1959,9 +2050,10 @@ public class GenericMapping extends Mapping {
 			mappingType++;
 		}
 		
-		String header = "MappingStatus";
+		header = "MappingStatus";
 		header += "," + SourceDrug.getHeader();
 		header += "," + SourceIngredient.getHeader();
+		header += "," + "StrengthMarginPercentage";
 		header += "," + "MappingType";
 		header += "," + "MappingResult";
 		header += "," + "concept_id";
@@ -1979,9 +2071,13 @@ public class GenericMapping extends Mapping {
 		header = "MappingStatus";
 		header += "," + SourceDrug.getHeader();
 		header += "," + SourceIngredient.getHeader();
+		header += "," + "StrengthMarginPercentage";
 		header += "," + "MappingType";
 		header += "," + "MappingResult";
-		header += "," + "Results";
+		//header += "," + "Results";
+		for (Integer conceptNr = 1; conceptNr <= maxResultConcepts; conceptNr++) {
+			header += "," + "Concept_" + conceptNr; 
+		}
 		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
 		
 		header = "SourceCode";
@@ -2035,9 +2131,17 @@ public class GenericMapping extends Mapping {
 								// Write the result records
 								int mappingResultType = 0;
 								while (mappingResultDescriptions.containsKey(mappingResultType)) {
+									String strengthDeviationPercentage = "";
+									if (mappingResultType == MAPPED) {
+										String key = mappingType == INGREDIENT_MAPPING ? ("Ingredient " + sourceDrug.getCode() + "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientCode()) : ("Drug " + sourceDrug.getCode());
+										if (usedStrengthDeviationPercentageMap.get(key) != null) {
+											strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
+										}
+									}
 									String record = DrugMapping.escapeFieldValue(mappingStatus);
 									record += "," + sourceDrug;
 									record += "," + sourceIngredientString;
+									record += "," + strengthDeviationPercentage; 
 									record += "," + DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
 									record += "," + DrugMapping.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
@@ -2546,6 +2650,7 @@ public class GenericMapping extends Mapping {
 			resultMapping.put(resultType, orgConceptList);
 		}
 		orgConceptList.addAll(conceptList);
+		maxResultConcepts = Math.max(maxResultConcepts, conceptList.size());
 	}
 	
 	

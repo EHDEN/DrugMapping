@@ -4,7 +4,7 @@ public class DrugMappingNumberUtilities {
 
 	
 	public static String percentage(Long count, Long total) {
-		return count + " of " + total + " (" + Double.toString((double) Math.round((((double) (count) / (double) total) * 1000)) / 10.0) + "%)"; 
+		return count + " of " + total + " (" + Double.toString((double) Math.round((((double) (count) / (double) total) * 100000)) / 1000.0) + "%)"; 
 	}
 	
 	
