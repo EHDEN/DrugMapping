@@ -19,10 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.ohdsi.databases.QueryParameters;
-import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.cdm.CDM;
-import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
@@ -38,7 +35,7 @@ public class FormConversion {
 	
 	private String formMapDate = null;
 	private List<String> sourceFormNames = new ArrayList<String>();                                            // List of source form names for sorting
-	private Map<String, Set<String>> formConversionMap = new HashMap<String, Set<String>>();                   // Map from Source form to CDM form concept_name
+	private Map<String, List<String>> formConversionMap = new HashMap<String, List<String>>();                   // Map from Source form to CDM form concept_name
 	
 	private int status = STATE_EMPTY;
 	private Set<String> oldSourceForms = new HashSet<String>();
@@ -105,18 +102,26 @@ public class FormConversion {
 								}
 								
 								String mappingLine = "        " + sourceForm;
+
+								List<Integer> priorities = new ArrayList<Integer>();
+								Map<Integer, String> priorityMap = new HashMap<Integer, String>();
+								List<String> sourceFormMapping = new ArrayList<String>();
+								formConversionMap.put(sourceForm, sourceFormMapping);
 								
-								Set<String> sourceFormMapping = formConversionMap.get(sourceForm);
-								if (sourceFormMapping == null) {
-									sourceFormMapping = new HashSet<String>();
-									formConversionMap.put(sourceForm, sourceFormMapping);
-								}
 								for (String concept_id : formConcepts) {
 									oldCDMForms.add(concept_id);
 									if (!concept_id.equals("Local form \\ CDM form")) {
 										if (cdm.getCDMFormConceptIdToNameMap().keySet().contains(concept_id)) {
 											String cell = row.get(concept_id, true).trim();
 											if (!cell.equals("")) {
+												try {
+													Integer priority = Integer.parseInt(cell);
+													priorities.add(priority);
+													priorityMap.put(priority, concept_id);
+												}
+												catch (NumberFormatException exception) {
+													// Ignore
+												}
 												sourceFormMapping.add(concept_id);
 												mappingLine += "=" + concept_id + ",\"" + cdm.getCDMFormConceptIdToNameMap().get(concept_id) + "\"";
 											}
@@ -125,6 +130,12 @@ public class FormConversion {
 											System.out.println("    WARNING: CDM form '" + cdm.getCDMFormConceptIdToNameMap().get(concept_id) + "' (" + concept_id + ") no longer exists!");
 										}
 									}
+								}
+								Collections.sort(priorities);
+								for (Integer priority : priorities) {
+									String concept_id = priorityMap.get(priority);
+									sourceFormMapping.add(concept_id);
+									mappingLine += "=" + concept_id + ",\"" + cdm.getCDMFormConceptIdToNameMap().get(concept_id) + "\"";
 								}
 								System.out.println(mappingLine);
 							}
@@ -234,13 +245,13 @@ public class FormConversion {
 				Collections.sort(allSourceFormNames);
 				for (String sourceFormName : allSourceFormNames) {
 					String record = "\"" + sourceFormName + "\""; 
-					Set<String> sourceFormMap = formConversionMap.get(sourceFormName);
+					List<String> sourceFormMap = formConversionMap.get(sourceFormName);
 					if (sourceFormMap == null) {
-						sourceFormMap = new HashSet<String>();
+						sourceFormMap = new ArrayList<String>();
 					}
 					for (String concept_name : cdm.getCDMFormConceptNames()) {
 						String concept_id = cdm.getCDMFormConceptId(concept_name);
-						record += "," + (sourceFormMap.contains(concept_id) ? "X" : "");
+						record += "," + (sourceFormMap.contains(concept_id) ? Integer.toString(sourceFormMap.indexOf(concept_id) + 1) : "");
 					}
 					formFileWriter.println(record);
 				}
@@ -257,7 +268,7 @@ public class FormConversion {
 		return status;
 	}
 	
-	
+	//TODO Priorities
 	public boolean matches(String sourceForm, String cdmForm, CDM cdm) {
 		boolean matches = false;
 

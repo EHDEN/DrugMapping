@@ -1639,7 +1639,7 @@ public class GenericMapping extends Mapping {
 							if (cdmDrugsWithIngredients == null) {
 								cdmDrugsWithIngredients = new ArrayList<CDMDrug>();
 								for (CDMDrug cdmDrug : cdmDrugsWithIngredient) {
-									if (!cdmDrugsWithIngredients.contains(cdmDrug)) {
+									if ((cdmDrug.getIngredients().size() == cdmDrugIngredients.size()) && (!cdmDrugsWithIngredients.contains(cdmDrug))) {
 										cdmDrugsWithIngredients.add(cdmDrug);
 									}
 								}
@@ -1647,7 +1647,7 @@ public class GenericMapping extends Mapping {
 							else {
 								Set<CDMDrug> cdmDrugsMissingIngredient = new HashSet<CDMDrug>();
 								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-									if (!cdmDrugsWithIngredient.contains(cdmDrug)) {
+									if ((cdmDrug.getIngredients().size() == cdmDrugIngredients.size()) && (!cdmDrugsWithIngredients.contains(cdmDrug))) {
 										cdmDrugsMissingIngredient.add(cdmDrug);
 									}
 								}
@@ -2007,10 +2007,7 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceIngredient sourceIngredient : sourceIngredients) {
-				CDMConcept cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
-				if (cdmIngredient == null) {
-					cdmIngredient = cdm.getCDMDrugComps().get(sourceIngredient.getMatchingIngredient());
-				}
+				CDMIngredient cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
 				
 				String record = sourceIngredient.getIngredientCode();
 				record += "," + DrugMapping.escapeFieldValue(sourceIngredient.getIngredientName());
