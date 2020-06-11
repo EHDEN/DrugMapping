@@ -68,7 +68,7 @@ public class GenericMapping extends Mapping {
 	private static int REJECTED_BY_RXNORM_PREFERENCE                  =  7; // The CDM drugs are rejected because they are not in the preferred RxNorm vocabulary.
 	private static int REJECTED_BY_RXNORM_EXTENSION_PREFERENCE        =  8; // The CDM drugs are rejected because they are not in the preferred RxNorm Extension vocabulary.
 	private static int REJECTED_BY_LATEST_DATE_PREFERENCE             =  9; // The CDM drugs are rejected because they do not have the latest valid start date.
-	private static int REJECTED_BY_OLDEST_DATE_PREFERENCE             = 10; // The CDM drugs are rejected because they do not have the oldest recent valid start date.
+	private static int REJECTED_BY_EARLIEST_DATE_PREFERENCE           = 10; // The CDM drugs are rejected because they do not have the earliest recent valid start date.
 	private static int REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE      = 11; // The CDM drugs are rejected because they do not have the smallest concept_id.
 	private static int REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE      = 12; // The CDM drugs are rejected because they do not have the greatest concept_id.
 	private static int NO_UNIQUE_MAPPING                              = 13; // There are several CDM drugs the source drug could be mapped to.
@@ -90,7 +90,7 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(REJECTED_BY_RXNORM_PREFERENCE                 , "Rejected by RxNorm preference");
 		mappingResultDescriptions.put(REJECTED_BY_RXNORM_EXTENSION_PREFERENCE       , "Rejected by RxNorm Extension preference");
 		mappingResultDescriptions.put(REJECTED_BY_LATEST_DATE_PREFERENCE            , "Rejected by latest valid start date");
-		mappingResultDescriptions.put(REJECTED_BY_OLDEST_DATE_PREFERENCE            , "Rejected by oldest valid start date");
+		mappingResultDescriptions.put(REJECTED_BY_EARLIEST_DATE_PREFERENCE          , "Rejected by earliest valid start date");
 		mappingResultDescriptions.put(REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE     , "Rejected by smallest concept_id");
 		mappingResultDescriptions.put(REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE     , "Rejected by greatest concept_id");
 		mappingResultDescriptions.put(NO_UNIQUE_MAPPING                             , "No unique mapping");
@@ -136,7 +136,7 @@ public class GenericMapping extends Mapping {
 	
 	private List<String> report = null;
 	
-	private boolean preferencesUsed = false;
+	private String preferencesUsed = null;
 	private int maxResultConcepts = 0;
 	
 	
@@ -170,7 +170,6 @@ public class GenericMapping extends Mapping {
 		
 		report = new ArrayList<String>();
 		
-		preferencesUsed = false;
 		maxResultConcepts = 0;
 		
 		int mapping = 0;
@@ -976,13 +975,15 @@ public class GenericMapping extends Mapping {
 				}
 				
 				if (cdmIngredient == null) { // No manual mapping on ingredient code found
-					preferencesUsed = false;
+					preferencesUsed = "";
 					boolean multipleMapping = false;
 
 					List<String> matchNameList = sourceIngredient.getIngredientMatchingNames();
 					for (String matchName : matchNameList) {
 						String matchType = matchName.substring(0, matchName.indexOf(": "));
 						matchName = matchName.substring(matchName.indexOf(": ") + 2);
+						
+						cdmIngredient = manualIngredientNameMappings.get(matchName);
 						
 						if (cdmIngredient != null) { // Manual mapping on part ingredient name found
 							ingredientMap.put(sourceIngredient, cdmIngredient);
@@ -1022,7 +1023,7 @@ public class GenericMapping extends Mapping {
 										cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
 										ingredientMap.put(sourceIngredient, cdmIngredient);
 										sourceIngredient.setMatchingIngredient(((CDMIngredient) matchedCDMIngredients.toArray()[0]).getConceptId());
-										sourceIngredient.setMatchString(matchType + ingredientNameIndexName + " " + searchName + (preferencesUsed ? " - USED PREFERENCES" : ""));
+										sourceIngredient.setMatchString(matchType + " " + ingredientNameIndexName + " " + searchName + " " + preferencesUsed);
 										matchedByName++;
 										break;
 									}
@@ -2006,7 +2007,10 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceIngredient sourceIngredient : sourceIngredients) {
-				CDMIngredient cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
+				CDMConcept cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
+				if (cdmIngredient == null) {
+					cdmIngredient = cdm.getCDMDrugComps().get(sourceIngredient.getMatchingIngredient());
+				}
 				
 				String record = sourceIngredient.getIngredientCode();
 				record += "," + DrugMapping.escapeFieldValue(sourceIngredient.getIngredientName());
@@ -2446,18 +2450,18 @@ public class GenericMapping extends Mapping {
 		int resultType = -1;
 		List<CDMConcept> remove;
 
-		preferencesUsed = false;
+		preferencesUsed = "";
 		if (conceptList.size() > 1) {
 			String vocabulary_id = null;
 			if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
 				vocabulary_id = "RxNorm";
 				resultType = REJECTED_BY_RXNORM_PREFERENCE;
-				preferencesUsed = true;
+				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + "RxNorm";
 			}
 			else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
 				vocabulary_id = "RxNorm Extension";
 				resultType = REJECTED_BY_RXNORM_EXTENSION_PREFERENCE;
-				preferencesUsed = true;
+				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + "RxNorm Extension";
 			}
 			remove = new ArrayList<CDMConcept>();
 			for (CDMConcept cdmConcept : conceptList) {
@@ -2474,9 +2478,9 @@ public class GenericMapping extends Mapping {
 		}
 		if (conceptList.size() > 1) {
 			if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("No")) {
-				preferencesUsed = true;
 				boolean latest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_DATE).equals("Latest");
-				resultType = latest ? REJECTED_BY_LATEST_DATE_PREFERENCE : REJECTED_BY_OLDEST_DATE_PREFERENCE;
+				resultType = latest ? REJECTED_BY_LATEST_DATE_PREFERENCE : REJECTED_BY_EARLIEST_DATE_PREFERENCE;
+				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + (latest ? "Latest Date" : "Earliest Date");
 				
 				remove = new ArrayList<CDMConcept>();
 				List<CDMConcept> lastConcepts = new ArrayList<CDMConcept>();
@@ -2515,9 +2519,9 @@ public class GenericMapping extends Mapping {
 		}
 		if (conceptList.size() > 1) {
 			if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("No")) {
-				preferencesUsed = true;
-				boolean oldest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
-				resultType = oldest ? REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+				boolean smallest = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID).equals("Smallest (= oldest)");
+				resultType = smallest ? REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE : REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE;
+				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + (smallest ? "Smallest concept_id" : "Greatest concept_id");
 				
 				remove = new ArrayList<CDMConcept>();
 				CDMConcept lastConcept = null;
@@ -2529,7 +2533,7 @@ public class GenericMapping extends Mapping {
 					}
 					else {
 						int conceptId = Integer.parseInt(cdmConcept.getConceptId());
-						if ((oldest && (conceptId < lastConceptId)) || ((!oldest) && (conceptId > lastConceptId))) {
+						if ((smallest && (conceptId < lastConceptId)) || ((!smallest) && (conceptId > lastConceptId))) {
 							lastConceptId = conceptId;
 							remove.add(lastConcept);
 							lastConcept = cdmConcept;
@@ -2547,9 +2551,9 @@ public class GenericMapping extends Mapping {
 		}
 		if (conceptList.size() > 1) {
 			if (!DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("None")) {
-				preferencesUsed = true;
 				boolean first = DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST).equals("First");
 				resultType = first ? REJECTED_BY_FIRST_PREFERENCE : REJECTED_BY_LAST_PREFERENCE;
+				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + (first ? "First" : "Last");
 				remove = new ArrayList<CDMConcept>();
 				if (first) {
 					for (int nr = 1; nr < conceptList.size(); nr++) {
