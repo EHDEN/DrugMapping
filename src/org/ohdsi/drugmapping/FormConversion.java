@@ -33,6 +33,8 @@ public class FormConversion {
 	
 	public static String FILENAME = "DrugMapping - FormConversionMap.csv";
 	
+	private CDM cdm = null;
+	
 	private String formMapDate = null;
 	private List<String> sourceFormNames = new ArrayList<String>();                                            // List of source form names for sorting
 	private Map<String, List<String>> formConversionMap = new HashMap<String, List<String>>();                   // Map from Source form to CDM form concept_name
@@ -43,6 +45,7 @@ public class FormConversion {
 	
 	
 	public FormConversion(Set<String> sourceForms, CDM cdm) {
+		this.cdm = cdm;
 		System.out.println(DrugMapping.getCurrentTime() + " Create Forms Conversion Map ...");
 		
 		sourceFormNames.addAll(sourceForms);
@@ -50,16 +53,16 @@ public class FormConversion {
 		
 		System.out.println("    Done");
 
-		readFromFile(cdm);
+		readFromFile();
 		if (status == STATE_NOT_FOUND) {
 			System.out.println("    Creating empty form conversion map ...");
-			writeFormConversionsToFile(cdm);
+			writeFormConversionsToFile();
 			status = STATE_EMPTY;
 			System.out.println("    Done");
 		}
 		if (status == STATE_CRITICAL) {
 			System.out.println("    Creating new form conversion map ...");
-			writeFormConversionsToFile(cdm);
+			writeFormConversionsToFile();
 			System.out.println("    Done");
 		}
 		
@@ -67,7 +70,7 @@ public class FormConversion {
 	}
 	
 	
-	private void readFromFile(CDM cdm) {
+	private void readFromFile() {
 		System.out.println("    Get form conversion map from file " + DrugMapping.getBasePath() + "/" + FILENAME + " ...");
 
 		boolean newSourceForms = false;
@@ -185,7 +188,7 @@ public class FormConversion {
 	}
 	
 	
-	private void writeFormConversionsToFile(CDM cdm) {
+	private void writeFormConversionsToFile() {
 		String formFileName = DrugMapping.getBasePath() + "/" + FILENAME;
 		File formFile = new File(formFileName);
 		if (formFile.exists()) {
@@ -269,7 +272,12 @@ public class FormConversion {
 	}
 	
 	//TODO Priorities
-	public boolean matches(String sourceForm, String cdmForm, CDM cdm) {
+	public List<String> getMatchingForms(String sourceForm) {
+		return sourceForm == null ? null : formConversionMap.get(sourceForm);
+	}
+	
+	
+	public boolean matches(String sourceForm, String cdmForm) {
 		boolean matches = false;
 
 		if ((sourceForm != null) && sourceFormNames.contains(sourceForm)) {

@@ -1260,18 +1260,32 @@ public class GenericMapping extends Mapping {
 						if (sourceDrug.getFormulation() != null) {
 							String sourceDrugForm = sourceDrug.getFormulation(); 
 							Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
-							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								List<String> cdmDrugForms = cdmDrug.getForms();
-								boolean formFound = false;
-								for (String cdmDrugForm : cdmDrugForms) {
-									if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm, cdm)) {
-										formFound = true;
+							List<String> matchingCDMForms = formConversionsMap.getMatchingForms(sourceDrugForm);
+							if ((matchingCDMForms != null) && (matchingCDMForms.size() > 0)) {
+								for (String cdmForm : matchingCDMForms) {
+									for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+										List<String> cdmDrugForms = cdmDrug.getForms();
+										boolean formFound = false;
+										for (String cdmDrugForm : cdmDrugForms) {
+											if (cdmForm.equals(cdmDrugForm)) {
+												formFound = true;
+												break;
+											}
+										}
+										if (!formFound) {
+											cdmDrugsMissingForm.add(cdmDrug);
+										}
+									}
+									if (cdmDrugsMissingForm.size() < cdmDrugsWithIngredients.size()) {
 										break;
 									}
+									else {
+										cdmDrugsMissingForm = new HashSet<CDMDrug>();
+									}
 								}
-								if (!formFound) {
-									cdmDrugsMissingForm.add(cdmDrug);
-								}
+							}
+							else {
+								cdmDrugsMissingForm.addAll(cdmDrugsWithIngredients);
 							}
 
 							logMappingResult(sourceDrug, mapping, REJECTED_BY_FORM, cdmDrugsMissingForm);
@@ -1666,21 +1680,36 @@ public class GenericMapping extends Mapping {
 					// Find CDM Clinical Drugs with corresponding formulation
 					if (cdmDrugsWithIngredients.size() > 0) {
 						if (sourceDrug.getFormulation() != null) {
-							String sourceDrugForm = sourceDrug.getFormulation(); 
+							String sourceDrugForm = sourceDrug.getFormulation();
 							Set<CDMDrug> cdmDrugsMissingForm = new HashSet<CDMDrug>();
-							for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-								List<String> cdmDrugForms = cdmDrug.getForms();
-								boolean formFound = false;
-								for (String cdmDrugForm : cdmDrugForms) {
-									if (formConversionsMap.matches(sourceDrugForm, cdmDrugForm, cdm)) {
-										formFound = true;
+							List<String> matchingCDMForms = formConversionsMap.getMatchingForms(sourceDrugForm);
+							if ((matchingCDMForms != null) && (matchingCDMForms.size() > 0)) {
+								for (String cdmForm : matchingCDMForms) {
+									for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
+										List<String> cdmDrugForms = cdmDrug.getForms();
+										boolean formFound = false;
+										for (String cdmDrugForm : cdmDrugForms) {
+											if (cdmForm.equals(cdmDrugForm)) {
+												formFound = true;
+												break;
+											}
+										}
+										if (!formFound) {
+											cdmDrugsMissingForm.add(cdmDrug);
+										}
+									}
+									if (cdmDrugsMissingForm.size() < cdmDrugsWithIngredients.size()) {
 										break;
 									}
-								}
-								if (!formFound) {
-									cdmDrugsMissingForm.add(cdmDrug);
+									else {
+										cdmDrugsMissingForm = new HashSet<CDMDrug>();
+									}
 								}
 							}
+							else {
+								cdmDrugsMissingForm.addAll(cdmDrugsWithIngredients);
+							}
+							
 							logMappingResult(sourceDrug, mapping, REJECTED_BY_FORM, cdmDrugsMissingForm);
 							
 							cdmDrugsWithIngredients.removeAll(cdmDrugsMissingForm);
