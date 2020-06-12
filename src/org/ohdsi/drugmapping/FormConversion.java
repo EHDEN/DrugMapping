@@ -125,8 +125,6 @@ public class FormConversion {
 												catch (NumberFormatException exception) {
 													// Ignore
 												}
-												sourceFormMapping.add(concept_id);
-												mappingLine += "=" + concept_id + ",\"" + cdm.getCDMFormConceptIdToNameMap().get(concept_id) + "\"";
 											}
 										}
 										else if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
