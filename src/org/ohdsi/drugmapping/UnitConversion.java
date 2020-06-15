@@ -317,9 +317,11 @@ public class UnitConversion {
 
 		if (numeratorFactor != null) {
 			if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
-				matches = (Math.round(((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) * 1000000) <= Math.round(cdmNumeratorValue * 1000000)) && (Math.round(((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) * 1000000) >= Math.round(cdmNumeratorValue * 1000000));
-				//matches = (((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) <= cdmNumeratorValue) && (((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) >= cdmNumeratorValue);
-				//matches = ((sourceNumeratorValue * numeratorFactor) == cdmNumeratorValue);
+				if (cdmDenominatorUnit == null) {
+					matches = (Math.round(((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) * 1000000) <= Math.round(cdmNumeratorValue * 1000000)) && (Math.round(((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) * 1000000) >= Math.round(cdmNumeratorValue * 1000000));
+					//matches = (((sourceNumeratorValue * numeratorFactor) - ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) <= cdmNumeratorValue) && (((sourceNumeratorValue * numeratorFactor) + ((sourceNumeratorValue * numeratorFactor) * deviationFactor)) >= cdmNumeratorValue);
+					//matches = ((sourceNumeratorValue * numeratorFactor) == cdmNumeratorValue);
+				}
 			}
 			else if (
 						(sourceNumeratorValue != null) &&

@@ -265,6 +265,160 @@ public class FormConversion {
 	}
 	
 	
+	private void readFromFile2() {
+		System.out.println("    Get form conversion map from file " + DrugMapping.getBasePath() + "/" + FILENAME + " ...");
+
+		boolean newSourceForms = false;
+		boolean newCDMForms = false;
+		boolean conceptNamesRead = false;
+		
+		File formFile = new File(DrugMapping.getBasePath() + "/" + FILENAME);
+		if (formFile.exists() && formFile.canRead()) {
+			status = STATE_OK;
+			
+			try {
+				ReadCSVFileWithHeader formConversionFile = new ReadCSVFileWithHeader(DrugMapping.getBasePath() + "/" + FILENAME, ',', '"');
+				
+				Iterator<Row> formConversionFileIterator = formConversionFile.iterator();
+				Set<String> formConcepts = formConversionFile.getColumns();
+				if (formConcepts != null) {
+					while (formConversionFileIterator.hasNext()) {
+						Row row = formConversionFileIterator.next();
+						
+						String sourceForm = row.get("DoseForm", true);
+						String priorityString = row.get("Priority", true);
+						String concept_id = row.get("ConceptId", true);
+						String concept_name = row.get("ConceptName", false);
+
+						if (!sourceForm.trim().equals("")) {
+							oldSourceForms.add(sourceForm);
+							
+						}
+						
+					}
+					
+					for (String sourceForm : sourceFormNames) {
+						if (!oldSourceForms.contains(sourceForm)) {
+							if (!newSourceForms) {
+								System.out.println();
+								System.out.println("    NEW SOURCE FORMS FOUND:");
+							}
+							System.out.println("        " + sourceForm);
+							newSourceForms = true;
+						}
+					}
+
+					for (String cdmForm : cdm.getCDMFormConceptIdToNameMap().keySet()) {
+						if (!oldCDMForms.contains(cdmForm)) {
+							if (!newCDMForms) {
+								System.out.println();
+								System.out.println("    NEW CDM FORMS FOUND:");
+							}
+							System.out.println("        " + cdmForm);
+							newCDMForms = true;
+						}
+					}
+					
+					if (newSourceForms || newCDMForms) {
+						status = STATE_CRITICAL;
+					}
+					else {
+						status = STATE_OK;
+					}
+				}
+			}
+			catch (NoSuchElementException fileException) {
+				System.out.println("  ERROR: " + fileException.getMessage());
+			}
+		}
+		else {
+			System.out.println("    ERROR: No form conversion map found!");
+			status = STATE_NOT_FOUND;
+		}
+		
+		System.out.println("    Done");
+	}
+	
+	
+	private void writeFormConversionsToFile2() {
+		String formFileName = DrugMapping.getBasePath() + "/" + FILENAME;
+		File formFile = new File(formFileName);
+		if (formFile.exists()) {
+			// Backup old form conversion map
+			String oldFormFileName = null;
+			File oldFormFile = null;
+			int fileNr = 0;
+			do {
+				fileNr++;
+				String fileNrString = "00" + Integer.toString(fileNr);
+				fileNrString = fileNrString.substring(fileNrString.length() - 2);
+				oldFormFileName = DrugMapping.getBasePath() + "/" + FILENAME.substring(0, FILENAME.length() - 4) + " " + formMapDate + " " + fileNrString + FILENAME.substring(FILENAME.length() - 4);
+				oldFormFile = new File(oldFormFileName);
+			} while (oldFormFile.exists());
+			try {
+				PrintWriter oldFormFileWriter = new PrintWriter(new File(oldFormFileName));
+				try {
+					BufferedReader oldFormFileReader = new BufferedReader(new InputStreamReader(new FileInputStream(formFileName)));
+					String line;
+					while ((line = oldFormFileReader.readLine()) != null) {
+						oldFormFileWriter.println(line);
+					}
+					oldFormFileReader.close();
+					oldFormFileWriter.close();
+				}
+				catch (FileNotFoundException e) {
+					System.out.println("    ERROR: Cannot find original form conversion map '" + formFileName + "'!");
+					status = STATE_ERROR;
+				}
+				catch (IOException e) {
+					System.out.println("    ERROR: Reading original form conversion map '" + formFileName + "'!");
+					status = STATE_ERROR;
+				}
+			} catch (FileNotFoundException e) {
+				System.out.println("    ERROR: Cannot create backup form conversion map '" + oldFormFileName + "'!");
+				status = STATE_ERROR;
+			}
+		}
+
+		if (status != STATE_ERROR) {
+			try {
+				PrintWriter formFileWriter = new PrintWriter(formFile);
+
+				String header1 = "Local form \\ CDM form";
+				String header2 = (new SimpleDateFormat("yyyy-MM-dd")).format(new Date());
+				for (String concept_name : cdm.getCDMFormConceptNames()) {
+					header1 += "," + cdm.getCDMFormConceptId(concept_name);
+					header2 += "," + "\"" + concept_name + "\"";
+				}
+				formFileWriter.println(header1);
+				formFileWriter.println(header2);
+				Set<String> allSourceFormNamesSet = new HashSet<String>();
+				allSourceFormNamesSet.addAll(sourceFormNames);
+				allSourceFormNamesSet.addAll(oldSourceForms);
+				List<String> allSourceFormNames = new ArrayList<String>();
+				allSourceFormNames.addAll(allSourceFormNamesSet);
+				Collections.sort(allSourceFormNames);
+				for (String sourceFormName : allSourceFormNames) {
+					String record = "\"" + sourceFormName + "\""; 
+					List<String> sourceFormMap = formConversionMap.get(sourceFormName);
+					if (sourceFormMap == null) {
+						sourceFormMap = new ArrayList<String>();
+					}
+					for (String concept_name : cdm.getCDMFormConceptNames()) {
+						String concept_id = cdm.getCDMFormConceptId(concept_name);
+						record += "," + (sourceFormMap.contains(concept_id) ? Integer.toString(sourceFormMap.indexOf(concept_id) + 1) : "");
+					}
+					formFileWriter.println(record);
+				}
+				formFileWriter.close();
+			} catch (FileNotFoundException e) {
+				System.out.println("    ERROR: Cannot create form conversion map '" + DrugMapping.getBasePath() + "/" + FILENAME + "'!");
+				status = STATE_ERROR;
+			}
+		}
+	}
+	
+	
 	public int getStatus() {
 		return status;
 	}

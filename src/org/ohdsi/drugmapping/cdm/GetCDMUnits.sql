@@ -14,7 +14,7 @@ WITH units AS (
       LEFT OUTER JOIN @vocab.concept denominator_unit
         ON denominator_unit_concept_id = concept_id
 )
-SELECT *
+SELECT DISTINCT *
 FROM units
 WHERE domain_id = 'Unit'
 AND   concept_class_id = 'Unit'
