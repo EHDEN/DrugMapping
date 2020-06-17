@@ -20,7 +20,9 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.ohdsi.drugmapping.cdm.CDM;
+import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.source.SourceDrugComponent;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
@@ -33,6 +35,8 @@ public class UnitConversion {
 	
 	public static String FILENAME = "DrugMapping - UnitConversionMap.csv";
 	
+	private CDM cdm = null;
+	
 	private String unitMapDate = null;
 	private List<String> sourceUnitNames = new ArrayList<String>();                                            // List of source unit names for sorting
 	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();   // Map from Source unit to map from CDM unit concept_name to factor (CDM unit = Source unit * factor)
@@ -43,6 +47,7 @@ public class UnitConversion {
 	
 	
 	public UnitConversion(Set<String> sourceUnits, CDM cdm) {
+		this.cdm = cdm;
 		System.out.println(DrugMapping.getCurrentTime() + " Create Units Conversion Map ...");
 		
 		sourceUnitNames.addAll(sourceUnits);
@@ -270,13 +275,8 @@ public class UnitConversion {
 		
 		if ((sourceUnit != null) && sourceUnitNames.contains(sourceUnit)) {
 			if (cdmUnit != null) {
-				if (cdm.getCDMUnitConceptNames().contains(cdmUnit)) {
-					if (cdm.getCDMUnitNameToConceptIdMap().keySet().contains(cdmUnit)) {
-						cdmUnit = cdm.getCDMUnitConceptId(cdmUnit);
-					}
-					else {
-						cdmUnit = null;
-					}
+				if (!cdm.getCDMUnitConceptIdToNameMap().keySet().contains(cdmUnit)) {
+					cdmUnit = null;
 				}
 			}
 		}
@@ -340,5 +340,37 @@ public class UnitConversion {
 		}
 		
 		return matches;
+	}
+	
+	
+	public Double getStandardizedStrength(SourceDrugComponent sourceDrugComponent, CDMIngredientStrength cdmIngredientStrength) {
+		Double strength = null;
+		String sourceNumeratorUnit = sourceDrugComponent.getNumeratorDosageUnit();
+		Double sourceNumeratorValue = sourceDrugComponent.getNumeratorDosage();
+		String sourceDenominatorUnit = sourceDrugComponent.getDenominatorDosageUnit();
+		Double sourceDenominatorValue = sourceDrugComponent.getDenominatorDosage();
+		String cdmNumeratorUnit = cdmIngredientStrength.getNumeratorDosageUnit();
+		String cdmDenominatorUnit = cdmIngredientStrength.getDenominatorDosageUnit();
+		
+		Double numeratorFactor = getFactor(sourceNumeratorUnit, cdmNumeratorUnit, cdm);
+		Double denominatorFactor = getFactor(sourceDenominatorUnit, cdmDenominatorUnit, cdm);
+
+		if (numeratorFactor != null) {
+			if ((sourceNumeratorUnit != null) && (sourceDenominatorUnit == null)) {
+				if (cdmDenominatorUnit == null) {
+					strength = sourceNumeratorValue * numeratorFactor;
+				}
+			}
+			else if (
+						(sourceNumeratorValue != null) &&
+						(sourceDenominatorValue != null) &&
+						(numeratorFactor != null) &&
+						(denominatorFactor != null)
+			) {
+				strength = (sourceNumeratorValue * numeratorFactor) / (sourceDenominatorValue * denominatorFactor); 
+			}
+		}
+		
+		return strength;
 	}
 }

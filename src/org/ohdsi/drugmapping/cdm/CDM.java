@@ -43,13 +43,13 @@ public class CDM {
 	private Map<String, Map<String, Set<CDMIngredient>>> cdmIngredientNameIndexMap = new HashMap<String, Map<String, Set<CDMIngredient>>>();
 	
 	private Map<String, CDMDrug> cdmDrugs = new HashMap<String, CDMDrug>();
-	private Map<CDMIngredient, List<CDMDrug>> cdmDrugsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
+	private Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugsContainingIngredient = new HashMap<Integer, Map<CDMIngredient, List<CDMDrug>>>();
 
 	private Map<String, CDMDrug> cdmDrugComps = new HashMap<String, CDMDrug>();
 	private Map<CDMIngredient, List<CDMDrug>> cdmDrugCompsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
 
 	private Map<String, CDMDrug> cdmDrugForms = new HashMap<String, CDMDrug>();
-	private Map<CDMIngredient, List<CDMDrug>> cdmDrugFormsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
+	private Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugFormsContainingIngredient = new HashMap<Integer, Map<CDMIngredient, List<CDMDrug>>>();
 	
 	private Map<String, CDMConcept> cdmForms = new HashMap<String, CDMConcept>();
 
@@ -143,6 +143,29 @@ public class CDM {
 	}
 	
 	
+	public boolean isOrphanIngredient(CDMIngredient cdmIngredient) {
+		boolean isOrphan = true;
+		for (int ingredientCount : cdmDrugsContainingIngredient.keySet()) {
+			if (cdmDrugsContainingIngredient.get(ingredientCount).get(cdmIngredient) != null) {
+				isOrphan = false;
+				break;
+			}
+		}
+		if (isOrphan) {
+			isOrphan = (cdmDrugCompsContainingIngredient.get(cdmIngredient) == null);
+		}
+		if (isOrphan) {
+			for (int ingredientCount : cdmDrugFormsContainingIngredient.keySet()) {
+				if (cdmDrugFormsContainingIngredient.get(ingredientCount).get(cdmIngredient) != null) {
+					isOrphan = false;
+					break;
+				}
+			}
+		}
+		return isOrphan;
+	}
+	
+	
 	public Map<String, CDMIngredient> getCDMIngredients() {
 		return cdmIngredients;
 	}
@@ -168,8 +191,9 @@ public class CDM {
 	}
 
 
-	public Map<CDMIngredient, List<CDMDrug>> getCDMDrugsContainingIngredient() {
-		return cdmDrugsContainingIngredient;
+	public List<CDMDrug> getCDMDrugsContainingIngredient(Integer ingredientCount, CDMIngredient ingredient) {
+		Map<CDMIngredient, List<CDMDrug>> drugsWithIngredientCount = cdmDrugsContainingIngredient.get(ingredientCount);
+		return drugsWithIngredientCount == null ? null : drugsWithIngredientCount.get(ingredient);
 	}
 
 
@@ -178,8 +202,8 @@ public class CDM {
 	}
 
 
-	public Map<CDMIngredient, List<CDMDrug>> getCDMDrugCompsContainingIngredient() {
-		return cdmDrugCompsContainingIngredient;
+	public List<CDMDrug> getCDMDrugCompsContainingIngredient(CDMIngredient ingredient) {
+		return cdmDrugCompsContainingIngredient.get(ingredient);
 	}
 
 
@@ -188,8 +212,9 @@ public class CDM {
 	}
 
 
-	public Map<CDMIngredient, List<CDMDrug>> getCDMDrugFormsContainingIngredient() {
-		return cdmDrugFormsContainingIngredient;
+	public List<CDMDrug> getCDMDrugFormsContainingIngredient(Integer ingredientCount, CDMIngredient ingredient) {
+		Map<CDMIngredient, List<CDMDrug>> drugsWithIngredientCount = cdmDrugFormsContainingIngredient.get(ingredientCount);
+		return drugsWithIngredientCount == null ? null : drugsWithIngredientCount.get(ingredient);
 	}
 
 
@@ -240,6 +265,11 @@ public class CDM {
 	
 	public List<String> getCDMFormConceptNames() {
 		return cdmFormConceptNames;
+	}
+	
+	
+	public CDMConcept getCDMFormConcept(String conceptId) {
+		return cdmForms.get(conceptId);
 	}
 	
 	
@@ -476,6 +506,7 @@ public class CDM {
 	private void getRxNormClinicalDrugsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
 		
+		Set<CDMDrug> drugs = new HashSet<CDMDrug>();
 		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drug_concept_id", true);
 			
@@ -484,6 +515,7 @@ public class CDM {
 				if (cdmDrug == null) {
 					cdmDrug = new CDMDrug(this, queryRow, "drug_");
 					cdmDrugs.put(cdmDrug.getConceptId(), cdmDrug);
+					drugs.add(cdmDrug);
 				}
 				String cdmFormConceptId = queryRow.get("form_concept_id", true);
 				cdmDrug.addForm(cdmFormConceptId);
@@ -494,18 +526,27 @@ public class CDM {
 					if (cdmIngredient != null) {
 						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 						cdmDrug.addIngredientStrength(cdmIngredientStrength);
-						
-						List<CDMDrug> drugsContainingIngredient = cdmDrugsContainingIngredient.get(cdmIngredient);
-						if (drugsContainingIngredient == null) {
-							drugsContainingIngredient = new ArrayList<CDMDrug>();
-							cdmDrugsContainingIngredient.put(cdmIngredient, drugsContainingIngredient);
-						}
-						if (!drugsContainingIngredient.contains(cdmDrug)) {
-							drugsContainingIngredient.add(cdmDrug);
-						}
 					}
 				}
 			} 
+		}
+		
+		// Build map of drugs containing ingredients
+		for (CDMDrug cdmDrug : drugs) {
+			int ingredientCount = cdmDrug.getIngredients().size();
+			Map<CDMIngredient, List<CDMDrug>> cdmDrugsEqualIngredientCount = cdmDrugsContainingIngredient.get(ingredientCount);
+			if (cdmDrugsEqualIngredientCount == null) {
+				cdmDrugsEqualIngredientCount = new HashMap<CDMIngredient, List<CDMDrug>>();
+				cdmDrugsContainingIngredient.put(ingredientCount, cdmDrugsEqualIngredientCount);
+			}
+			for (CDMIngredient cdmIngredient : cdmDrug.getIngredients()) {
+				List<CDMDrug> drugsContaingIngredient = cdmDrugsEqualIngredientCount.get(cdmIngredient);
+				if (drugsContaingIngredient == null) {
+					drugsContaingIngredient = new ArrayList<CDMDrug>();
+					cdmDrugsEqualIngredientCount.put(cdmIngredient, drugsContaingIngredient);
+				}
+				drugsContaingIngredient.add(cdmDrug);
+			}
 		}
 
 		report.add("RxNorm Clinical Drugs found: " + Integer.toString(cdmDrugs.size()));
@@ -515,7 +556,7 @@ public class CDM {
 	
 	private void getRxNormClinicalDrugCompsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Comps with ingredients ...");
-		
+
 		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugCompsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drugcomp_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
@@ -531,16 +572,17 @@ public class CDM {
 					if (cdmIngredient != null) {
 						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 						cdmDrugComp.addIngredientStrength(cdmIngredientStrength);
-						
-						List<CDMDrug> drugsContainingIngredient = cdmDrugCompsContainingIngredient.get(cdmIngredient);
-						if (drugsContainingIngredient == null) {
-							drugsContainingIngredient = new ArrayList<CDMDrug>();
-							cdmDrugCompsContainingIngredient.put(cdmIngredient, drugsContainingIngredient);
+						List<CDMDrug> drugCompsContainingIngredient = cdmDrugCompsContainingIngredient.get(cdmIngredient);
+						if (drugCompsContainingIngredient == null) {
+							drugCompsContainingIngredient = new ArrayList<CDMDrug>();
+							cdmDrugCompsContainingIngredient.put(cdmIngredient, drugCompsContainingIngredient);
 						}
-						drugsContainingIngredient.add(cdmDrugComp);
+						if (!drugCompsContainingIngredient.contains(cdmDrugComp)) {
+							drugCompsContainingIngredient.add(cdmDrugComp);
+						}
 					}
 				}
-			} 
+			}
 		}
 
 		report.add("RxNorm Clinical Drug Comps found: " + Integer.toString(cdmDrugComps.size()));
@@ -550,7 +592,8 @@ public class CDM {
 	
 	private void getRxNormClinicalDrugFormsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
-		
+
+		Set<CDMDrug> drugForms = new HashSet<CDMDrug>();
 		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugFormsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drugform_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
@@ -558,6 +601,7 @@ public class CDM {
 				if (cdmDrugForm == null) {
 					cdmDrugForm = new CDMDrug(this, queryRow, "drugform_");
 					cdmDrugForms.put(cdmDrugForm.getConceptId(), cdmDrugForm);
+					drugForms.add(cdmDrugForm);
 				}
 				
 				String cdmFormConceptId = queryRow.get("form_concept_id", true);
@@ -571,16 +615,27 @@ public class CDM {
 					if (cdmIngredient != null) {
 						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 						cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
-						
-						List<CDMDrug> drugsContainingIngredient = cdmDrugFormsContainingIngredient.get(cdmIngredient);
-						if (drugsContainingIngredient == null) {
-							drugsContainingIngredient = new ArrayList<CDMDrug>();
-							cdmDrugFormsContainingIngredient.put(cdmIngredient, drugsContainingIngredient);
-						}
-						drugsContainingIngredient.add(cdmDrugForm);
 					}
 				}
 			} 
+		}
+		
+		// Build map of drug forms containing ingredients
+		for (CDMDrug cdmDrugForm : drugForms) {
+			int ingredientCount = cdmDrugForm.getIngredients().size();
+			Map<CDMIngredient, List<CDMDrug>> cdmDrugFormsEqualIngredientCount = cdmDrugFormsContainingIngredient.get(ingredientCount);
+			if (cdmDrugFormsEqualIngredientCount == null) {
+				cdmDrugFormsEqualIngredientCount = new HashMap<CDMIngredient, List<CDMDrug>>();
+				cdmDrugFormsContainingIngredient.put(ingredientCount, cdmDrugFormsEqualIngredientCount);
+			}
+			for (CDMIngredient cdmIngredient : cdmDrugForm.getIngredients()) {
+				List<CDMDrug> drugFormsContaingIngredient = cdmDrugFormsEqualIngredientCount.get(cdmIngredient);
+				if (drugFormsContaingIngredient == null) {
+					drugFormsContaingIngredient = new ArrayList<CDMDrug>();
+					cdmDrugFormsEqualIngredientCount.put(cdmIngredient, drugFormsContaingIngredient);
+				}
+				drugFormsContaingIngredient.add(cdmDrugForm);
+			}
 		}
 
 		report.add("RxNorm Clinical Drug Forms found: " + Integer.toString(cdmDrugForms.size()));

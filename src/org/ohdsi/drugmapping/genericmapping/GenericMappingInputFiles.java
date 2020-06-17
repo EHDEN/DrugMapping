@@ -89,6 +89,51 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								}
 						),
 						new FileDefinition(
+								"Unit Mapping File",
+								new String[] {
+										"This file should contain the mapping from source units to CDM units."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"SourceUnit",
+												new String[] {
+														"This is the source unit."
+												}
+										),
+										new FileColumnDefinition(
+												"DrugCount",
+												new String[] {
+														"This is the number of drugs the source unit is used in."
+												}
+										),
+										new FileColumnDefinition(
+												"RecordCount",
+												new String[] {
+														"This is the number of data records the unit is used in."
+												}
+										),
+										new FileColumnDefinition(
+												"Factor",
+												new String[] {
+														"Multiply the source value with this value to get the CDM value."
+												}
+										),
+										new FileColumnDefinition(
+												"TargetUnit",
+												new String[] {
+														"This is the unit in CDM concept code terms."
+												}
+										),
+										new FileColumnDefinition(
+												"Comment",
+												new String[] {
+														"This is a comment."
+												}
+										)
+								},
+								false
+						),
+						new FileDefinition(
 								"CAS File",
 								new String[] {
 										"This file should contain CAS numbers with their chemical name an synonyms."

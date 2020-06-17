@@ -130,7 +130,7 @@ public class CDMIngredient extends CDMConcept {
 	
 	
 	public boolean isOrphan() {
-		return cdm.getCDMDrugsContainingIngredient().get(this) == null;
+		return cdm.isOrphanIngredient(this);
 	}
 
 }

@@ -283,17 +283,8 @@ public class SourceDrug {
 	
 	
 	public SourceIngredient AddIngredient(SourceIngredient sourceIngredient, String dosage, String dosageUnit) {
-		SourceDrugComponent sourceComponent = null;
-		for (SourceDrugComponent component : allComponents) {
-			if (component.matches(sourceIngredient, dosage, dosageUnit)) {
-				sourceComponent = component;
-				break;
-			}
-		}
-		if (sourceComponent == null) {
-			sourceComponent = new SourceDrugComponent(sourceIngredient, dosage, dosageUnit);
-			allComponents.add(sourceComponent);
-		}
+		SourceDrugComponent sourceComponent = new SourceDrugComponent(sourceIngredient, dosage, dosageUnit);
+		allComponents.add(sourceComponent);
 		components.add(sourceComponent);
 		// Keep the components sorted by ingredient code
 		Collections.sort(components, new Comparator<SourceDrugComponent>() {
@@ -326,6 +317,16 @@ public class SourceDrug {
 			dosage = component.getDosage();
 		}
 		return dosage;
+	}
+	
+	
+	public String getIngredientDosageUnit(SourceIngredient ingredient) {
+		String dosageUnit = null;
+		SourceDrugComponent component = getIngredientComponent(ingredient);
+		if (component != null) {
+			dosageUnit = component.getDosageUnit();
+		}
+		return dosageUnit;
 	}
 	
 	
