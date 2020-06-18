@@ -130,8 +130,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"This is a comment."
 												}
 										)
-								},
-								false
+								}
 						),
 						new FileDefinition(
 								"CAS File",

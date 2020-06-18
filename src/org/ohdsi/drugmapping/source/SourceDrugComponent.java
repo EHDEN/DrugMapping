@@ -26,9 +26,11 @@ public class SourceDrugComponent {
 	}
 	
 	
-	public SourceDrugComponent(SourceIngredient ingredient, String dosage, String dosageUnit) {
+	public SourceDrugComponent(SourceDrug sourceDrug, SourceIngredient ingredient, String dosage, String dosageUnit) {
 		this.ingredient = ingredient;
 		Double dosageValue = null;
+		dosageUnit = dosageUnit.toUpperCase();
+		
 		try {
 			dosageValue = Double.parseDouble(dosage);
 		}
@@ -38,8 +40,8 @@ public class SourceDrugComponent {
 		if (dosageValue != null) {
 			if (dosageUnit.contains("/")) {
 				String[] dosageUnitSplit = dosageUnit.split("/");
-				this.dosage = null;
-				this.dosageUnit = null;
+				this.dosage = dosageValue;
+				this.dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
 				numeratorDosageUnit = dosageUnitSplit[0].trim();
 				numeratorDosageUnit = numeratorDosageUnit.equals("") ? null : numeratorDosageUnit;
 				denominatorDosageUnit = dosageUnitSplit[1].trim();
@@ -55,6 +57,7 @@ public class SourceDrugComponent {
 				denominatorDosage = 1.0;
 				denominatorDosageUnit = null;
 			}
+			sourceDrug.countUnit(dosageUnit);
 		}
 	}
 	

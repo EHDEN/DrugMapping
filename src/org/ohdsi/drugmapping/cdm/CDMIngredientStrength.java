@@ -19,6 +19,9 @@ public class CDMIngredientStrength {
 	private String box_size                 = null;
 	private CDMIngredient ingredient        = null;
 	
+	private Double dosage                   = null;
+	private String unit                     = null;
+	
 	
 	public static String getHeader() {
 		return getHeader("");
@@ -77,6 +80,19 @@ public class CDMIngredientStrength {
 			catch (NumberFormatException e) {
 				denominator_value = null;
 			}
+		}
+		
+		if (amount_value != null) {
+			dosage = amount_value;
+			unit = amount_unit.getConceptCode().toUpperCase();
+		}
+		else {
+			if (numerator_value != null) {
+				dosage = numerator_value / (denominator_value == null ? 1.0 : denominator_value);
+			}
+			String numeratorCode = (((numerator_unit == null) || (numerator_unit.getConceptCode() == null)) ? "" : numerator_unit.getConceptCode());
+			String denominatorCode = (((denominator_unit == null) || (denominator_unit.getConceptCode() == null)) ? "" : denominator_unit.getConceptCode());
+			unit = (numeratorCode.equals("") ? "" : numeratorCode) + (denominatorCode.equals("") ? "" : "/" + denominatorCode);
 		}
 		
 		this.ingredient = ingredient;
@@ -188,6 +204,17 @@ public class CDMIngredientStrength {
 		return denominatorDosageUnit;
 	}
 	
+	
+	public Double getDosage() {
+		return dosage;
+	}
+	
+	
+	public String getUnit() {
+		return unit;
+	}
+	
+	
 	public String getBoxSize() {
 		return box_size;
 	}
@@ -210,9 +237,9 @@ public class CDMIngredientStrength {
 		
 		String description = ingredient.toString();
 		description += "," + (getNumeratorDosage() == null ? "" : getNumeratorDosage());
-		description += "," + (((numerator_unit == null) || (numerator_unit.getConceptName() == null)) ? "" : numerator_unit.getConceptName());
+		description += "," + (((numerator_unit == null) || (numerator_unit.getConceptCode() == null)) ? "" : numerator_unit.getConceptCode());
 		description += "," + (getDenominatorDosage() == null ? "" : getDenominatorDosage());
-		description += "," + (((denominator_unit == null) || (denominator_unit.getConceptName() == null)) ? "" : denominator_unit.getConceptName());
+		description += "," + (((denominator_unit == null) || (denominator_unit.getConceptCode() == null)) ? "" : denominator_unit.getConceptCode());
 		return description;
 	}
 	

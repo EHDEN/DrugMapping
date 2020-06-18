@@ -77,6 +77,21 @@ public class InputFile extends JPanel {
 	private Iterator<Row> fileIterator;
 	
 	
+	public static char fieldDelimiter(String delimiterName) {
+		if (delimiterName.equals("Tab")) return '\t';
+		if (delimiterName.equals("Semicolon")) return ';';
+		if (delimiterName.equals("Comma")) return ',';
+		if (delimiterName.equals("Space")) return ' ';
+		return delimiterName.charAt(0);
+	}
+	
+	
+	public static char textQualifier(String textQualifierName) {
+		if (textQualifierName.equals("None")) return (char) 0;
+		return textQualifierName.charAt(0);
+	}
+	
+	
 	public InputFile(FileDefinition fileDefinition) {
 		this.fileDefinition = fileDefinition;
 		this.labelText = fileDefinition.getFileName();
@@ -249,16 +264,8 @@ public class InputFile extends JPanel {
 		if (getFileName() != null) {
 			File inputFile = new File(getFileName());
 			if (inputFile.exists() && inputFile.canRead()) {
-				char delmiter = ',';
-				if      (fieldDelimiter.equals("Tab"))       delmiter = '\t';
-				else if (fieldDelimiter.equals("Semicolon")) delmiter = ';';
-				else if (fieldDelimiter.equals("Comma"))     delmiter = ',';
-				else if (fieldDelimiter.equals("Space"))     delmiter = ' ';
-				else                                         delmiter = this.fieldDelimiter.toCharArray()[0];
-
-				char textDelimiter = '\"';
-				if      (textQualifier.equals("None"))       textDelimiter = (char) 0;
-				else                                         textDelimiter = this.textQualifier.toCharArray()[0];
+				char delmiter = fieldDelimiter(fieldDelimiter);
+				char textDelimiter = textQualifier(textQualifier);
 				
 				ReadCSVFileWithHeader readFile = new ReadCSVFileWithHeader(getFileName(), delmiter, textDelimiter);
 				if (readFile.isOpen()) {

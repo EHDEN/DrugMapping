@@ -48,6 +48,7 @@ public class DrugMappingStringUtilities {
 		name = name.replaceAll("AE", "A");
 		name = name.replaceAll("EA", "A");
 		name = name.replaceAll("PH", "F");
+		name = name.replaceAll("Y", "I");
 		name = name.replaceAll("S ", " ");
 		name = name.replaceAll("E ", " ");
 		name = name.replaceAll("A ", " ");

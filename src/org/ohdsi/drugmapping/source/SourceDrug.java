@@ -17,9 +17,13 @@ public class SourceDrug {
 	
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
 	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
+	private static Map<String, Long> allUnits = new HashMap<String, Long>();
+	
 	private static Map<String, SourceIngredient> ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
 	private static Map<String, List<SourceIngredient>> ingredientNameIndex = new HashMap<String, List<SourceIngredient>>();
 	private static Map<String, SourceIngredient> ingredientCASNumberIndex = new HashMap<String, SourceIngredient>();
+	
+	private static Map<String, Set<SourceDrug>> unitsUsedInSourceDrug = new HashMap<String, Set<SourceDrug>>(); 
 	
 	private static Integer casNumbersSet = 0;
 	
@@ -52,6 +56,27 @@ public class SourceDrug {
 	
 	public static Set<SourceIngredient> getAllIngredients() {
 		return allIngredients;
+	}
+	
+	
+	public static Set<String> getAllUnits() {
+		return allUnits.keySet();
+	}
+	
+	
+	public static Integer getUnitSourceDrugUsage(String unit) {
+		Integer usage = 0;
+		Set<SourceDrug> sourceDrugUsage = unitsUsedInSourceDrug.get(unit);
+		if (sourceDrugUsage != null) {
+			usage = sourceDrugUsage.size();
+		}
+		return usage;
+	}
+	
+	
+	public static Long getUnitRecordUsage(String unit) {
+		Long usage = allUnits.get(unit);
+		return usage == null ? 0L : usage;
 	}
 	
 	
@@ -283,7 +308,7 @@ public class SourceDrug {
 	
 	
 	public SourceIngredient AddIngredient(SourceIngredient sourceIngredient, String dosage, String dosageUnit) {
-		SourceDrugComponent sourceComponent = new SourceDrugComponent(sourceIngredient, dosage, dosageUnit);
+		SourceDrugComponent sourceComponent = new SourceDrugComponent(this, sourceIngredient, dosage, dosageUnit);
 		allComponents.add(sourceComponent);
 		components.add(sourceComponent);
 		// Keep the components sorted by ingredient code
@@ -363,6 +388,19 @@ public class SourceDrug {
 			}
 		}
 		return ingredients;
+	}
+	
+	
+	public void countUnit(String unit) {
+		Set<SourceDrug> sourceDrugUsage = unitsUsedInSourceDrug.get(unit);
+		if (sourceDrugUsage == null) {
+			sourceDrugUsage = new HashSet<SourceDrug>();
+			unitsUsedInSourceDrug.put(unit, sourceDrugUsage);
+		}
+		if (sourceDrugUsage.add(this)) {
+			Long recordUsage = allUnits.get(unit);
+			allUnits.put(unit, (recordUsage == null ? 0 : recordUsage) + getCount());
+		}
 	}
 	
 	
