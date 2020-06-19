@@ -2,7 +2,7 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 
-import org.ohdsi.drugmapping.UnitConversion;
+import org.ohdsi.drugmapping.UnitConversionOld;
 import org.ohdsi.drugmapping.cdm.CDM;
 
 public class SourceDrugComponent {
@@ -40,8 +40,6 @@ public class SourceDrugComponent {
 		if (dosageValue != null) {
 			if (dosageUnit.contains("/")) {
 				String[] dosageUnitSplit = dosageUnit.split("/");
-				this.dosage = dosageValue;
-				this.dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
 				numeratorDosageUnit = dosageUnitSplit[0].trim();
 				numeratorDosageUnit = numeratorDosageUnit.equals("") ? null : numeratorDosageUnit;
 				denominatorDosageUnit = dosageUnitSplit[1].trim();
@@ -50,8 +48,6 @@ public class SourceDrugComponent {
 				denominatorDosage = 1.0;
 			}
 			else {
-				this.dosage = dosageValue;
-				this.dosageUnit = dosageUnit.equals("") ? null : dosageUnit;
 				numeratorDosage = this.dosage;
 				numeratorDosageUnit = this.dosageUnit;
 				denominatorDosage = 1.0;
@@ -59,6 +55,8 @@ public class SourceDrugComponent {
 			}
 			sourceDrug.countUnit(dosageUnit);
 		}
+		this.dosage = dosageValue;
+		this.dosageUnit = dosageUnit;
 	}
 	
 	
@@ -147,7 +145,7 @@ public class SourceDrugComponent {
 	}
 	
 	
-	public boolean matches(UnitConversion unitConversion, Double numeratorDosage, String numeratorDosageUnit, Double denominatorDosage, String denominatorDosageUnit, Double strengthDeviationPercentage, CDM cdm) {
+	public boolean matches(UnitConversionOld unitConversion, Double numeratorDosage, String numeratorDosageUnit, Double denominatorDosage, String denominatorDosageUnit, Double strengthDeviationPercentage, CDM cdm) {
 		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage, strengthDeviationPercentage, cdm);
 	}
 

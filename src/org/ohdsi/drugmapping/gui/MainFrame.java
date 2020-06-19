@@ -44,6 +44,7 @@ public class MainFrame {
 	public static int MAXIMUM_STRENGTH_DEVIATION;
 	
 	public static int PREFERENCE_RXNORM;
+	public static int PREFERENCE_ATC;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
 	public static int PREFERENCE_PRIORITIZE_BY_CONCEPT_ID;
 	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
@@ -149,6 +150,7 @@ public class MainFrame {
 			MINIMUM_USE_COUNT                   = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
 			MAXIMUM_STRENGTH_DEVIATION          = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
 			PREFERENCE_RXNORM                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
+			PREFERENCE_ATC                      = DrugMapping.settings.addSetting(new BooleanValueSetting(this, "preferenceATC", "Prefer matching ATC when multiple mappings found:", true));
 			PREFERENCE_PRIORITIZE_BY_DATE       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Latest", "Oldest", "No" }, "No"));
 			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Prioritize by concept_id when multiple mappings found:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
 			PREFERENCE_TAKE_FIRST_OR_LAST       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "Take first or last when multiple mappings left:", new String[] { "First", "Last", "None" }, "None"));

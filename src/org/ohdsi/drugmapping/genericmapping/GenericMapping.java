@@ -3,6 +3,7 @@ package org.ohdsi.drugmapping.genericmapping;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,8 +18,8 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.FormConversion;
 import org.ohdsi.drugmapping.IngredientNameTranslation;
 import org.ohdsi.drugmapping.Mapping;
+import org.ohdsi.drugmapping.UnitConversionOld;
 import org.ohdsi.drugmapping.UnitConversion;
-import org.ohdsi.drugmapping.UnitConversion2;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.cdm.CDMDrug;
@@ -73,16 +74,17 @@ public class GenericMapping extends Mapping {
 	private static int REJECTED_BY_FORM_AND_STRENGTH                  = 11; // The CDM drugs are rejected because they have a different form and strength than the source drug.
 	private static int REJECTED_BY_RXNORM_PREFERENCE                  = 12; // The CDM drugs are rejected because they are not in the preferred RxNorm vocabulary.
 	private static int REJECTED_BY_RXNORM_EXTENSION_PREFERENCE        = 13; // The CDM drugs are rejected because they are not in the preferred RxNorm Extension vocabulary.
-	private static int REJECTED_BY_LATEST_DATE_PREFERENCE             = 14; // The CDM drugs are rejected because they do not have the latest valid start date.
-	private static int REJECTED_BY_EARLIEST_DATE_PREFERENCE           = 15; // The CDM drugs are rejected because they do not have the earliest recent valid start date.
-	private static int REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE      = 16; // The CDM drugs are rejected because they do not have the smallest concept_id.
-	private static int REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE      = 17; // The CDM drugs are rejected because they do not have the greatest concept_id.
-	private static int NO_UNIQUE_MAPPING                              = 18; // There are several CDM drugs the source drug could be mapped to.
-	private static int REJECTED_BY_FIRST_PREFERENCE                   = 19; // The CDM drugs are rejected because the first one found is taken.
-	private static int REJECTED_BY_LAST_PREFERENCE                    = 20; // The CDM drugs are rejected because the last one found is taken.
-	private static int OVERRULED_MAPPING                              = 21; // A mapping to a single CDM drug or a failing mapping is overruled by a manual mapping.
-	private static int MAPPED                                         = 22; // The final mapping of the source drug to a CDM drug.
-	private static int NO_MAPPING                                     = 23; // No mapping found.
+	private static int REJECTED_BY_ATC_PREFERENCE                     = 14; // The CDM drugs are rejected because they are not match on ATC code.
+	private static int REJECTED_BY_LATEST_DATE_PREFERENCE             = 15; // The CDM drugs are rejected because they do not have the latest valid start date.
+	private static int REJECTED_BY_EARLIEST_DATE_PREFERENCE           = 16; // The CDM drugs are rejected because they do not have the earliest recent valid start date.
+	private static int REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE      = 17; // The CDM drugs are rejected because they do not have the smallest concept_id.
+	private static int REJECTED_BY_GREATEST_CONCEPTID_PREFERENCE      = 18; // The CDM drugs are rejected because they do not have the greatest concept_id.
+	private static int NO_UNIQUE_MAPPING                              = 19; // There are several CDM drugs the source drug could be mapped to.
+	private static int REJECTED_BY_FIRST_PREFERENCE                   = 20; // The CDM drugs are rejected because the first one found is taken.
+	private static int REJECTED_BY_LAST_PREFERENCE                    = 21; // The CDM drugs are rejected because the last one found is taken.
+	private static int OVERRULED_MAPPING                              = 22; // A mapping to a single CDM drug or a failing mapping is overruled by a manual mapping.
+	private static int MAPPED                                         = 23; // The final mapping of the source drug to a CDM drug.
+	private static int NO_MAPPING                                     = 24; // No mapping found.
 
 	private static Map<Integer, String> mappingResultDescriptions;
 	static {
@@ -101,6 +103,7 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(REJECTED_BY_FORM_AND_STRENGTH                 , "Rejected by form and strength");
 		mappingResultDescriptions.put(REJECTED_BY_RXNORM_PREFERENCE                 , "Rejected by RxNorm preference");
 		mappingResultDescriptions.put(REJECTED_BY_RXNORM_EXTENSION_PREFERENCE       , "Rejected by RxNorm Extension preference");
+		mappingResultDescriptions.put(REJECTED_BY_ATC_PREFERENCE                    , "Rejected by ATC preference");
 		mappingResultDescriptions.put(REJECTED_BY_LATEST_DATE_PREFERENCE            , "Rejected by latest valid start date");
 		mappingResultDescriptions.put(REJECTED_BY_EARLIEST_DATE_PREFERENCE          , "Rejected by earliest valid start date");
 		mappingResultDescriptions.put(REJECTED_BY_SMALLEST_CONCEPTID_PREFERENCE     , "Rejected by smallest concept_id");
@@ -124,8 +127,8 @@ public class GenericMapping extends Mapping {
 	
 	private CDM cdm = null;
 	
-	private UnitConversion unitConversionsMap = null;
-	private UnitConversion2 unitConversionsMap2 = null;
+	private UnitConversionOld unitConversionsMap = null;
+	private UnitConversion unitConversionsMap2 = null;
 	private FormConversion formConversionsMap = null;
 	private IngredientNameTranslation ingredientNameTranslationMap = null;
 	
@@ -198,32 +201,22 @@ public class GenericMapping extends Mapping {
 		// Load source drug ingredient mapping
 		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT)) && (!SourceDrug.errorOccurred());
 
+		// Get the ingredient name translation map
+		boolean translationOk = true;
+
 		// Get unit conversion from local units to CDM units
-		ok = ok && getUnitConversion2(unitMappingFile);
+		boolean unitsOk = getUnitConversion(unitMappingFile);
 		
 		// Get CDM Ingredients
 		if (ok) {
 			cdm = new CDM(database, report);
 			ok = ok && cdm.isOK();
-		}		
-		
-		// Get unit conversion from local units to CDM units
-		//boolean unitsOk = ok && getUnitConversion(database);
-		boolean unitsOk = true;
-		//boolean unitsOk = ok && getUnitConversion2(unitMappingFile);
+		}	
 		
 		// Get form conversion from local forms to CDM forms
 		boolean formsOk = ok && getFormConversion();
 
-		/* 2020-05-20 REPLACED BEGIN Translation */
-		ok = ok && unitsOk && formsOk;
-		/* 2020-05-20 REPLACED BEGIN Translation */
-		/* 2020-05-20 REPLACED BY BEGIN Translation
-		// Get the ingredient name translation map
-		boolean translationOk = ok && getIngredientnameTranslationMap();
-		
-		ok = ok && unitsOk && formsOk && translationOk;
-		/* 2020-05-20 REPLACED BY END Translation */
+		ok = ok && translationOk && unitsOk && formsOk;
 		
 		// Load manual CAS mappings
 		ok = ok && getManualCASMappings(manualCASMappingFile);		
@@ -427,17 +420,17 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getUnitConversion(CDMDatabase database) {
+	private boolean getUnitConversionOld(CDMDatabase database) {
 		boolean ok = true;
 		
 		// Create Units Map
-		unitConversionsMap = new UnitConversion(units, cdm);
-		if (unitConversionsMap.getStatus() != UnitConversion.STATE_OK) {
+		unitConversionsMap = new UnitConversionOld(units, cdm);
+		if (unitConversionsMap.getStatus() != UnitConversionOld.STATE_OK) {
 			// If no unit conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + UnitConversion.FILENAME);
+			System.out.println(DrugMapping.getBasePath() + "/" + UnitConversionOld.FILENAME);
 			System.out.println("");
 			System.out.println("The cells should contain a value so that: Local unit = <cell value> * CDM unit");
 			System.out.println("");
@@ -448,12 +441,12 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getUnitConversion2(InputFile unitMappingFile) {
+	private boolean getUnitConversion(InputFile unitMappingFile) {
 		boolean ok = true;
 		
 		// Create Units Map
-		unitConversionsMap2 = new UnitConversion2(unitMappingFile);
-		if (unitConversionsMap2.getStatus() != UnitConversion2.STATE_OK) {
+		unitConversionsMap2 = new UnitConversion(unitMappingFile);
+		if (unitConversionsMap2.getStatus() != UnitConversion.STATE_OK) {
 			// If no unit conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
@@ -2225,7 +2218,8 @@ public class GenericMapping extends Mapping {
 	
 	
 	private String standardizedAmount(SourceDrugComponent sourceDrugComponent) {
-		String amount = sourceDrugComponent.getDosage() == null ? "" : sourceDrugComponent.getDosage().toString();
+	    DecimalFormat format5 = new DecimalFormat("##########0.00000");
+		String amount = sourceDrugComponent.getDosage() == null ? "" : format5.format(sourceDrugComponent.getDosage());
 		if (!amount.equals("")) {
 			amount = amount.contains(".") ? (amount + "00000").substring(0, amount.indexOf(".") + 6) : amount + ".00000";
 		}
@@ -2547,6 +2541,41 @@ public class GenericMapping extends Mapping {
 					logMappingResult(sourceDrug, mapping, resultType, remove, componentNr);
 				}
 				conceptList.removeAll(remove);
+			}
+		}
+		if (conceptList.size() > 1) {
+			if ((sourceDrug != null) && DrugMapping.settings.getBooleanSetting(MainFrame.PREFERENCE_ATC)) {
+				resultType = REJECTED_BY_ATC_PREFERENCE;
+				List<SourceIngredient> sourceIngredients = sourceDrug.getIngredients(); 
+				if ((sourceIngredients != null) && (sourceIngredients.size() == 1)) {
+					String sourceATC = sourceDrug.getATCCode();
+					if (sourceATC != null) {
+						remove = new ArrayList<CDMConcept>();
+						for (CDMConcept cdmConcept : conceptList) {
+							if (cdmConcept.getClass().equals("Ingredient")) {
+								String cdmATC = ((CDMIngredient) cdmConcept).getATC();
+								if ((cdmATC != null) && (!sourceATC.equals(cdmATC))) {
+									remove.add(cdmConcept);
+								}
+							}
+							else {
+								List<CDMIngredient> cdmIngredients = ((CDMDrug) cdmConcept).getIngredients();
+								if ((cdmIngredients != null) && (cdmIngredients.size() == 1)) {
+									String cdmATC = cdmIngredients.get(0).getATC();
+									if ((cdmATC != null) && (!sourceATC.equals(cdmATC))) {
+										remove.add(cdmConcept);
+									}
+								}
+							}
+						}
+						if ((remove.size() > 0) && (conceptList.size() != remove.size())) {
+							if (sourceDrug != null) {
+								logMappingResult(sourceDrug, mapping, resultType, remove, componentNr);
+							}
+							conceptList.removeAll(remove);
+						}
+					}
+				}
 			}
 		}
 		if (conceptList.size() > 1) {
