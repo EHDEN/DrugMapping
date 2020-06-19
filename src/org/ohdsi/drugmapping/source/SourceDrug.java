@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class SourceDrug {
 	private static boolean error = false;
@@ -18,6 +18,7 @@ public class SourceDrug {
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
 	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
 	private static Map<String, Long> allUnits = new HashMap<String, Long>();
+	private static Set<String> allForms = new HashSet<String>();
 	
 	private static Map<String, SourceIngredient> ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
 	private static Map<String, List<SourceIngredient>> ingredientNameIndex = new HashMap<String, List<SourceIngredient>>();
@@ -64,6 +65,11 @@ public class SourceDrug {
 	}
 	
 	
+	public static Set<String> getAllForms() {
+		return allForms;
+	}
+	
+	
 	public static Integer getUnitSourceDrugUsage(String unit) {
 		Integer usage = 0;
 		Set<SourceDrug> sourceDrugUsage = unitsUsedInSourceDrug.get(unit);
@@ -105,6 +111,7 @@ public class SourceDrug {
 			if (sourceIngredients != null) {
 				if (sourceIngredients.size() == 1) {
 					sourceIngredient = sourceIngredients.get(0);
+					
 					if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals("")) {
 						sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
 					}
@@ -117,6 +124,7 @@ public class SourceDrug {
 							error = true;
 						}
 					}
+					
 					if (!casNumber.equals("")) {
 						if (sourceIngredient.getCASNumber() == null) {
 							sourceIngredient.setCASNumber(casNumber);
@@ -232,6 +240,9 @@ public class SourceDrug {
 		}
 		catch (NumberFormatException e) {
 			this.count = -1L;
+		}
+		if (this.formulation != null) {
+			allForms.add(this.formulation);
 		}
 	}
 	
@@ -405,10 +416,10 @@ public class SourceDrug {
 	
 	
 	public String toString() {
-		String description = (code == null ? "" : DrugMapping.escapeFieldValue(code));
-		description += "," + (name == null ? "" : DrugMapping.escapeFieldValue(name));
-		description += "," + (atcCode == null ? "" : DrugMapping.escapeFieldValue(atcCode));
-		description += "," + (formulation == null ? "" : DrugMapping.escapeFieldValue(formulation));
+		String description = (code == null ? "" : DrugMappingStringUtilities.escapeFieldValue(code));
+		description += "," + (name == null ? "" : DrugMappingStringUtilities.escapeFieldValue(name));
+		description += "," + (atcCode == null ? "" : DrugMappingStringUtilities.escapeFieldValue(atcCode));
+		description += "," + (formulation == null ? "" : DrugMappingStringUtilities.escapeFieldValue(formulation));
 		description += "," + (count == null ? "" : count);
 		return description;
 	}

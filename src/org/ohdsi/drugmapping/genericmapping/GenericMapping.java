@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.FormConversion;
+import org.ohdsi.drugmapping.FormConversionOld;
 import org.ohdsi.drugmapping.IngredientNameTranslation;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.UnitConversionOld;
@@ -127,8 +128,9 @@ public class GenericMapping extends Mapping {
 	
 	private CDM cdm = null;
 	
-	private UnitConversionOld unitConversionsMap = null;
-	private UnitConversion unitConversionsMap2 = null;
+	private UnitConversionOld unitConversionsMapOld = null;
+	private UnitConversion unitConversionsMap = null;
+	private FormConversionOld formConversionsMapOld = null;
 	private FormConversion formConversionsMap = null;
 	private IngredientNameTranslation ingredientNameTranslationMap = null;
 	
@@ -159,7 +161,7 @@ public class GenericMapping extends Mapping {
 	
 		
 	
-	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile unitMappingFile, InputFile casFile, InputFile manualCASMappingFile, InputFile manualIngredientMappingFile, InputFile manualDrugMappingFile) {
+	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile ingredientNameTranslationFile, InputFile unitMappingFile, InputFile formMappingFile, InputFile casFile, InputFile manualCASMappingFile, InputFile manualIngredientMappingFile, InputFile manualDrugMappingFile) {
 		boolean ok = true;
 		
 		forms = new HashSet<String>();
@@ -201,11 +203,18 @@ public class GenericMapping extends Mapping {
 		// Load source drug ingredient mapping
 		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT)) && (!SourceDrug.errorOccurred());
 
-		// Get the ingredient name translation map
-		boolean translationOk = true;
+		if (ok) {
+			// Get the ingredient name translation map
+			boolean translationOk = getIngredientNameTranslationMap(ingredientNameTranslationFile);
 
-		// Get unit conversion from local units to CDM units
-		boolean unitsOk = getUnitConversion(unitMappingFile);
+			// Get unit conversion from local units to CDM units
+			boolean unitsOk = getUnitConversion(unitMappingFile);
+
+			// Get unit conversion from local dose forms to CDM dose forms
+			boolean formsOk = getFormConversion(formMappingFile);
+
+			ok = ok && translationOk && unitsOk && formsOk;
+		}
 		
 		// Get CDM Ingredients
 		if (ok) {
@@ -214,9 +223,9 @@ public class GenericMapping extends Mapping {
 		}	
 		
 		// Get form conversion from local forms to CDM forms
-		boolean formsOk = ok && getFormConversion();
+		//boolean formsOk = ok && getFormConversionOld();
 
-		ok = ok && translationOk && unitsOk && formsOk;
+		//ok = ok && translationOk && unitsOk && formsOk;
 		
 		// Load manual CAS mappings
 		ok = ok && getManualCASMappings(manualCASMappingFile);		
@@ -326,12 +335,7 @@ public class GenericMapping extends Mapping {
 						if (sourceDrug != null) {
 							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", false); 
 							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase();
-							/* 2020-05-20 REPLACE BEGIN Translation */
-							String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
-							/* 2020-05-20 REPLACE END Translation */
-							/* 2020-05-20 REPLACED BY BEGIN Translation 
-							String ingredientNameEnglish = null;
-							/* 2020-05-20 REPLACED BY END */
+							String ingredientNameEnglish = ""; //sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
 							String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
 							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim().toUpperCase(); 
 							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true).trim();
@@ -339,16 +343,9 @@ public class GenericMapping extends Mapping {
 							if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
 							ingredientName        = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
 							ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish);
-							/* 2020-05-20 REMOVED END Translation */
 							dosage                = DrugMappingStringUtilities.removeExtraSpaces(dosage);
 							dosageUnit            = DrugMappingStringUtilities.removeExtraSpaces(dosageUnit).toUpperCase();
 							casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
-
-							// Remove comma's
-							/* 2020-05-20 REMOVED BEGIN Translation 
-							ingredientName = ingredientName.replaceAll(",", " ").replaceAll("  ", " ");
-							ingredientNameEnglish = ingredientNameEnglish.replaceAll(",", " ").replaceAll("  ", " ");
-							/* 2020-05-20 REMOVED END Translation */
 
 							SourceIngredient sourceIngredient = null;
 							if (!ingredientName.equals("")) {
@@ -359,13 +356,6 @@ public class GenericMapping extends Mapping {
 								else {
 									sourceIngredient = sourceDrug.AddIngredient(sourceIngredient, dosage, dosageUnit);
 								}
-								
-								//TODO
-								/*
-								if (dosageUnit != null) {
-									units.add(dosageUnit);
-								}
-								*/
 								
 								String numeratorDosageUnit = sourceDrug.getIngredientNumeratorDosageUnit(sourceIngredient);
 								if (numeratorDosageUnit != null) {
@@ -409,9 +399,13 @@ public class GenericMapping extends Mapping {
 				report.add("Source drugs without ATC: " + DrugMappingNumberUtilities.percentage((long) noATCCounter, (long) sourceDrugs.size()));
 				report.add("Source ingredients: " + Integer.toString(SourceDrug.getAllIngredients().size()));
 			}
+			else {
+				sourceDrugError = true;
+			}
 		}
 		catch (NoSuchElementException fileException) {
 			System.out.println("  ERROR: " + fileException.getMessage());
+			sourceDrugError = true;
 		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
@@ -420,12 +414,36 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
+	private boolean getIngredientNameTranslationMap(InputFile ingredientNameTranslationFile) {
+		boolean ok = true;
+		
+		// Create Units Map
+		ingredientNameTranslationMap = new IngredientNameTranslation(ingredientNameTranslationFile);
+		if (ingredientNameTranslationMap.getStatus() != FormConversion.STATE_OK) {
+			// If no unit conversion is specified then stop.
+			System.out.println("");
+			System.out.println("First fill the ingredient name translation map in the file:");
+			System.out.println("");
+			System.out.println(ingredientNameTranslationMap.getFileName());
+			System.out.println("");
+			ok = false;
+		}
+		else {
+			for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+				sourceIngredient.setIngredientNameEnglish(ingredientNameTranslationMap.getNameIngredientNameEnglish(sourceIngredient.getIngredientName()));
+			}
+		}
+		
+		return ok;
+	}
+	
+	
 	private boolean getUnitConversionOld(CDMDatabase database) {
 		boolean ok = true;
 		
 		// Create Units Map
-		unitConversionsMap = new UnitConversionOld(units, cdm);
-		if (unitConversionsMap.getStatus() != UnitConversionOld.STATE_OK) {
+		unitConversionsMapOld = new UnitConversionOld(units, cdm);
+		if (unitConversionsMapOld.getStatus() != UnitConversionOld.STATE_OK) {
 			// If no unit conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
@@ -445,13 +463,13 @@ public class GenericMapping extends Mapping {
 		boolean ok = true;
 		
 		// Create Units Map
-		unitConversionsMap2 = new UnitConversion(unitMappingFile);
-		if (unitConversionsMap2.getStatus() != UnitConversion.STATE_OK) {
+		unitConversionsMap = new UnitConversion(unitMappingFile);
+		if (unitConversionsMap.getStatus() != UnitConversion.STATE_OK) {
 			// If no unit conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the unit conversion map in the file:");
 			System.out.println("");
-			System.out.println(unitConversionsMap2.getFileName());
+			System.out.println(unitConversionsMap.getFileName());
 			System.out.println("");
 			ok = false;
 		}
@@ -460,16 +478,16 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getFormConversion() {
+	private boolean getFormConversionOld() {
 		boolean ok = true;
 		
-		formConversionsMap = new FormConversion(forms, cdm);
-		if (formConversionsMap.getStatus() != FormConversion.STATE_OK) {
+		formConversionsMapOld = new FormConversionOld(forms, cdm);
+		if (formConversionsMapOld.getStatus() != FormConversionOld.STATE_OK) {
 			// If no form conversion is specified then stop.
 			System.out.println("");
 			System.out.println("First fill the form conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + FormConversion.FILENAME);
+			System.out.println(DrugMapping.getBasePath() + "/" + FormConversionOld.FILENAME);
 			System.out.println("");
 			System.out.println("Fill the cells of matching forms with an non-space character.");
 			System.out.println("");
@@ -479,26 +497,24 @@ public class GenericMapping extends Mapping {
 		return ok;
 	}
 	
-	/* 2020-05-20 ADDED BEGIN Translation
-	private boolean getIngredientnameTranslationMap() {
+	
+	private boolean getFormConversion(InputFile formMappingFile) {
 		boolean ok = true;
 		
-		ingredientNameTranslationMap = new IngredientNameTranslation();
-		if (ingredientNameTranslationMap.getStatus() != IngredientNameTranslation.STATE_OK) {
-			// If no ingredient name translation map is specified then stop.
+		// Create Units Map
+		formConversionsMap = new FormConversion(formMappingFile);
+		if (formConversionsMap.getStatus() != FormConversion.STATE_OK) {
+			// If no unit conversion is specified then stop.
 			System.out.println("");
-			System.out.println("First fill the ingredient name translation map in the file:");
+			System.out.println("First fill the dose form conversion map in the file:");
 			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + IngredientNameTranslation.FILENAME);
-			System.out.println("");
-			System.out.println("Fill the missing translations marked with <NEW>.");
+			System.out.println(formConversionsMap.getFileName());
 			System.out.println("");
 			ok = false;
 		}
 		
 		return ok;
 	}
-	/* 2020-05-20 ADDED END Translation */
 	
 	
 	private boolean getManualCASMappings(InputFile manualMappingFile) {
@@ -1947,14 +1963,14 @@ public class GenericMapping extends Mapping {
 				CDMIngredient cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
 				
 				String record = sourceIngredient.getIngredientCode();
-				record += "," + DrugMapping.escapeFieldValue(sourceIngredient.getIngredientName());
+				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 				record += "," + sourceIngredient.getCount();
 				if (cdmIngredient != null) {
 					record += "," + cdmIngredient.getConceptId();
-					record += "," + DrugMapping.escapeFieldValue(cdmIngredient.getConceptName());
+					record += "," + DrugMappingStringUtilities.escapeFieldValue(cdmIngredient.getConceptName());
 					record += "," + cdmIngredient.getVocabularyId();
 					record += "," + cdmIngredient.getConceptClassId();
-					record += "," + DrugMapping.escapeFieldValue(sourceIngredient.getMatchString());
+					record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getMatchString());
 				}
 				else {
 					record += ",";
@@ -2094,16 +2110,16 @@ public class GenericMapping extends Mapping {
 								
 								sourceIngredientResultsString = sourceDrugComponent.getIngredient().toString();
 								sourceIngredientResultsString += "," + standardizedAmount(sourceDrugComponent);
-								sourceIngredientResultsString += "," + DrugMapping.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+								sourceIngredientResultsString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
 
 								sourceIngredientMappingString = sourceDrugComponent.getIngredient().toString();
 								sourceIngredientMappingString += "," + standardizedAmount(sourceDrugComponent);
-								sourceIngredientMappingString += "," + DrugMapping.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+								sourceIngredientMappingString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
 								
 								sourceIngredientDebugString = sourceDrugComponent.getIngredient().getIngredientCode();
-								sourceIngredientDebugString += "," + DrugMapping.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientName());
+								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientName());
 								sourceIngredientDebugString += "," + standardizedAmount(sourceDrugComponent);
-								sourceIngredientDebugString += "," + DrugMapping.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
 							}
 							if (mappingResult != null) {
 								// Write the result records
@@ -2116,24 +2132,24 @@ public class GenericMapping extends Mapping {
 											strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
 										}
 									}
-									String resultRecord = DrugMapping.escapeFieldValue(mappingStatus);
+									String resultRecord = DrugMappingStringUtilities.escapeFieldValue(mappingStatus);
 									resultRecord += "," + sourceDrug;
 									resultRecord += "," + sourceIngredientResultsString;
 									resultRecord += "," + strengthDeviationPercentage; 
-									resultRecord += "," + DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
-									resultRecord += "," + DrugMapping.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
+									resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
+									resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
-									String drugMappingRecord = DrugMapping.escapeFieldValue(mappingStatus);
+									String drugMappingRecord = DrugMappingStringUtilities.escapeFieldValue(mappingStatus);
 									drugMappingRecord += "," + sourceDrug;
 									drugMappingRecord += "," + sourceIngredientMappingString;
 									drugMappingRecord += "," + strengthDeviationPercentage; 
-									drugMappingRecord += "," + DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
-									drugMappingRecord += "," + DrugMapping.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
+									drugMappingRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
+									drugMappingRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
-									String debugRecord = DrugMapping.escapeFieldValue(sourceDrug.getCode());
-									debugRecord += "," + DrugMapping.escapeFieldValue(sourceDrug.getName());
-									debugRecord += "," + DrugMapping.escapeFieldValue(sourceDrug.getCount().toString());
-									debugRecord += "," + DrugMapping.escapeFieldValue(sourceDrug.getFormulation());
+									String debugRecord = DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+									debugRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+									debugRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCount().toString());
+									debugRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getFormulation());
 									debugRecord += "," + sourceIngredientDebugString;
 									
 									List<CDMConcept> results = mappingResult.get(mappingResultType);
@@ -2142,10 +2158,10 @@ public class GenericMapping extends Mapping {
 											CDMConcept result = results.get(0);
 											drugMappingRecord += "," + (result == null ? "" : result.toString());
 											
-											debugRecord += "," + (result == null ? "" : DrugMapping.escapeFieldValue(result.getConceptId()));
-											debugRecord += "," + (result == null ? "" : DrugMapping.escapeFieldValue(result.getConceptName()));
-											debugRecord += "," + (result == null ? "" : DrugMapping.escapeFieldValue(result.getConceptClassId()));
-											debugRecord += "," + (result == null ? "" : DrugMapping.escapeFieldValue(mappingTypeDescriptions.get(mappingType)));
+											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptId()));
+											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptName()));
+											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptClassId()));
+											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(mappingTypeDescriptions.get(mappingType)));
 										}
 										Collections.sort(results, new Comparator<CDMConcept>() {
 											@Override
@@ -2155,7 +2171,7 @@ public class GenericMapping extends Mapping {
 										});
 										for (CDMConcept result : results) {
 											if (mappingResultType == REJECTED_BY_STRENGTH) {
-												resultRecord += "," + DrugMapping.escapeFieldValue(result == null ? "" : ((CDMDrug) result).toString() + ": " + ((CDMDrug) result).getStrengthDescription());
+												resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(result == null ? "" : ((CDMDrug) result).toString() + ": " + ((CDMDrug) result).getStrengthDescription());
 											}
 											else if (mappingResultType == REJECTED_BY_FORM) {
 												if (result != null) {
@@ -2167,10 +2183,10 @@ public class GenericMapping extends Mapping {
 														}
 														formsDescription += cdm.getCDMFormConceptName(cdmDrugFormConceptId) + " (" + cdmDrugFormConceptId + ")";
 													}
-													resultRecord += "," + DrugMapping.escapeFieldValue(cdmDrug.toString() + ": " + formsDescription);
+													resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(cdmDrug.toString() + ": " + formsDescription);
 												}
 												else {
-													resultRecord += "," + DrugMapping.escapeFieldValue("");
+													resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue("");
 												}
 											}
 											else if ((mappingResultType == DOUBLE_INGREDIENT_MAPPING) || (mappingResultType == UNMAPPED_SOURCE_INGREDIENTS)) {
@@ -2179,11 +2195,11 @@ public class GenericMapping extends Mapping {
 													CDMIngredient cdmIngredient = (sourceDrugIngredient.getMatchingIngredient() == null ? null : cdm.getCDMIngredients().get(sourceDrugIngredient.getMatchingIngredient()));
 													String description = sourceDrugIngredient.toString();
 													description += " -> " + (cdmIngredient == null ? "" : cdmIngredient.toString());
-													resultRecord += "," + DrugMapping.escapeFieldValue(description);
+													resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(description);
 												}
 											}
 											else {
-												resultRecord += "," + DrugMapping.escapeFieldValue(result == null ? "" : result.toString());
+												resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(result == null ? "" : result.toString());
 											}
 										}
 										if ((mappingResultType == MAPPED) || ((mappingType == INGREDIENT_MAPPING) && (mappingResultType == NO_MAPPING))) {
@@ -2440,7 +2456,7 @@ public class GenericMapping extends Mapping {
 	
 	private boolean matchIngredient(SourceDrugComponent sourceDrugComponent, CDMIngredientStrength cdmIngredientStrength, Double strengthDeviationPercentage) {
 		boolean match = false;
-		if (sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit(), strengthDeviationPercentage, cdm)) {
+		if (sourceDrugComponent.matches(unitConversionsMapOld, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit(), strengthDeviationPercentage, cdm)) {
 			match = true;
 		}
 		return match;
@@ -2451,7 +2467,7 @@ public class GenericMapping extends Mapping {
 		Double percentage = null;
 		//Double sourceStrength = unitConversionsMap.getStandardizedStrength(sourceDrugComponent, cdmIngredientStrength);
 		//Double cdmStrength = getStandardizedCDMStrength(cdmIngredientStrength);
-		Double sourceStrength = unitConversionsMap2.getConversion(sourceDrugComponent.getDosageUnit(), sourceDrugComponent.getDosage(), cdmIngredientStrength.getUnit());
+		Double sourceStrength = unitConversionsMap.getConversion(sourceDrugComponent.getDosageUnit(), sourceDrugComponent.getDosage(), cdmIngredientStrength.getUnit());
 		Double cdmStrength = cdmIngredientStrength.getDosage();
 		if ((sourceStrength != null) && (cdmStrength != null)) {
 			percentage = (Math.abs(cdmStrength - sourceStrength) / sourceStrength) * 100;

@@ -424,7 +424,7 @@ public class MainFrame {
 			}
 			catch (IOException e) {
 				if (mandatory) {
-					JOptionPane.showMessageDialog(frame, "Unable to read settings from file!", "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(frame, "Unable to read settings from file '" + settingsFileName + "'!", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				settings = null;
 			}

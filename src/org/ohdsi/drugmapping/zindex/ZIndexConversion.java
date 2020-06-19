@@ -1149,8 +1149,8 @@ REPLACED END 2020-05-11 */
 									sortedSourceIngredientNames.addAll(originalIngredientNameTranslation.keySet());
 									Collections.sort(sortedSourceIngredientNames);
 									for (String sourceIngredientName : sortedSourceIngredientNames) {
-										String record = DrugMapping.escapeFieldValue(sourceIngredientName);
-										record += "," + DrugMapping.escapeFieldValue(originalIngredientNameTranslation.get(sourceIngredientName));
+										String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredientName);
+										record += "," + DrugMappingStringUtilities.escapeFieldValue(originalIngredientNameTranslation.get(sourceIngredientName));
 										translationFile.println(record);
 									}
 									translationFile.close();
@@ -1184,8 +1184,8 @@ REPLACED END 2020-05-11 */
 								sortedSourceIngredientNames.addAll(ingredientNameTranslation.keySet());
 								Collections.sort(sortedSourceIngredientNames);
 								for (String sourceIngredientName : sortedSourceIngredientNames) {
-									String record = DrugMapping.escapeFieldValue(sourceIngredientName);
-									record += "," + DrugMapping.escapeFieldValue(ingredientNameTranslation.get(sourceIngredientName));
+									String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredientName);
+									record += "," + DrugMappingStringUtilities.escapeFieldValue(ingredientNameTranslation.get(sourceIngredientName));
 									translationFile.println(record);
 								}
 								translationFile.close();
@@ -1242,7 +1242,7 @@ REPLACED END 2020-05-11 */
 									}
 									String record = "";
 									for (int column = 0; column < OUTPUT_ColumnCount; column++) {
-										record += (column == 0 ? "" : ",") + DrugMapping.escapeFieldValue(outputIngredient[column]);
+										record += (column == 0 ? "" : ",") + DrugMappingStringUtilities.escapeFieldValue(outputIngredient[column]);
 									}
 									gpkFullFile.println(record);
 								}
@@ -1277,7 +1277,7 @@ REPLACED END 2020-05-11 */
 										
 										String record = "";
 										for (int column = 0; column < OUTPUT_ColumnCount; column++) {
-											record += (column == 0 ? "" : ",") + DrugMapping.escapeFieldValue(gpkIngredientRecord[column]);
+											record += (column == 0 ? "" : ",") + DrugMappingStringUtilities.escapeFieldValue(gpkIngredientRecord[column]);
 										}
 										gpkFullFile.println(record);
 									}

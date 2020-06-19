@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
@@ -30,15 +31,20 @@ public class UnitConversion {
 	private Map<String, Map<String, Double>> unitConversionMap = new HashMap<String, Map<String, Double>>();
 	
 	
+	public static String getDefaultFileName() {
+		return DrugMapping.getBasePath() + "/" + DEFAULT_FILENAME;
+	}
+	
+	
 	public UnitConversion(InputFile sourceUnitMappingFile) {
-		System.out.println(DrugMapping.getCurrentTime() + " Create Units Conversion Map ...");
+		System.out.println(DrugMapping.getCurrentTime() + "     Create Units Conversion Map ...");
 		
 		readUnitConversionFile(sourceUnitMappingFile);
 		if (status == STATE_EMPTY) {
 			createUnitConversionFile(sourceUnitMappingFile);
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + " Done");
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
 	
 	
@@ -49,7 +55,7 @@ public class UnitConversion {
 	private void readUnitConversionFile(InputFile sourceUnitMappingFile) {
 		if ((sourceUnitMappingFile != null) && sourceUnitMappingFile.openFile(true)) {
 			fileName = sourceUnitMappingFile.getFileName();
-			System.out.println("    Get unit conversion map from file " + fileName + " ...");
+			System.out.println(DrugMapping.getCurrentTime() + "        Get unit conversion map from file " + fileName + " ...");
 			while (sourceUnitMappingFile.hasNext()) {
 				Row row = sourceUnitMappingFile.next();
 				
@@ -66,18 +72,20 @@ public class UnitConversion {
 						factor = Double.parseDouble(factorString);
 					}
 					catch (NumberFormatException exception) {
-						System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + targetUnit + "' conversion. Ignored.");
+						System.out.println("    ERROR: Illegal factor '" + factorString + "' for '" + sourceUnit + "' to '" + targetUnit + "' conversion.");
 						status = STATE_ERROR;
 					}
 				}
 				else {
-					System.out.println("    WARNING: No factor found for conversion from  '" + sourceUnit + "' to '" + targetUnit + "'. Defaults to 1.0.");
+					if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+						System.out.println("    WARNING: No factor found for conversion from  '" + sourceUnit + "' to '" + targetUnit + "'. Defaults to 1.0.");
+					}
 					factor = 1.0;
 				}
 				
 				if (factor != null) {
 					if ((!sourceUnit.equals("")) && (targetUnit.equals(""))) {
-						System.out.println("    ERROR: No target unit specified for '" + sourceUnit + ". Ignored.");
+						System.out.println("    ERROR: No target unit specified for '" + sourceUnit + ".");
 						status = STATE_ERROR;
 					}
 					else {
@@ -88,14 +96,16 @@ public class UnitConversion {
 						}
 						Double existingFactor = sourceUnitConversion.get(targetUnit);
 						if (existingFactor != null) {
-							System.out.println("    WARNING: Double conversion from  '" + sourceUnit + "' to '" + targetUnit + "' found: " + existingFactor + " (old) and " + factor + " (new). Last one used.");
+							if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+								System.out.println("    WARNING: Double conversion from  '" + sourceUnit + "' to '" + targetUnit + "' found: " + existingFactor + " (old) and " + factor + " (new). Last one used.");
+							}
 						}
 						sourceUnitConversion.put(targetUnit, factor);
 					}
 				}
 			}
 			
-			System.out.println("    Done");
+			System.out.println(DrugMapping.getCurrentTime() + "        Done");
 		}
 		else {
 			System.out.println("    ERROR: No unit conversion file found.");
@@ -105,7 +115,7 @@ public class UnitConversion {
 	
 	
 	private void createUnitConversionFile(InputFile sourceUnitMappingFile) {
-		fileName = DrugMapping.getBasePath() + "/" + DEFAULT_FILENAME;
+		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
 		
@@ -118,7 +128,7 @@ public class UnitConversion {
 		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
 		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
 
-		System.out.println("    Write unit conversion map to file " + fileName + " ...");
+		System.out.println(DrugMapping.getCurrentTime() + "        Write unit conversion map to file " + fileName + " ...");
 		
 		File mappingFile = new File(fileName);
 		try {
@@ -134,21 +144,14 @@ public class UnitConversion {
 			mappingFileWriter.println(header);
 			
 			// Get all units
-			List<String> units = new ArrayList<String>();
-			units.addAll(SourceDrug.getAllUnits());
-			Collections.sort(units);
+			List<String> sortedUnits = new ArrayList<String>();
+			sortedUnits.addAll(SourceDrug.getAllUnits());
+			Collections.sort(sortedUnits);
 			
 			// Write all units to file
-			for (String unit : units) {
-				String unitName = unit;
-				if (unitName.contains(fieldDelimiter)) {
-					if (unitName.contains(textQualifier)) {
-						unitName.replaceAll(textQualifier, textQualifier + textQualifier);
-					}
-					unitName = textQualifier + unitName + textQualifier;
-				}
+			for (String unit : sortedUnits) {
 				
-				String record = unitName;
+				String record = DrugMappingStringUtilities.escapeFieldValue(unit, fieldDelimiter, textQualifier);
 				record += fieldDelimiter + SourceDrug.getUnitSourceDrugUsage(unit);
 				record += fieldDelimiter + SourceDrug.getUnitRecordUsage(unit);
 				record += fieldDelimiter;
@@ -160,7 +163,7 @@ public class UnitConversion {
 			
 			mappingFileWriter.close();
 			
-			System.out.println("    Done");
+			System.out.println(DrugMapping.getCurrentTime() + "        Done");
 		} 
 		catch (FileNotFoundException exception) {
 			System.out.println("    ERROR: Cannot create unit mapping file '" + fileName + "'.");

@@ -113,7 +113,7 @@ public class InputFile extends JPanel {
 		fileLabelPanel.add(fileLabel, BorderLayout.WEST);
 		
 		fileNameField = new JTextField();
-		fileNameField.setText("");
+		fileNameField.setText(fileDefinition.getDefaultFile());
 		fileNameField.setPreferredSize(new Dimension(10000, fileNameField.getHeight()));
 		fileNameField.setEditable(false);
 
@@ -158,6 +158,14 @@ public class InputFile extends JPanel {
 		});
 		
 		DrugMapping.disableWhenRunning(fileSelectButton);
+		
+		if (fileDefinition.getDefaultFieldDelimiter() != null) {
+			setFieldDelimiter(fileDefinition.getDefaultFieldDelimiter());
+		}
+		
+		if (fileDefinition.getDefaultTextQualifier() != null) {
+			setTextQualifier(fileDefinition.getDefaultTextQualifier());
+		}
 	}
 	
 	

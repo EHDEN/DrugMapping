@@ -118,10 +118,10 @@ public class CDM {
 			getCASToRxNormIngredientsMapping(connection, queryParameters, report);
 			
 			// Get CDM units
-			getCDMUnits(connection, queryParameters, report);
+			//getCDMUnits(connection, queryParameters, report);
 			
 			// Get CDM Forms
-			getCDMForms(connection, queryParameters, report);
+			//getCDMForms(connection, queryParameters, report);
 			
 			// Write Ingredients Name index to file
 			writeIngredientsNameIndexToFile();

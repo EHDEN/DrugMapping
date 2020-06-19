@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class SourceIngredient {
@@ -14,8 +13,8 @@ public class SourceIngredient {
 	private String ingredientCode = null;
 	private String ingredientName = null;
 	private String ingredientNameNoSpaces = null;
-	private String ingredientNameEnglish = null;
-	private String ingredientNameEnglishNoSpaces = null;
+	private String ingredientNameEnglish = "";
+	private String ingredientNameEnglishNoSpaces = "";
 	private String casNumber = null;
 	private Long count = 0L;
 	private List<String> ingredientMatchingNames = null;
@@ -56,8 +55,8 @@ public class SourceIngredient {
 		ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish);
 
 		this.ingredientCode = ((ingredientCode == null) || ingredientCode.equals("")) ? null : ingredientCode;
-		this.ingredientName = ingredientName.equals("") ? null : ingredientName;
-		this.ingredientNameEnglish = ingredientNameEnglish.equals("") ? null : ingredientNameEnglish;
+		this.ingredientName = ingredientName;
+		this.ingredientNameEnglish = ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
 		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish == null ? "" : this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
@@ -76,7 +75,7 @@ public class SourceIngredient {
 		if (uniqueNames.add(name)) {
 			matchingNames.add("IngredientName: " + name);
 		}
-		if (uniqueNames.add(englishName)) {
+		if ((englishName != null) && (!englishName.equals("")) && uniqueNames.add(englishName)) {
 			matchingNames.add("IngredientName Translated: " + englishName);
 		}
 		for (Integer length = 20; length > 0; length--) {
@@ -89,13 +88,15 @@ public class SourceIngredient {
 					matchingNames.add("IngredientName First " + length + " words + EXTRACT: " + reducedName + " EXTRACT");
 				}
 			}
-			reducedName = getReducedName(englishName, length);
-			if (reducedName != null) {
-				if (uniqueNames.add(reducedName)) {
-					matchingNames.add("IngredientName Translated First " + length + " words: " + reducedName);
-				}
-				if (uniqueNames.add(reducedName + " EXTRACT")) {
-					matchingNames.add("IngredientName Translated First " + length + " words + EXTRACT: " + reducedName + " EXTRACT");
+			if ((englishName != null) && (!englishName.equals(""))) {
+				reducedName = getReducedName(englishName, length);
+				if (reducedName != null) {
+					if (uniqueNames.add(reducedName)) {
+						matchingNames.add("IngredientName Translated First " + length + " words: " + reducedName);
+					}
+					if (uniqueNames.add(reducedName + " EXTRACT")) {
+						matchingNames.add("IngredientName Translated First " + length + " words + EXTRACT: " + reducedName + " EXTRACT");
+					}
 				}
 			}
 		}
@@ -157,8 +158,9 @@ public class SourceIngredient {
 	
 	
 	public void setIngredientNameEnglish(String ingredientNameEnglish) {
-		this.ingredientNameEnglish = ingredientNameEnglish;
-		this.ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+		this.ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish;
+		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
+		ingredientMatchingNames = generateMatchingNames();
 	}
 	
 	
@@ -208,20 +210,20 @@ public class SourceIngredient {
 	
 	
 	public String toString() {
-		String description = (ingredientCode == null ? "" : DrugMapping.escapeFieldValue(ingredientCode));
-		description += "," + (ingredientName == null ? "" : DrugMapping.escapeFieldValue(ingredientName));
-		description += "," + (ingredientNameEnglish == null ? "" : DrugMapping.escapeFieldValue(ingredientNameEnglish));
-		description += "," + (casNumber == null ? "" : DrugMapping.escapeFieldValue(casNumber));
+		String description = (ingredientCode == null ? "" : DrugMappingStringUtilities.escapeFieldValue(ingredientCode));
+		description += "," + (ingredientName == null ? "" : DrugMappingStringUtilities.escapeFieldValue(ingredientName));
+		description += "," + (ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.escapeFieldValue(ingredientNameEnglish));
+		description += "," + (casNumber == null ? "" : DrugMappingStringUtilities.escapeFieldValue(casNumber));
 		return description;
 	}
 	
 	
 	public String toMatchString() {
-		String description = (ingredientCode == null ? "" : DrugMapping.escapeFieldValue(ingredientCode));
-		description += "," + (ingredientName == null ? "" : DrugMapping.escapeFieldValue(ingredientName));
-		description += "," + (ingredientNameEnglish == null ? "" : DrugMapping.escapeFieldValue(ingredientNameEnglish));
-		description += "," + (casNumber == null ? "" : DrugMapping.escapeFieldValue(casNumber));
-		description += "," + DrugMapping.escapeFieldValue(matchString);
+		String description = (ingredientCode == null ? "" : DrugMappingStringUtilities.escapeFieldValue(ingredientCode));
+		description += "," + (ingredientName == null ? "" : DrugMappingStringUtilities.escapeFieldValue(ingredientName));
+		description += "," + (ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.escapeFieldValue(ingredientNameEnglish));
+		description += "," + (casNumber == null ? "" : DrugMappingStringUtilities.escapeFieldValue(casNumber));
+		description += "," + DrugMappingStringUtilities.escapeFieldValue(matchString);
 		return description;
 	}
 	

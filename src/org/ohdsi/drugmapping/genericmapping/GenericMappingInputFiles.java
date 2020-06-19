@@ -2,7 +2,11 @@ package org.ohdsi.drugmapping.genericmapping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.ohdsi.drugmapping.FormConversion;
+import org.ohdsi.drugmapping.IngredientNameTranslation;
 import org.ohdsi.drugmapping.MappingInputDefinition;
+import org.ohdsi.drugmapping.UnitConversion;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
 
@@ -61,12 +65,14 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"This is the name of the ingredient of the drug."
 												}
 										),
+										/*
 										new FileColumnDefinition(
 												"IngredientNameEnglish",
 												new String[] {
 														"This is the English name of the ingredient of the drug."
 												}
 										),
+										*/
 										new FileColumnDefinition(
 												"Dosage",
 												new String[] {
@@ -87,6 +93,31 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								}
+						),
+						new FileDefinition(
+								"Ingredient Name Translation File",
+								new String[] {
+										"This file should contain the translation from source ingredient",
+										"names to English."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"IngredientName",
+												new String[] {
+														"This is the source ingredient name."
+												}
+										),
+										new FileColumnDefinition(
+												"IngredientNameEnglish",
+												new String[] {
+														"This is the English ingredient name."
+												}
+										),
+								},
+								IngredientNameTranslation.getDefaultFileName(),
+								"Comma",
+								"\"",
+								true
 						),
 						new FileDefinition(
 								"Unit Mapping File",
@@ -130,7 +161,54 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"This is a comment."
 												}
 										)
-								}
+								},
+								UnitConversion.getDefaultFileName(),
+								"Comma",
+								"\"",
+								true
+						),
+						new FileDefinition(
+								"Dose Form Mapping File",
+								new String[] {
+										"This file should contain the mapping from source dose forms to CDM dose forms."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"DoseForm",
+												new String[] {
+														"This is the source dose form."
+												}
+										),
+										new FileColumnDefinition(
+												"Priority",
+												new String[] {
+														"This is an integer specifying the order of several mappings",
+														"for the same source dose form."
+												}
+										),
+										new FileColumnDefinition(
+												"ConceptId",
+												new String[] {
+														"This is the concept_id of the target CDM dose form."
+												}
+										),
+										new FileColumnDefinition(
+												"ConceptName",
+												new String[] {
+														"This is the concept_name of the target CDM dose form."
+												}
+										),
+										new FileColumnDefinition(
+												"Comment",
+												new String[] {
+														"This is a comment."
+												}
+										)
+								},
+								FormConversion.getDefaultFileName(),
+								"Comma",
+								"\"",
+								true
 						),
 						new FileDefinition(
 								"CAS File",

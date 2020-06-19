@@ -14,6 +14,22 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String escapeFieldValue(String value) {
+		return escapeFieldValue(value, ",", "\"");
+	}
+	
+	
+	public static String escapeFieldValue(String value, String fieldDelimiter, String textQualifier) {
+		if (value == null) {
+			value = "";
+		}
+		else if (value.contains(fieldDelimiter) || value.contains(textQualifier)) {
+			value = textQualifier + value.replaceAll(textQualifier, textQualifier + textQualifier) + textQualifier;
+		}
+		return value;
+	}
+	
+	
 	public static String modifyName(String name) {
 		
 		name = " " + name.toUpperCase() + " ";

@@ -58,17 +58,6 @@ public class DrugMapping {
 	}
 	
 	
-	public static String escapeFieldValue(String value) {
-		if (value == null) {
-			value = "";
-		}
-		else if (value.contains(",") || value.contains("\"")) {
-			value = "\"" + value.replaceAll("\"", "\"\"") + "\"";
-		}
-		return value;
-	}
-	
-	
 	private static String getOutputVersion(String logFileName) {
 		String version = "";
 		
@@ -126,6 +115,19 @@ public class DrugMapping {
 		autoStart = false;
 		special = parameters.get("special");
 		
+		if (parameters.containsKey("path")) {
+			basePath = parameters.get("path");
+			currentPath = basePath;
+		}
+		else {
+			try {
+				basePath = new File("./").getCanonicalPath().replaceAll("\\\\", "/");
+				currentPath = basePath;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if (special != null) {
 			special = special.toUpperCase();
 			if (special.equals("ZINDEX")) {
@@ -156,18 +158,6 @@ public class DrugMapping {
 		}
 		if (parameters.containsKey("generalsettings")) {
 			generalSettings = mainFrame.readSettingsFromFile(parameters.get("generalsettings"), false);
-		}
-		if (parameters.containsKey("path")) {
-			basePath = parameters.get("path");
-			currentPath = basePath;
-		}
-		else {
-			try {
-				basePath = new File("./").getCanonicalPath().replaceAll("\\\\", "/");
-				currentPath = basePath;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
 		if (parameters.containsKey("autostart")) {
 			autoStart = parameters.get("autostart").toLowerCase().equals("yes");
@@ -255,13 +245,25 @@ public class DrugMapping {
 			else {
 				logDatabaseSettings(getDatabase());
 				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
+				logFileSettings("Ingredient Name Translation File", getFile("Ingredient Name Translation File"));
 				logFileSettings("Unit Mapping File", getFile("Unit Mapping File"));
+				logFileSettings("Dose Form Mapping File", getFile("Dose Form Mapping File"));
 				logFileSettings("CAS File", getFile("CAS File"));
 				logFileSettings("Manual CAS Mappings File", getFile("Manual CAS Mappings File"));
 				logFileSettings("Manual Ingedient Mappings - RxNorm File", getFile("Manual Ingedient Mappings - RxNorm File"));
 				logFileSettings("Manual Drug Mappings File", getFile("Manual Drug Mappings File"));
 				logGeneralSettings();
-				new GenericMapping(getDatabase(), getFile("Generic Drugs File"), getFile("Unit Mapping File"), getFile("CAS File"), getFile("Manual CAS Mappings File"), getFile("Manual Ingedient Mappings - RxNorm File"), getFile("Manual Drug Mappings File"));
+				new GenericMapping(
+						getDatabase(), 
+						getFile("Generic Drugs File"), 
+						getFile("Ingredient Name Translation File"),
+						getFile("Unit Mapping File"), 
+						getFile("Dose Form Mapping File"), 
+						getFile("CAS File"), 
+						getFile("Manual CAS Mappings File"), 
+						getFile("Manual Ingedient Mappings - RxNorm File"), 
+						getFile("Manual Drug Mappings File")
+						);
 			}
 
 			for (JComponent component : componentsToDisableWhenRunning)
