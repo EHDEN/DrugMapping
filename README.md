@@ -42,7 +42,7 @@ Make sure you have a database containing the CDM vocabularies. The DrugMapping t
 
 The DrugMapping tool consists of two files released in a .zip file:
 
-DrugMapping \&lt;version\&gt;.dat
+DrugMapping &lt;version&gt;.dat
 
 DrugMapping \&lt;version\&gt;.jar
 
