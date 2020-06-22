@@ -44,7 +44,7 @@ The DrugMapping tool consists of two files released in a .zip file:
 
 DrugMapping &lt;version&gt;.dat
 
-DrugMapping \&lt;version\&gt;.jar
+DrugMapping &lt;version&gt;.jar
 
 Extract the zip file.
 
@@ -88,11 +88,11 @@ _Dose Form Mapping File_
 
 After you have specified the initial ingredient name translations and unit and formulation mappings you are ready to perform the real mapping. The mapping will create several files all starting with the date of today (yyyy-mm-dd) and a two digit sequence number. The most important files I will describe here.
 
-_\&lt;yyyy-mm-dd ss\&gt; DrugMapping Log.txt_
+_&lt;yyyy-mm-dd ss&gt; DrugMapping Log.txt_
 
 This is the log file containing console output of the DrugMapping tool.
 
-_\&lt;yyyy-mm-dd ss\&gt; DrugMapping IngredientMapping Results.csv_
+_&lt;yyyy-mm-dd ss&gt; DrugMapping IngredientMapping Results.csv_
 
 This file contains information on how source ingredients are mapped to RxNorm (Extension) ingredients. It contains the following columns:
 
@@ -118,7 +118,7 @@ This file contains information on how source ingredients are mapped to RxNorm (E
 
 The file sorted descending on the SourceCount column.
 
-_\&lt;yyyy-mm-dd ss\&gt; DrugMapping Mapping Results.csv_
+_&lt;yyyy-mm-dd ss&gt; DrugMapping Mapping Results.csv_
 
 This file contains information on how the source drugs are mapped to the RxNorm (Extension) drugs. It contains the following columns:
 
@@ -201,7 +201,7 @@ This file is optional.
 
 The DrugMapping tool can also be started from the command line with the command:
 
-java -jar \&lt;DrugMapping .jar file\&gt; [databasesettings=\&lt;database settings file\&gt; password=\&lt;database password\&gt;] [filesettings=\&lt;file settings file\&gt;] [generalsettings=\&lt;general settings file\&gt;] [path=\&lt;path where result files are written\&gt;] [autostart=yes]
+java -jar &lt;DrugMapping .jar file&gt; [databasesettings=&lt;database settings file&gt; password=&lt;database password&gt;] [filesettings=&lt;file settings file&gt;] [generalsettings=&lt;general settings file&gt;] [path=&lt;path where result files are written&gt;] [autostart=yes]
 
 […] means the option is optional. The square brackets should not be written in the command.
 
