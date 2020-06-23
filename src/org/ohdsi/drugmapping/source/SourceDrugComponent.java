@@ -13,6 +13,7 @@ public class SourceDrugComponent {
 	private String numeratorDosageUnit = null;
 	private Double denominatorDosage = null;
 	private String denominatorDosageUnit = null;
+	private String matchString = "";
 	
 	
 	public static String getHeader() {
@@ -92,6 +93,16 @@ public class SourceDrugComponent {
 	
 	public String getDenominatorDosageUnit() {
 		return denominatorDosageUnit;
+	}
+	
+	
+	public String getMatchString() {
+		return matchString;
+	}
+	
+	
+	public void setMatchString(String matchString) {
+		this.matchString = matchString;
 	}
 	
 	

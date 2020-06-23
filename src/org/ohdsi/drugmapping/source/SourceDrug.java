@@ -35,6 +35,7 @@ public class SourceDrug {
 	private String formulation = null;
 	private Long count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
+	private String matchString = "";
 	
 	
 	public static void init() {
@@ -269,6 +270,16 @@ public class SourceDrug {
 	
 	public Long getCount() {
 		return count;
+	}
+	
+	
+	public String getMatchString() {
+		return matchString;
+	}
+	
+	
+	public void setMatchString(String matchString) {
+		this.matchString = matchString;
 	}
 	
 	

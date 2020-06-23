@@ -113,6 +113,9 @@ public class CDM {
 					
 			// Get CDM RxNorm Ingredient ATCs
 			getRxNormIngredientATCs(connection, queryParameters, report);
+			
+			// Get CDM RxNorm Drug ATCs
+			getRxNormDrugATCs(connection, queryParameters, report);
 					
 			// Get CAS code to CDM RxNorm (Extension) Ingredient mapping
 			getCASToRxNormIngredientsMapping(connection, queryParameters, report);
@@ -121,7 +124,7 @@ public class CDM {
 			//getCDMUnits(connection, queryParameters, report);
 			
 			// Get CDM Forms
-			//getCDMForms(connection, queryParameters, report);
+			getCDMForms(connection, queryParameters, report);
 			
 			// Write Ingredients Name index to file
 			writeIngredientsNameIndexToFile();
@@ -672,6 +675,38 @@ public class CDM {
 		}
 		
 		report.add("CDM Ingredients with ATC: " + DrugMappingNumberUtilities.percentage((long) atcCount, (long) cdmIngredients.size()));
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void getRxNormDrugATCs(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Drug ATCs ...");
+		
+		for (Row queryRow : connection.queryResource("GetRxNormDrugATCs.sql", queryParameters)) {
+			String cdmDrugConceptId = queryRow.get("concept_id", true);
+			String cdmDrugATC = queryRow.get("atc", true);
+			
+			CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
+			if (cdmDrug == null) {
+				cdmDrug = cdmDrugComps.get(cdmDrugConceptId);
+			}
+			if (cdmDrug == null) {
+				cdmDrug = cdmDrugForms.get(cdmDrugConceptId);
+			}
+			if (cdmDrug != null) {
+				cdmDrug.addATC(cdmDrugATC);
+			}
+		}
+
+		Integer atcCount = 0;
+		for (String cdmDrugConceptId : cdmDrugs.keySet()) {
+			CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
+			if (cdmDrug.getATCs().size() > 0) {
+				atcCount++;
+			}
+		}
+		
+		report.add("CDM Drugs with ATC: " + DrugMappingNumberUtilities.percentage((long) atcCount, (long) cdmDrugs.size()));
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
 	

@@ -13,6 +13,7 @@ public class CDMDrug extends CDMConcept {
 	private List<CDMIngredientStrength> ingredientStrengths = new ArrayList<CDMIngredientStrength>();
 	private List<CDMIngredient> ingredients = new ArrayList<CDMIngredient>(); 
 	private Map<String, List<CDMIngredientStrength>> ingredientsMap = new HashMap<String, List<CDMIngredientStrength>>();
+	private List<String> atcList = new ArrayList<String>();
 	
 	
 	public static String getHeader() {
@@ -52,6 +53,27 @@ public class CDMDrug extends CDMConcept {
 			formConceptIds.add(formConceptId);
 			Collections.sort(formConceptIds);
 		}
+	}
+	
+	
+	public void addATC(String atc) {
+		if (atcList.size() > 0) {
+			if (atc.length() > atcList.get(0).length()) {
+				atcList = new ArrayList<String>();
+				atcList.add(atc);
+			}
+			else if (atc.length() == atcList.get(0).length()) {
+				atcList.add(atc);
+			}
+		}
+		else {
+			atcList.add(atc);
+		}
+	}
+	
+	
+	public List<String> getATCs() {
+		return atcList;
 	}
 	
 	
