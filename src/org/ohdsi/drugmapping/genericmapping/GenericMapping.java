@@ -155,7 +155,7 @@ public class GenericMapping extends Mapping {
 	
 	private List<String> report = null;
 	
-	private String preferencesUsed = null;
+	private String preferencesUsed = "";
 	private int maxResultConcepts = 0;
 	
 	
@@ -1267,6 +1267,7 @@ public class GenericMapping extends Mapping {
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			CDMDrug automaticMapping = null;
 			Double usedStrengthDeviationPercentage = null;
+			preferencesUsed = "";
 			
 			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 				List<CDMIngredient> sourceDrugCDMIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
@@ -1425,9 +1426,9 @@ public class GenericMapping extends Mapping {
 						
 						if (cdmDrugsWithIngredientsAndForm.size() == 1) {
 							automaticMapping = cdmDrugsWithIngredientsAndForm.get(0);
+							sourceDrug.setMatchString("Strength margin: " + usedStrengthDeviationPercentage);
 						}
 						else if (cdmDrugsWithIngredientsAndForm.size() > 1) {
-							preferencesUsed = "";
 							List<CDMDrug> selectedCDMDrugsWithIngredientsAndForm = selectConcept(sourceDrug, cdmDrugsWithIngredientsAndForm, mapping);
 							if (selectedCDMDrugsWithIngredientsAndForm.size() > 1) {
 								logMappingResult(sourceDrug, mapping, selectedCDMDrugsWithIngredientsAndForm, NO_UNIQUE_MAPPING);
@@ -1435,7 +1436,7 @@ public class GenericMapping extends Mapping {
 							}
 							else {
 								automaticMapping = selectedCDMDrugsWithIngredientsAndForm.get(0);
-								sourceDrug.setMatchString(preferencesUsed);
+								sourceDrug.setMatchString("Strength margin: " + usedStrengthDeviationPercentage + " " + preferencesUsed);
 							}
 						}
 						else {
@@ -1504,6 +1505,7 @@ public class GenericMapping extends Mapping {
 					}
 				}
 				if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
+					preferencesUsed = "";
 					if (sourceDrug.getIngredients().size() == 1) { // Clinical Drug Comp is always single ingredient
 						List<CDMIngredient> sourceDrugCDMIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 
@@ -1581,9 +1583,9 @@ public class GenericMapping extends Mapping {
 							if (matchingCDMDrugs != null) {
 								if (matchingCDMDrugs.size() == 1) {
 									automaticMapping = matchingCDMDrugs.get(0);
+									sourceDrug.setMatchString("Strength margin: " + usedStrengthDeviationPercentage);
 								}
 								else if (matchingCDMDrugs.size() > 1) {
-									preferencesUsed = "";
 									List<CDMDrug> selectedCDMDrugsWithIngredientsAndStrength = selectConcept(sourceDrug, matchingCDMDrugs, mapping);
 									if (selectedCDMDrugsWithIngredientsAndStrength.size() > 1) {
 										logMappingResult(sourceDrug, mapping, selectedCDMDrugsWithIngredientsAndStrength, NO_UNIQUE_MAPPING);
@@ -1591,7 +1593,7 @@ public class GenericMapping extends Mapping {
 									}
 									else {
 										automaticMapping = selectedCDMDrugsWithIngredientsAndStrength.get(0);
-										sourceDrug.setMatchString(preferencesUsed);
+										sourceDrug.setMatchString("Strength margin: " + usedStrengthDeviationPercentage + " " + preferencesUsed);
 									}
 								}
 							}
@@ -1661,6 +1663,7 @@ public class GenericMapping extends Mapping {
 					}
 				}
 				if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
+					preferencesUsed = "";
 					List<CDMIngredient> cdmDrugIngredients = sourceDrugsCDMIngredients.get(sourceDrug);
 
 					// Find CDM Clinical Drug Forms with corresponding ingredients
@@ -1750,7 +1753,6 @@ public class GenericMapping extends Mapping {
 						if (cdmDrugsWithIngredients.size() > 1) {
 							preferencesUsed = "";
 							cdmDrugsWithIngredients = selectConcept(sourceDrug, cdmDrugsWithIngredients, mapping);
-							sourceDrug.setMatchString(preferencesUsed);
 						}
 
 						if (cdmDrugsWithIngredients.size() > 0) {
@@ -1766,6 +1768,7 @@ public class GenericMapping extends Mapping {
 							}
 							if (matchingCDMDrugs.size() == 1) {
 								automaticMapping = matchingCDMDrugs.get(0);
+								sourceDrug.setMatchString(preferencesUsed);
 							}
 							else if (matchingCDMDrugs.size() > 1) {
 								logMappingResult(sourceDrug, mapping, matchingCDMDrugs, NO_UNIQUE_MAPPING);
@@ -1841,6 +1844,7 @@ public class GenericMapping extends Mapping {
 				if (sourceDrugComponents.size() > 0) {
 					// Find CDM Clinical Drug Comps with corresponding ingredients
 					for (int componentNr = 0; componentNr < sourceDrugComponents.size(); componentNr++) {
+						preferencesUsed = "";
 						usedStrengthDeviationPercentage.add(null);
 						SourceDrugComponent sourceDrugComponent = sourceDrugComponents.get(componentNr);
 						SourceIngredient sourceDrugIngredient = sourceDrugComponent.getIngredient();
@@ -1885,14 +1889,13 @@ public class GenericMapping extends Mapping {
 
 								if (matchingCDMDrugComps != null) {
 									if (matchingCDMDrugComps.size() > 1) {
-										preferencesUsed = "";
 										matchingCDMDrugComps = selectConcept(sourceDrug, matchingCDMDrugComps, mapping, componentNr);
-										sourceDrugComponent.setMatchString(preferencesUsed);
 									}
 									if (matchingCDMDrugComps.size() == 1) {
 										automaticMappings.set(componentNr, matchingCDMDrugComps.get(0));
 										usedStrengthDeviationPercentageMap.put("Ingredient " + sourceDrug.getCode() + "," + sourceDrugIngredient.getIngredientCode(), usedStrengthDeviationPercentage.get(componentNr));
 										mappedSourceDrugs.add(sourceDrug);
+										sourceDrugComponent.setMatchString("Strength margin: " + usedStrengthDeviationPercentage.get(componentNr) + " " + preferencesUsed);
 									}
 									if (matchingCDMDrugComps.size() > 1) {
 										logMappingResult(sourceDrug, mapping, matchingCDMDrugComps, NO_UNIQUE_MAPPING, componentNr);
@@ -2653,12 +2656,10 @@ public class GenericMapping extends Mapping {
 			if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
 				vocabulary_id = "RxNorm";
 				resultType = REJECTED_BY_RXNORM_PREFERENCE;
-				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + "RxNorm";
 			}
 			else if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm Extension")) {
 				vocabulary_id = "RxNorm Extension";
 				resultType = REJECTED_BY_RXNORM_EXTENSION_PREFERENCE;
-				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + "RxNorm Extension";
 			}
 			remove = new ArrayList<CDMConcept>();
 			for (CDMConcept cdmConcept : conceptList) {
@@ -2671,6 +2672,7 @@ public class GenericMapping extends Mapping {
 					logMappingResult(sourceDrug, mapping, resultType, remove, componentNr);
 				}
 				conceptList.removeAll(remove);
+				preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + vocabulary_id;
 			}
 		}
 		if (conceptList.size() > 1) {
@@ -2690,6 +2692,7 @@ public class GenericMapping extends Mapping {
 						logMappingResult(sourceDrug, mapping, resultType, remove, componentNr);
 					}
 					conceptList.removeAll(remove);
+					preferencesUsed += (preferencesUsed.equals("") ? "Preferences: " : ",") + "ATC";
 				}
 			}
 		}
