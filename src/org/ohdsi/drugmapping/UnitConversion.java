@@ -59,11 +59,11 @@ public class UnitConversion {
 			while (sourceUnitMappingFile.hasNext()) {
 				Row row = sourceUnitMappingFile.next();
 				
-				String sourceUnit = DrugMappingStringUtilities.removeExtraSpaces(row.get("SourceUnit", true)).toUpperCase();
-				//String drugCountString = row.get("DrugCount", false);
-				//String recordCountString = row.get("RecordCount", false);
-				String factorString = row.get("Factor", true);
-				String targetUnit = DrugMappingStringUtilities.removeExtraSpaces(row.get("TargetUnit", true)).toUpperCase();
+				String sourceUnit = DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "SourceUnit", true)).toUpperCase();
+				//String drugCountString = sourceUnitMappingFile.get(row, "DrugCount", false);
+				//String recordCountString = sourceUnitMappingFile.get(row, "RecordCount", false);
+				String factorString = sourceUnitMappingFile.get(row, "Factor", true);
+				String targetUnit = DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "TargetUnit", true)).toUpperCase();
 				//String comment = row.get("Comment", false);
 				
 				Double factor = null;
@@ -85,8 +85,7 @@ public class UnitConversion {
 				
 				if (factor != null) {
 					if ((!sourceUnit.equals("")) && (targetUnit.equals(""))) {
-						System.out.println("    ERROR: No target unit specified for '" + sourceUnit + ".");
-						status = STATE_ERROR;
+						System.out.println("    WARNING: No target unit specified for '" + sourceUnit + ".");
 					}
 					else {
 						Map<String, Double> sourceUnitConversion = unitConversionMap.get(sourceUnit);

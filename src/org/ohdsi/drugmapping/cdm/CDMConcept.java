@@ -71,7 +71,9 @@ public class CDMConcept {
 		valid_end_date   = queryRow.get(prefix + "valid_end_date", true).trim();
 		invalid_reason   = queryRow.get(prefix + "invalid_reason", true).trim();
 		
-		while (concept_name.contains("  ")) concept_name = concept_name.replaceAll("  ", " ");
+		concept_name = DrugMappingStringUtilities.removeExtraSpaces(concept_name);
+		if (vocabulary_id.equals("None"))         vocabulary_id    = "";
+		if (concept_class_id.equals("Undefined")) concept_class_id = "";
 		
 		conceptNameNoSpaces = concept_name.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 	}

@@ -222,6 +222,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 										)
 								}
 						),
+/*
 						new FileDefinition(
 								"ZIndex Ignored Words File",
 								new String[] {
@@ -273,6 +274,7 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 										)
 								}
 						),
+*/
 						new FileDefinition(
 								"ZIndex GPK IPCI Compositions File",
 								new String[] {

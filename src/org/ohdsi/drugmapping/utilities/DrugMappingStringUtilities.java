@@ -5,7 +5,7 @@ public class DrugMappingStringUtilities {
 
 	public static String removeExtraSpaces(String string) {
 		String orgString;
-		string = string.trim();
+		string = (string == null ? "" : string).trim();
 		do {
 			orgString = string;
 			string = orgString.replaceAll("  ", " ");

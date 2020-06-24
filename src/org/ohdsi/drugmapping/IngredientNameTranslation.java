@@ -69,8 +69,8 @@ public class IngredientNameTranslation {
 			while (ingredientNameTranslationFile.hasNext()) {
 				Row row = ingredientNameTranslationFile.next();
 				
-				String ingredientName = DrugMappingStringUtilities.removeExtraSpaces(row.get("IngredientName", true)).toUpperCase();
-				String ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(row.get("IngredientNameEnglish", true)).toUpperCase();
+				String ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameTranslationFile.get(row, "IngredientName", true)).toUpperCase();
+				String ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameTranslationFile.get(row, "IngredientNameEnglish", true)).toUpperCase();
 				
 				if ((!ingredientName.equals("")) && (!ingredientNameEnglish.equals(""))) {
 					String translation = ingredientNameTranslationMap.get(ingredientName);

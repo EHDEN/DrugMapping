@@ -60,11 +60,11 @@ public class FormConversion {
 			while (sourceFormMappingFile.hasNext()) {
 				Row row = sourceFormMappingFile.next();
 				
-				String sourceForm = DrugMappingStringUtilities.removeExtraSpaces(row.get("DoseForm", true)).toUpperCase();
-				String priorityString = row.get("Priority", false);
-				String conceptId = row.get("ConceptId", false);
-				String conceptName = DrugMappingStringUtilities.removeExtraSpaces(row.get("ConceptName", true)).toUpperCase();
-				//String comment = row.get("Comment", false);
+				String sourceForm = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "DoseForm", true)).toUpperCase();
+				String priorityString = sourceFormMappingFile.get(row, "Priority", false);
+				String conceptId = sourceFormMappingFile.get(row, "ConceptId", false);
+				String conceptName = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "ConceptName", true)).toUpperCase();
+				//String comment = sourceFormMappingFile.get(row, "Comment", false);
 				
 				Integer priority = null;
 				if (!priorityString.equals("")) {
