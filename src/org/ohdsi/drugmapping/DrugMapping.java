@@ -17,6 +17,7 @@ import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
+import org.ohdsi.drugmapping.gui.Folder;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
@@ -26,6 +27,7 @@ import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 public class DrugMapping { 
 	public static GeneralSettings settings = null;
 	public static String outputVersion = "";
+	public static boolean debug = false;
 	public static String special = "";
 	public static Boolean autoStart = false;
 	
@@ -33,7 +35,7 @@ public class DrugMapping {
 	
 	private static String currentDate = null;
 	private static String currentPath = null;	
-	private static String basePath = null;
+	private static String basePath = new File(".").getAbsolutePath();
 	private static MappingInputDefinition inputFiles = null;
 	
 	private MainFrame mainFrame;
@@ -112,20 +114,8 @@ public class DrugMapping {
 		String logFileName = null;
 		autoStart = false;
 		special = parameters.get("special");
-		
-		if (parameters.containsKey("path")) {
-			basePath = parameters.get("path");
-			currentPath = basePath;
-		}
-		else {
-			try {
-				basePath = new File("./").getCanonicalPath().replaceAll("\\\\", "/");
-				currentPath = basePath;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
+		debug = (parameters.get("debug") != null);
+
 		if (special != null) {
 			special = special.toUpperCase();
 			if (special.equals("ZINDEX")) {
@@ -160,25 +150,10 @@ public class DrugMapping {
 		if (parameters.containsKey("autostart")) {
 			autoStart = parameters.get("autostart").toLowerCase().equals("yes");
 		}
-
-		File logFile;
-		if (basePath != null) {
-			outputVersion = getOutputVersion(logFileName);
-			logFileName = basePath + "/" + outputVersion + logFileName;
-		}
-		else {
-			outputVersion = "";
-			logFile = new File(logFileName);
-			try {
-				basePath = logFile.getCanonicalPath().replaceAll("\\\\", "/");
-				basePath = basePath.substring(0, basePath.lastIndexOf(File.pathSeparator));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		
 		if (fileSettings != null) {
 			mainFrame.loadFileSettingsFile(fileSettings);
+			setBasePath(mainFrame.getOutputFolder().getFolderName());
 		}
 		
 		if (generalSettings != null) {
@@ -191,10 +166,27 @@ public class DrugMapping {
 			}
 			mainFrame.getDatabase().putSettings(dbSettings);
 		}
-		
+
+		File logFile;
+		if (basePath != null) {
+			outputVersion = debug ? getOutputVersion(logFileName) : "";
+			logFileName = basePath + "/" + outputVersion + logFileName;
+		}
+		else {
+			outputVersion = "";
+			logFile = new File(logFileName);
+			try {
+				basePath = logFile.getCanonicalPath().replaceAll("\\\\", "/");
+				basePath = basePath.substring(0, basePath.lastIndexOf(File.pathSeparator));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		if (logFileName != null) {
 			mainFrame.setLogFile(logFileName);
 		}
+
 	}
 	
 	
@@ -253,6 +245,7 @@ public class DrugMapping {
 				logFileSettings("Manual CAS Mappings File", getFile("Manual CAS Mappings File"));
 				logFileSettings("Manual Ingedient Mappings - RxNorm File", getFile("Manual Ingedient Mappings - RxNorm File"));
 				logFileSettings("Manual Drug Mappings File", getFile("Manual Drug Mappings File"));
+				logFolderSettings(mainFrame.getOutputFolder());
 				logGeneralSettings();
 				new GenericMapping(
 						getDatabase(), 
@@ -302,6 +295,14 @@ public class DrugMapping {
 	}
 	
 	
+	private void logFolderSettings(Folder folder) {
+		if (folder.getFolderName() != null) {
+			System.out.println(folder.getName() + ": " + folder.getFolderName());
+			System.out.println();
+		}
+	}
+	
+	
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
 		for (Setting setting : DrugMapping.settings.getSettings()) {
@@ -316,8 +317,12 @@ public class DrugMapping {
 
 		for (int i = 0; i < args.length; i++) {
 			int equalSignIndex = args[i].indexOf("=");
-			String argVariable = args[i].substring(0, equalSignIndex).toLowerCase();
-			String value = args[i].substring(equalSignIndex + 1);
+			String argVariable = args[i].toLowerCase();
+			String value = "";
+			if (equalSignIndex != -1) {
+				argVariable = args[i].substring(0, equalSignIndex).toLowerCase();
+				value = args[i].substring(equalSignIndex + 1);
+			}
 			parameters.put(argVariable, value);
 		}
 		

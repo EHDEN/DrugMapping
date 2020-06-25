@@ -56,6 +56,7 @@ public class MainFrame {
 	private Console console;
 	private CDMDatabase database = null;
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
+	private Folder outputFolder = null; 
 	private JButton startButton = null;
 	private String logFile = null;
 	
@@ -140,6 +141,18 @@ public class MainFrame {
 		
 		JPanel level2Frame = new JPanel(new BorderLayout());
 		level2Frame.setBorder(BorderFactory.createEmptyBorder());
+		
+		JPanel outputPanel = null;
+		if (!DrugMapping.special.equals("ZINDEX")) {
+			// Database settings
+			outputPanel = new JPanel(new GridLayout(0, 1));
+			outputPanel.setBorder(BorderFactory.createTitledBorder("Output Folder"));
+			outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
+			outputPanel.add(outputFolder);
+		}
+		
+		JPanel level3Frame = new JPanel(new BorderLayout());
+		level3Frame.setBorder(BorderFactory.createEmptyBorder());
 
 
 		// General Settings
@@ -182,10 +195,12 @@ public class MainFrame {
 		frame.add(level1Frame, BorderLayout.CENTER);
 		level1Frame.add(filePanel, BorderLayout.NORTH);
 		level1Frame.add(level2Frame, BorderLayout.CENTER);
+		level2Frame.add(outputPanel, BorderLayout.NORTH);
+		level2Frame.add(level3Frame, BorderLayout.CENTER);
 		if (DrugMapping.settings != null) {
-			level2Frame.add(DrugMapping.settings, BorderLayout.NORTH);
+			level3Frame.add(DrugMapping.settings, BorderLayout.NORTH);
 		}
-		level2Frame.add(createConsolePanel(), BorderLayout.CENTER);
+		level3Frame.add(createConsolePanel(), BorderLayout.CENTER);
 		frame.add(buttonSectionPanel, BorderLayout.SOUTH);
 		
 		DrugMapping.disableWhenRunning(startButton);
@@ -342,6 +357,9 @@ public class MainFrame {
 	
 	public void loadFileSettingsFile(List<String> fileSettings) {
 		if (fileSettings != null) {
+			if (outputFolder != null) {
+				outputFolder.putSettings(fileSettings);
+			}
 			for (InputFile inputFile : inputFiles) {
 				inputFile.putSettings(fileSettings);
 			}
@@ -351,6 +369,11 @@ public class MainFrame {
 	
 	private void saveFileSettingsFile() {
 		List<String> settings = new ArrayList<String>();
+		if (outputFolder != null) {
+			settings.addAll(outputFolder.getSettings());
+			settings.add("");
+			settings.add("");
+		}
 		for (InputFile inputFile : inputFiles) {
 			settings.addAll(inputFile.getSettings());
 			settings.add("");
@@ -466,6 +489,11 @@ public class MainFrame {
 		}
 		
 		return file;
+	}
+	
+	
+	public Folder getOutputFolder() {
+		return outputFolder;
 	}
 	
 	
