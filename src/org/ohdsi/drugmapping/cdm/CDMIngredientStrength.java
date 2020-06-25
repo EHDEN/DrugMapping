@@ -5,8 +5,6 @@ import java.util.List;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredientStrength {
-	private CDM cdm = null;
-	
 	private String amount_value_string      = null;
 	private Double amount_value             = null;
 	private CDMConcept amount_unit          = null;
@@ -45,7 +43,6 @@ public class CDMIngredientStrength {
 	
 	
 	public CDMIngredientStrength(CDM cdm, Row queryRow, String prefix, CDMIngredient ingredient) {
-		this.cdm = cdm;
 		List<String> fieldNames = queryRow.getFieldNames();
 		if (fieldNames.contains(prefix + "amount_value"))                amount_value_string      = queryRow.get(prefix + "amount_value", true);
 		if (fieldNames.contains(prefix + "amount_unit_concept_id"))      amount_unit              = new CDMConcept(cdm, queryRow, prefix + "amount_unit_");

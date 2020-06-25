@@ -222,59 +222,6 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 										)
 								}
 						),
-/*
-						new FileDefinition(
-								"ZIndex Ignored Words File",
-								new String[] {
-										"This file should contain words to remove from ingredients extracted.",
-						  		},
-								new FileColumnDefinition[] {
-										new FileColumnDefinition(
-												"Word",
-												new String[] {
-														"This is the word to remove."
-												}
-										)
-								},
-								false
-						),
-						new FileDefinition(
-								"ZIndex Non-Denomiator Units File",
-								new String[] {
-										"This file should contain units are ignored as denominator.",
-						  		},
-								new FileColumnDefinition[] {
-										new FileColumnDefinition(
-												"NonDenominatorUnit",
-												new String[] {
-														"This is the unit to be ignored."
-												}
-										)
-								},
-								false
-						),
-						new FileDefinition(
-								"ZIndex Ingredient Name Translation File",
-								new String[] {
-										"This file should contain the translation from the source",
-										"ingredient names to English.",
-						  		},
-								new FileColumnDefinition[] {
-										new FileColumnDefinition(
-												"SourceIngredientName",
-												new String[] {
-														"This is the ingredient name in the source language."
-												}
-										),
-										new FileColumnDefinition(
-												"EnglishIngredientName",
-												new String[] {
-														"This is the ingredient name in English."
-												}
-										)
-								}
-						),
-*/
 						new FileDefinition(
 								"ZIndex GPK IPCI Compositions File",
 								new String[] {

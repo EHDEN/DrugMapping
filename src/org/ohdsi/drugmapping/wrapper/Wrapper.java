@@ -28,22 +28,10 @@ public class Wrapper {
 		partNr++; cmdArray[partNr] = datName;
 		for (String arg : args) {
 			partNr++; cmdArray[partNr] = arg;
-		}
-		/* Old code from Jerboa
-		String[] cmdArray = {
-				"java",
-				bits64 ? "-d64" : "",
-						"-Dfile.encoding=UTF-8",  //force the file encoding here as in the main method is too late
-						"-jar",
-						"-Xms512m",
-						bits64 ? "-Xmx" + maxMemory + "G" : "-Xmx1280m",		 
-						datName,
-						
-		};
-		*/ 
+		} 
 		
 		//DEBUG
-//		printDebugInfo(cmdArray);
+		//printDebugInfo(cmdArray);
 
 		// create the process
 		try{

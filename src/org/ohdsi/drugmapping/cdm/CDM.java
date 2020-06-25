@@ -837,6 +837,7 @@ public class CDM {
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private void getCDMUnits(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM units ...");
 		

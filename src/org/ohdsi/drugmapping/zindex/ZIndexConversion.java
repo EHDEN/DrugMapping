@@ -4,14 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
-
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.gui.InputFile;
@@ -23,7 +19,6 @@ public class ZIndexConversion extends Mapping {
 	private static final boolean IGNORE_EMPTY_GPK_NAMES   = false;
 	private static final boolean IGNORE_STARRED_GPK_NAMES = false;
 	
-	private static final String DIGITS = "1234567890";
 	private static final String NUMBER_CHARS = "1234567890,.";
 	
 	private static final int GPK_ColumnCount      = 13;
@@ -94,13 +89,12 @@ public class ZIndexConversion extends Mapping {
 	private Map<String, Integer> gnkNameMap = new HashMap<String, Integer>();
 	private Map<String, Integer> gpkStatisticsMap = new HashMap<String, Integer>();
 	private List<String> wordsToRemove = new ArrayList<String>();
-	private Set<String> nonDenominatorUnits = new HashSet<String>();
 	private Map<String, String> ingredientNameTranslation = new HashMap<String, String>();
 	private Map<String, List<String[]>> gpkIPCIMap = new HashMap<String, List<String[]>>();
 	private Map<Integer, List<String[]>> outputMap = new HashMap<Integer, List<String[]>>();
 
 	
-	//public ZIndexConversion(InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile wordsToRemoveFile, InputFile nonDenominatorUnitsFile, InputFile ingredientNameTranslationFile, InputFile gpkIPCIFile) {
+	@SuppressWarnings("unused")
 	public ZIndexConversion(InputFile gpkFile, InputFile gskFile, InputFile gnkFile, InputFile gpkStatsFile, InputFile gpkIPCIFile) {	
 		boolean ok = true;
 		
@@ -229,138 +223,6 @@ public class ZIndexConversion extends Mapping {
 			System.out.println(DrugMapping.getCurrentTime() + "   Done");
 		}
 		
-/* SKIPPED BEGIN 2020-05-12
-		// Load Words To Ignore File
-		if (ok) {
-			if (wordsToRemoveFile != null) {
-				try {
-					System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex Words To Ignore File ...");
-					if (wordsToRemoveFile.openFile(true)) {
-						List<List<String>> wordsFoundToRemove = new ArrayList<List<String>>();
-						while (wordsToRemoveFile.hasNext()) {
-							Row row = wordsToRemoveFile.next();
-
-							String word = wordsToRemoveFile.get(row, "Word", true).trim().toUpperCase();
-							//System.out.println("    " + word);
-							
-							if (word != null) {
-								if (wordsFoundToRemove.size() == 0) {
-									List<String> equalWordsGroup = new ArrayList<String>();
-									equalWordsGroup.add(word);
-									wordsFoundToRemove.add(equalWordsGroup);
-								}
-								else {
-									List<List<String>> wordsBeforeGroups = new ArrayList<List<String>>();
-									List<List<String>> wordsAfterGroups = new ArrayList<List<String>>();
-									List<List<String>> wordsEqualGroups = new ArrayList<List<String>>();
-									
-									for (List<String> equalWordsGroup : wordsFoundToRemove) {
-										List<String> wordsBefore = new ArrayList<String>();
-										List<String> wordsAfter = new ArrayList<String>();
-										List<String> wordsEqual = new ArrayList<String>();
-
-										wordsBeforeGroups.add(wordsBefore);
-										wordsAfterGroups.add(wordsAfter);
-										wordsEqualGroups.add(wordsEqual);
-										
-										for (String groupWord : equalWordsGroup) {
-											int compare = compareWordsToRemove(word, groupWord);
-											if (compare < 0) {
-												wordsAfter.add(groupWord);
-											}
-											else if (compare > 0) {
-												wordsBefore.add(groupWord);
-											}
-											else {
-												wordsEqual.add(groupWord);
-											}
-										}
-									}
-									
-									wordsFoundToRemove = new ArrayList<List<String>>();
-									for (List<String> equalWordsGroup : wordsBeforeGroups) {
-										if (equalWordsGroup.size() > 0) {
-											wordsFoundToRemove.add(equalWordsGroup);
-										}
-									}
-									List<String> firstEqualWordsGroup = null;
-									for (List<String> equalWordsGroup : wordsEqualGroups) {
-										if (equalWordsGroup.size() > 0) {
-											wordsFoundToRemove.add(equalWordsGroup);
-											firstEqualWordsGroup = equalWordsGroup;
-										}
-									}
-									if (firstEqualWordsGroup != null) {
-										firstEqualWordsGroup.add(word);
-									}
-									else {
-										List<String> newEqualWordsGroup = new ArrayList<String>();
-										newEqualWordsGroup.add(word);
-										wordsFoundToRemove.add(newEqualWordsGroup);
-									}
-									for (List<String> equalWordsGroup : wordsAfterGroups) {
-										if (equalWordsGroup.size() > 0) {
-											wordsFoundToRemove.add(equalWordsGroup);
-										}
-									}
-								}
-							}				
-						}
-						// Collect the words in the wordsToRemove list
-						for (List<String> equalWordsGroup : wordsFoundToRemove) {
-							for (String word : equalWordsGroup) {
-								wordsToRemove.add(word);
-								System.out.println("    " + word);
-							}
-						}
-					}
-					else {
-						System.out.println("  ERROR: Cannot load  ZIndex Words To Ignore file '" + wordsToRemoveFile.getFileName() + "'");
-						ok = false;
-					}
-				}
-				catch (NoSuchElementException fileException) {
-					System.out.println("  ERROR: " + fileException.getMessage());
-					ok = false;
-				}
-				System.out.println(DrugMapping.getCurrentTime() + "   Done");
-				
-			}
-		}
-		
-
-		// Load ZIndex Non-Denominator Units File
-		if (ok) {
-			if (nonDenominatorUnitsFile != null) {
-				try {
-					System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex Non-Denominator Units File ...");
-					if (nonDenominatorUnitsFile.openFile(true)) {
-						while (nonDenominatorUnitsFile.hasNext()) {
-							Row row = nonDenominatorUnitsFile.next();
-
-							String nonDenominatorUnit = nonDenominatorUnitsFile.get(row, "NonDenominatorUnit", true).trim().toUpperCase();
-							//System.out.println("    " + nonDenominatorUnit);
-							
-							if ((nonDenominatorUnit != null) && (!nonDenominatorUnit.equals(""))) {
-								nonDenominatorUnits.add(nonDenominatorUnit);
-							}				
-						}
-					}
-					else {
-						System.out.println("  ERROR: Cannot load  ZIndex Non-Denominator Units file '" + nonDenominatorUnitsFile.getFileName() + "'");
-						ok = false;
-					}
-				}
-				catch (NoSuchElementException fileException) {
-					System.out.println("  ERROR: " + fileException.getMessage());
-					ok = false;
-				}
-				System.out.println(DrugMapping.getCurrentTime() + "   Done");
-				
-			}
-		}
-SKIPPED END 2020-05-12 */
-		
 		// Load GPK IPCI Compositions File
 		if (ok) {
 			if ((gpkIPCIFile != null) && gpkIPCIFile.isSelected()) {
@@ -469,20 +331,7 @@ SKIPPED END 2020-05-12 */
 							
 							for (String[] gpkIPCIIngredient : gpkIPCIIngredients) {
 								String ingredientNumeratorUnit = gpkIPCIIngredient[GPKIPCI_AmountUnit];
-								/* REPLACED BEGIN 2020-06-24
-								if (ingredientNumeratorUnit.equals("")) {
-									if (!hpkNumeratorUnit.equals("")) {
-										ingredientNumeratorUnit = hpkNumeratorUnit;
-									}
-								}
-								String ingredientDenominatorUnit = hpkDenominatorUnit;
-								if ((ingredientDenominatorUnit == null) && (gpkIPCIIngredients.size() > 1)) {
-									ingredientDenominatorUnit = basicUnit.equals("") ? null : (nonDenominatorUnits.contains(basicUnit) ? null : basicUnit);
-								}
-								/* REPLACED END 2020-06-24 */
-								/* REPLACED BY BEGIN 2020-06-24 */
 								String ingredientDenominatorUnit = basicUnit.equals("ST") ? "" : basicUnit;
-								/* REPLACED BY END 2020-06-24 */
 								String ingredientUnit = ingredientDenominatorUnit.equals("") ? ingredientNumeratorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit);
 								
 								String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
@@ -494,7 +343,6 @@ SKIPPED END 2020-05-12 */
 								gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndexIPCI";
 								gpkIngredientRecord[OUTPUT_IngredientCode]        = gpkIPCIIngredient[GPKIPCI_GNKCode];
 								gpkIngredientRecord[OUTPUT_IngredientName]        = gpkIPCIIngredient[GPKIPCI_GNKName];
-								//gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 								gpkIngredientRecord[OUTPUT_Dosage]                = gpkIPCIIngredient[GPKIPCI_Amount];
 								gpkIngredientRecord[OUTPUT_DosageUnit]            = ingredientUnit;
 								gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
@@ -541,76 +389,8 @@ SKIPPED END 2020-05-12 */
 									String amount = gskObject[GSK_Amount];
 
 									String ingredientNumeratorUnit = gskObject[GSK_AmountUnit];
-									/* REPLACED BEGIN 2020-06-24
-									
-									if (ingredientNumeratorUnit.equals("")) {
-										if (!hpkNumeratorUnit.equals("")) {
-											ingredientNumeratorUnit = hpkNumeratorUnit;
-										}
-									}
-									String ingredientDenominatorUnit = hpkDenominatorUnit;
-									if ((ingredientDenominatorUnit == null) && (gskList.size() > 1)) {
-										ingredientDenominatorUnit = basicUnit.equals("") ? null : (nonDenominatorUnits.contains(basicUnit) ? null : basicUnit);
-									}
-								    String amountUnit = ingredientDenominatorUnit == null ? ingredientNumeratorUnit : (ingredientNumeratorUnit.equals("") ? ingredientDenominatorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit));
-									/* REPLACED END 2020-06-24 */
-									/* REPLACED BY BEGIN 2020-06-24 */
 									String ingredientDenominatorUnit = basicUnit.equals("ST") ? "" : basicUnit;
 									String amountUnit = ingredientDenominatorUnit.equals("") ? ingredientNumeratorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit);
-									/* REPLACED BY END 2020-06-24 */
-									
-									/* REMOVED 2020-06-24 BEGIN 
-									// Extract unit from name
-									if (name.lastIndexOf(" ") >= 0) {
-										String strengthString = DrugMappingStringUtilities.removeExtraSpaces(name.substring(name.lastIndexOf(" ")));
-										if (DIGITS.contains(strengthString.substring(0, 1))) {
-											String strengthValueString = ""; 
-											for (int charNr = 0; charNr < strengthString.length(); charNr++) {
-												if (NUMBER_CHARS.contains(strengthString.subSequence(charNr, charNr + 1))) {
-													strengthValueString += strengthString.subSequence(charNr, charNr + 1);
-												}
-												else {
-													break;
-												}
-											}
-											String strengthUnitString = DrugMappingStringUtilities.removeExtraSpaces(strengthString.substring(strengthValueString.length()));
-											if (!
-													(
-															strengthUnitString.contains("1") ||
-															strengthUnitString.contains("2") ||
-															strengthUnitString.contains("3") ||
-															strengthUnitString.contains("4") ||
-															strengthUnitString.contains("5") ||
-															strengthUnitString.contains("6") ||
-															strengthUnitString.contains("7") ||
-															strengthUnitString.contains("8") ||
-															strengthUnitString.contains("9") ||
-															strengthUnitString.contains("0") ||
-															strengthUnitString.startsWith("-") ||
-															(strengthUnitString.contains("(") && (!strengthUnitString.contains(")"))) ||
-															((!strengthUnitString.contains("(")) && strengthUnitString.contains(")"))
-													)
-												) {
-												try {
-													Double.valueOf(strengthValueString);
-													amount = strengthValueString;
-													amountUnit = strengthUnitString;
-												}
-												catch (NumberFormatException e) {
-													// Do nothing
-												}
-											}
-										}
-									}
-									/* REMOVED 2020-06-24 END */
-									
-									// When no amount is specified for the ingredient and it is the only ingredient and
-									// a HPK amount is specified, use that as the amount.
-									//if (amount.equals("") && (gskList.size() == 1) && (!hpkAmount.equals("")) && (!hpkUnit.equals(""))) {
-									//	amount = hpkAmount;
-									//	amountUnit = hpkUnit;
-									//}
-									
 									
 									String gnkCode = gskObject[GSK_GNKCode];
 									String genericName = cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
@@ -624,7 +404,6 @@ SKIPPED END 2020-05-12 */
 									gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = "ZIndex";
 									gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode.toString();
 									gpkIngredientRecord[OUTPUT_IngredientName]        = genericName != null ? genericName : gskObject[GSK_GenericName];
-									//gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 									gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 									gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
 									gpkIngredientRecord[OUTPUT_OrgDosage]             = gskObject[GSK_Amount];
@@ -649,10 +428,6 @@ SKIPPED END 2020-05-12 */
 							//   The appearance of the words are checked with surrounding parenthesis, with
 							//   surrounding spaces, and at the end of the extracted part.
 							
-							//if (!name.equals("")) {
-							//	if (name.substring(name.length() - 1).equals(",")) {
-							//		name = name.substring(0, name.length() - 1);
-							//	}
 							List<String> ingredientNames = new ArrayList<String>();
 							List<String> ingredientAmounts = new ArrayList<String>();
 							List<String> ingredientAmountUnits = new ArrayList<String>();
@@ -671,7 +446,7 @@ SKIPPED END 2020-05-12 */
 									
 									for (int ingredientNr = 0; ingredientNr < ingredientsSplit.length; ingredientNr++) {
 										String ingredientName = ingredientsSplit[ingredientNr];
-										ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName); //CHANGED 2020-04-29 cleanupExtractedIngredientName(ingredientName);
+										ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
 										if (ingredientName != null) {
 											ingredientNames.add(ingredientName);
 											
@@ -718,7 +493,6 @@ SKIPPED END 2020-05-12 */
 									}
 								}
 								else {
-									//CHANGED 2020-04-29 ingredientName = cleanupExtractedIngredientName(name);
 									String ingredientName = ingredients;
 									
 									if (ingredientName != null) {
@@ -776,7 +550,6 @@ SKIPPED END 2020-05-12 */
 										gpkIngredientRecord[OUTPUT_IngredientNameStatus]  = gnkCode == null ? "Extracted" : "Mapped to GNK";
 										gpkIngredientRecord[OUTPUT_IngredientCode]        = gnkCode == null ? "" : gnkCode.toString();
 										gpkIngredientRecord[OUTPUT_IngredientName]        = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
-										//gpkIngredientRecord[OUTPUT_IngredientNameEnglish] = "";
 										gpkIngredientRecord[OUTPUT_Dosage]                = amount;
 										gpkIngredientRecord[OUTPUT_DosageUnit]            = amountUnit;
 										gpkIngredientRecord[OUTPUT_OrgDosage]             = "";
@@ -798,251 +571,6 @@ SKIPPED END 2020-05-12 */
 						}
 
 						List<String[]> outputIngredients = null;
-/* REPLACED BEGIN 2020-05-12
-						// If IPCI ingredients are found
-						if (ipciOutputIngredients != null) {
-							// If Z-Index ingredients are found
-							if (zindexOutputIngredients != null) {
-								// If Z-Index extracted ingredients are found
-								if (zindexExtractedOutputIngredients != null) {
-									outputIngredients = new ArrayList<String[]>();
-									
-									List<String[]> zindexMatch = matchIngredients(ipciOutputIngredients, zindexOutputIngredients);
-									List<String[]> zindexExtractedMatch = matchIngredients(ipciOutputIngredients, zindexExtractedOutputIngredients);
-									
-									// For each IPCI derived ingredient
-									for (int ingredientNr = 0; ingredientNr < ipciOutputIngredients.size(); ingredientNr++) {
-										// Get IPCI ingredient
-										String[] ipciOutputIngredient = ipciOutputIngredients.get(ingredientNr);
-										
-										// Get corresponding Z-Index ingredient
-										String[] zindexOutputIngredient = zindexMatch == null ? null : zindexMatch.get(ingredientNr);
-
-										// get corresponding Z-Index extracted ingredient
-										String[] zindexExtractedOutputIngredient = zindexExtractedMatch == null ? null : zindexExtractedMatch.get(ingredientNr);
-										
-										// When found check if dosage and dosage unit correspond
-										if (zindexOutputIngredient != null) {
-											if (ipciOutputIngredient[OUTPUT_Dosage].equals(zindexOutputIngredient[OUTPUT_Dosage]) && ipciOutputIngredient[OUTPUT_DosageUnit].equals(zindexOutputIngredient[OUTPUT_DosageUnit])) {
-												if ((zindexExtractedOutputIngredient == null) || (ipciOutputIngredient[OUTPUT_Dosage].equals(zindexExtractedOutputIngredient[OUTPUT_Dosage]) && ipciOutputIngredient[OUTPUT_DosageUnit].equals(zindexExtractedOutputIngredient[OUTPUT_DosageUnit]))) {
-													// If no Z-Index extracted ingredient is found or all dosages are the same take the IPCI ingredient
-													outputIngredients.add(ipciOutputIngredient);
-												}
-												else {
-													// The Z-Index extracted is different
-													// If in Z-Index extracted it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index extracted values
-													if ((!zindexExtractedOutputIngredient[OUTPUT_Dosage].equals("")) && zindexExtractedOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-														ipciOutputIngredient[OUTPUT_Dosage]     = zindexExtractedOutputIngredient[OUTPUT_Dosage]; 
-														ipciOutputIngredient[OUTPUT_DosageUnit] = zindexExtractedOutputIngredient[OUTPUT_DosageUnit];
-														outputIngredients.add(ipciOutputIngredient);
-													}
-													// Else take the IPCI ingredient
-													else {
-														outputIngredients.add(ipciOutputIngredient);
-													}
-												}
-											}
-											else {
-												if ((zindexExtractedOutputIngredient == null) || (zindexOutputIngredient[OUTPUT_Dosage].equals(zindexExtractedOutputIngredient[OUTPUT_Dosage]) && zindexOutputIngredient[OUTPUT_DosageUnit].equals(zindexExtractedOutputIngredient[OUTPUT_DosageUnit]))) {
-													// Z-Index and Z-Index extracted is not found or the same but both are different from IPCI
-													// If in Z-Index it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index values
-													if (zindexOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-														ipciOutputIngredient[OUTPUT_Dosage]     = zindexOutputIngredient[OUTPUT_Dosage]; 
-														ipciOutputIngredient[OUTPUT_DosageUnit] = zindexOutputIngredient[OUTPUT_DosageUnit];
-														outputIngredients.add(ipciOutputIngredient);
-													}
-												}
-												else {
-													// All differ: check if there is a numerator/denominator dosage
-													// If in Z-Index it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index values
-													if (zindexOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-														ipciOutputIngredient[OUTPUT_Dosage]     = zindexOutputIngredient[OUTPUT_Dosage]; 
-														ipciOutputIngredient[OUTPUT_DosageUnit] = zindexOutputIngredient[OUTPUT_DosageUnit];
-														outputIngredients.add(ipciOutputIngredient);
-													}
-													// Else if in Z-Index extracted it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index extracted values
-													else if ((!zindexExtractedOutputIngredient[OUTPUT_Dosage].equals("")) && zindexExtractedOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-														ipciOutputIngredient[OUTPUT_Dosage]     = zindexExtractedOutputIngredient[OUTPUT_Dosage]; 
-														ipciOutputIngredient[OUTPUT_DosageUnit] = zindexExtractedOutputIngredient[OUTPUT_DosageUnit];
-														outputIngredients.add(ipciOutputIngredient);
-													}
-												}
-											}
-											
-											// If in Z-Index it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index values
-											if (zindexOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-												ipciOutputIngredient[OUTPUT_Dosage]     = zindexOutputIngredient[OUTPUT_Dosage]; 
-												ipciOutputIngredient[OUTPUT_DosageUnit] = zindexOutputIngredient[OUTPUT_DosageUnit];
-												outputIngredients.add(ipciOutputIngredient);
-											}
-											// Else take the IPCI ingredient
-											else {
-												outputIngredients.add(ipciOutputIngredient);
-											}
-										}
-										else if ((zindexExtractedOutputIngredient == null) || (ipciOutputIngredient[OUTPUT_Dosage].equals(zindexExtractedOutputIngredient[OUTPUT_Dosage]) && ipciOutputIngredient[OUTPUT_DosageUnit].equals(zindexExtractedOutputIngredient[OUTPUT_DosageUnit]))) {
-											// If no Z-Index extracted ingredient is found or the dosage of the Z=-Index extracted en IPCI are the same take the IPCI ingredient
-											outputIngredients.add(ipciOutputIngredient);
-										}
-										else {
-											// The Z-Index extracted is different from IPCI
-											// If in Z-Index extracted it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index extracted values
-											if ((!zindexExtractedOutputIngredient[OUTPUT_Dosage].equals("")) && zindexExtractedOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-												ipciOutputIngredient[OUTPUT_Dosage]     = zindexExtractedOutputIngredient[OUTPUT_Dosage]; 
-												ipciOutputIngredient[OUTPUT_DosageUnit] = zindexExtractedOutputIngredient[OUTPUT_DosageUnit];
-												outputIngredients.add(ipciOutputIngredient);
-											}
-											// Else take the IPCI ingredient
-											else {
-												outputIngredients.add(ipciOutputIngredient);
-											}
-										}
-									}
-									
-								}
-								else {
-									outputIngredients = new ArrayList<String[]>();
-									
-									List<String[]> zindexMatch = matchIngredients(ipciOutputIngredients, zindexOutputIngredients);
-									
-									// For each IPCI derived ingredient
-									for (int ingredientNr = 0; ingredientNr < ipciOutputIngredients.size(); ingredientNr++) {
-										// Get IPCI ingredient
-										String[] ipciOutputIngredient = ipciOutputIngredients.get(ingredientNr);
-										
-										// Get corresponding Z-Index ingredient
-										String[] zindexOutputIngredient = zindexMatch.get(ingredientNr);
-										
-										// When found check if dosage and dosage unit correspond
-										if (zindexOutputIngredient != null) {
-											// If the Z-Index and IPCI dosages are the same take the IPCI ingredient
-											if (ipciOutputIngredient[OUTPUT_Dosage].equals(zindexOutputIngredient[OUTPUT_Dosage]) && ipciOutputIngredient[OUTPUT_DosageUnit].equals(zindexOutputIngredient[OUTPUT_DosageUnit])) {
-												outputIngredients.add(ipciOutputIngredient);
-											}
-											// If in Z-Index it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index values
-											else if (zindexOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-												ipciOutputIngredient[OUTPUT_Dosage]     = zindexOutputIngredient[OUTPUT_Dosage]; 
-												ipciOutputIngredient[OUTPUT_DosageUnit] = zindexOutputIngredient[OUTPUT_DosageUnit];
-												outputIngredients.add(ipciOutputIngredient);
-											}
-											// Else take the IPCI ingredient
-											else {
-												outputIngredients.add(ipciOutputIngredient);
-											}
-										}
-										// Else take the IPCI ingredient
-										else {
-											outputIngredients.add(ipciOutputIngredient);
-										}
-									}
-								}
-							}
-							// Else if Z-Index extracted ingredients are found
-							else if (zindexExtractedOutputIngredients != null) {
-								outputIngredients = new ArrayList<String[]>();
-								
-								List<String[]> zindexExtractedMatch = matchIngredients(ipciOutputIngredients, zindexExtractedOutputIngredients);
-								
-								if (zindexExtractedMatch != null) {
-									// For each IPCI derived ingredient
-									for (int ingredientNr = 0; ingredientNr < ipciOutputIngredients.size(); ingredientNr++) {
-										// Get IPCI ingredient
-										String[] ipciOutputIngredient = ipciOutputIngredients.get(ingredientNr);
-
-										// get corresponding Z-Index extracted ingredient
-										String[] zindexExtractedOutputIngredient = zindexExtractedMatch.get(ingredientNr);
-										
-										// When found check if dosage and dosage unit correspond
-										if (zindexExtractedOutputIngredient != null) {
-											// If the Z-Index extracted and IPCI dosages are the same take the IPCI ingredient
-											if (ipciOutputIngredient[OUTPUT_Dosage].equals(zindexExtractedOutputIngredient[OUTPUT_Dosage]) && ipciOutputIngredient[OUTPUT_DosageUnit].equals(zindexExtractedOutputIngredient[OUTPUT_DosageUnit])) {
-												outputIngredients.add(ipciOutputIngredient);
-											}
-											// If in Z-Index extracted it is a numerator/denominator dosage and not in IPCI overrule the IPCI dosage/dosage unit with the Z-Index extracted values
-											else if ((!zindexExtractedOutputIngredient[OUTPUT_Dosage].equals("")) && zindexExtractedOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!ipciOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-												ipciOutputIngredient[OUTPUT_Dosage]     = zindexExtractedOutputIngredient[OUTPUT_Dosage]; 
-												ipciOutputIngredient[OUTPUT_DosageUnit] = zindexExtractedOutputIngredient[OUTPUT_DosageUnit];
-												outputIngredients.add(ipciOutputIngredient);
-											}
-											// Else take the IPCI ingredient
-											else {
-												outputIngredients.add(ipciOutputIngredient);
-											}
-										}
-										// Else take the IPCI ingredient
-										else {
-											outputIngredients.add(ipciOutputIngredient);
-										}
-									}
-								}
-								else {
-									// Take the IPCI ingredients
-									outputIngredients = ipciOutputIngredients;
-								}
-							}
-							else {
-								// Take the IPCI ingredients
-								outputIngredients = ipciOutputIngredients;
-							}
-						}
-						else {
-							// If Z-Index ingredients are found
-							if (zindexOutputIngredients != null) {
-								// If Z-Index extracted ingredients are found
-								if (zindexExtractedOutputIngredients != null) {
-									outputIngredients = new ArrayList<String[]>();
-									
-									List<String[]> zindexExtractedMatch = matchIngredients(zindexOutputIngredients, zindexExtractedOutputIngredients);
-									
-									if (zindexExtractedMatch != null) {
-										// For each IPCI derived ingredient
-										for (int ingredientNr = 0; ingredientNr < zindexOutputIngredients.size(); ingredientNr++) {
-											// Get Z-Index ingredient
-											String[] zindexOutputIngredient = zindexOutputIngredients.get(ingredientNr);
-
-											// get corresponding Z-Index extracted ingredient
-											String[] zindexExtractedOutputIngredient = zindexExtractedMatch.get(ingredientNr);
-											
-											// When found check if dosage and dosage unit correspond
-											if (zindexExtractedOutputIngredient != null) {
-												// If the Z-Index and Z-Index extracted dosages are the same take the Z-Index ingredient
-												if (zindexOutputIngredient[OUTPUT_Dosage].equals(zindexExtractedOutputIngredient[OUTPUT_Dosage]) && zindexOutputIngredient[OUTPUT_DosageUnit].equals(zindexExtractedOutputIngredient[OUTPUT_DosageUnit])) {
-													outputIngredients.add(zindexOutputIngredient);
-												}
-												// If in Z-Index extracted it is a numerator/denominator dosage and not in Z-Index overrule the Z-Index dosage/dosage unit with the Z-Index extracted values
-												else if ((!zindexExtractedOutputIngredient[OUTPUT_Dosage].equals("")) && zindexExtractedOutputIngredient[OUTPUT_DosageUnit].contains("/")  && (!zindexOutputIngredient[OUTPUT_DosageUnit].contains("/"))) { 
-													zindexOutputIngredient[OUTPUT_Dosage]     = zindexExtractedOutputIngredient[OUTPUT_Dosage]; 
-													zindexOutputIngredient[OUTPUT_DosageUnit] = zindexExtractedOutputIngredient[OUTPUT_DosageUnit];
-													outputIngredients.add(zindexOutputIngredient);
-												}
-												// Else take the IPCI ingredient
-												else {
-													outputIngredients.add(zindexOutputIngredient);
-												}
-											}
-											// Else take the IPCI ingredient
-											else {
-												outputIngredients.add(zindexOutputIngredient);
-											}
-										}
-									}
-									else {
-										// Take the Z-Index ingredients
-										outputIngredients = zindexOutputIngredients;
-									}
-								}
-								else {
-									// Take the Z-Index ingredients
-									outputIngredients = zindexOutputIngredients;
-								}
-							}
-							// Else if Z-Index extracted ingredients found take the Z-Index extracted ingredients
-							else if (zindexExtractedOutputIngredients != null) {
-								outputIngredients = zindexExtractedOutputIngredients;
-							}
-						}
-REPLACED END 2020-05-11 */
-/* REPLACED BY BEGIN 2020-05-11 */
 						outputIngredients = ipciOutputIngredients != null ? ipciOutputIngredients : zindexOutputIngredients;
 						if (outputIngredients != null) {
 							for (String[] outputIngredient : outputIngredients) {
@@ -1051,8 +579,7 @@ REPLACED END 2020-05-11 */
 									outputIngredient[OUTPUT_DosageUnit] = "";
 								}
 							}
-						}
-/* REPLACED BY END 2020-05-11 */						
+						}						
 						
 						// When output ingredients are found write them to the output
 						if (outputIngredients != null) {
@@ -1076,144 +603,6 @@ REPLACED END 2020-05-11 */
 		// Load translation file
 		if (ok) {
 			if (gpkList.size() > 0) {
-				/*
-				System.out.println(DrugMapping.getCurrentTime() + "   Loading Ingredient Name Translation File ...");
-				try {
-					boolean newFile = false;
-					Map<String, String> originalIngredientNameTranslation = new HashMap<String, String>();
-					if (ingredientNameTranslationFile != null) {
-						if (ingredientNameTranslationFile.openFile(true)) {
-							if (ingredientNameTranslationFile.getFileName().contains("Google")) {
-								translationType = "Google";
-							}
-							if (ingredientNameTranslationFile.getFileName().contains("Amazon")) {
-								translationType = "Amazon";
-							}
-							while (ingredientNameTranslationFile.hasNext()) {
-								Row row = ingredientNameTranslationFile.next();
-								
-								String sourceIngredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameTranslationFile.get(row, "SourceIngredientName", true));
-								String englishIngredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameTranslationFile.get(row, "EnglishIngredientName", true));
-								
-								if (!sourceIngredientName.equals("")) {
-									if ((ingredientNameTranslation.get(sourceIngredientName) != null) && (!ingredientNameTranslation.get(sourceIngredientName).equals(englishIngredientName))) {
-										System.out.println("    ERROR: Different translations for '" + sourceIngredientName + "': '" + englishIngredientName + "' and '" + ingredientNameTranslation.get(sourceIngredientName) + "'");
-										ok = false;
-									}
-									else {
-										originalIngredientNameTranslation.put(sourceIngredientName, englishIngredientName);
-										if (!ingredientNameTranslation.containsKey(sourceIngredientName)) { // Not used anymore
-											System.out.println("    WARNING: Source ingredient name '" + sourceIngredientName + "' ('" + englishIngredientName + "') is not used anymore. Will be removed.");
-											newFile = true;
-										}
-										else {
-											ingredientNameTranslation.put(sourceIngredientName, englishIngredientName);
-										}
-									}
-								}
-							}
-						}
-						else {
-							System.out.println("  ERROR: Couldn't open translation file '" + ingredientNameTranslationFile.getFileName() + "'");
-							newFile = true;
-							ok = false;
-						}
-					}
-					else {
-						System.out.println("  WARNING: No translation file found.");
-						newFile = true;
-						ok = false;
-					}
-
-					boolean backupOk = true;
-					if (newFile) {
-						if (originalIngredientNameTranslation.size() > 0) {
-							// Backup last translation
-							String fileName = ingredientNameTranslationFile.getFileName();
-							String date = DrugMapping.getCurrentDate();
-							String baseFileName = fileName + " " + date;
-							String extension = "";
-							int extensionIndex = fileName.lastIndexOf(File.separator) + fileName.substring(fileName.lastIndexOf(File.separator)).lastIndexOf(".");
-							if (extensionIndex > -1) {
-								baseFileName = fileName.substring(0, extensionIndex) + " " + date;
-								extension =  fileName.substring(extensionIndex);
-							}
-							// Find first free backup file name of today
-							fileName = null;
-							for (int backupNr = 1; backupNr < 100; backupNr++) {
-								String backupNrString = "00"+ Integer.toString(backupNr);
-								backupNrString = backupNrString.substring(backupNrString.length() - 2);
-								fileName = baseFileName + " " + backupNrString + extension;
-								if (!(new File(fileName)).exists()) {
-									break;
-								}
-							}
-							
-							if (fileName != null) {
-								try {
-									PrintWriter translationFile = new PrintWriter(new File(fileName));
-									System.out.println(DrugMapping.getCurrentTime() + "     Writing backup of current translation file to: " + fileName);
-
-									translationFile.println("SourceIngredientName,EnglishIngredientName");
-									
-									List<String> sortedSourceIngredientNames = new ArrayList<String>();
-									sortedSourceIngredientNames.addAll(originalIngredientNameTranslation.keySet());
-									Collections.sort(sortedSourceIngredientNames);
-									for (String sourceIngredientName : sortedSourceIngredientNames) {
-										String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredientName);
-										record += "," + DrugMappingStringUtilities.escapeFieldValue(originalIngredientNameTranslation.get(sourceIngredientName));
-										translationFile.println(record);
-									}
-									translationFile.close();
-									System.out.println(DrugMapping.getCurrentTime() + "     Done");
-								}
-								catch (FileNotFoundException e) {
-									System.out.println("  ERROR: Cannot create backup file '" + fileName + "'");
-								}
-							}
-							else {
-								System.out.println("  ERROR: No free backup file found.");
-								backupOk = false;
-							}
-							
-						}
-						
-						if (backupOk) {
-							// Create translation file
-							String fileName = DrugMapping.getBasePath() + "/ZIndex - Ingredient Name Translation.csv";
-							if (ingredientNameTranslationFile != null) {
-								fileName = ingredientNameTranslationFile.getFileName();
-							}
-							try {
-								PrintWriter translationFile = new PrintWriter(new File(fileName));
-								System.out.println(DrugMapping.getCurrentTime() + "     Writing translation file to: " + fileName);
-								System.out.println("  ACTION REQUIRED: Please add the missing translations.");
-
-								translationFile.println("SourceIngredientName,EnglishIngredientName");
-								
-								List<String> sortedSourceIngredientNames = new ArrayList<String>();
-								sortedSourceIngredientNames.addAll(ingredientNameTranslation.keySet());
-								Collections.sort(sortedSourceIngredientNames);
-								for (String sourceIngredientName : sortedSourceIngredientNames) {
-									String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredientName);
-									record += "," + DrugMappingStringUtilities.escapeFieldValue(ingredientNameTranslation.get(sourceIngredientName));
-									translationFile.println(record);
-								}
-								translationFile.close();
-								System.out.println(DrugMapping.getCurrentTime() + "     Done");
-							}
-							catch (FileNotFoundException e) {
-								System.out.println("  ERROR: Cannot create output file '" + fileName + "'");
-							}
-						}
-					}
-				}
-				catch (NoSuchElementException fileException) {
-					System.out.println("  ERROR: " + fileException.getMessage());
-					ok = false;
-				}
-				System.out.println(DrugMapping.getCurrentTime() + "   Done");
-*/
 				
 				// Write output file
 				if (ok && (outputMap.size() > 0)) {
@@ -1231,7 +620,6 @@ REPLACED END 2020-05-11 */
 						header += "," + "IngredientNameStatus";
 						header += "," + "IngredientCode";
 						header += "," + "IngredientName";
-						//header += "," + "IngredientNameEnglish";
 						header += "," + "Dosage";
 						header += "," + "DosageUnit";
 						header += "," + "OrgDosage";
@@ -1244,15 +632,6 @@ REPLACED END 2020-05-11 */
 							List<String[]> outputIngredients = outputMap.get(gpkCode);
 							if (outputIngredients != null) {
 								for (String[] outputIngredient : outputIngredients) {
-/*									
-									if (outputIngredient[OUTPUT_IngredientName].equals("")) {
-										outputIngredient[OUTPUT_IngredientNameEnglish] = "";
-									}
-									else {
-										String translation = ingredientNameTranslation.get(outputIngredient[OUTPUT_IngredientName]);
-										outputIngredient[OUTPUT_IngredientNameEnglish] = translation == null ? "" : translation;
-									}
-*/
 									String record = "";
 									for (int column = 0; column < OUTPUT_ColumnCount; column++) {
 										record += (column == 0 ? "" : ",") + DrugMappingStringUtilities.escapeFieldValue(outputIngredient[column]);
@@ -1318,73 +697,10 @@ REPLACED END 2020-05-11 */
 	}
 	
 	
-	private int compareWordsToRemove(String word1, String word2) {
-		if (word1.startsWith(word2)) {
-			return -1;
-		}
-		else if (word2.startsWith(word1)) {
-			return 1;
-		}
-		else if (word1.endsWith(word2)) {
-			return -1;
-		}
-		else if (word2.endsWith(word1)) {
-			return 1;
-		}
-		else if (word1.contains(word2)) {
-			return -1;
-		}
-		else {
-			return 0;
-		}
-	}
-	
-	
 	private String cleanupExtractedIngredientName(String ingredientName) {
 		for (String word : wordsToRemove) {
 			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
-/*
-			ingredientName = ingredientName.replaceAll("\t", " ").trim();
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", ""));
 			
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*$", ""));
-
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("[\"][^\"]*[\"]", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" \\(.*\\) ", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" \\(.*\\)$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^\\(.*\\) ", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^\\(.*\\)$", ""));
-			ingredientName = ingredientName.replaceAll("\\([)]*$", "").trim();
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("\\([^)]*$", ""));
-			
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ", ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + ",", " "));
-
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + " ", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[,]??[0-9]*[,]??[0-9]*[,]??[0-9]*" + word + "$", " "));
-			
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ", ", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + ",", " "));
-
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + " ", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", ""));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(",[0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " "));
-			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(", [0-9]*[.]??[0-9]*[.]??[0-9]*[.]??[0-9]*" + word + "$", " "));
-*/
 			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll("^" + word + " ", " "));
 			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" " + word + " ", " "));
 			ingredientName = DrugMappingStringUtilities.removeExtraSpaces(ingredientName.replaceAll(" " + word + ",", " "));
@@ -1449,47 +765,10 @@ REPLACED END 2020-05-11 */
 		}
 		
 		// Get the last part as dose information
-		//OLD String[] fullNameSplit = fullName.split(" ");
-		//OLD if ((fullNameSplit.length > 2) && (!fullNameSplit[fullNameSplit.length - 1].trim().equals("")) && (DIGITS.contains(fullNameSplit[fullNameSplit.length - 1].trim().substring(0, 1)))) {
-		//OLD 	doseString = fullNameSplit[fullNameSplit.length - 1].trim();
-		//OLD }
 		int lastSpaceIndex = fullName.lastIndexOf(" ");
 		if (lastSpaceIndex > -1) {
 			doseString = fullName.substring(lastSpaceIndex + 1);
 		}
 		return doseString;
-	}
-	
-	
-	private List<String[]> matchIngredients(List<String[]> leadingDrug, List<String[]> matchingDrug) {
-		List<String[]> match = leadingDrug;
-		if (leadingDrug.size() == matchingDrug.size()) {
-			int matchCount = 0;
-			match = new ArrayList<String[]>();
-			for (int ingredientNr = 0; ingredientNr < leadingDrug.size(); ingredientNr++) {
-				String[] leadingIngredient = leadingDrug.get(ingredientNr);
-				match.add(null);
-				for (String[] matchingIngredient : matchingDrug) {
-					if (leadingIngredient[OUTPUT_IngredientCode].equals(matchingIngredient[OUTPUT_IngredientCode])) {
-						match.set(ingredientNr, matchingIngredient);
-						matchingDrug.remove(matchingIngredient);
-						matchCount++;
-						break;
-					}
-				}
-			}
-			if (matchingDrug.size() > 0) {
-				for (int ingredientNr = 0; ingredientNr < leadingDrug.size(); ingredientNr++) {
-					if (match.get(ingredientNr) == null) {
-						match.set(ingredientNr, leadingDrug.get(ingredientNr));
-						matchCount++;
-						if (matchCount == leadingDrug.size()) {
-							break;
-						}
-					}
-				}
-			}
-		}
-		return match;
 	}
 }

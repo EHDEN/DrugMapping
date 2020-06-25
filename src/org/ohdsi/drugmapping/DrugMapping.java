@@ -2,8 +2,6 @@ package org.ohdsi.drugmapping;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -236,18 +234,12 @@ public class DrugMapping {
 				logFileSettings("ZIndex GSK File", getFile("ZIndex GSK File"));
 				logFileSettings("ZIndex GNK File", getFile("ZIndex GNK File"));
 				logFileSettings("ZIndex GPK Statistics File", getFile("ZIndex GPK Statistics File"));
-				//logFileSettings("ZIndex Ignored Words File", getFile("ZIndex Ignored Words File"));
-				//logFileSettings("ZIndex Non-Denomiator Units File", getFile("ZIndex Non-Denomiator Units File"));
-				//logFileSettings("ZIndex Ingredient Name Translation File", getFile("ZIndex Ingredient Name Translation File"));
 				logFileSettings("ZIndex GPK IPCI Compositions File", getFile("ZIndex GPK IPCI Compositions File"));
 				new ZIndexConversion(
 						getFile("ZIndex GPK File"), 
 						getFile("ZIndex GSK File"), 
 						getFile("ZIndex GNK File"), 
 						getFile("ZIndex GPK Statistics File"), 
-				//		getFile("ZIndex Ignored Words File"), 
-				//		getFile("ZIndex Non-Denomiator Units File"), 
-				//		getFile("ZIndex Ingredient Name Translation File"), 
 						getFile("ZIndex GPK IPCI Compositions File")
 						);
 			}

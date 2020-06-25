@@ -16,10 +16,8 @@ import java.util.Set;
 
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.FormConversion;
-import org.ohdsi.drugmapping.FormConversionOld;
 import org.ohdsi.drugmapping.IngredientNameTranslation;
 import org.ohdsi.drugmapping.Mapping;
-import org.ohdsi.drugmapping.UnitConversionOld;
 import org.ohdsi.drugmapping.UnitConversion;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
@@ -130,9 +128,7 @@ public class GenericMapping extends Mapping {
 	
 	private CDM cdm = null;
 	
-	private UnitConversionOld unitConversionsMapOld = null;
 	private UnitConversion unitConversionsMap = null;
-	private FormConversionOld formConversionsMapOld = null;
 	private FormConversion formConversionsMap = null;
 	private IngredientNameTranslation ingredientNameTranslationMap = null;
 	
@@ -223,11 +219,6 @@ public class GenericMapping extends Mapping {
 			cdm = new CDM(database, report);
 			ok = ok && cdm.isOK();
 		}	
-		
-		// Get form conversion from local forms to CDM forms
-		//boolean formsOk = ok && getFormConversionOld();
-
-		//ok = ok && translationOk && unitsOk && formsOk;
 		
 		// Load manual CAS mappings
 		ok = ok && getManualCASMappings(manualCASMappingFile);		
@@ -440,27 +431,6 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getUnitConversionOld(CDMDatabase database) {
-		boolean ok = true;
-		
-		// Create Units Map
-		unitConversionsMapOld = new UnitConversionOld(units, cdm);
-		if (unitConversionsMapOld.getStatus() != UnitConversionOld.STATE_OK) {
-			// If no unit conversion is specified then stop.
-			System.out.println("");
-			System.out.println("First fill the unit conversion map in the file:");
-			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + UnitConversionOld.FILENAME);
-			System.out.println("");
-			System.out.println("The cells should contain a value so that: Local unit = <cell value> * CDM unit");
-			System.out.println("");
-			ok = false;
-		}
-		
-		return ok;
-	}
-	
-	
 	private boolean getUnitConversion(InputFile unitMappingFile) {
 		boolean ok = true;
 		
@@ -472,26 +442,6 @@ public class GenericMapping extends Mapping {
 			System.out.println("First fill the unit conversion map in the file:");
 			System.out.println("");
 			System.out.println(unitConversionsMap.getFileName());
-			System.out.println("");
-			ok = false;
-		}
-		
-		return ok;
-	}
-	
-	
-	private boolean getFormConversionOld() {
-		boolean ok = true;
-		
-		formConversionsMapOld = new FormConversionOld(forms, cdm);
-		if (formConversionsMapOld.getStatus() != FormConversionOld.STATE_OK) {
-			// If no form conversion is specified then stop.
-			System.out.println("");
-			System.out.println("First fill the form conversion map in the file:");
-			System.out.println("");
-			System.out.println(DrugMapping.getBasePath() + "/" + FormConversionOld.FILENAME);
-			System.out.println("");
-			System.out.println("Fill the cells of matching forms with an non-space character.");
 			System.out.println("");
 			ok = false;
 		}
@@ -779,23 +729,7 @@ public class GenericMapping extends Mapping {
 										casNames.add(modifiedName);
 									}
 								}
-								
-								/*
-								for (String synonym : synonymSplit) {
-									String synonymNoSpaces = synonym.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-									if (!synonymNoSpaces.equals("")) {
-										//casNames.add(synonymNoSpaces);
-										casNames.add(synonym);
-										casNames.add(DrugMappingStringUtilities.modifyName(synonym));
-									}
-								}
-								
-								String chemicalNameNoSpaces = chemicalName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", ""); 
-								if (!chemicalNameNoSpaces.equals("")) {
-									casNames.add(chemicalNameNoSpaces);
-									casNames.add(DrugMappingStringUtilities.modifyName(chemicalName));
-								}
-								*/
+
 								externalCASSynonymsMap.put(casNumber, casNames);
 							}
 						}
@@ -973,34 +907,6 @@ public class GenericMapping extends Mapping {
 							}
 						}
 					}
-					
-					/*
-					String casNumber = sourceIngredient.getCASNumber();
-					if (casNumber != null) {
-						List<String> casNames = casMap.get(casNumber);
-						if (casNames != null) {
-							Set<CDMIngredient>matchedCDMIngredients = new HashSet<CDMIngredient>();
-							String matchingCASname = null;
-							for (String casName : casNames) {
-								Set<CDMIngredient> casNameIngredients = cdmIngredientNameIndex.get(casName);
-								if (casNameIngredients != null) {
-									matchedCDMIngredients.addAll(casNameIngredients);
-									matchingCASname = casName;
-								}
-							}
-							if (matchedCDMIngredients.size() == 1) {
-								CDMIngredient cdmIngredient = (CDMIngredient) matchedCDMIngredients.toArray()[0];
-								ingredientMap.put(sourceIngredient, cdmIngredient);
-								sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-								sourceIngredient.setMatchString("CAS: " + matchingCASname);
-								matchedByCASName++;
-							}
-							else {
-								multipleMappings++;
-							}
-						}
-					}
-					*/
 				}
 			}
 
@@ -1764,7 +1670,7 @@ public class GenericMapping extends Mapping {
 								Map<CDMDrug, List<CDMIngredientStrength>> matchingIngredientsMap = new HashMap<CDMDrug, List<CDMIngredientStrength>>();
 								
 								for (CDMDrug cdmDrug : cdmDrugsWithIngredients) {
-									List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap(), null);
+									List<CDMIngredientStrength> matchingIngredients = matchingIngredients(sourceDrug.getComponents(), cdmDrug.getIngredientsMap());
 									if ((matchingIngredients != null) && (!matchingCDMDrugs.contains(cdmDrug))) {
 										matchingCDMDrugs.add(cdmDrug);
 										matchingIngredientsMap.put(cdmDrug, matchingIngredients);
@@ -2517,7 +2423,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private List<CDMIngredientStrength> matchingIngredients(List<SourceDrugComponent> sourceDrugComponents, Map<String, List<CDMIngredientStrength>> cdmIngredientsMap, Double strengthDeviationPercentage) {
+	private List<CDMIngredientStrength> matchingIngredients(List<SourceDrugComponent> sourceDrugComponents, Map<String, List<CDMIngredientStrength>> cdmIngredientsMap) {
 		List<CDMIngredientStrength> matchingIngredients = new ArrayList<CDMIngredientStrength>();
 		for (SourceDrugComponent sourceDrugComponent : sourceDrugComponents) {
 			SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
@@ -2526,35 +2432,17 @@ public class GenericMapping extends Mapping {
 				if (cdmIngredientConceptId != null) {
 					List<CDMIngredientStrength> matchingCDMIngredients = cdmIngredientsMap.get(cdmIngredientConceptId);
 					if (matchingCDMIngredients != null) {
-						if (strengthDeviationPercentage != null) {
-							boolean found = false;
-							for (CDMIngredientStrength cdmIngredientStrength : matchingCDMIngredients) {
-								//if (sourceDrugComponent.matches(unitConversionsMap, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit(), strengthDeviationPercentage, cdm)) {
-								if (matchIngredient(sourceDrugComponent, cdmIngredientStrength, strengthDeviationPercentage)) {
-									matchingIngredients.add(cdmIngredientStrength);
-									found = true;
-									break;
-								}
-							}
-							if (!found) {
-								// No matching ingredients with matching strength
-								matchingIngredients = null;
-								break;
-							}
+						Set<CDMIngredient> cdmIngredients = new HashSet<CDMIngredient>();
+						for (CDMIngredientStrength cdmIngredientStrength : matchingCDMIngredients) {
+							cdmIngredients.add(cdmIngredientStrength.getIngredient());
+						}
+						if (cdmIngredients.size() == 1) {
+							matchingIngredients.add((CDMIngredientStrength) matchingCDMIngredients.toArray()[0]);
 						}
 						else {
-							Set<CDMIngredient> cdmIngredients = new HashSet<CDMIngredient>();
-							for (CDMIngredientStrength cdmIngredientStrength : matchingCDMIngredients) {
-								cdmIngredients.add(cdmIngredientStrength.getIngredient());
-							}
-							if (cdmIngredients.size() == 1) {
-								matchingIngredients.add((CDMIngredientStrength) matchingCDMIngredients.toArray()[0]);
-							}
-							else {
-								// No matching ingredients with matching strength
-								matchingIngredients = null;
-								break;
-							}
+							// No matching ingredients with matching strength
+							matchingIngredients = null;
+							break;
 						}
 					}
 					else {
@@ -2580,37 +2468,14 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean matchIngredient(SourceDrugComponent sourceDrugComponent, CDMIngredientStrength cdmIngredientStrength, Double strengthDeviationPercentage) {
-		boolean match = false;
-		if (sourceDrugComponent.matches(unitConversionsMapOld, cdmIngredientStrength.getNumeratorDosage(), cdmIngredientStrength.getNumeratorDosageUnit(), cdmIngredientStrength.getDenominatorDosage(), cdmIngredientStrength.getDenominatorDosageUnit(), strengthDeviationPercentage, cdm)) {
-			match = true;
-		}
-		return match;
-	}
-	
-	
 	private Double getStrengthDeviationPercentage(SourceDrugComponent sourceDrugComponent, CDMIngredientStrength cdmIngredientStrength) {
 		Double percentage = null;
-		//Double sourceStrength = unitConversionsMap.getStandardizedStrength(sourceDrugComponent, cdmIngredientStrength);
-		//Double cdmStrength = getStandardizedCDMStrength(cdmIngredientStrength);
 		Double sourceStrength = unitConversionsMap.getConversion(sourceDrugComponent.getDosageUnit(), sourceDrugComponent.getDosage(), cdmIngredientStrength.getUnit());
 		Double cdmStrength = cdmIngredientStrength.getDosage();
 		if ((sourceStrength != null) && (cdmStrength != null)) {
 			percentage = (Math.abs(cdmStrength - sourceStrength) / sourceStrength) * 100;
 		}
 		return percentage;
-	}
-	
-	
-	private Double getStandardizedCDMStrength(CDMIngredientStrength cdmIngredientStrength) {
-		Double strength = null;
-		Double numeratorDosage = cdmIngredientStrength.getNumeratorDosage();
-		Double denominatorDosage = cdmIngredientStrength.getDenominatorDosage();
-		if ((numeratorDosage != null) && (denominatorDosage != null)) {
-			strength = numeratorDosage / denominatorDosage;
-		}
-		
-		return strength;
 	}
 	
 

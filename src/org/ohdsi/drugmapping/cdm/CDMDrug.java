@@ -21,27 +21,8 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	public static String getHeader(String prefix) {
-		String header = CDMConcept.getHeader(prefix);
-	/*
-		header += "," + prefix + "form_concept_id";
-	*/
-		return header;
+		return CDMConcept.getHeader(prefix);
 	}
-	
-	/*
-	public String toString() {
-		String description = super.toString();
-		String form_concept_ids = "";
-		for (String form_concept_id : formConceptIds) {
-			if (!form_concept_ids.equals("")) {
-				form_concept_ids += "|";
-			}
-			form_concept_ids += form_concept_id;
-		}
-		description += "," + form_concept_ids;
-		return description;
-	}
-	*/
 
 	public CDMDrug(CDM cdm, Row queryRow, String prefix) {
 		super(cdm, queryRow, prefix);

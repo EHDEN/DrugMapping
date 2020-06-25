@@ -65,14 +65,6 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"This is the name of the ingredient of the drug."
 												}
 										),
-										/*
-										new FileColumnDefinition(
-												"IngredientNameEnglish",
-												new String[] {
-														"This is the English name of the ingredient of the drug."
-												}
-										),
-										*/
 										new FileColumnDefinition(
 												"Dosage",
 												new String[] {

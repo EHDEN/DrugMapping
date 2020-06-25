@@ -2,9 +2,6 @@ package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
 
-import org.ohdsi.drugmapping.UnitConversionOld;
-import org.ohdsi.drugmapping.cdm.CDM;
-
 public class SourceDrugComponent {
 	private SourceIngredient ingredient = null;
 	private Double dosage = null;
@@ -18,10 +15,8 @@ public class SourceDrugComponent {
 	
 	public static String getHeader() {
 		String header = SourceIngredient.getHeader();
-		header += "," + "NumeratorDosage";
-		header += "," + "NumeratorDosageUnit";
-		header += "," + "DenominatorDosage";
-		header += "," + "DenominatorDosageUnit";
+		header += "," + "Dosage";
+		header += "," + "Unit";
 		
 		return header;
 	}
@@ -108,20 +103,8 @@ public class SourceDrugComponent {
 	
 	public String toString() {
 		String description = ingredient.toString();
-		description += "," + (numeratorDosage == null ? "" : numeratorDosage);
-		description += "," + "\"" + (numeratorDosageUnit == null ? "" : numeratorDosageUnit) + "\"";
-		description += "," + (denominatorDosage == null ? "" : denominatorDosage);
-		description += "," + "\"" + (denominatorDosageUnit == null ? "" : denominatorDosageUnit) + "\"";
-		/*
-		if ((dosage == null) && (dosageUnit == null)) {
-			description += "," + (numeratorDosage == null ? "" : numeratorDosage) + "/" + (denominatorDosage == null ? "" : denominatorDosage);
-			description += "," + "\"" + (numeratorDosageUnit == null ? "" : numeratorDosageUnit) + "/" + (denominatorDosageUnit == null ? "" : denominatorDosageUnit) + "\"";
-		}
-		else {
-			description += "," + (dosage == null ? "" : dosage);
-			description += "," + (dosageUnit == null ? "" : "\"" + dosageUnit + "\"");
-		}
-		*/
+		description += "," + (dosage == null ? "" : dosage);
+		description += "," + "\"" + (dosageUnit == null ? "" : dosageUnit) + "\"";
 		return description;
 	}
 	
@@ -153,11 +136,6 @@ public class SourceDrugComponent {
 				);
 		
 		return matches;
-	}
-	
-	
-	public boolean matches(UnitConversionOld unitConversion, Double numeratorDosage, String numeratorDosageUnit, Double denominatorDosage, String denominatorDosageUnit, Double strengthDeviationPercentage, CDM cdm) {
-		return unitConversion.matches(this.numeratorDosageUnit, this.numeratorDosage, this.denominatorDosageUnit, this.denominatorDosage, numeratorDosageUnit, numeratorDosage, denominatorDosageUnit, denominatorDosage, strengthDeviationPercentage, cdm);
 	}
 
 }
