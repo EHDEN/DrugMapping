@@ -36,4 +36,5 @@ GROUP BY drugform.concept_id,
          form.concept_id,
          strength.ingredient_concept_id
 ORDER BY drugform.concept_id,
+         form.concept_id,
          strength.ingredient_concept_id

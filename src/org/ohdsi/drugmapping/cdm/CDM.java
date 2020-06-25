@@ -508,29 +508,40 @@ public class CDM {
 	
 	private void getRxNormClinicalDrugsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
-		
+
 		Set<CDMDrug> drugs = new HashSet<CDMDrug>();
+		String lastCDMFormConceptId = "xxxxxxxx";
+		int formCount = 0;
 		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drug_concept_id", true);
+			String cdmFormConceptId = queryRow.get("form_concept_id", true);
+			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
 			
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
-				CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
-				if (cdmDrug == null) {
-					cdmDrug = new CDMDrug(this, queryRow, "drug_");
-					cdmDrugs.put(cdmDrug.getConceptId(), cdmDrug);
-					drugs.add(cdmDrug);
+				CDMDrug cdmDrugForm = cdmDrugForms.get(cdmDrugConceptId);
+				if (cdmDrugForm == null) {
+					cdmDrugForm = new CDMDrug(this, queryRow, "drug_");
+					cdmDrugForms.put(cdmDrugForm.getConceptId(), cdmDrugForm);
+					drugs.add(cdmDrugForm);
+					lastCDMFormConceptId = "xxxxxxxx";
+					formCount = 0;
 				}
-				String cdmFormConceptId = queryRow.get("form_concept_id", true);
-				cdmDrug.addForm(cdmFormConceptId);
-				
-				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
-				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
-					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-					if (cdmIngredient != null) {
-						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
-						cdmDrug.addIngredientStrength(cdmIngredientStrength);
+				if (!cdmFormConceptId.equals(lastCDMFormConceptId)) {
+					if ((cdmFormConceptId != null) && (!cdmFormConceptId.equals(""))) {
+						cdmDrugForm.addForm(cdmFormConceptId);
+					}
+					formCount++;
+				}
+				if (formCount == 1) {
+					if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
+						CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
+						if (cdmIngredient != null) {
+							CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
+							cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
+						}
 					}
 				}
+				lastCDMFormConceptId = cdmFormConceptId;
 			} 
 		}
 		
@@ -595,31 +606,40 @@ public class CDM {
 	
 	private void getRxNormClinicalDrugFormsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
-
+		
 		Set<CDMDrug> drugForms = new HashSet<CDMDrug>();
+		String lastCDMFormConceptId = "xxxxxxxx";
+		int formCount = 0;
 		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugFormsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drugform_concept_id", true);
+			String cdmFormConceptId = queryRow.get("form_concept_id", true);
+			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
+			
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugForm = cdmDrugForms.get(cdmDrugConceptId);
 				if (cdmDrugForm == null) {
 					cdmDrugForm = new CDMDrug(this, queryRow, "drugform_");
 					cdmDrugForms.put(cdmDrugForm.getConceptId(), cdmDrugForm);
 					drugForms.add(cdmDrugForm);
+					lastCDMFormConceptId = "xxxxxxxx";
+					formCount = 0;
 				}
-				
-				String cdmFormConceptId = queryRow.get("form_concept_id", true);
-				if ((cdmFormConceptId != null) && (!cdmFormConceptId.equals(""))) {
-					cdmDrugForm.addForm(cdmFormConceptId);
+				if (!cdmFormConceptId.equals(lastCDMFormConceptId)) {
+					if ((cdmFormConceptId != null) && (!cdmFormConceptId.equals(""))) {
+						cdmDrugForm.addForm(cdmFormConceptId);
+					}
+					formCount++;
 				}
-				
-				String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
-				if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
-					CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-					if (cdmIngredient != null) {
-						CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
-						cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
+				if (formCount == 1) {
+					if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
+						CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
+						if (cdmIngredient != null) {
+							CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
+							cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
+						}
 					}
 				}
+				lastCDMFormConceptId = cdmFormConceptId;
 			} 
 		}
 		

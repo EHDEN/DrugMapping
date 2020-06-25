@@ -606,17 +606,14 @@ SKIPPED END 2020-05-12 */
 									
 									// When no amount is specified for the ingredient and it is the only ingredient and
 									// a HPK amount is specified, use that as the amount.
-									if (amount.equals("") && (gskList.size() == 1) && (!hpkAmount.equals("")) && (!hpkUnit.equals(""))) {
-										amount = hpkAmount;
-										amountUnit = hpkUnit;
-									}
+									//if (amount.equals("") && (gskList.size() == 1) && (!hpkAmount.equals("")) && (!hpkUnit.equals(""))) {
+									//	amount = hpkAmount;
+									//	amountUnit = hpkUnit;
+									//}
 									
 									
 									String gnkCode = gskObject[GSK_GNKCode];
-									String genericName = ""; 
-									if (!gskObject[GSK_GenericName].substring(0, 1).equals("*")) {
-										genericName = gskObject[GSK_GenericName]; //CHANGED 2020-04-29 cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
-									}
+									String genericName = cleanupExtractedIngredientName(gskObject[GSK_GenericName]);
 
 									String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
 									gpkIngredientRecord[OUTPUT_SourceCode]            = gpkCodeString;

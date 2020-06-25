@@ -110,4 +110,5 @@ GROUP BY drug.concept_id,
          strength.box_size,
          strength.ingredient_concept_id
 ORDER BY drug.concept_id,
+         form.concept_id,
          strength.ingredient_concept_id
