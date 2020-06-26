@@ -1,7 +1,6 @@
 package org.ohdsi.drugmapping;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -38,6 +37,7 @@ public class DrugMapping {
 	private static String basePath = new File(".").getAbsolutePath();
 	private static MappingInputDefinition inputFiles = null;
 	
+	private String logFileName;
 	private MainFrame mainFrame;
 	
 	
@@ -111,7 +111,6 @@ public class DrugMapping {
 		String password = null;
 		List<String> fileSettings = null;
 		List<String> generalSettings = null;
-		String logFileName = null;
 		autoStart = false;
 		special = parameters.get("special");
 		debug = (parameters.get("debug") != null);
@@ -167,26 +166,6 @@ public class DrugMapping {
 			mainFrame.getDatabase().putSettings(dbSettings);
 		}
 
-		File logFile;
-		if (basePath != null) {
-			outputVersion = debug ? getOutputVersion(logFileName) : "";
-			logFileName = basePath + "/" + outputVersion + logFileName;
-		}
-		else {
-			outputVersion = "";
-			logFile = new File(logFileName);
-			try {
-				basePath = logFile.getCanonicalPath().replaceAll("\\\\", "/");
-				basePath = basePath.substring(0, basePath.lastIndexOf(File.pathSeparator));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (logFileName != null) {
-			mainFrame.setLogFile(logFileName);
-		}
-
 	}
 	
 	
@@ -209,7 +188,14 @@ public class DrugMapping {
 	
 	
 	public void StartMapping() {
-		//vocabulary = new Vocabulary(getDatabase());
+		// Create log file and set basePath
+		basePath = mainFrame.getOutputFolder().getFolderName();
+		if ((basePath == null) || basePath.equals("")) {
+			basePath = new File(".").getAbsolutePath();
+		}
+		outputVersion = debug ? getOutputVersion(logFileName) : "";
+		String fullLogFileName = basePath + "/" + outputVersion + logFileName;
+		mainFrame.setLogFile(fullLogFileName);
 		MappingThread mappingThread = new MappingThread();
 		mappingThread.start();
 	}
@@ -260,6 +246,8 @@ public class DrugMapping {
 						);
 			}
 
+			mainFrame.closeLogFile();
+			
 			for (JComponent component : componentsToDisableWhenRunning)
 				component.setEnabled(true);
 		}

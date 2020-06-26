@@ -58,7 +58,6 @@ public class MainFrame {
 	private List<InputFile> inputFiles = new ArrayList<InputFile>();
 	private Folder outputFolder = null; 
 	private JButton startButton = null;
-	private String logFile = null;
 	
 
 	/**
@@ -144,7 +143,7 @@ public class MainFrame {
 		
 		JPanel outputPanel = null;
 		if (!DrugMapping.special.equals("ZINDEX")) {
-			// Database settings
+			// Output Folder
 			outputPanel = new JPanel(new GridLayout(0, 1));
 			outputPanel.setBorder(BorderFactory.createTitledBorder("Output Folder"));
 			outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
@@ -214,9 +213,6 @@ public class MainFrame {
 		consoleArea.setEditable(false);
 		console = new Console();
 		console.setTextArea(consoleArea);
-		if (logFile != null) {
-			console.setDebugFile(logFile);
-		}
 		System.setOut(new PrintStream(console));
 		System.setErr(new PrintStream(console));
 		JScrollPane consoleScrollPane = new JScrollPane(consoleArea);
@@ -497,11 +493,21 @@ public class MainFrame {
 	}
 	
 	
+	public void clearConsole() {
+		console.clear();
+	}
+	
+	
 	public void setLogFile(String logFile) {
-		this.logFile = logFile;
+		clearConsole();
 		if (logFile != null) {
 			console.setDebugFile(logFile);
 		}
+	}
+	
+	
+	public void closeLogFile() {
+		console.closeDebugFile();
 	}
 
 }

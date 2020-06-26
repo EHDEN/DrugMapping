@@ -2555,7 +2555,7 @@ public class GenericMapping extends Mapping {
 				remove = new ArrayList<CDMConcept>();
 				String sourceATC = sourceDrug.getATCCode();
 				for (CDMConcept cdmConcept : conceptList) {
-					if (!cdmConcept.getClass().equals("Ingredient")) {
+					if (!cdmConcept.getConceptClassId().equals("Ingredient")) {
 						if (!((CDMDrug) cdmConcept).getATCs().contains(sourceATC)) {
 							remove.add(cdmConcept);
 						}

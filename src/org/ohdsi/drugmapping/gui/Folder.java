@@ -15,6 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.ohdsi.drugmapping.DrugMapping;
+
 public class Folder extends JPanel {
 	private static final long serialVersionUID = -23890588306917810L;
 
@@ -67,6 +69,8 @@ public class Folder extends JPanel {
 				}
 			}
 		});
+		
+		DrugMapping.disableWhenRunning(folderSelectButton);
 	}
 	
 	

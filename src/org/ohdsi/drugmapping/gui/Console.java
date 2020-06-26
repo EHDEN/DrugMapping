@@ -46,7 +46,21 @@ public class Console extends OutputStream {
 	}
 	
 	public void setDebugFile(String filename) {
+		closeDebugFile();
+		textArea.setText("");
 		debug = new WriteTextFile(filename);
+	}
+	
+	public void closeDebugFile() {
+		if (debug != null) {
+			debug.close();
+			debug = null;
+		}
+	}
+	
+	public void clear() {
+		closeDebugFile();
+		textArea.setText("");
 	}
 	
 	public String getText() {
