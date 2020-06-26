@@ -142,13 +142,11 @@ public class MainFrame {
 		level2Frame.setBorder(BorderFactory.createEmptyBorder());
 		
 		JPanel outputPanel = null;
-		if (!DrugMapping.special.equals("ZINDEX")) {
-			// Output Folder
-			outputPanel = new JPanel(new GridLayout(0, 1));
-			outputPanel.setBorder(BorderFactory.createTitledBorder("Output Folder"));
-			outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
-			outputPanel.add(outputFolder);
-		}
+		// Output Folder
+		outputPanel = new JPanel(new GridLayout(0, 1));
+		outputPanel.setBorder(BorderFactory.createTitledBorder("Output Folder"));
+		outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
+		outputPanel.add(outputFolder);
 		
 		JPanel level3Frame = new JPanel(new BorderLayout());
 		level3Frame.setBorder(BorderFactory.createEmptyBorder());
