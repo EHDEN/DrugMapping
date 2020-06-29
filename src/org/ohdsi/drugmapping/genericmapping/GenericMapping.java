@@ -1884,13 +1884,14 @@ public class GenericMapping extends Mapping {
 		
 		String header = "SourceIngredientCode";
 		header += "," + "SourceIngredientName";
+		header += "," + "SourceIngredientEnglishName";
 		header += "," + "SourceRecordCount";
 		header += "," + "concept_id";
 		header += "," + "concept_name";
 		header += "," + "concept_vocabulary_id";
 		header += "," + "concept_class_id";
 		header += "," + "MatchLog";
-		PrintWriter ingredientMappingDebugFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Debug.csv", header);
+		PrintWriter ingredientMappingDebugFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Review.csv", header);
 		if (ingredientMappingDebugFile != null) {
 			
 			// Sort the ingredients on use count descending.
@@ -1911,6 +1912,7 @@ public class GenericMapping extends Mapping {
 				
 				String record = sourceIngredient.getIngredientCode();
 				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
+				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientNameEnglish());
 				record += "," + sourceIngredient.getCount();
 				if (cdmIngredient != null) {
 					record += "," + cdmIngredient.getConceptId();
@@ -1997,7 +1999,7 @@ public class GenericMapping extends Mapping {
 		header += "," + "concept_name";
 		header += "," + "concept_class";
 		header += "," + "Mapping_log";
-		PrintWriter drugMappingDebugFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Debug.csv", header);
+		PrintWriter drugMappingDebugFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
 		
 		if ((drugMappingFile != null) && (drugMappingResultsFile != null)) {
 			System.out.println(DrugMapping.getCurrentTime() + "     Saving Drug Mapping Results ...");
