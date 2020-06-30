@@ -410,7 +410,7 @@ public class GenericMapping extends Mapping {
 	private boolean getIngredientNameTranslationMap(InputFile ingredientNameTranslationFile) {
 		boolean ok = true;
 		
-		// Create Units Map
+		// Create Translation Map
 		ingredientNameTranslationMap = new IngredientNameTranslation(ingredientNameTranslationFile);
 		if (ingredientNameTranslationMap.getStatus() != FormConversion.STATE_OK) {
 			// If no unit conversion is specified then stop.

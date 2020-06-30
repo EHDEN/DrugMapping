@@ -17,7 +17,7 @@ AND   mapsto.vocabulary_id LIKE 'RxNorm%'
 AND   mapsto.concept_class_id = 'Ingredient'
 AND   mapsto.standard_concept = 'S'
 AND   mapsto.invalid_reason IS NULL
-AND   UPPER(drug.concept_name) <> UPPER(mapsto.concept_name)
+--AND   UPPER(drug.concept_name) <> UPPER(mapsto.concept_name)
 ORDER BY drug.concept_id,
          synonym.concept_synonym_name,
          mapsto.concept_id

@@ -42,9 +42,11 @@ public class IngredientNameTranslation {
 	public IngredientNameTranslation(InputFile ingredientNameTranslationFile) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Create Ingredient Name Translation Map ...");
 		
-		readIngredientNameTranslationFile(ingredientNameTranslationFile);
-		if (status == STATE_EMPTY) {
-			createIngredientNameTranslationFile(ingredientNameTranslationFile);
+		if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.isSelected()) {
+			readIngredientNameTranslationFile(ingredientNameTranslationFile);
+			if (status == STATE_EMPTY) {
+				createIngredientNameTranslationFile(ingredientNameTranslationFile);
+			}
 		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
