@@ -21,8 +21,6 @@ public class SourceDrug {
 	private static Set<String> allForms = new HashSet<String>();
 	
 	private static Map<String, SourceIngredient> ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
-	private static Map<String, List<SourceIngredient>> ingredientNameIndex = new HashMap<String, List<SourceIngredient>>();
-	private static Map<String, SourceIngredient> ingredientCASNumberIndex = new HashMap<String, SourceIngredient>();
 	
 	private static Map<String, Set<SourceDrug>> unitsUsedInSourceDrug = new HashMap<String, Set<SourceDrug>>(); 
 	
@@ -31,7 +29,7 @@ public class SourceDrug {
 	
 	private String code = null;
 	private String name = null;
-	private String atcCode = null;
+	private List<String> atcCodeList = new ArrayList<String>();
 	private String formulation = null;
 	private Long count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
@@ -44,8 +42,6 @@ public class SourceDrug {
 		allComponents = new HashSet<SourceDrugComponent>();
 		allIngredients = new HashSet<SourceIngredient>();
 		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
-		ingredientNameIndex = new HashMap<String, List<SourceIngredient>>();
-		ingredientCASNumberIndex = new HashMap<String, SourceIngredient>();
 		
 		casNumbersSet = 0;
 	}
@@ -87,16 +83,6 @@ public class SourceDrug {
 	}
 	
 	
-	public static SourceIngredient findIngredient(String casNumber) {
-		SourceIngredient sourceIngredient = null;
-
-		if ((casNumber != null) && (!casNumber.equals(""))) {
-			sourceIngredient = ingredientCASNumberIndex.get(casNumber);
-		}
-		return sourceIngredient;
-	}
-	
-	
 	public static SourceIngredient getIngredient(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber) {
 		error = false;
 		SourceIngredient sourceIngredient = null;
@@ -104,86 +90,10 @@ public class SourceDrug {
 		if ((ingredientCode != null) && (!ingredientCode.equals(""))) {
 			sourceIngredient = ingredientSourceCodeIndex.get(ingredientCode);
 		}
-
 		if (sourceIngredient == null) {
-			String ingredientNameNoSpaces = ingredientName.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" ", "").replaceAll("-", "");
-			String ingredientNameEnglishNoSpaces = ingredientNameEnglish.replaceAll("\n", " ").replaceAll("\r", " ").replaceAll(" ", "").replaceAll("-", "");
-			List<SourceIngredient> sourceIngredients = ingredientNameIndex.get(ingredientNameNoSpaces);
-			if (sourceIngredients != null) {
-				if (sourceIngredients.size() == 1) {
-					sourceIngredient = sourceIngredients.get(0);
-					
-					if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals("")) {
-						sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
-					}
-					else if (!sourceIngredient.getIngredientNameEnglishNoSpaces().equals(ingredientNameEnglishNoSpaces)) {
-						if (sourceIngredient.getIngredientNameEnglishNoSpaces().equals(sourceIngredient.getIngredientNameNoSpaces()) && (!sourceIngredient.getIngredientNameNoSpaces().equals(ingredientNameEnglishNoSpaces))) {
-							sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
-						}
-						else {
-							System.out.println("    NameEnglish conflict: '" + ingredientNameEnglish + "' <-> " + sourceIngredient);
-							error = true;
-						}
-					}
-					
-					if (!casNumber.equals("")) {
-						if (sourceIngredient.getCASNumber() == null) {
-							sourceIngredient.setCASNumber(casNumber);
-							casNumbersSet++;
-						}
-						else if (!sourceIngredient.getCASNumber().equals(casNumber)) {
-							/*
-							System.out.println("    CASNumber conflict: '" + casNumber + "' <-> " + sourceIngredient);
-							error = true;
-							*/
-							sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
-							sourceIngredients.add(sourceIngredient);
-							ingredientCASNumberIndex.put(casNumber, sourceIngredient);
-							if ((ingredientCode != null) && (!ingredientCode.equals(""))) {
-								ingredientSourceCodeIndex.put(ingredientCode, sourceIngredient);
-							}
-						}
-					}
-				}
-				else {
-					if (!casNumber.equals("")) {
-						sourceIngredient = ingredientCASNumberIndex.get(casNumber);
-						if (sourceIngredient == null) {
-							sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
-							sourceIngredients.add(sourceIngredient);
-							ingredientCASNumberIndex.put(casNumber, sourceIngredient);
-							if ((ingredientCode != null) && (!ingredientCode.equals(""))) {
-								ingredientSourceCodeIndex.put(ingredientCode, sourceIngredient);
-							}
-						}
-					}
-					else {
-						for (SourceIngredient ingredient : sourceIngredients) {
-							if (ingredient.getCASNumber() == null) {
-								sourceIngredient = ingredient;
-								break;
-							}
-						}
-						if (sourceIngredient == null) {
-							sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
-							sourceIngredients.add(sourceIngredient);
-						}
-					}
-				}
-			}
-			else {
-				sourceIngredients = new ArrayList<SourceIngredient>();
-				ingredientNameIndex.put(ingredientNameNoSpaces, sourceIngredients);
-				sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
-				sourceIngredients.add(sourceIngredient);
-				if ((casNumber != null) && (!casNumber.equals(""))) {
-					ingredientCASNumberIndex.put(casNumber, sourceIngredient);
-				}
-				if ((ingredientCode != null) && (!ingredientCode.equals(""))) {
-					ingredientSourceCodeIndex.put(ingredientCode, sourceIngredient);
-				}
-			}
+			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 
+			ingredientSourceCodeIndex.put(ingredientCode, sourceIngredient);
 			allIngredients.add(sourceIngredient);
 		}
 
@@ -231,10 +141,17 @@ public class SourceDrug {
 	}
 	
 	
-	public SourceDrug(String sourceCode, String sourceName, String sourceATCCode, String formulation, String count) {
+	public SourceDrug(String sourceCode, String sourceName, String sourceATCCodes, String formulation, String count) {
 		this.code = sourceCode.equals("") ? null : sourceCode;
 		this.name = sourceName.equals("") ? null : sourceName;
-		this.atcCode = sourceATCCode.equals("") ? null : sourceATCCode;
+		if ((sourceATCCodes != null) && (!sourceATCCodes.equals(""))) {
+			String[] sourceATCCodesSplit = sourceATCCodes.split("\\|");
+			for (String sourceATCode : sourceATCCodesSplit) {
+				if (!sourceATCode.equals("")) {
+					atcCodeList.add(sourceATCode);
+				}
+			}
+		}
 		this.formulation = formulation.equals("") ? null : formulation;
 		try {
 			this.count = Long.valueOf(count);
@@ -258,8 +175,8 @@ public class SourceDrug {
 	}
 	
 	
-	public String getATCCode() {
-		return atcCode;
+	public List<String> getATCCodes() {
+		return atcCodeList;
 	}
 	
 	
@@ -280,52 +197,6 @@ public class SourceDrug {
 	
 	public void setMatchString(String matchString) {
 		this.matchString = matchString;
-	}
-	
-	
-	public SourceIngredient AddIngredientByCASnumber(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
-		SourceIngredient sourceIngredient = null;
-		
-		sourceIngredient = SourceDrug.findIngredient(casNumber);
-		if (sourceIngredient == null) {
-			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
-			allIngredients.add(sourceIngredient);
-			if ((casNumber != null) && (!casNumber.equals(""))) {
-				ingredientCASNumberIndex.put(casNumber, sourceIngredient);
-			}
-		}
-		sourceIngredient.addCount(getCount());
-
-		return AddIngredient(sourceIngredient, dosage, dosageUnit);
-	}
-	
-	
-	public SourceIngredient AddIngredient(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber, String dosage, String dosageUnit) {
-		SourceIngredient sourceIngredient = null;
-
-		for (SourceIngredient ingredient : allIngredients) {
-			if (ingredient.matches(ingredientName, ingredientNameEnglish, casNumber)) {
-				sourceIngredient = ingredient;
-				break;
-			}
-		}
-		if (sourceIngredient == null) {
-			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
-			allIngredients.add(sourceIngredient);
-			if (!ingredientName.equals("")) {
-				List<SourceIngredient> sourceIngredients = ingredientNameIndex.get(sourceIngredient.getIngredientNameNoSpaces());
-				if (sourceIngredients == null) {
-					sourceIngredients = new ArrayList<SourceIngredient>();
-				}
-				sourceIngredients.add(sourceIngredient);
-				if (sourceIngredient.getCASNumber() != null) {
-					ingredientCASNumberIndex.put(sourceIngredient.getCASNumber(), sourceIngredient);
-				}
-			}
-		}
-		sourceIngredient.addCount(getCount());
-
-		return AddIngredient(sourceIngredient, dosage, dosageUnit);
 	}
 	
 	
@@ -429,7 +300,11 @@ public class SourceDrug {
 	public String toString() {
 		String description = (code == null ? "" : DrugMappingStringUtilities.escapeFieldValue(code));
 		description += "," + (name == null ? "" : DrugMappingStringUtilities.escapeFieldValue(name));
-		description += "," + (atcCode == null ? "" : DrugMappingStringUtilities.escapeFieldValue(atcCode));
+		String atcCodes = "";
+		for (String atcCode : atcCodeList) {
+			atcCodes += atcCodes + (atcCode.equals("") ? "" : "|") + atcCode;
+		}
+		description += "," + (atcCodes == null ? "" : DrugMappingStringUtilities.escapeFieldValue(atcCodes));
 		description += "," + (formulation == null ? "" : DrugMappingStringUtilities.escapeFieldValue(formulation));
 		description += "," + (count == null ? "" : count);
 		return description;

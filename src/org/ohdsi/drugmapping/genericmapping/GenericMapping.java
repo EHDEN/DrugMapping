@@ -312,7 +312,7 @@ public class GenericMapping extends Mapping {
 								
 								//System.out.println("    " + sourceDrug);
 								
-								if (sourceDrug.getATCCode() == null) {
+								if ((sourceDrug.getATCCodes() == null) && (sourceDrug.getATCCodes().size() == 0)) {
 									if (missingATCFile != null) {
 										sourceDrug.writeDescriptionToFile("", missingATCFile);
 									}
@@ -326,7 +326,7 @@ public class GenericMapping extends Mapping {
 						}
 
 						if (sourceDrug != null) {
-							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", false); 
+							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", false).trim().toUpperCase(); 
 							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase();
 							String ingredientNameEnglish = ""; //sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
 							String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
@@ -1021,15 +1021,23 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			List<SourceIngredient> sourceIngredients = sourceDrug.getIngredients();
-			if ((sourceDrug.getATCCode() != null) && (sourceIngredients.size() == 1)) {
+			if ((sourceDrug.getATCCodes() != null) && (sourceDrug.getATCCodes().size() > 0) && (sourceIngredients.size() == 1)) {
 				SourceIngredient sourceIngredient = sourceIngredients.get(0);
 				if (sourceIngredient.getMatchingIngredient() == null) {
-					Set<CDMIngredient> cdmATCIngredients = cdm.getCDMATCIngredientMap().get(sourceDrug.getATCCode());
+					String matchingATCCodes = "ATC:";
+					Set<CDMIngredient> cdmATCIngredients = new HashSet<CDMIngredient>();
+					for (String sourceATCCode : sourceDrug.getATCCodes()) {
+						Set<CDMIngredient> matchingIngredients = cdm.getCDMATCIngredientMap().get(sourceATCCode);
+						if ((matchingIngredients != null) && (matchingIngredients.size() > 0)) {
+							matchingATCCodes = matchingATCCodes + " " + sourceATCCode;
+							cdmATCIngredients.addAll(matchingIngredients);
+						}
+					}
 					if ((cdmATCIngredients != null) && (cdmATCIngredients.size() == 1)) {
 						CDMIngredient cdmIngredient = (CDMIngredient) cdmATCIngredients.toArray()[0];
 						ingredientMap.put(sourceIngredient, cdmIngredient);
 						sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-						sourceIngredient.setMatchString(sourceDrug.getATCCode());
+						sourceIngredient.setMatchString(matchingATCCodes);
 						matchedByATC++;
 					}
 				}
@@ -1910,7 +1918,7 @@ public class GenericMapping extends Mapping {
 			for (SourceIngredient sourceIngredient : sourceIngredients) {
 				CDMIngredient cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
 				
-				String record = sourceIngredient.getIngredientCode();
+				String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientNameEnglish());
 				record += "," + sourceIngredient.getCount();
@@ -2555,10 +2563,17 @@ public class GenericMapping extends Mapping {
 			if ((sourceDrug != null) && DrugMapping.settings.getBooleanSetting(MainFrame.PREFERENCE_ATC)) {
 				resultType = REJECTED_BY_ATC_PREFERENCE;
 				remove = new ArrayList<CDMConcept>();
-				String sourceATC = sourceDrug.getATCCode();
+				List<String> sourceATCCodes = sourceDrug.getATCCodes();
 				for (CDMConcept cdmConcept : conceptList) {
 					if (!cdmConcept.getConceptClassId().equals("Ingredient")) {
-						if (!((CDMDrug) cdmConcept).getATCs().contains(sourceATC)) {
+						boolean found = false;
+						for (String sourceATC : sourceATCCodes) {
+							if (((CDMDrug) cdmConcept).getATCs().contains(sourceATC)) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
 							remove.add(cdmConcept);
 						}
 					}

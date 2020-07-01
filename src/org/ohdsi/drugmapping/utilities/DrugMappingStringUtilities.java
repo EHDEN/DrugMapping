@@ -4,12 +4,14 @@ public class DrugMappingStringUtilities {
 	
 
 	public static String removeExtraSpaces(String string) {
+		/*
 		String orgString;
 		string = (string == null ? "" : string).trim();
 		do {
 			orgString = string;
 			string = orgString.replaceAll("  ", " ");
 		} while (string.length() != orgString.length());
+		*/
 		return string;
 	}
 	
