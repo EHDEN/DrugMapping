@@ -30,7 +30,7 @@ public class SourceDrug {
 	private String code = null;
 	private String name = null;
 	private List<String> atcCodeList = new ArrayList<String>();
-	private String formulation = null;
+	private List<String> formulationsList = new ArrayList<String>();
 	private Long count = null;
 	private List<SourceDrugComponent> components = new ArrayList<SourceDrugComponent>();
 	private String matchString = "";
@@ -141,26 +141,33 @@ public class SourceDrug {
 	}
 	
 	
-	public SourceDrug(String sourceCode, String sourceName, String sourceATCCodes, String formulation, String count) {
+	public SourceDrug(String sourceCode, String sourceName, String sourceATCCodes, String sourceFormulations, String count) {
 		this.code = sourceCode.equals("") ? null : sourceCode;
 		this.name = sourceName.equals("") ? null : sourceName;
 		if ((sourceATCCodes != null) && (!sourceATCCodes.equals(""))) {
 			String[] sourceATCCodesSplit = sourceATCCodes.split("\\|");
-			for (String sourceATCode : sourceATCCodesSplit) {
-				if (!sourceATCode.equals("")) {
-					atcCodeList.add(sourceATCode);
+			for (String sourceATCCode : sourceATCCodesSplit) {
+				if ((!sourceATCCode.equals("")) && (!atcCodeList.contains(sourceATCCode))) {
+					atcCodeList.add(sourceATCCode);
 				}
 			}
 		}
-		this.formulation = formulation.equals("") ? null : formulation;
+		if ((sourceFormulations != null) && (!sourceFormulations.equals(""))) {
+			String[] sourceFormulationsSplit = sourceFormulations.split("\\|");
+			for (String sourceFormulation : sourceFormulationsSplit) {
+				if ((!sourceFormulation.equals("")) && (!formulationsList.contains(sourceFormulation))) {
+					formulationsList.add(sourceFormulation);
+				}
+			}
+		}
 		try {
 			this.count = Long.valueOf(count);
 		}
 		catch (NumberFormatException e) {
 			this.count = -1L;
 		}
-		if (this.formulation != null) {
-			allForms.add(this.formulation);
+		if (this.formulationsList != null) {
+			allForms.addAll(formulationsList);
 		}
 	}
 	
@@ -180,8 +187,26 @@ public class SourceDrug {
 	}
 	
 	
-	public String getFormulation() {
-		return formulation;
+	public String getATCCodesString() {
+		String atcCodes = "";
+		for (String atcCode : atcCodeList) {
+			atcCodes += atcCodes + (atcCodes.equals("") ? "" : "|") + atcCode;
+		}
+		return atcCodes;
+	}
+	
+	
+	public List<String> getFormulations() {
+		return formulationsList;
+	}
+	
+	
+	public String getFormulationsString() {
+		String formulations = "";
+		for (String formulation : formulationsList) {
+			formulations += formulations + (formulations.equals("") ? "" : "|") + formulation;
+		}
+		return formulations;
 	}
 	
 	
@@ -300,12 +325,8 @@ public class SourceDrug {
 	public String toString() {
 		String description = (code == null ? "" : DrugMappingStringUtilities.escapeFieldValue(code));
 		description += "," + (name == null ? "" : DrugMappingStringUtilities.escapeFieldValue(name));
-		String atcCodes = "";
-		for (String atcCode : atcCodeList) {
-			atcCodes += atcCodes + (atcCode.equals("") ? "" : "|") + atcCode;
-		}
-		description += "," + (atcCodes == null ? "" : DrugMappingStringUtilities.escapeFieldValue(atcCodes));
-		description += "," + (formulation == null ? "" : DrugMappingStringUtilities.escapeFieldValue(formulation));
+		description += "," + DrugMappingStringUtilities.escapeFieldValue(getATCCodesString());
+		description += "," + DrugMappingStringUtilities.escapeFieldValue(getFormulationsString());
 		description += "," + (count == null ? "" : count);
 		return description;
 	}
