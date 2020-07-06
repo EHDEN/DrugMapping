@@ -227,7 +227,6 @@ public class DrugMapping {
 				logFileSettings("Ingredient Name Translation File", getFile("Ingredient Name Translation File"));
 				logFileSettings("Unit Mapping File", getFile("Unit Mapping File"));
 				logFileSettings("Dose Form Mapping File", getFile("Dose Form Mapping File"));
-				logFileSettings("CAS File", getFile("CAS File"));
 				logFileSettings("Manual CAS Mappings File", getFile("Manual CAS Mappings File"));
 				logFileSettings("Manual Ingedient Mappings - RxNorm File", getFile("Manual Ingedient Mappings - RxNorm File"));
 				logFileSettings("Manual Drug Mappings File", getFile("Manual Drug Mappings File"));
@@ -235,11 +234,10 @@ public class DrugMapping {
 				logGeneralSettings();
 				new GenericMapping(
 						getDatabase(), 
-						getFile("Generic Drugs File"), 
+						getFile("Generic Drugs File"),
 						getFile("Ingredient Name Translation File"),
-						getFile("Unit Mapping File"), 
-						getFile("Dose Form Mapping File"), 
-						getFile("CAS File"), 
+						getFile("Unit Mapping File"),
+						getFile("Dose Form Mapping File"),
 						getFile("Manual CAS Mappings File"), 
 						getFile("Manual Ingedient Mappings - RxNorm File"), 
 						getFile("Manual Drug Mappings File")

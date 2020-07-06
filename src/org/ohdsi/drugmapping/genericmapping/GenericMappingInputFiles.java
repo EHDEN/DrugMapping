@@ -203,34 +203,6 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								true
 						),
 						new FileDefinition(
-								"CAS File",
-								new String[] {
-										"This file should contain CAS numbers with their chemical name an synonyms."
-						  		},
-								new FileColumnDefinition[] {
-										new FileColumnDefinition(
-												"CASNumber",
-												new String[] {
-														"This is the CAS number of the substance."
-												}
-										),
-										new FileColumnDefinition(
-												"ChemicalName",
-												new String[] {
-														"This is the chemical name of the substance."
-												}
-										),
-										new FileColumnDefinition(
-												"Synonyms",
-												new String[] {
-														"This is a list of synonyms for the chemical name separated", 
-														"by a '|' character."
-												}
-										)
-								},
-								false
-						),
-						new FileDefinition(
 								"Manual CAS Mappings File",
 								new String[] {
 										"This file should contain mappings of CAS numbers to CDM Ingredient concepts",

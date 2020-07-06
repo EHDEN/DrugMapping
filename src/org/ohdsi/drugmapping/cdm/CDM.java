@@ -29,14 +29,28 @@ public class CDM {
 	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
 	
 	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	
 	private Map<String, Set<CDMIngredient>> cdmEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	
+	private Map<String, Set<CDMIngredient>> cdmFormOfIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymFormOfIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
 	private Map<String, Set<CDMIngredient>> cdmIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	
 	private Map<String, Set<CDMIngredient>> cdmSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	
 	private Map<String, Set<CDMIngredient>> cdmPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	
 	private Map<String, Set<CDMIngredient>> cdmOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	
 	private Map<String, Set<CDMIngredient>> cdmReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSynonymReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
 	private Map<String, CDMIngredient> cdmReplacedByIngredientConceptIdIndex = new HashMap<String, CDMIngredient>();
 	
 	private List<String> cdmIngredientNameIndexNameList = new ArrayList<String>();
@@ -69,19 +83,37 @@ public class CDM {
 	
 	public CDM(CDMDatabase database, List<String> report) {
 		cdmIngredientNameIndexNameList.add("Ingredient");
-		cdmIngredientNameIndexMap.put("Ingredient", cdmIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "Ingredient", cdmIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymIngredient", cdmSynonymIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("EquivalentToIngredient");
-		cdmIngredientNameIndexMap.put("EquivalentToIngredient", cdmEquivalentIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "EquivalentToIngredient", cdmEquivalentIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymEquivalentToIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymEquivalentToIngredient", cdmSynonymEquivalentIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("IngredientMapsToIngredient");
-		cdmIngredientNameIndexMap.put("IngredientMapsToIngredient", cdmIngredientMapsToIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "IngredientMapsToIngredient", cdmIngredientMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymIngredientMapsToIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymIngredientMapsToIngredient", cdmSynonymIngredientMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("PreciseIngredientMapsToIngredient");
-		cdmIngredientNameIndexMap.put("PreciseIngredientMapsToIngredient", cdmPreciseIngredientMapsToIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "PreciseIngredientMapsToIngredient", cdmPreciseIngredientMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymPreciseIngredientMapsToIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymPreciseIngredientMapsToIngredient", cdmSynonymPreciseIngredientMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SubstanceMapsToIngredient");
-		cdmIngredientNameIndexMap.put("SubstanceMapsToIngredient", cdmSubstanceMapsToIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "SubstanceMapsToIngredient", cdmSubstanceMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymSubstanceMapsToIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymSubstanceMapsToIngredient", cdmSynonymSubstanceMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("ReplacedByIngredient");
-		cdmIngredientNameIndexMap.put("ReplacedByIngredient", cdmReplacedByIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "ReplacedByIngredient", cdmReplacedByIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymReplacedByIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymReplacedByIngredient", cdmSynonymReplacedByIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("FormOfIngredient");
+		cdmIngredientNameIndexMap.put(     "FormOfIngredient", cdmFormOfIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymFormOfIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymFormOfIngredient", cdmSynonymFormOfIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("OtherMapsToIngredient");
-		cdmIngredientNameIndexMap.put("OtherMapsToIngredient", cdmOtherMapsToIngredientNameIndex);
+		cdmIngredientNameIndexMap.put(     "OtherMapsToIngredient", cdmOtherMapsToIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymOtherMapsToIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymOtherMapsToIngredient", cdmSynonymOtherMapsToIngredientNameIndex);
 		
 		try {
 			QueryParameters queryParameters = new QueryParameters();
@@ -93,15 +125,9 @@ public class CDM {
 			// Get CDM ingredients
 			getRxNormIngredients(connection, queryParameters, report);
 			
-			// Get "%RxNorm eq" RxNorm Ingredients
-			getRxNormEqRxNormIngredients(connection, queryParameters, report);
-			
-			// Get "Maps to" RxNorm Ingredients
-			getMapsToRxNormIngredients(connection, queryParameters, report);
-			
-			// Get CDM concepts replaced by RxNorm Ingredients
-			getConceptsReplacedByRxNormIngredients(connection, queryParameters, report);
-					
+			// Get CDM Ingredient relationships
+			getRxNormIngredientRelationships(connection, queryParameters, report);
+
 			// Get RxNorm Clinical Drugs with Form and Ingredients
 			getRxNormClinicalDrugsWithIngredients(connection, queryParameters, report);
 					
@@ -110,10 +136,7 @@ public class CDM {
 					
 			// Get RxNorm Clinical Drugs with Form and Ingredients
 			getRxNormClinicalDrugFormsWithIngredients(connection, queryParameters, report);
-					
-			// Get CDM RxNorm Ingredient ATCs
-			getRxNormIngredientATCs(connection, queryParameters, report);
-			
+
 			// Get CDM RxNorm Drug ATCs
 			getRxNormDrugATCs(connection, queryParameters, report);
 					
@@ -358,10 +381,10 @@ public class CDM {
 			Set<String> nameSet = getMatchingNames(cdmIngredientSynonym);
 			
 			for (String name : nameSet) {
-				Set<CDMIngredient> nameIngredients = cdmIngredientNameIndex.get(name); 
+				Set<CDMIngredient> nameIngredients = cdmSynonymIngredientNameIndex.get(name); 
 				if (nameIngredients == null) {
 					nameIngredients = new HashSet<CDMIngredient>();
-					cdmIngredientNameIndex.put(name, nameIngredients);
+					cdmSynonymIngredientNameIndex.put(name, nameIngredients);
 				}
 				nameIngredients.add(lastCdmIngredient);
 			}
@@ -383,121 +406,106 @@ public class CDM {
 	}
 	
 	
-	private void getRxNormEqRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM '%RxNorm eq' RxNorm Ingredients ...");
+	private void getRxNormIngredientRelationships(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredient Relationships ...");
 		
-		for (Row queryRow : connection.queryResource("GetRxNormEquivalentIngredients.sql", queryParameters)) {
-			//String drugConceptId = queryRow.get("drug_concept_id", true).trim();
-			String drugConceptName = queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String cdmIngredientConceptId = queryRow.get("equivalent_concept_id", true).trim();
-			String drugNameSynonym = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+		for (Row queryRow : connection.queryResource("GetRxNormIngredientRelationships.sql", queryParameters)) {
+			String relationshipId = queryRow.get("relationship_id", true);
+			String drugConceptId = queryRow.get("drug_concept_id", true);
+			String drugConceptName = queryRow.get("drug_concept_name", true);
+			String drugVocabularyId = queryRow.get("drug_vocabulary_id", true);
+			String drugConceptClassId = queryRow.get("drug_concept_class_id", true);
+			String drugConceptCode = queryRow.get("drug_concept_code", true);
+			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
+			String drugSynonymName = queryRow.get("drug_synonym_name", true);
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
 			if (cdmIngredient != null) {
 				Set<String> nameSet = getMatchingNames(drugConceptName);
-				nameSet.addAll(getMatchingNames(drugNameSynonym));
+				Set<String> synonymNameSet = getMatchingNames(drugSynonymName);
 				
-				for (String name : nameSet) {
-					Set<CDMIngredient> nameIngredients = cdmEquivalentIngredientNameIndex.get(name); 
-					if (nameIngredients == null) {
-						nameIngredients = new HashSet<CDMIngredient>();
-						cdmEquivalentIngredientNameIndex.put(name, nameIngredients);
-					}
-					nameIngredients.add(cdmIngredient);
+				Map<String, Set<CDMIngredient>> ingredientNameIndex = null;
+				Map<String, Set<CDMIngredient>> synonymIngredientNameIndex = null;
+				Map<String, Set<CDMIngredient>> atcIngredientMap = null;
+				
+				if (relationshipId.equals("ATC - RxNorm") && drugConceptClassId.equals("ATC 5th") && (!drugConceptCode.equals(""))) {
+					atcIngredientMap = cdmATCIngredientMap;
 				}
-			}
-		}
-		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
-	}
-	
-	
-	private void getMapsToRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM 'Maps to' RxNorm Ingredients ...");
-		
-		for (Row queryRow : connection.queryResource("GetMapsToRxNormIngredients.sql", queryParameters)) {
-			//String drugConceptId = queryRow.get("drug_concept_id", true).trim();
-			String drugConceptName = queryRow.get("drug_concept_name", true).trim().toUpperCase();
-			String drugConceptClassId = queryRow.get("drug_concept_class_id", true).trim();
-			String cdmIngredientConceptId = queryRow.get("mapsto_concept_id", true).trim();
-			String drugNameSynonym = queryRow.get("drug_synonym_name", true).trim().toUpperCase();
-			
-			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-			
-			if (cdmIngredient != null) {
-				
-				Set<String> nameSet = getMatchingNames(drugConceptName); 
-				nameSet.addAll(getMatchingNames(drugNameSynonym));
-
-				Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmOtherMapsToIngredientNameIndex;
-				if (drugConceptClassId.equals("Ingredient"))              ingredientNameIndex = cdmIngredientMapsToIngredientNameIndex;
-				else if (drugConceptClassId.equals("Precise Ingredient")) ingredientNameIndex = cdmPreciseIngredientMapsToIngredientNameIndex;
-				else if (drugConceptClassId.equals("Substance"))          ingredientNameIndex = cdmSubstanceMapsToIngredientNameIndex;
-				
-				for (String name : nameSet) {
-					Set<CDMIngredient> nameIngredients = ingredientNameIndex.get(name); 
-					if (nameIngredients == null) {
-						nameIngredients = new HashSet<CDMIngredient>();
-						ingredientNameIndex.put(name, nameIngredients);
-					}
-					nameIngredients.add(cdmIngredient);
+				else if (relationshipId.equals("Form of")) {
+					ingredientNameIndex = cdmFormOfIngredientNameIndex;
+					synonymIngredientNameIndex = cdmSynonymFormOfIngredientNameIndex;
 				}
-			}
-		}
-		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
-	}
-	
-	
-	private void getConceptsReplacedByRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM concepts replaced by RxNorm Ingredients ...");
-		
-		for (Row queryRow : connection.queryResource("GetConceptReplacedByRxNormIngredient.sql", queryParameters)) {
-			String cdmReplacedByName      = queryRow.get("replaced_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
-			String cdmReplacedConceptId   = queryRow.get("replaced_concept_id", true);
-			String cdmReplacedByConceptId = queryRow.get("replaced_by_concept_id", true);
-			
-			CDMIngredient cdmIngredient = cdmIngredients.get(cdmReplacedByConceptId);
-			if (cdmIngredient != null) {
-				
-				Set<String> nameSet = getMatchingNames(cdmReplacedByName); 
-				
-				for (String name : nameSet) {
-					Set<CDMIngredient> nameIngredients = cdmReplacedByIngredientNameIndex.get(name); 
-					if (nameIngredients == null) {
-						nameIngredients = new HashSet<CDMIngredient>();
-						cdmReplacedByIngredientNameIndex.put(name, nameIngredients);
+				else if (relationshipId.equals("Concept replaced by")) {
+					ingredientNameIndex = cdmReplacedByIngredientNameIndex;
+					synonymIngredientNameIndex = cdmSynonymReplacedByIngredientNameIndex;
+					if ((drugConceptId != null) && (!drugConceptId.equals(""))) {
+						cdmReplacedByIngredientConceptIdIndex.put(drugConceptId, cdmIngredient);
 					}
-					nameIngredients.add(cdmIngredient);
+				}
+				else if (relationshipId.equals("Maps to")) {
+					ingredientNameIndex = cdmOtherMapsToIngredientNameIndex;
+					synonymIngredientNameIndex = cdmSynonymOtherMapsToIngredientNameIndex;
+					if (drugConceptClassId.equals("Ingredient")) {
+						ingredientNameIndex = cdmIngredientMapsToIngredientNameIndex;
+						synonymIngredientNameIndex = cdmSynonymIngredientMapsToIngredientNameIndex;
+					}
+					else if (drugConceptClassId.equals("Precise Ingredient")) {
+						ingredientNameIndex = cdmPreciseIngredientMapsToIngredientNameIndex;
+						synonymIngredientNameIndex = cdmSynonymPreciseIngredientMapsToIngredientNameIndex;
+					}
+					else if (drugConceptClassId.equals("Substance")) {
+						ingredientNameIndex = cdmSubstanceMapsToIngredientNameIndex;
+						synonymIngredientNameIndex = cdmSynonymSubstanceMapsToIngredientNameIndex;
+					}
+					
+					if (drugVocabularyId.equals("ATC") && drugConceptClassId.equals("ATC 5th") && (!drugConceptCode.equals(""))) {
+						atcIngredientMap = cdmATCIngredientMap;
+					}
+				}
+				else if (relationshipId.endsWith(" - RxNorm eq")) {
+					ingredientNameIndex = cdmEquivalentIngredientNameIndex;
+					synonymIngredientNameIndex = cdmSynonymEquivalentIngredientNameIndex;
 				}
 				
-				cdmReplacedByIngredientConceptIdIndex.put(cdmReplacedConceptId, cdmIngredient);
-			} 
-		}
-		
-		for (String ingredientNameIndexName : cdmIngredientNameIndexNameList) {
-			Map<String, Set<CDMIngredient>> ingredientNameIndex = cdmIngredientNameIndexMap.get(ingredientNameIndexName);
-
-			for (String ingredientName : ingredientNameIndex.keySet()) {
-				Set<CDMIngredient> ingredientNameIngredients = ingredientNameIndex.get(ingredientName);
-				if ((ingredientNameIngredients != null) && (ingredientNameIngredients.size() > 1) && (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS))) {
-					System.out.println("      WARNING: Multiple ingredients found for name '" + ingredientName + "' in " + ingredientNameIndexName + " index");
-					for (CDMIngredient cdmIngredient : ingredientNameIngredients) {
-						String ingredientDescription = cdmIngredient.toString();
-						boolean firstSynonym = true;
-						for (String synonym : cdmIngredient.getSynonyms()) {
-							if (firstSynonym) {
-								ingredientDescription += "  Synonyms: ";
-								firstSynonym = false;	
-							}
-							else {
-								ingredientDescription += ", ";
-							}
-							ingredientDescription += "'" + synonym + "'";
+				if (ingredientNameIndex != null) {
+					for (String name : nameSet) {
+						Set<CDMIngredient> nameIngredients = ingredientNameIndex.get(name); 
+						if (nameIngredients == null) {
+							nameIngredients = new HashSet<CDMIngredient>();
+							ingredientNameIndex.put(name, nameIngredients);
 						}
-						System.out.println("                   " + ingredientDescription);
+						nameIngredients.add(cdmIngredient);
 					}
+				}
+				
+				if (synonymIngredientNameIndex != null) {
+					for (String name : synonymNameSet) {
+						Set<CDMIngredient> nameIngredients = synonymIngredientNameIndex.get(name); 
+						if (nameIngredients == null) {
+							nameIngredients = new HashSet<CDMIngredient>();
+							synonymIngredientNameIndex.put(name, nameIngredients);
+						}
+						nameIngredients.add(cdmIngredient);
+					}
+				}
+				
+				if ((drugConceptCode != null) && (!drugConceptCode.equals("")) && (atcIngredientMap != null)) {
+					String ingredientATC = cdmIngredient.getATC();
+					if ((ingredientATC != null) && (!ingredientATC.equals(""))) {
+						if (!drugConceptCode.equals(ingredientATC)) {
+							cdmIngredient.setATC(null);
+						}
+					}
+					else {
+						cdmIngredient.setATC(drugConceptCode);
+					}
+					Set<CDMIngredient> cdmATCIngredients = atcIngredientMap.get(drugConceptCode);
+					if (cdmATCIngredients == null) {
+						cdmATCIngredients = new HashSet<CDMIngredient>();
+						atcIngredientMap.put(drugConceptCode, cdmATCIngredients);
+					}
+					cdmATCIngredients.add(cdmIngredient);
 				}
 			}
 		}
@@ -662,39 +670,6 @@ public class CDM {
 		}
 
 		report.add("RxNorm Clinical Drug Forms found: " + Integer.toString(cdmDrugForms.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
-	}
-	
-	
-	private void getRxNormIngredientATCs(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredient ATCs ...");
-		
-		for (Row queryRow : connection.queryResource("GetRxNormIngredientATC.sql", queryParameters)) {
-			String cdmIngredientConceptId = queryRow.get("concept_id", true);
-			String cdmIngredientATC = queryRow.get("atc", true);
-			
-			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-			if (cdmIngredient != null) {
-				cdmIngredient.setATC(cdmIngredientATC);
-				Set<CDMIngredient> cdmATCIngredients = cdmATCIngredientMap.get(cdmIngredientATC);
-				if (cdmATCIngredients == null) {
-					cdmATCIngredients = new HashSet<CDMIngredient>();
-					cdmATCIngredientMap.put(cdmIngredientATC, cdmATCIngredients);
-				}
-				cdmATCIngredients.add(cdmIngredient);
-				
-			}
-		}
-
-		Integer atcCount = 0;
-		for (String cdmIngredientConceptId : cdmIngredients.keySet()) {
-			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-			if (cdmIngredient.getATC() != null) {
-				atcCount++;
-			}
-		}
-		
-		report.add("CDM Ingredients with ATC: " + DrugMappingNumberUtilities.percentage((long) atcCount, (long) cdmIngredients.size()));
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
 	

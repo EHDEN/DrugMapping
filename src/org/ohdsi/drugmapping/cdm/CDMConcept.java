@@ -143,6 +143,16 @@ public class CDMConcept {
 	public String getValidStartDate() {
 		return valid_start_date;
 	}
+
+	
+	public String getValidEndDate() {
+		return valid_end_date;
+	}
+
+	
+	public String getInvalidReason() {
+		return invalid_reason;
+	}
 	
 	
 	public String toString() {

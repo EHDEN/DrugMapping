@@ -40,6 +40,8 @@ public class MainFrame {
 	
 	private static final String ICON = "/org/ohdsi/drugmapping/gui/OHDSI Icon Picture 048x048.gif"; 
 	
+	public static int VOCABULARY_ID;
+	
 	public static int MINIMUM_USE_COUNT;
 	public static int MAXIMUM_STRENGTH_DEVIATION;
 	
@@ -156,7 +158,8 @@ public class MainFrame {
 		DrugMapping.settings = null;
 		if (!DrugMapping.special.equals("ZINDEX")) {
 			DrugMapping.settings = new GeneralSettings(this);
-			
+
+			VOCABULARY_ID                       = DrugMapping.settings.addSetting(new StringValueSetting(this, "VocabularyID", "Vocabulary ID:", ""));
 			MINIMUM_USE_COUNT                   = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
 			MAXIMUM_STRENGTH_DEVIATION          = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
 			PREFERENCE_RXNORM                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));

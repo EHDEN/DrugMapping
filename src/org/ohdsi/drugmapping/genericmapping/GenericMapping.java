@@ -161,7 +161,7 @@ public class GenericMapping extends Mapping {
 	
 		
 	
-	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile ingredientNameTranslationFile, InputFile unitMappingFile, InputFile formMappingFile, InputFile casFile, InputFile manualCASMappingFile, InputFile manualIngredientMappingFile, InputFile manualDrugMappingFile) {
+	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile ingredientNameTranslationFile, InputFile unitMappingFile, InputFile formMappingFile, InputFile manualCASMappingFile, InputFile manualIngredientMappingFile, InputFile manualDrugMappingFile) {
 		boolean ok = true;
 		
 		forms = new HashSet<String>();
@@ -230,9 +230,6 @@ public class GenericMapping extends Mapping {
 		
 		// Load manual drug mappings
 		ok = ok && getManualDrugMappings(manualDrugMappingFile);
-		
-		// Load CAS names
-		ok = ok && getCASNames(casFile);
 		
 		// Match ingredients by ATC and full name
 		ok = ok && matchIngredients();
@@ -686,75 +683,6 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getCASNames(InputFile casFile) {
-		boolean ok = true;
-		
-		if ((casFile != null) && casFile.isSelected()) {
-			externalCASSynonymsMap = new HashMap<String, List<String>>();
-			
-			System.out.println(DrugMapping.getCurrentTime() + "     Loading CAS names ...");
-			
-			if (casFile.fileExists()) {
-				try {
-					if (casFile.openFile()) {
-						while (casFile.hasNext()) {
-							Row row = casFile.next();
-							
-							String casNumber = casFile.get(row, "CASNumber", true).trim();
-							String chemicalName = casFile.get(row, "ChemicalName", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
-							String synonyms = casFile.get(row, "Synonyms", true).replaceAll("\n", " ").replaceAll("\r", " ").toUpperCase().trim();
-							String[] synonymSplit = synonyms.split("[|]");
-							
-							if (!casNumber.equals("")) {
-								casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
-								List<String> casNames = new ArrayList<String>();
-								
-								casNames.add(chemicalName);
-
-								for (String synonym : synonymSplit) {
-									if (!casNames.contains(synonym)) {
-										casNames.add(synonym);
-									}
-								}
-								
-								String modifiedName = DrugMappingStringUtilities.modifyName(chemicalName);
-								if (!casNames.contains(modifiedName)) {
-									casNames.add(modifiedName);
-								}
-
-								for (String synonym : synonymSplit) {
-									modifiedName = DrugMappingStringUtilities.modifyName(synonym);
-									if (!casNames.contains(modifiedName)) {
-										casNames.add(modifiedName);
-									}
-								}
-
-								externalCASSynonymsMap.put(casNumber, casNames);
-							}
-						}
-					}
-					else {
-						ok = false;
-					}
-				}
-				catch (NoSuchElementException fileException) {
-					System.out.println("  ERROR: " + fileException.getMessage());
-				}
-			}
-			else {
-				System.out.println("         No CAS File found.");
-			}
-			
-			System.out.println(DrugMapping.getCurrentTime() + "     Done");
-		}
-		else {
-			System.out.println(DrugMapping.getCurrentTime() + "     No CAS file used.");
-		}
-		
-		return ok;
-	}
-	
-	
 	private boolean matchIngredients() {
 		boolean ok = true;
 		
@@ -791,21 +719,37 @@ public class GenericMapping extends Mapping {
 					
 					String casNr = sourceIngredient.getCASNumber();
 					if (casNr != null) {
-						CDMIngredient cdmIngredient = manualCASMappings.get(casNr);
-						if (cdmIngredient != null) { // Manual mapping found
-							ingredientMap.put(sourceIngredient, cdmIngredient);
-							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-							sourceIngredient.setMatchString("MANUAL CAS");
-							matchedManualByCASNumber++;
-						}
-						else {
-							cdmIngredient = cdm.getCDMCASIngredientMap().get(casNr);
-							if (cdmIngredient != null) {
-								ingredientMap.put(sourceIngredient, cdmIngredient);
-								sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-								sourceIngredient.setMatchString("CDM CAS");
+						String matchString = null;
+						CDMIngredient cdmIngredient = cdm.getCDMCASIngredientMap().get(casNr);
+						CDMIngredient cdmIngredientManual = manualCASMappings.get(casNr);
+						if (cdmIngredient != null) {
+							if (cdmIngredientManual != null) {
+								if (cdmIngredient != cdmIngredientManual) {
+									cdmIngredient = cdmIngredientManual;
+									matchString = "MANUAL CAS OVERRULED CDM CAS";
+									matchedManualByCASNumber++;
+								}
+								else {
+									matchString = "CDM CAS - MANUAL CAS OBSOLETE";
+									matchedByCDMCASNumber++;
+								}
+							}
+							else {
+								matchString = "CDM CAS";
 								matchedByCDMCASNumber++;
 							}
+						}
+						else {
+							if (cdmIngredientManual != null) {
+								cdmIngredient = cdmIngredientManual;
+								matchString = "MANUAL CAS";
+								matchedManualByCASNumber++;
+							}
+						}
+						if (cdmIngredient != null) {
+							ingredientMap.put(sourceIngredient, cdmIngredient);
+							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+							sourceIngredient.setMatchString(matchString);
 						}
 					}
 				}
@@ -2029,6 +1973,17 @@ public class GenericMapping extends Mapping {
 		header += "," + "valid_end_date";
 		header += "," + "invalid_reason	atc";
 		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping.csv", header);
+		
+		header = "source_code";
+		header += "," + "source_concept_id";
+		header += "," + "source_vocabulary_id";
+		header += "," + "source_code_description";
+		header += "," + "target_concept_id";
+		header += "," + "target_vocabulary_id";
+		header += "," + "valid_start_date";
+		header += "," + "valid_end_date";
+		header += "," + "invalid_reason";
+		PrintWriter sourceToConceptMapFile = DrugMappingFileUtilities.openOutputFile("SourceToConceptMap.csv", header);
 
 		header = "MappingStatus";
 		header += "," + SourceDrug.getHeader();
@@ -2104,7 +2059,8 @@ public class GenericMapping extends Mapping {
 							}
 							
 						});
-						
+
+						String sourceToConceptRecord = "";
 						for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
 							mappingLog = "";
 							Map<Integer, List<CDMConcept>> mappingResult = mappingResultList.get(ingredientNr); 
@@ -2130,7 +2086,19 @@ public class GenericMapping extends Mapping {
 								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
 								
 								mappingLog = sourceDrugComponent.getMatchString();
-								
+
+								/*
+								sourceToConceptRecord = sourceDrugComponent.getIngredient().getIngredientCode();
+								sourceToConceptRecord += ",";
+								sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+								sourceToConceptRecord += "," + sourceDrugComponent.getIngredient().getIngredientName();
+								*/
+							}
+							else {
+								sourceToConceptRecord = sourceDrug.getCode();
+								sourceToConceptRecord += ",";
+								sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+								sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
 							}
 							if (mappingResult != null) {
 								// Write the result records
@@ -2168,6 +2136,14 @@ public class GenericMapping extends Mapping {
 										if ((mappingResultType == MAPPED) || ((mappingType == INGREDIENT_MAPPING) && (mappingResultType == NO_MAPPING))) {
 											CDMConcept result = results.get(0);
 											drugMappingRecord += "," + (result == null ? "" : result.toString());
+
+											if ((mappingType != INGREDIENT_MAPPING) && (mappingResultType != NO_MAPPING)) {
+												sourceToConceptRecord += "," + result.getConceptId();
+												sourceToConceptRecord += "," + result.getVocabularyId();
+												sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
+												sourceToConceptRecord += ",";
+												sourceToConceptRecord += ",";
+											}
 											
 											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptId()));
 											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptName()));
@@ -2216,6 +2192,9 @@ public class GenericMapping extends Mapping {
 										if ((mappingResultType == MAPPED) || ((mappingType == INGREDIENT_MAPPING) && (mappingResultType == NO_MAPPING))) {
 											drugMappingFile.println(drugMappingRecord);
 											drugMappingDebugFile.println(debugRecord);
+											if ((mappingType != INGREDIENT_MAPPING) && (mappingResultType != NO_MAPPING)) {
+												sourceToConceptMapFile.println(sourceToConceptRecord);
+											}
 										}
 										drugMappingResultsFile.println(resultRecord);
 									}
@@ -2748,18 +2727,6 @@ public class GenericMapping extends Mapping {
 	private void logMappingResult(SourceDrug sourceDrug, int mapping, int resultType, CDMDrug cdmDrug) {
 		List<CDMConcept> conceptList = new ArrayList<CDMConcept>();
 		conceptList.add(cdmDrug);
-		logMappingResult(sourceDrug, mapping, resultType, conceptList);
-	}
-	
-	
-	private void logMappingResult(SourceDrug sourceDrug, int mapping, int resultType, Set<CDMDrug> cdmDrugSet) {
-		List<CDMConcept> conceptList = new ArrayList<CDMConcept>();
-		if (cdmDrugSet != null) {
-			conceptList.addAll(cdmDrugSet);
-		}
-		else {
-			conceptList.add(null);
-		}
 		logMappingResult(sourceDrug, mapping, resultType, conceptList);
 	}
 	
