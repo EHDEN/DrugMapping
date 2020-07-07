@@ -59,7 +59,7 @@ public class UnitConversion {
 			while (sourceUnitMappingFile.hasNext()) {
 				Row row = sourceUnitMappingFile.next();
 				
-				String sourceUnit = DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "SourceUnit", true)).toUpperCase();
+				String sourceUnit = DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "SourceUnit", true));
 				//String drugCountString = sourceUnitMappingFile.get(row, "DrugCount", false);
 				//String recordCountString = sourceUnitMappingFile.get(row, "RecordCount", false);
 				String factorString = sourceUnitMappingFile.get(row, "Factor", true);

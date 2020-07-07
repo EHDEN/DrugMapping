@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -86,10 +87,18 @@ public class CDM {
 		cdmIngredientNameIndexMap.put(     "Ingredient", cdmIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SynonymIngredient");
 		cdmIngredientNameIndexMap.put(     "SynonymIngredient", cdmSynonymIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("ReplacedByIngredient");
+		cdmIngredientNameIndexMap.put(     "ReplacedByIngredient", cdmReplacedByIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymReplacedByIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymReplacedByIngredient", cdmSynonymReplacedByIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("EquivalentToIngredient");
 		cdmIngredientNameIndexMap.put(     "EquivalentToIngredient", cdmEquivalentIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SynonymEquivalentToIngredient");
 		cdmIngredientNameIndexMap.put(     "SynonymEquivalentToIngredient", cdmSynonymEquivalentIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("FormOfIngredient");
+		cdmIngredientNameIndexMap.put(     "FormOfIngredient", cdmFormOfIngredientNameIndex);
+		cdmIngredientNameIndexNameList.add("SynonymFormOfIngredient");
+		cdmIngredientNameIndexMap.put(     "SynonymFormOfIngredient", cdmSynonymFormOfIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("IngredientMapsToIngredient");
 		cdmIngredientNameIndexMap.put(     "IngredientMapsToIngredient", cdmIngredientMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SynonymIngredientMapsToIngredient");
@@ -102,14 +111,6 @@ public class CDM {
 		cdmIngredientNameIndexMap.put(     "SubstanceMapsToIngredient", cdmSubstanceMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SynonymSubstanceMapsToIngredient");
 		cdmIngredientNameIndexMap.put(     "SynonymSubstanceMapsToIngredient", cdmSynonymSubstanceMapsToIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("ReplacedByIngredient");
-		cdmIngredientNameIndexMap.put(     "ReplacedByIngredient", cdmReplacedByIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("SynonymReplacedByIngredient");
-		cdmIngredientNameIndexMap.put(     "SynonymReplacedByIngredient", cdmSynonymReplacedByIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("FormOfIngredient");
-		cdmIngredientNameIndexMap.put(     "FormOfIngredient", cdmFormOfIngredientNameIndex);
-		cdmIngredientNameIndexNameList.add("SynonymFormOfIngredient");
-		cdmIngredientNameIndexMap.put(     "SynonymFormOfIngredient", cdmSynonymFormOfIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("OtherMapsToIngredient");
 		cdmIngredientNameIndexMap.put(     "OtherMapsToIngredient", cdmOtherMapsToIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SynonymOtherMapsToIngredient");
@@ -150,7 +151,7 @@ public class CDM {
 			getCDMForms(connection, queryParameters, report);
 			
 			// Write Ingredients Name index to file
-			writeIngredientsNameIndexToFile();
+			writeNameIndexesToFile();
 			
 			// Close database connection
 			connection.close();
@@ -412,12 +413,12 @@ public class CDM {
 		for (Row queryRow : connection.queryResource("GetRxNormIngredientRelationships.sql", queryParameters)) {
 			String relationshipId = queryRow.get("relationship_id", true);
 			String drugConceptId = queryRow.get("drug_concept_id", true);
-			String drugConceptName = queryRow.get("drug_concept_name", true);
+			String drugConceptName = queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			String drugVocabularyId = queryRow.get("drug_vocabulary_id", true);
 			String drugConceptClassId = queryRow.get("drug_concept_class_id", true);
 			String drugConceptCode = queryRow.get("drug_concept_code", true);
 			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
-			String drugSynonymName = queryRow.get("drug_synonym_name", true);
+			String drugSynonymName = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
@@ -875,15 +876,30 @@ public class CDM {
 	}
 	
 	
-	private void writeIngredientsNameIndexToFile() {
-		PrintWriter cdmRxNormIngredientsNameIndexFile = DrugMappingFileUtilities.openOutputFile("DrugMapping CDM RxNorm Ingredients Name Index.csv", "Name," + CDMIngredient.getHeader());
+	private void writeNameIndexesToFile() {
+		PrintWriter cdmRxNormIngredientsNameIndexFile = DrugMappingFileUtilities.openOutputFile("DrugMapping CDM RxNorm Ingredients Name Index.csv", "Index,Name," + CDMIngredient.getHeader());
 		
-		if (cdmRxNormIngredientsNameIndexFile != null) {
-			for (String name : cdmIngredientNameIndex.keySet()) {
-				Set<CDMIngredient> cdmIngredientsByName = cdmIngredientNameIndex.get(name);
-				for (CDMIngredient cdmIngredientByName : cdmIngredientsByName) {
-					String record = "\"" + name + "\"";
-					record += "," + cdmIngredientByName.toString();
+		for (String indexName : cdmIngredientNameIndexNameList) {
+			Map<String, Set<CDMIngredient>> index = cdmIngredientNameIndexMap.get(indexName);
+			List<String> names = new ArrayList<String>();
+			names.addAll(index.keySet());
+			Collections.sort(names);
+			
+			for (String name : names) {
+				List<CDMIngredient> cdmIngredients = new ArrayList<CDMIngredient>();
+				cdmIngredients.addAll(index.get(name));
+				Collections.sort(cdmIngredients, new Comparator<CDMIngredient>() {
+
+					@Override
+					public int compare(CDMIngredient cdmIngredient1, CDMIngredient cdmIngredient2) {
+						
+						return Integer.compare(Integer.valueOf(cdmIngredient1.getConceptId()), Integer.valueOf(cdmIngredient2.getConceptId()));
+					}
+				});
+				for (CDMIngredient cdmIngredient : cdmIngredients) {
+					String record = indexName;
+					record += "," + DrugMappingStringUtilities.escapeFieldValue(name);
+					record += "," + cdmIngredient.toString();
 					cdmRxNormIngredientsNameIndexFile.println(record);
 				}
 			}

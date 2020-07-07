@@ -25,7 +25,6 @@ public class SourceDrugComponent {
 	public SourceDrugComponent(SourceDrug sourceDrug, SourceIngredient ingredient, String dosage, String dosageUnit) {
 		this.ingredient = ingredient;
 		Double dosageValue = null;
-		dosageUnit = dosageUnit.toUpperCase();
 		
 		try {
 			dosageValue = Double.parseDouble(dosage);

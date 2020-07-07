@@ -326,14 +326,14 @@ public class GenericMapping extends Mapping {
 							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase();
 							String ingredientNameEnglish = ""; //sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
 							String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
-							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim().toUpperCase(); 
+							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim(); 
 							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true).trim();
 							
 							if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
 							ingredientName        = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
 							ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish);
 							dosage                = DrugMappingStringUtilities.removeExtraSpaces(dosage);
-							dosageUnit            = DrugMappingStringUtilities.removeExtraSpaces(dosageUnit).toUpperCase();
+							dosageUnit            = DrugMappingStringUtilities.removeExtraSpaces(dosageUnit);
 							casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
 
 							SourceIngredient sourceIngredient = null;
@@ -1852,6 +1852,7 @@ public class GenericMapping extends Mapping {
 	
 	
 	private void saveMapping() {
+		
 		// Save ingredient mapping
 		PrintWriter ingredientMappingFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Results.csv", SourceIngredient.getMatchHeader() + ",SourceCount," + CDMIngredient.getHeader());
 		
@@ -2013,7 +2014,7 @@ public class GenericMapping extends Mapping {
 		header += "," + "Mapping_log";
 		PrintWriter drugMappingDebugFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
 		
-		if ((drugMappingFile != null) && (drugMappingResultsFile != null)) {
+		if (drugMappingFile != null) {
 			System.out.println(DrugMapping.getCurrentTime() + "     Saving Drug Mapping Results ...");
 
 			// Sort source drugs on use count descending
@@ -2080,22 +2081,20 @@ public class GenericMapping extends Mapping {
 								sourceIngredientMappingString += "," + standardizedAmount(sourceDrugComponent);
 								sourceIngredientMappingString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
 								
-								sourceIngredientDebugString = sourceDrugComponent.getIngredient().getIngredientCode();
+								sourceIngredientDebugString = DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientCode());
 								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientName());
 								sourceIngredientDebugString += "," + standardizedAmount(sourceDrugComponent);
 								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
 								
 								mappingLog = sourceDrugComponent.getMatchString();
 
-								/*
-								sourceToConceptRecord = sourceDrugComponent.getIngredient().getIngredientCode();
+								sourceToConceptRecord = "Ingredient " + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientCode());
 								sourceToConceptRecord += ",";
 								sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
 								sourceToConceptRecord += "," + sourceDrugComponent.getIngredient().getIngredientName();
-								*/
 							}
 							else {
-								sourceToConceptRecord = sourceDrug.getCode();
+								sourceToConceptRecord = "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
 								sourceToConceptRecord += ",";
 								sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
 								sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
@@ -2137,7 +2136,7 @@ public class GenericMapping extends Mapping {
 											CDMConcept result = results.get(0);
 											drugMappingRecord += "," + (result == null ? "" : result.toString());
 
-											if ((mappingType != INGREDIENT_MAPPING) && (mappingResultType != NO_MAPPING)) {
+											if (mappingResultType != NO_MAPPING) {
 												sourceToConceptRecord += "," + result.getConceptId();
 												sourceToConceptRecord += "," + result.getVocabularyId();
 												sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
@@ -2192,7 +2191,7 @@ public class GenericMapping extends Mapping {
 										if ((mappingResultType == MAPPED) || ((mappingType == INGREDIENT_MAPPING) && (mappingResultType == NO_MAPPING))) {
 											drugMappingFile.println(drugMappingRecord);
 											drugMappingDebugFile.println(debugRecord);
-											if ((mappingType != INGREDIENT_MAPPING) && (mappingResultType != NO_MAPPING)) {
+											if (mappingResultType != NO_MAPPING) {
 												sourceToConceptMapFile.println(sourceToConceptRecord);
 											}
 										}
