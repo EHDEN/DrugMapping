@@ -295,9 +295,9 @@ public class GenericMapping extends Mapping {
 							sourceDrugCount++;
 							sourceDrug = new SourceDrug(
 												sourceCode, 
-												sourceDrugsFile.get(row, "SourceName", true).trim().toUpperCase(), 
-												sourceDrugsFile.get(row, "SourceATCCode", true).trim().toUpperCase(), 
-												sourceDrugsFile.get(row, "SourceFormulation", true).trim().toUpperCase(), 
+												DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceName", true)).toUpperCase(), 
+												DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceATCCode", true)).toUpperCase(), 
+												DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceFormulation", true)).toUpperCase(), 
 												sourceDrugsFile.get(row, "SourceCount", true).trim()
 												);
 							if (sourceDrug.getCount() >= minimumUseCount) {
@@ -323,17 +323,17 @@ public class GenericMapping extends Mapping {
 
 						if (sourceDrug != null) {
 							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", false).trim().toUpperCase(); 
-							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase();
+							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase().replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ");
 							String ingredientNameEnglish = ""; //sourceDrugsFile.get(row, "IngredientNameEnglish", true).trim().toUpperCase();
 							String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
 							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim(); 
 							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true).trim();
 							
 							if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
-							ingredientName        = DrugMappingStringUtilities.removeExtraSpaces(ingredientName);
-							ingredientNameEnglish = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish);
-							dosage                = DrugMappingStringUtilities.removeExtraSpaces(dosage);
-							dosageUnit            = DrugMappingStringUtilities.removeExtraSpaces(dosageUnit);
+							ingredientName        = DrugMappingStringUtilities.cleanString(ingredientName).toUpperCase();
+							ingredientNameEnglish = DrugMappingStringUtilities.cleanString(ingredientNameEnglish).toUpperCase();
+							dosage                = dosage;
+							dosageUnit            = dosageUnit;
 							casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
 
 							SourceIngredient sourceIngredient = null;
