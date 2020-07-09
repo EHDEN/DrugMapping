@@ -332,8 +332,6 @@ public class GenericMapping extends Mapping {
 							if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
 							ingredientName        = DrugMappingStringUtilities.cleanString(ingredientName).toUpperCase();
 							ingredientNameEnglish = DrugMappingStringUtilities.cleanString(ingredientNameEnglish).toUpperCase();
-							dosage                = dosage;
-							dosageUnit            = dosageUnit;
 							casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
 
 							SourceIngredient sourceIngredient = null;
@@ -1853,24 +1851,52 @@ public class GenericMapping extends Mapping {
 	
 	private void saveMapping() {
 		
+		System.out.println(DrugMapping.getCurrentTime() + "     Saving Mappings ...");
+		
+		// Sort the ingredients on use count descending.
+		List<SourceIngredient> sourceIngredients = new ArrayList<SourceIngredient>();
+		sourceIngredients.addAll(SourceDrug.getAllIngredients());
+		
+		Collections.sort(sourceIngredients, new Comparator<SourceIngredient>() {
+			@Override
+			public int compare(SourceIngredient ingredient1, SourceIngredient ingredient2) {
+				int countCompare = Long.compare(ingredient1.getCount() == null ? 0L : ingredient1.getCount(), ingredient2.getCount() == null ? 0L : ingredient2.getCount()); 
+				int compareResult = (countCompare == 0 ? (ingredient1.getIngredientCode() == null ? "" : ingredient1.getIngredientCode()).compareTo(ingredient2.getIngredientCode() == null ? "" : ingredient2.getIngredientCode()) : -countCompare);
+				//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
+				return compareResult;
+			}
+		});
+
+		// Sort source drugs on use count descending
+		Collections.sort(sourceDrugs, new Comparator<SourceDrug>() {
+			@Override
+			public int compare(SourceDrug sourceDrug1, SourceDrug sourceDrug2) {
+				int countCompare = Long.compare(sourceDrug1.getCount() == null ? 0L : sourceDrug1.getCount(), sourceDrug2.getCount() == null ? 0L : sourceDrug2.getCount()); 
+				int compareResult = (countCompare == 0 ? (sourceDrug1.getCode() == null ? "" : sourceDrug1.getCode()).compareTo(sourceDrug2.getCode() == null ? "" : sourceDrug2.getCode()) : -countCompare);
+				//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
+				return compareResult;
+			}
+		});
+		
+		saveIngredientMapping(sourceIngredients);
+		saveDrugMapping();
+		saveDrugMappingResults();
+			
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void saveIngredientMapping(List<SourceIngredient> sourceIngredients) {
+		
+		System.out.println(DrugMapping.getCurrentTime() + "       Saving Ingredient Mapping Results ...");
+		
 		// Save ingredient mapping
-		PrintWriter ingredientMappingFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Results.csv", SourceIngredient.getMatchHeader() + ",SourceCount," + CDMIngredient.getHeader());
+		String header = SourceIngredient.getMatchHeader();
+		header += "," + "SourceCount";
+		header += "," + CDMIngredient.getHeader();
+		PrintWriter ingredientMappingFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Results.csv", header);
 		
 		if (ingredientMappingFile != null) {
-			
-			// Sort the ingredients on use count descending.
-			List<SourceIngredient> sourceIngredients = new ArrayList<SourceIngredient>();
-			sourceIngredients.addAll(SourceDrug.getAllIngredients());
-			
-			Collections.sort(sourceIngredients, new Comparator<SourceIngredient>() {
-				@Override
-				public int compare(SourceIngredient ingredient1, SourceIngredient ingredient2) {
-					int countCompare = Long.compare(ingredient1.getCount() == null ? 0L : ingredient1.getCount(), ingredient2.getCount() == null ? 0L : ingredient2.getCount()); 
-					int compareResult = (countCompare == 0 ? (ingredient1.getIngredientCode() == null ? "" : ingredient1.getIngredientCode()).compareTo(ingredient2.getIngredientCode() == null ? "" : ingredient2.getIngredientCode()) : -countCompare);
-					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
-					return compareResult;
-				}
-			});
 			
 			for (SourceIngredient sourceIngredient : sourceIngredients) {
 				if (sourceIngredient.getMatchingIngredient() != null) {
@@ -1883,8 +1909,12 @@ public class GenericMapping extends Mapping {
 			
 			ingredientMappingFile.close();
 		}
+
+		System.out.println(DrugMapping.getCurrentTime() + "       Done");
 		
-		String header = "SourceIngredientCode";
+		System.out.println(DrugMapping.getCurrentTime() + "       Saving Ingredient Mapping Review ...");
+		
+		header =        "SourceIngredientCode";
 		header += "," + "SourceIngredientName";
 		header += "," + "SourceIngredientEnglishName";
 		header += "," + "SourceRecordCount";
@@ -1894,20 +1924,8 @@ public class GenericMapping extends Mapping {
 		header += "," + "concept_class_id";
 		header += "," + "MatchLog";
 		PrintWriter ingredientMappingDebugFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Review.csv", header);
+		
 		if (ingredientMappingDebugFile != null) {
-			
-			// Sort the ingredients on use count descending.
-			List<SourceIngredient> sourceIngredients = new ArrayList<SourceIngredient>();
-			sourceIngredients.addAll(SourceDrug.getAllIngredients());
-			
-			Collections.sort(sourceIngredients, new Comparator<SourceIngredient>() {
-				@Override
-				public int compare(SourceIngredient ingredient1, SourceIngredient ingredient2) {
-					int compareResult = (ingredient1.getIngredientName() == null ? "" : ingredient1.getIngredientName()).compareTo(ingredient2.getIngredientName() == null ? "" : ingredient2.getIngredientName());
-					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
-					return compareResult;
-				}
-			});
 			
 			for (SourceIngredient sourceIngredient : sourceIngredients) {
 				CDMIngredient cdmIngredient = cdm.getCDMIngredients().get(sourceIngredient.getMatchingIngredient());
@@ -1935,6 +1953,291 @@ public class GenericMapping extends Mapping {
 			
 			ingredientMappingDebugFile.close();
 		}
+
+		System.out.println(DrugMapping.getCurrentTime() + "       Done");
+	}
+	
+	
+	private void saveDrugMapping() {
+		
+		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping ...");
+		
+		String header = "MappingStatus";
+		header += "," + SourceDrug.getHeader();
+		header += "," + SourceIngredient.getHeader();
+		header += "," + "SourceIngredientAmount";
+		header += "," + "SourceIngredentUnit";
+		header += "," + "StrengthMarginPercentage";
+		header += "," + "MappingType";
+		header += "," + "concept_id";
+		header += "," + "concept_name";
+		header += "," + "domain_id";
+		header += "," + "vocabulary_id";
+		header += "," + "concept_class_id";
+		header += "," + "standard_concept";
+		header += "," + "concept_code";
+		header += "," + "valid_start_date";
+		header += "," + "valid_end_date";
+		header += "," + "invalid_reason	atc";
+		
+		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping.csv", header);
+		
+		header = "source_code";
+		header += "," + "source_concept_id";
+		header += "," + "source_vocabulary_id";
+		header += "," + "source_code_description";
+		header += "," + "target_concept_id";
+		header += "," + "target_vocabulary_id";
+		header += "," + "valid_start_date";
+		header += "," + "valid_end_date";
+		header += "," + "invalid_reason";
+		
+		PrintWriter sourceToConceptMapFile = DrugMappingFileUtilities.openOutputFile("SourceToConceptMap.csv", header);
+		
+		header = "SourceCode";
+		header += "," + "SourceName";
+		header += "," + "SourceCount";
+		header += "," + "SourceDoseForm";
+		header += "," + "SourceIngredientCode";
+		header += "," + "SourceIngredientName";
+		header += "," + "SourceIngredientAmount";
+		header += "," + "SourceIngredentUnit";
+		header += "," + "concept_id";
+		header += "," + "concept_name";
+		header += "," + "concept_class";
+		header += "," + "Mapping_log";
+		
+		PrintWriter drugMappingReviewFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
+
+		for (SourceDrug sourceDrug : sourceDrugs) {
+			String mappingStatus = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
+			Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
+			
+			// Get the mapping type
+			int mappingType = -1;
+			if (sourceDrugMappings != null) {
+				int mapping = 0;
+				while (mappingTypeDescriptions.get(mapping) != null) {
+					if ((mapping == INGREDIENT_MAPPING) && mappingStatus.equals("Mapped")) {
+						mappingType = INGREDIENT_MAPPING;
+						break;
+					}
+					else {
+						if ((sourceDrugMappings.get(mapping) != null) && (sourceDrugMappings.get(mapping).get(0).get(MAPPED) != null)) {
+							mappingType = mapping;
+							break;
+						}
+					}
+					mapping++;
+				}
+			}
+			
+			String drugMappingRecord = mappingStatus;
+			drugMappingRecord += "," + sourceDrug; 
+			
+			String sourceToConceptRecord = "";
+			
+			String drugMappingReviewRecord = DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+			drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+			drugMappingReviewRecord += "," + sourceDrug.getCount();
+			drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getFormulationsString());
+			
+			if (mappingType != -1) {
+				String mappingLog = sourceDrug.getMatchString();
+				List< Map<Integer, List<CDMConcept>>> mappingResultList = sourceDrugMappings.get(mappingType);
+				
+				if (mappingType == INGREDIENT_MAPPING) {
+					List<SourceDrugComponent> sourceDrugComponents = new ArrayList<SourceDrugComponent>();
+					sourceDrugComponents.addAll(sourceDrug.getComponents());
+					List<SourceDrugComponent> sortedSourceDrugComponents = new ArrayList<SourceDrugComponent>();
+					sortedSourceDrugComponents.addAll(sourceDrug.getComponents());
+					Collections.sort(sortedSourceDrugComponents, new Comparator<SourceDrugComponent>() {
+
+						@Override
+						public int compare(SourceDrugComponent sourceDrugComponent1, SourceDrugComponent sourceDrugComponent2) {
+							int compare = sourceDrugComponent1.getIngredient().getIngredientCode().compareTo(sourceDrugComponent2.getIngredient().getIngredientCode());
+							if (compare == 0) {
+								Double amount1 = sourceDrugComponent1.getDosage();
+								Double amount2 = sourceDrugComponent2.getDosage();
+								compare = (amount1 == null ? (amount2 == null ? 0 : -1) : (amount2 == null ? 1 : amount1.compareTo(amount2)));
+							}
+							return compare;
+						}
+						
+					});
+					
+					for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
+						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.get(ingredientNr);
+						SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
+						String key = "Ingredient " + sourceDrug.getCode() + "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientCode();
+						String strengthDeviationPercentage = "";
+						if (usedStrengthDeviationPercentageMap.get(key) != null) {
+							strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
+						}
+						
+						CDMConcept target = mappingResultList.get(sourceDrugComponents.indexOf(sourceDrugComponent)).get(MAPPED) == null ? null : mappingResultList.get(sourceDrugComponents.indexOf(sourceDrugComponent)).get(MAPPED).get(0);
+						mappingLog = sourceDrugComponent.getMatchString(); 
+						
+						String drugMappingIngredientRecord = drugMappingRecord;
+						drugMappingIngredientRecord += "," + sourceIngredient;
+						drugMappingIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
+						drugMappingIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						drugMappingIngredientRecord += "," + strengthDeviationPercentage;
+						drugMappingIngredientRecord += "," + mappingTypeDescriptions.get(mappingType);
+						drugMappingIngredientRecord += "," + (target == null ? CDMConcept.emptyRecord() : target.toString());
+						
+						drugMappingFile.println(drugMappingIngredientRecord);
+						
+						if (target != null) {
+							sourceToConceptRecord +=       "Ingredient " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+							sourceToConceptRecord += "," + "0";
+							sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+							sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+							sourceToConceptRecord += "," + target.getConceptId();
+							sourceToConceptRecord += "," + target.getVocabularyId();
+							sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
+							sourceToConceptRecord += ",";
+							sourceToConceptRecord += ",";
+							
+							sourceToConceptMapFile.println(sourceToConceptRecord);
+						}
+						
+
+						String drugMappingReviewIngredientRecord =       drugMappingReviewRecord;
+						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
+						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
+						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
+						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						if (target != null) {
+							drugMappingReviewIngredientRecord += "," + target.getConceptId();
+							drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(target.getConceptName());
+							drugMappingReviewIngredientRecord += "," + target.getConceptClassId();
+							drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingLog);
+						}
+						else {
+							drugMappingReviewIngredientRecord += ",";
+							drugMappingReviewIngredientRecord += ",";
+							drugMappingReviewIngredientRecord += ",";
+							drugMappingReviewIngredientRecord += ",";
+						}
+						
+						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+					}
+				}
+				else {
+					String key = "Drug " + sourceDrug.getCode();
+					String strengthDeviationPercentage = "";
+					if (usedStrengthDeviationPercentageMap.get(key) != null) {
+						strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
+					}
+					CDMConcept target = mappingResultList.get(0).get(MAPPED) == null ? null : mappingResultList.get(0).get(MAPPED).get(0);
+					
+					drugMappingRecord += "," + SourceIngredient.getStarredRecord();
+					drugMappingRecord += "," + "*";
+					drugMappingRecord += "," + "*";
+					drugMappingRecord += "," + strengthDeviationPercentage;
+					drugMappingRecord += "," + mappingTypeDescriptions.get(mappingType);
+					drugMappingRecord += "," + (target == null ? CDMConcept.emptyRecord() : target.toString());
+					
+					drugMappingFile.println(drugMappingRecord);
+					
+					
+					if (target != null) {
+						sourceToConceptRecord +=       "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+						sourceToConceptRecord += "," + "0";
+						sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+						sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+						sourceToConceptRecord += "," + target.getConceptId();
+						sourceToConceptRecord += "," + target.getVocabularyId();
+						sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
+						sourceToConceptRecord += ",";
+						sourceToConceptRecord += ",";
+						
+						sourceToConceptMapFile.println(sourceToConceptRecord);
+					}
+					
+
+					drugMappingReviewRecord += "," + "*";
+					drugMappingReviewRecord += "," + "*";
+					drugMappingReviewRecord += "," + "*";
+					drugMappingReviewRecord += "," + "*";
+					if (target != null) {
+						drugMappingReviewRecord += "," + target.getConceptId();
+						drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(target.getConceptName());
+						drugMappingReviewRecord += "," + target.getConceptClassId();
+						drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingLog);
+					}
+					else {
+						drugMappingReviewRecord += ",";
+						drugMappingReviewRecord += ",";
+						drugMappingReviewRecord += ",";
+						drugMappingReviewRecord += ",";
+					}
+					
+					drugMappingReviewFile.println(drugMappingReviewRecord);
+				}
+			}
+			else {
+				drugMappingRecord += "," + SourceIngredient.getStarredRecord();
+				drugMappingRecord += ",";
+				drugMappingRecord += ",";
+				drugMappingRecord += ",";
+				drugMappingRecord += ",";
+				drugMappingRecord += "," + CDMDrug.emptyRecord();
+				
+				drugMappingFile.println(drugMappingRecord);
+				
+
+				List<SourceDrugComponent> sortedSourceDrugComponents = new ArrayList<SourceDrugComponent>();
+				sortedSourceDrugComponents.addAll(sourceDrug.getComponents());
+				Collections.sort(sortedSourceDrugComponents, new Comparator<SourceDrugComponent>() {
+
+					@Override
+					public int compare(SourceDrugComponent sourceDrugComponent1, SourceDrugComponent sourceDrugComponent2) {
+						int compare = sourceDrugComponent1.getIngredient().getIngredientCode().compareTo(sourceDrugComponent2.getIngredient().getIngredientCode());
+						if (compare == 0) {
+							Double amount1 = sourceDrugComponent1.getDosage();
+							Double amount2 = sourceDrugComponent2.getDosage();
+							compare = (amount1 == null ? (amount2 == null ? 0 : -1) : (amount2 == null ? 1 : amount1.compareTo(amount2)));
+						}
+						return compare;
+					}
+					
+				});
+				
+				List< Map<Integer, List<CDMConcept>>> mappingResultList = sourceDrugMappings.get(INGREDIENT_MAPPING);
+				if (mappingResultList != null) {
+					for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
+						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.get(ingredientNr);
+						SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
+						
+						String drugMappingReviewIngredientRecord =       drugMappingReviewRecord;
+						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
+						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
+						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
+						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						drugMappingReviewIngredientRecord += ",";
+						drugMappingReviewIngredientRecord += ",";
+						drugMappingReviewIngredientRecord += ",";
+						drugMappingReviewIngredientRecord += ",";
+						
+						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+					}
+				}
+			}
+		}
+
+		DrugMappingFileUtilities.closeOutputFile(drugMappingFile);
+		DrugMappingFileUtilities.closeOutputFile(sourceToConceptMapFile);
+		DrugMappingFileUtilities.closeOutputFile(drugMappingReviewFile);
+		
+		System.out.println(DrugMapping.getCurrentTime() + "       Done");
+	}
+	
+	
+	private void saveDrugMappingResults() {
+		
+		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Results ...");
 		
 		// Save drug mapping
 		counters = new HashMap<Integer, Map<Integer, Long>>();
@@ -1954,39 +2257,8 @@ public class GenericMapping extends Mapping {
 			}
 			mappingType++;
 		}
-		
-		header = "MappingStatus";
-		header += "," + SourceDrug.getHeader();
-		header += "," + SourceIngredient.getHeader();
-		header += "," + "SourceIngredientAmount";
-		header += "," + "SourceIngredentUnit";
-		header += "," + "StrengthMarginPercentage";
-		header += "," + "MappingType";
-		header += "," + "MappingResult";
-		header += "," + "concept_id";
-		header += "," + "concept_name";
-		header += "," + "domain_id";
-		header += "," + "vocabulary_id";
-		header += "," + "concept_class_id";
-		header += "," + "standard_concept";
-		header += "," + "concept_code";
-		header += "," + "valid_start_date";
-		header += "," + "valid_end_date";
-		header += "," + "invalid_reason	atc";
-		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping.csv", header);
-		
-		header = "source_code";
-		header += "," + "source_concept_id";
-		header += "," + "source_vocabulary_id";
-		header += "," + "source_code_description";
-		header += "," + "target_concept_id";
-		header += "," + "target_vocabulary_id";
-		header += "," + "valid_start_date";
-		header += "," + "valid_end_date";
-		header += "," + "invalid_reason";
-		PrintWriter sourceToConceptMapFile = DrugMappingFileUtilities.openOutputFile("SourceToConceptMap.csv", header);
 
-		header = "MappingStatus";
+		String header = "MappingStatus";
 		header += "," + SourceDrug.getHeader();
 		header += "," + SourceIngredient.getHeader();
 		header += "," + "SourceIngredientAmount";
@@ -2000,22 +2272,7 @@ public class GenericMapping extends Mapping {
 		}
 		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
 		
-		header = "SourceCode";
-		header += "," + "SourceName";
-		header += "," + "SourceCount";
-		header += "," + "SourceDoseForm";
-		header += "," + "SourceIngredientCode";
-		header += "," + "SourceIngredientName";
-		header += "," + "SourceIngredientAmount";
-		header += "," + "SourceIngredentUnit";
-		header += "," + "concept_id";
-		header += "," + "concept_name";
-		header += "," + "concept_class";
-		header += "," + "Mapping_log";
-		PrintWriter drugMappingDebugFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
-		
-		if (drugMappingFile != null) {
-			System.out.println(DrugMapping.getCurrentTime() + "     Saving Drug Mapping Results ...");
+		if (drugMappingResultsFile != null) {
 
 			// Sort source drugs on use count descending
 			Collections.sort(sourceDrugs, new Comparator<SourceDrug>() {
@@ -2029,7 +2286,6 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceDrug sourceDrug : sourceDrugs) {
-				String mappingLog = sourceDrug.getMatchString();
 				String mappingStatus = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
 				Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
 				
@@ -2061,14 +2317,10 @@ public class GenericMapping extends Mapping {
 							
 						});
 
-						String sourceToConceptRecord = "";
 						for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
-							mappingLog = "";
 							Map<Integer, List<CDMConcept>> mappingResult = mappingResultList.get(ingredientNr); 
 							// Mapping on source drug
 							String sourceIngredientResultsString = "*,*,*,*,*,*"; 
-							String sourceIngredientMappingString = "*,*,*,*,*,*";
-							String sourceIngredientDebugString = "*,*,*,*";
 							if (mappingType == INGREDIENT_MAPPING) {   // Mapping on source drug ingredients
 								SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.size() == 0 ? null : sortedSourceDrugComponents.get(ingredientNr);
 								mappingResult = mappingResultList.get(sourceDrugComponent == null ? 0 : sourceDrugComponents.indexOf(sourceDrugComponent));
@@ -2076,28 +2328,6 @@ public class GenericMapping extends Mapping {
 								sourceIngredientResultsString = sourceDrugComponent.getIngredient().toString();
 								sourceIngredientResultsString += "," + standardizedAmount(sourceDrugComponent);
 								sourceIngredientResultsString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
-
-								sourceIngredientMappingString = sourceDrugComponent.getIngredient().toString();
-								sourceIngredientMappingString += "," + standardizedAmount(sourceDrugComponent);
-								sourceIngredientMappingString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
-								
-								sourceIngredientDebugString = DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientCode());
-								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientName());
-								sourceIngredientDebugString += "," + standardizedAmount(sourceDrugComponent);
-								sourceIngredientDebugString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
-								
-								mappingLog = sourceDrugComponent.getMatchString();
-
-								sourceToConceptRecord = "Ingredient " + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientCode());
-								sourceToConceptRecord += ",";
-								sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
-								sourceToConceptRecord += "," + sourceDrugComponent.getIngredient().getIngredientName();
-							}
-							else {
-								sourceToConceptRecord = "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
-								sourceToConceptRecord += ",";
-								sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
-								sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
 							}
 							if (mappingResult != null) {
 								// Write the result records
@@ -2117,38 +2347,8 @@ public class GenericMapping extends Mapping {
 									resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
 									resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
 									
-									String drugMappingRecord = DrugMappingStringUtilities.escapeFieldValue(mappingStatus);
-									drugMappingRecord += "," + sourceDrug;
-									drugMappingRecord += "," + sourceIngredientMappingString;
-									drugMappingRecord += "," + strengthDeviationPercentage; 
-									drugMappingRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
-									drugMappingRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
-									
-									String debugRecord = DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
-									debugRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
-									debugRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCount().toString());
-									debugRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getFormulationsString());
-									debugRecord += "," + sourceIngredientDebugString;
-									
 									List<CDMConcept> results = mappingResult.get(mappingResultType);
 									if ((results != null) && (results.size() > 0)) {
-										if ((mappingResultType == MAPPED) || ((mappingType == INGREDIENT_MAPPING) && (mappingResultType == NO_MAPPING))) {
-											CDMConcept result = results.get(0);
-											drugMappingRecord += "," + (result == null ? "" : result.toString());
-
-											if (mappingResultType != NO_MAPPING) {
-												sourceToConceptRecord += "," + result.getConceptId();
-												sourceToConceptRecord += "," + result.getVocabularyId();
-												sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
-												sourceToConceptRecord += ",";
-												sourceToConceptRecord += ",";
-											}
-											
-											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptId()));
-											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptName()));
-											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(result.getConceptClassId()));
-											debugRecord += "," + (result == null ? "" : DrugMappingStringUtilities.escapeFieldValue(mappingLog));
-										}
 										Collections.sort(results, new Comparator<CDMConcept>() {
 											@Override
 											public int compare(CDMConcept concept1, CDMConcept concept2) {
@@ -2188,13 +2388,6 @@ public class GenericMapping extends Mapping {
 												resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(result == null ? "" : result.toString());
 											}
 										}
-										if ((mappingResultType == MAPPED) || ((mappingType == INGREDIENT_MAPPING) && (mappingResultType == NO_MAPPING))) {
-											drugMappingFile.println(drugMappingRecord);
-											drugMappingDebugFile.println(debugRecord);
-											if (mappingResultType != NO_MAPPING) {
-												sourceToConceptMapFile.println(sourceToConceptRecord);
-											}
-										}
 										drugMappingResultsFile.println(resultRecord);
 									}
 									
@@ -2213,11 +2406,9 @@ public class GenericMapping extends Mapping {
 				}
 			}
 
-			DrugMappingFileUtilities.closeOutputFile(drugMappingFile);
 			DrugMappingFileUtilities.closeOutputFile(drugMappingResultsFile);
-			DrugMappingFileUtilities.closeOutputFile(drugMappingDebugFile);
-			
-			System.out.println(DrugMapping.getCurrentTime() + "     Done");
+
+			System.out.println(DrugMapping.getCurrentTime() + "       Done");
 		}
 	}
 	

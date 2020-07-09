@@ -42,6 +42,11 @@ public class SourceIngredient {
 	}
 	
 	
+	public static String getStarredRecord() {
+		return "*,*,*,*";
+	}
+	
+	
 	public static void writeHeaderToFile(PrintWriter file) {
 		file.println(getHeader());
 	}
