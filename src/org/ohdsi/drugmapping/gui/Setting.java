@@ -4,6 +4,8 @@ import javax.swing.JPanel;
 
 public class Setting extends JPanel {
 	private static final long serialVersionUID = -1756870820181266594L;
+
+	protected final int SETTING_LABEL_SIZE = 260;
 	
 	public static final int SETTING_TYPE_LONG    = 0;
 	public static final int SETTING_TYPE_DOUBLE  = 1;

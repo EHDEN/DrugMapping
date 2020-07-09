@@ -71,7 +71,7 @@ public class IngredientNameTranslation {
 					String translation = ingredientNameTranslationMap.get(ingredientName);
 					if (translation != null) {
 						if (translation.equals(ingredientNameEnglish)) {
-							if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 								System.out.println("    WARNING: Double translation definition for '" + ingredientName + "'. Ignored.");
 							}
 						}

@@ -121,7 +121,7 @@ public class MainFrame {
 		if (!DrugMapping.special.equals("ZINDEX")) {
 			// Database settings
 			databasePanel = new JPanel(new GridLayout(0, 1));
-			databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Database"));
+			databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Vocabulary"));
 			database = new CDMDatabase();
 			databasePanel.add(database);
 		}
@@ -132,7 +132,7 @@ public class MainFrame {
 		
 		// File settings
 		JPanel filePanel = new JPanel(new GridLayout(0, 1));
-		filePanel.setBorder(BorderFactory.createTitledBorder("Input Files"));
+		filePanel.setBorder(BorderFactory.createTitledBorder("Input"));
 		
 		for (FileDefinition fileDefinition : DrugMapping.getInputFiles()) {
 			InputFile inputFile = new InputFile(fileDefinition);
@@ -146,7 +146,7 @@ public class MainFrame {
 		JPanel outputPanel = null;
 		// Output Folder
 		outputPanel = new JPanel(new GridLayout(0, 1));
-		outputPanel.setBorder(BorderFactory.createTitledBorder("Output Folder"));
+		outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
 		outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
 		outputPanel.add(outputFolder);
 		
@@ -162,12 +162,12 @@ public class MainFrame {
 			VOCABULARY_ID                       = DrugMapping.settings.addSetting(new StringValueSetting(this, "VocabularyID", "Vocabulary ID:", ""));
 			MINIMUM_USE_COUNT                   = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
 			MAXIMUM_STRENGTH_DEVIATION          = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
-			PREFERENCE_RXNORM                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference when multiple mappings found:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
-			PREFERENCE_ATC                      = DrugMapping.settings.addSetting(new BooleanValueSetting(this, "preferenceATC", "Prefer matching ATC when multiple mappings found:", true));
-			PREFERENCE_PRIORITIZE_BY_DATE       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Prioritize by valid start date when multiple mappings found:", new String[] { "Latest", "Oldest", "No" }, "No"));
-			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Prioritize by concept_id when multiple mappings found:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
-			PREFERENCE_TAKE_FIRST_OR_LAST       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "Take first or last when multiple mappings left:", new String[] { "First", "Last", "None" }, "None"));
-			SUPPRESS_WARNINGS                   = DrugMapping.settings.addSetting(new BooleanValueSetting(this, "suppressWarnings", "Suppress warnings:", false));
+			PREFERENCE_RXNORM                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
+			PREFERENCE_ATC                      = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceATC", "Prefer matching ATC:", new String[] { "Yes", "No" }, "Yes"));
+			PREFERENCE_PRIORITIZE_BY_DATE       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No"));
+			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
+			PREFERENCE_TAKE_FIRST_OR_LAST       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None"));
+			SUPPRESS_WARNINGS                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No"));
 		}
 		
 		

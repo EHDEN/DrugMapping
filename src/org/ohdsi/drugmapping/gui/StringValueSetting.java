@@ -1,10 +1,12 @@
 package org.ohdsi.drugmapping.gui;
 
-import java.awt.FlowLayout;
-
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -22,9 +24,14 @@ public class StringValueSetting extends Setting {
 		this.label = label;
 		this.value = defaultValue;
 		
-		setLayout(new FlowLayout(FlowLayout.LEFT));
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder());
+
 		JLabel stringValueLabel = new JLabel(label);
+		stringValueLabel.setMinimumSize(new Dimension(SETTING_LABEL_SIZE, stringValueLabel.getHeight()));
+		stringValueLabel.setPreferredSize(new Dimension(SETTING_LABEL_SIZE, stringValueLabel.getHeight()));
+		
+		JPanel stringValueFieldPanel = new JPanel(new BorderLayout());
 		stringValueField = new JTextField(6);
 		stringValueField.getDocument().addDocumentListener(new DocumentListener() {
 			
@@ -50,9 +57,12 @@ public class StringValueSetting extends Setting {
 				mainFrame.checkReadyToStart();
 			}
 		});
+		stringValueFieldPanel.add(stringValueField, BorderLayout.WEST);
+		
 		setValue(defaultValue);
+		
 		add(stringValueLabel);
-		add(stringValueField);
+		add(stringValueFieldPanel);
 		initialize();
 	}
 

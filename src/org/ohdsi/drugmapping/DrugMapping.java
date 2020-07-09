@@ -228,7 +228,8 @@ public class DrugMapping {
 				logFileSettings("Unit Mapping File", getFile("Unit Mapping File"));
 				logFileSettings("Dose Form Mapping File", getFile("Dose Form Mapping File"));
 				logFileSettings("Manual CAS Mappings File", getFile("Manual CAS Mappings File"));
-				logFileSettings("Manual Ingedient Mappings - RxNorm File", getFile("Manual Ingedient Mappings - RxNorm File"));
+				logFileSettings("Manual Ingedient Overrule Mappings File", getFile("Manual Ingedient Overrule Mappings File"));
+				logFileSettings("Manual Ingedient Fallback Mappings File", getFile("Manual Ingedient Fallback Mappings File"));
 				logFileSettings("Manual Drug Mappings File", getFile("Manual Drug Mappings File"));
 				logFolderSettings(mainFrame.getOutputFolder());
 				logGeneralSettings();
@@ -239,7 +240,8 @@ public class DrugMapping {
 						getFile("Unit Mapping File"),
 						getFile("Dose Form Mapping File"),
 						getFile("Manual CAS Mappings File"), 
-						getFile("Manual Ingedient Mappings - RxNorm File"), 
+						getFile("Manual Ingedient Overrule Mappings File"), 
+						getFile("Manual Ingedient Fallback Mappings File"), 
 						getFile("Manual Drug Mappings File")
 						);
 			}

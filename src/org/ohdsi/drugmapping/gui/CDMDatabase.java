@@ -38,6 +38,8 @@ import org.ohdsi.utilities.files.Row;
 
 public class CDMDatabase extends JPanel {
 	private static final long serialVersionUID = -5203643429301521906L;
+	
+	private final int DATABASE_LABEL_SIZE = 260;
 
 	private JLabel serverLabel;
 	private JTextField serverField;
@@ -59,9 +61,9 @@ public class CDMDatabase extends JPanel {
 	public CDMDatabase() {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		serverLabel = new JLabel("CDM Server:");
-		serverLabel.setMinimumSize(new Dimension(100, serverLabel.getHeight()));
-		serverLabel.setPreferredSize(new Dimension(100, serverLabel.getHeight()));
+		serverLabel = new JLabel("CDM Database:");
+		serverLabel.setMinimumSize(new Dimension(DATABASE_LABEL_SIZE, serverLabel.getHeight()));
+		serverLabel.setPreferredSize(new Dimension(DATABASE_LABEL_SIZE, serverLabel.getHeight()));
 		
 		serverField = new JTextField();
 		serverField.setText("");

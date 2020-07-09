@@ -20,7 +20,7 @@ import org.ohdsi.drugmapping.DrugMapping;
 public class Folder extends JPanel {
 	private static final long serialVersionUID = -23890588306917810L;
 
-	private final int FOLDER_LABEL_SIZE = 100;
+	private final int FOLDER_LABEL_SIZE = 260;
 	
 	private String name = "";
 	private String folderName = ".";

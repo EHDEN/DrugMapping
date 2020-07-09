@@ -233,10 +233,55 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								false
 						),
 						new FileDefinition(
-								"Manual Ingedient Mappings - RxNorm File",
+								"Manual Ingedient Overrule Mappings File",
 								new String[] {
 										"This file should contain manual mappings of source ingredients to.",
-										"CDM Ingredient concepts."
+										"CDM Ingredient concepts that are used to correct incorrect automatic",
+										"mappings."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"SourceCode",
+												new String[] {
+														"This is the code of the source ingredient.",
+														"When empty drugs starting with the SourceName are mapped."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceName",
+												new String[] {
+														"This is the name of the ingredient in the native language."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_id",
+												new String[] {
+														"This is the CDM concept id of the ingredient the ingredient", 
+														"should be mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_name",
+												new String[] {
+														"This is the CDM concept name of the ingredient the ingredient", 
+														"should be mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"Comment",
+												new String[] {
+														"Comment on the mapping."
+												}
+										)
+								},
+								false
+						),
+						new FileDefinition(
+								"Manual Ingedient Fallback Mappings File",
+								new String[] {
+										"This file should contain manual mappings of source ingredients to.",
+										"CDM Ingredient concepts that are used when no automatic mapping",
+										"could be made."
 						  		},
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(

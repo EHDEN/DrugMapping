@@ -1,5 +1,7 @@
 package org.ohdsi.drugmapping.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,17 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 public class ChoiceValueSetting extends Setting {
 	private static final long serialVersionUID = -5697418430701146284L;
 
-	private List<JRadioButton> choiceRadioButtons= new ArrayList<JRadioButton>();
-	private ButtonGroup choiceRadioButtonGroup = null;
 	List<String> choices = new ArrayList<String>();
+	JComboBox<String> choiceValueField = null;
 	String value = null;
 	
 	
@@ -27,30 +31,33 @@ public class ChoiceValueSetting extends Setting {
 		this.label = label;
 		this.value = defaultValue;
 		
-		setLayout(new FlowLayout(FlowLayout.LEFT));
+		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder());
+
 		JLabel choiceValueLabel = new JLabel(label);
-		choiceRadioButtonGroup = new ButtonGroup();
+		choiceValueLabel.setMinimumSize(new Dimension(SETTING_LABEL_SIZE, choiceValueLabel.getHeight()));
+		choiceValueLabel.setPreferredSize(new Dimension(SETTING_LABEL_SIZE, choiceValueLabel.getHeight()));
+
+		JPanel choiceValueFieldPanel = new JPanel(new BorderLayout());
+		choiceValueField = new JComboBox<String>();
 		for (String choice : choices) {
 			this.choices.add(choice);
-			JRadioButton choiceRadioButton = new JRadioButton(choice);
-			choiceRadioButton.addActionListener(new ActionListener() {
-				
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					JRadioButton radioButton = (JRadioButton) e.getSource();
-					value = radioButton.getText();
-					correct = true;
-				}
-			});
-			choiceRadioButtons.add(choiceRadioButton);
-			choiceRadioButtonGroup.add(choiceRadioButton);
+			choiceValueField.addItem(choice);
 		}
+		choiceValueField.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				value = (String) choiceValueField.getSelectedItem();
+				correct = true;
+			}
+		});
+		choiceValueFieldPanel.add(choiceValueField, BorderLayout.WEST);
+		
 		setValue(defaultValue);
+		
 		add(choiceValueLabel);
-		for (JRadioButton choiceRadioButton : choiceRadioButtons) {
-			add(choiceRadioButton);
-		}
+		add(choiceValueFieldPanel);
 		initialize();
 	}
 
@@ -73,8 +80,7 @@ public class ChoiceValueSetting extends Setting {
 	public void setValue(String value) {
 		if (choices.contains(value)) {
 			this.value = value;
-			choiceRadioButtons.get(choices.indexOf(value)).setSelected(true);
-			correct = true;
+			choiceValueField.setSelectedItem(value);
 		}
 		else {
 			String possibleValues = "";
@@ -84,7 +90,7 @@ public class ChoiceValueSetting extends Setting {
 				}
 				possibleValues += "'" + choice + "'";
 			}
-			JOptionPane.showMessageDialog(null, "Illegal value for general setting '" + name + "!\nPossible values are: " + possibleValues + "\nCurrent value is: " + value, "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Illegal value '" + value + "' for general setting '" + name + "!\nPossible values are: " + possibleValues + "\nCurrent value is: " + value, "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

@@ -123,9 +123,12 @@ public class GenericMapping extends Mapping {
 	private Set<String> units = null;
 
 	private Map<String, CDMIngredient> manualCASMappings = null;
-	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeMappings = null;
-	private Map<SourceIngredient, String> manualIngredientCodeMappingRemarks = null;
-	private Map<String, CDMIngredient> manualIngredientNameMappings = null;
+	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeOverruleMappings = null;
+	private Map<SourceIngredient, String> manualIngredientCodeOverruleMappingRemarks = null;
+	private Map<String, CDMIngredient> manualIngredientNameOverruleMappings = null;
+	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeFallbackMappings = null;
+	private Map<SourceIngredient, String> manualIngredientCodeFallbackMappingRemarks = null;
+	private Map<String, CDMIngredient> manualIngredientNameFallbackMappings = null;
 	private Map<SourceDrug, CDMDrug> manualDrugMappings = null;
 	
 	private CDM cdm = null;
@@ -150,9 +153,6 @@ public class GenericMapping extends Mapping {
 	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingResults = null;
 	private Map<Integer, Set<SourceDrug>> notUniqueMapping = null;
 	
-	private Map<Integer, Map<Integer, Long>> counters;
-	private Map<Integer, Map<Integer, Long>> dataCoverage;
-	
 	private List<String> report = null;
 	
 	private String preferencesUsed = "";
@@ -161,16 +161,29 @@ public class GenericMapping extends Mapping {
 	
 		
 	
-	public GenericMapping(CDMDatabase database, InputFile sourceDrugsFile, InputFile ingredientNameTranslationFile, InputFile unitMappingFile, InputFile formMappingFile, InputFile manualCASMappingFile, InputFile manualIngredientMappingFile, InputFile manualDrugMappingFile) {
+	public GenericMapping(
+					CDMDatabase database, 
+					InputFile sourceDrugsFile, 
+					InputFile ingredientNameTranslationFile, 
+					InputFile unitMappingFile, 
+					InputFile formMappingFile, 
+					InputFile manualCASMappingFile, 
+					InputFile manualIngredientOverruleMappingFile,
+					InputFile manualIngredientFallbackMappingFile, 
+					InputFile manualDrugMappingFile
+					) {
 		boolean ok = true;
 		
 		forms = new HashSet<String>();
 		units = new HashSet<String>();
 
 		manualCASMappings = new HashMap<String, CDMIngredient>();
-		manualIngredientCodeMappings = new HashMap<SourceIngredient, CDMIngredient>();
-		manualIngredientCodeMappingRemarks = new HashMap<SourceIngredient, String>();
-		manualIngredientNameMappings = new HashMap<String, CDMIngredient>();
+		manualIngredientCodeOverruleMappings = new HashMap<SourceIngredient, CDMIngredient>();
+		manualIngredientCodeOverruleMappingRemarks = new HashMap<SourceIngredient, String>();
+		manualIngredientNameOverruleMappings = new HashMap<String, CDMIngredient>();
+		manualIngredientCodeFallbackMappings = new HashMap<SourceIngredient, CDMIngredient>();
+		manualIngredientCodeFallbackMappingRemarks = new HashMap<SourceIngredient, String>();
+		manualIngredientNameFallbackMappings = new HashMap<String, CDMIngredient>();
 		manualDrugMappings = new HashMap<SourceDrug, CDMDrug>();
 		
 		sourceDrugs = new ArrayList<SourceDrug>();
@@ -225,8 +238,11 @@ public class GenericMapping extends Mapping {
 		// Load manual CAS mappings
 		ok = ok && getManualCASMappings(manualCASMappingFile);		
 		
-		// Load manual Ingredient mappings
-		ok = ok && getManualIngredientMappings(manualIngredientMappingFile);
+		// Load manual Ingredient Overrule mappings
+		ok = ok && getManualIngredientMappings(manualIngredientOverruleMappingFile, "overrule");		
+		
+		// Load manual Ingredient Fallback mappings
+		ok = ok && getManualIngredientMappings(manualIngredientFallbackMappingFile, "fallback");
 		
 		// Load manual drug mappings
 		ok = ok && getManualDrugMappings(manualDrugMappingFile);
@@ -489,19 +505,19 @@ public class GenericMapping extends Mapping {
 									manualCASMappings.put(casNumber, cdmIngredient);
 								}
 								else {
-									if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+									if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 										System.out.println("      WARNING: No CDM Ingredient found for concept_id " + cdmConceptId + " for CAS number " + casNumber + " in line " + lineNr + ".");
 									}
 								}
 							}
 							else {
-								if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 									System.out.println("      WARNING: No concept_id found in line " + lineNr + ".");
 								}
 							}
 						}
 						else {
-							if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 								System.out.println("      WARNING: No CAS number found in line " + lineNr + ".");
 							}
 						}
@@ -526,11 +542,19 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getManualIngredientMappings(InputFile manualMappingFile) {
+	private boolean getManualIngredientMappings(InputFile manualMappingFile, String type) {
 		boolean ok = true;
 
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading manual ingredient mappings ...");
+		System.out.println(DrugMapping.getCurrentTime() + "     Loading manual ingredient " + type + " mappings ...");
 		if ((manualMappingFile != null) && manualMappingFile.isSelected()) {
+			Map<SourceIngredient, CDMIngredient> codeMappings = manualIngredientCodeOverruleMappings;
+			Map<SourceIngredient, String> codeMappingRemarks = manualIngredientCodeOverruleMappingRemarks;
+			Map<String, CDMIngredient> nameMappings = manualIngredientNameOverruleMappings;
+			if (type.equals("fallback")) {
+				codeMappings = manualIngredientCodeFallbackMappings;
+				codeMappingRemarks = manualIngredientCodeFallbackMappingRemarks;
+				nameMappings = manualIngredientNameFallbackMappings;
+			}
 			try {
 				
 				if (manualMappingFile.openFile(true)) {
@@ -566,40 +590,40 @@ public class GenericMapping extends Mapping {
 									sourceCodeFound = true;
 									SourceIngredient sourceIngredient = SourceDrug.getIngredient(sourceCode);
 									if (sourceIngredient != null) {
-										manualIngredientCodeMappings.put(sourceIngredient, cdmIngredient);
-										manualIngredientCodeMappingRemarks.put(sourceIngredient, remark);
+										codeMappings.put(sourceIngredient, cdmIngredient);
+										codeMappingRemarks.put(sourceIngredient, remark);
 									}
 									else {
-										if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+										if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 											System.out.println("      WARNING: No source ingredient found for sourceCode " + sourceCode + " in line " + lineNr + ".");
 										}
 									}
 								}
 								if (!sourceName.equals("")) {
 									sourceNameFound = true;
-									manualIngredientNameMappings.put(sourceName, cdmIngredient);
+									nameMappings.put(sourceName, cdmIngredient);
 								}
 								if ((!sourceCodeFound) && (!sourceNameFound)) {
-									if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+									if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 										System.out.println("      WARNING: No sourceCode and no sourceName found in line " + lineNr + ".");
 									}
 								}
 							}
 							else {
-								if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 									System.out.println("      WARNING: No CDM Ingredient found for concept_id " + cdmConceptId + " in line " + lineNr + ".");
 								}
 							}
 						}
 						else {
-							if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 								System.out.println("      WARNING: No concept_id found in line " + lineNr + ".");
 							}
 						}
 					}
 				}
 				else {
-					System.out.println("    No manual ingredient mappings found.");
+					System.out.println("    No manual ingredient " + type + " mappings found.");
 				}
 			}
 			catch (NoSuchElementException fileException) {
@@ -608,7 +632,7 @@ public class GenericMapping extends Mapping {
 			}
 		}
 		else {
-			System.out.println(DrugMapping.getCurrentTime() + "     No manual ingredient mappings used.");
+			System.out.println(DrugMapping.getCurrentTime() + "     No manual ingredient " + type + " mappings used.");
 		}
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
@@ -868,27 +892,40 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "       Match ingredients by name ...");
 		
 		for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+			boolean multipleMapping = false;
+			
 			if (sourceIngredient.getMatchingIngredient() == null) {
 				
-				CDMIngredient cdmIngredient = manualIngredientCodeMappings.get(sourceIngredient);
+				CDMIngredient cdmIngredient = manualIngredientCodeOverruleMappings.get(sourceIngredient);
 				
 				if (cdmIngredient != null) { // Manual mapping on ingredient code found
 					ingredientMap.put(sourceIngredient, cdmIngredient);
 					sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-					sourceIngredient.setMatchString("MANUAL CODE " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+					sourceIngredient.setMatchString("MANUAL CODE " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
 					matchedManualCode++;
 				}
 				
 				if (cdmIngredient == null) { // No manual mapping on ingredient code found
+					if (!sourceIngredient.getIngredientName().equals("")) {
+						cdmIngredient = manualIngredientNameOverruleMappings.get(sourceIngredient.getIngredientName());
+						if (cdmIngredient != null) {
+							ingredientMap.put(sourceIngredient, cdmIngredient);
+							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+							sourceIngredient.setMatchString("MANUAL NAME " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+							matchedManualCode++;
+						}
+					}
+				}
+				
+				if (cdmIngredient == null) { // No manual mapping on ingredient name found
 					preferencesUsed = "";
-					boolean multipleMapping = false;
 
 					List<String> matchNameList = sourceIngredient.getIngredientMatchingNames();
 					for (String matchName : matchNameList) {
 						String matchType = matchName.substring(0, matchName.indexOf(": "));
 						matchName = matchName.substring(matchName.indexOf(": ") + 2);
-						
-						cdmIngredient = manualIngredientNameMappings.get(matchName);
+						/*
+						cdmIngredient = manualIngredientNameOverruleMappings.get(matchName);
 						
 						if (cdmIngredient != null) { // Manual mapping on part ingredient name found
 							ingredientMap.put(sourceIngredient, cdmIngredient);
@@ -897,7 +934,7 @@ public class GenericMapping extends Mapping {
 							matchedManualName++;
 							break;
 						}
-						
+						*/
 						List<String> matchList = new ArrayList<String>();
 						matchList.add(matchType + ": " + matchName);
 						matchList.add(matchType + " Standardized: " + DrugMappingStringUtilities.modifyName(matchName));
@@ -941,6 +978,32 @@ public class GenericMapping extends Mapping {
 						if ((cdmIngredient != null) || multipleMapping) {
 							break;
 						}
+					}
+				}
+				if (cdmIngredient == null) { // No mapping found
+					cdmIngredient = manualIngredientCodeFallbackMappings.get(sourceIngredient);
+					
+					if (cdmIngredient != null) { // Manual mapping on ingredient code found
+						ingredientMap.put(sourceIngredient, cdmIngredient);
+						sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+						sourceIngredient.setMatchString("MANUAL CODE " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+						matchedManualCode++;
+					}
+					
+					if (cdmIngredient == null) { // No manual mapping on ingredient code found
+						if (!sourceIngredient.getIngredientName().equals("")) {
+							cdmIngredient = manualIngredientNameFallbackMappings.get(sourceIngredient.getIngredientName());
+							if (cdmIngredient != null) {
+								ingredientMap.put(sourceIngredient, cdmIngredient);
+								sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+								sourceIngredient.setMatchString("MANUAL NAME " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+								matchedManualCode++;
+							}
+						}
+					}
+					
+					if ((cdmIngredient != null) && (multipleMapping)) {
+						multipleMappings--;
 					}
 				}
 			}
@@ -2238,25 +2301,6 @@ public class GenericMapping extends Mapping {
 	private void saveDrugMappingResults() {
 		
 		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Results ...");
-		
-		// Save drug mapping
-		counters = new HashMap<Integer, Map<Integer, Long>>();
-		dataCoverage = new HashMap<Integer, Map<Integer, Long>>();
-
-		int mappingType = 0;
-		while (mappingTypeDescriptions.containsKey(mappingType)) {
-			Map<Integer, Long> mappingTypeCounters = new HashMap<Integer, Long>();
-			counters.put(mappingType, mappingTypeCounters);
-			Map<Integer, Long> mappingTypeDataCoverage = new HashMap<Integer, Long>();
-			dataCoverage.put(mappingType, mappingTypeDataCoverage);
-			int mappingResultType = 0;
-			while (mappingResultDescriptions.containsKey(mappingResultType)) {
-				mappingTypeCounters.put(mappingResultType, 0L);
-				mappingTypeDataCoverage.put(mappingResultType, 0L);
-				mappingResultType++;
-			}
-			mappingType++;
-		}
 
 		String header = "MappingStatus";
 		header += "," + SourceDrug.getHeader();
@@ -2293,11 +2337,10 @@ public class GenericMapping extends Mapping {
 					System.out.println("ERROR: " + sourceDrug);
 				}
 
-				mappingType = 0;
+				int mappingType = 0;
 				while (mappingTypeDescriptions.containsKey(mappingType)) {
 					List< Map<Integer, List<CDMConcept>>> mappingResultList = sourceDrugMappings.get(mappingType);
 					if ((mappingResultList != null) && (mappingResultList.size() > 0)) {
-						Set<Integer> counted = new HashSet<Integer>();
 						List<SourceDrugComponent> sourceDrugComponents = new ArrayList<SourceDrugComponent>();
 						sourceDrugComponents.addAll(sourceDrug.getComponents());
 						List<SourceDrugComponent> sortedSourceDrugComponents = new ArrayList<SourceDrugComponent>();
@@ -2389,12 +2432,6 @@ public class GenericMapping extends Mapping {
 											}
 										}
 										drugMappingResultsFile.println(resultRecord);
-									}
-									
-									if (!counted.contains(mappingResultType)) {
-										counters.get(mappingType).put(mappingResultType, counters.get(mappingType).get(mappingResultType) + 1);
-										dataCoverage.get(mappingType).put(mappingResultType, dataCoverage.get(mappingType).get(mappingResultType) + sourceDrug.getCount());
-										counted.add(mappingResultType);
 									}
 									
 									mappingResultType++;
@@ -2778,7 +2815,7 @@ public class GenericMapping extends Mapping {
 			}
 		}
 		if (conceptList.size() > 1) {
-			if ((sourceDrug != null) && DrugMapping.settings.getBooleanSetting(MainFrame.PREFERENCE_ATC)) {
+			if ((sourceDrug != null) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_ATC).equals("Yes")) {
 				resultType = REJECTED_BY_ATC_PREFERENCE;
 				remove = new ArrayList<CDMConcept>();
 				List<String> sourceATCCodes = sourceDrug.getATCCodes();

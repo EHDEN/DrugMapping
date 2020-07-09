@@ -17,26 +17,46 @@ public class GeneralSettings extends JPanel {
 	private static final long serialVersionUID = 4495095183509328565L;
 	
 	List<Setting> generalSettings = new ArrayList<Setting>();
-	JPanel settingsListPanel = null;
+	JPanel leftSettingsListPanel = null;
+	JPanel rightSettingsListPanel = null;
 	
 	
 	public GeneralSettings(MainFrame mainFrame) {
-		
-		setLayout(new GridLayout(0, 1));
+		setLayout(new GridLayout(1, 2));
 		setBorder(BorderFactory.createTitledBorder("General Settings"));
 		
-		JPanel generalSettingsPanel = new JPanel(new BorderLayout());
-		settingsListPanel = new JPanel();
-		settingsListPanel.setLayout(new BoxLayout(settingsListPanel, BoxLayout.PAGE_AXIS));
-		settingsListPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		generalSettingsPanel.add(settingsListPanel, BorderLayout.WEST);
-		add(generalSettingsPanel);
+		JPanel leftSettingsPanel = new JPanel(new BorderLayout());
+		leftSettingsListPanel = new JPanel();
+		leftSettingsListPanel.setLayout(new BoxLayout(leftSettingsListPanel, BoxLayout.PAGE_AXIS));
+		leftSettingsListPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		leftSettingsPanel.add(leftSettingsListPanel, BorderLayout.WEST);
+		
+		JPanel rightSettingsPanel = new JPanel(new BorderLayout());
+		rightSettingsListPanel = new JPanel();
+		rightSettingsListPanel.setLayout(new BoxLayout(rightSettingsListPanel, BoxLayout.PAGE_AXIS));
+		rightSettingsListPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		rightSettingsPanel.add(rightSettingsListPanel, BorderLayout.WEST);
+		
+		add(leftSettingsPanel);
+		add(rightSettingsPanel);
 	}
 	
 	
 	public int addSetting(Setting setting) {
 		generalSettings.add(setting);
-		settingsListPanel.add(setting);
+		
+		leftSettingsListPanel.removeAll();
+		rightSettingsListPanel.removeAll();
+		int leftCount = (generalSettings.size() / 2) + (generalSettings.size() % 2);
+		for (int settingNr = 0; settingNr < generalSettings.size(); settingNr++) {
+			setting = generalSettings.get(settingNr);
+			if (settingNr < leftCount) {
+				leftSettingsListPanel.add(setting);
+			}
+			else {
+				rightSettingsListPanel.add(setting);
+			}
+		}
 		
 		return generalSettings.indexOf(setting);
 	}
@@ -105,15 +125,6 @@ public class GeneralSettings extends JPanel {
 		String value = null;
 		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_STRING) {
 			value = generalSettings.get(index).getValueAsString();
-		}
-		return value;
-	}
-	
-	
-	public Boolean getBooleanSetting(int index) {
-		Boolean value = null;
-		if (generalSettings.get(index).getValueType() == Setting.SETTING_TYPE_BOOLEAN) {
-			value = generalSettings.get(index).getValueAsString().equals("Yes");
 		}
 		return value;
 	}

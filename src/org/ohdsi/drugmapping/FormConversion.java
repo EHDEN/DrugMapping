@@ -77,7 +77,7 @@ public class FormConversion {
 					}
 				}
 				else {
-					if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 						System.out.println("    WARNING: No factor found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'. Defaults to 0.");
 					}
 					priority = 0;
@@ -85,7 +85,7 @@ public class FormConversion {
 				
 				if (priority != null) {
 					if ((!sourceForm.equals("")) && (conceptId.equals(""))) {
-						if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+						if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 							System.out.println("    WARINING: No target form specified for '" + sourceForm + ".");
 						}
 					}
@@ -101,7 +101,7 @@ public class FormConversion {
 						}
 						else {
 							if (existingConversion.equals(conceptId)) {
-								if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 									System.out.println("    WARNING: Double definition found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'.");								
 								}
 							}

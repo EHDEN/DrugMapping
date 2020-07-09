@@ -57,7 +57,7 @@ public class InputFile extends JPanel {
 	private final String[] TEXT_QUALIFIERS  = new String[]{ "\"", "'", "None" };
 	private final String   CHAR_SET         = "ISO-8859-1";
 	
-	private final int FILE_LABEL_SIZE = 250;
+	private final int FILE_LABEL_SIZE = 260;
 	
 	private FileDefinition fileDefinition;
 	private String labelText;
@@ -102,15 +102,19 @@ public class InputFile extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
+		JPanel fileSelectLabelPanel = new JPanel(new BorderLayout());
+		fileSelectLabelPanel.setMinimumSize(new Dimension(FILE_LABEL_SIZE, fileSelectLabelPanel.getHeight()));
+		fileSelectLabelPanel.setPreferredSize(new Dimension(FILE_LABEL_SIZE, fileSelectLabelPanel.getHeight()));
 		fileSelectCheckBox = new JCheckBox();
 		fileSelectCheckBox.setSelected(true);
 		fileSelectCheckBox.setEnabled(!fileDefinition.isRequired());
+		fileSelectLabelPanel.add(fileSelectCheckBox, BorderLayout.WEST);
 		
 		fileLabelPanel = new JPanel(new BorderLayout());
-		fileLabelPanel.setMinimumSize(new Dimension(FILE_LABEL_SIZE, fileLabelPanel.getHeight()));
-		fileLabelPanel.setPreferredSize(new Dimension(FILE_LABEL_SIZE, fileLabelPanel.getHeight()));
 		fileLabel = new JLabel(labelText + ":");
 		fileLabelPanel.add(fileLabel, BorderLayout.WEST);
+		
+		fileSelectLabelPanel.add(fileLabelPanel, BorderLayout.CENTER);
 		
 		fileNameField = new JTextField();
 		fileNameField.setText(fileDefinition.getDefaultFile());
@@ -119,8 +123,7 @@ public class InputFile extends JPanel {
 
 		fileSelectButton = new JButton("Select");
 
-		add(fileSelectCheckBox);
-		add(fileLabelPanel);
+		add(fileSelectLabelPanel);
 		add(fileNameField);
 		add(new JLabel("  "));
 		add(fileSelectButton);

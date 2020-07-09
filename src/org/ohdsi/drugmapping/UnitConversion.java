@@ -77,7 +77,7 @@ public class UnitConversion {
 					}
 				}
 				else {
-					if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 						System.out.println("    WARNING: No factor found for conversion from  '" + sourceUnit + "' to '" + targetUnit + "'. Defaults to 1.0.");
 					}
 					factor = 1.0;
@@ -95,7 +95,7 @@ public class UnitConversion {
 						}
 						Double existingFactor = sourceUnitConversion.get(targetUnit);
 						if (existingFactor != null) {
-							if (!DrugMapping.settings.getBooleanSetting(MainFrame.SUPPRESS_WARNINGS)) {
+							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 								System.out.println("    WARNING: Double conversion from  '" + sourceUnit + "' to '" + targetUnit + "' found: " + existingFactor + " (old) and " + factor + " (new). Last one used.");
 							}
 						}
