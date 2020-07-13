@@ -211,10 +211,10 @@ public class ZIndexConversion extends Mapping {
 						gpk[GPK_GSKCode]          = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "GSKCode", true));
 						gpk[GPK_DDDPerHPKUnit]    = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "DDDPerHPKUnit", true));
 						gpk[GPK_PrescriptionDays] = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "PrescriptionDays", true));
-						gpk[GPK_HPKMG]            = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "HPKMG", true)).toUpperCase();
-						gpk[GPK_HPKMGUnit]        = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "HPKMGUnit", true)).toUpperCase();
-						gpk[GPK_PharmForm]        = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "PharmForm", true)).toUpperCase();
-						gpk[GPK_BasicUnit]        = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "BasicUnit", true)).toUpperCase();
+						gpk[GPK_HPKMG]            = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "HPKMG", true));
+						gpk[GPK_HPKMGUnit]        = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "HPKMGUnit", true));
+						gpk[GPK_PharmForm]        = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "PharmForm", true));
+						gpk[GPK_BasicUnit]        = DrugMappingStringUtilities.removeExtraSpaces(gpkFile.get(row, "BasicUnit", true));
 
 						int gpkCode = Integer.valueOf(gpk[GPK_GPKCode]);
 						
@@ -416,7 +416,7 @@ public class ZIndexConversion extends Mapping {
 					
 					for (String[] gpkIPCIIngredient : gpkIPCIIngredients) {
 						String ingredientNumeratorUnit = gpkIPCIIngredient[GPKIPCI_AmountUnit];
-						String ingredientDenominatorUnit = basicUnit.equals("ST") ? "" : basicUnit;
+						String ingredientDenominatorUnit = basicUnit.equals("Stuk") ? "" : basicUnit;
 						String ingredientUnit = ingredientDenominatorUnit.equals("") ? ingredientNumeratorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit);
 						
 						String[] gpkIngredientRecord = new String[OUTPUT_ColumnCount];
@@ -474,7 +474,7 @@ public class ZIndexConversion extends Mapping {
 							String amount = gskObject[GSK_Amount];
 
 							String ingredientNumeratorUnit = gskObject[GSK_AmountUnit];
-							String ingredientDenominatorUnit = basicUnit.equals("ST") ? "" : basicUnit;
+							String ingredientDenominatorUnit = basicUnit.equals("Stuk") ? "" : basicUnit;
 							String amountUnit = ingredientDenominatorUnit.equals("") ? ingredientNumeratorUnit : (ingredientNumeratorUnit + "/" + ingredientDenominatorUnit);
 							
 							String gnkCode = gskObject[GSK_GNKCode];
@@ -659,8 +659,8 @@ public class ZIndexConversion extends Mapping {
 				outputIngredients = ipciOutputIngredients != null ? ipciOutputIngredients : zindexOutputIngredients;
 				if (outputIngredients != null) {
 					for (String[] outputIngredient : outputIngredients) {
-						outputIngredient[OUTPUT_DosageUnit] = outputIngredient[OUTPUT_DosageUnit].replaceAll("/ST", "");
-						if (outputIngredient[OUTPUT_DosageUnit].equals("ST")) {
+						outputIngredient[OUTPUT_DosageUnit] = outputIngredient[OUTPUT_DosageUnit].replaceAll("/Stuk", "");
+						if (outputIngredient[OUTPUT_DosageUnit].equals("Stuk")) {
 							outputIngredient[OUTPUT_DosageUnit] = "";
 						}
 					}

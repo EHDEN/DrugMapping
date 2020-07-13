@@ -124,7 +124,7 @@ public class GenericMapping extends Mapping {
 
 	private Map<String, CDMIngredient> manualCASMappings = null;
 	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeOverruleMappings = null;
-	private Map<SourceIngredient, String> manualIngredientCodeOverruleMappingRemarks = null;
+	private Map<SourceIngredient, String> manualIngredientCodeMappingRemarks = null;
 	private Map<String, CDMIngredient> manualIngredientNameOverruleMappings = null;
 	private Map<SourceIngredient, CDMIngredient> manualIngredientCodeFallbackMappings = null;
 	private Map<SourceIngredient, String> manualIngredientCodeFallbackMappingRemarks = null;
@@ -179,7 +179,7 @@ public class GenericMapping extends Mapping {
 
 		manualCASMappings = new HashMap<String, CDMIngredient>();
 		manualIngredientCodeOverruleMappings = new HashMap<SourceIngredient, CDMIngredient>();
-		manualIngredientCodeOverruleMappingRemarks = new HashMap<SourceIngredient, String>();
+		manualIngredientCodeMappingRemarks = new HashMap<SourceIngredient, String>();
 		manualIngredientNameOverruleMappings = new HashMap<String, CDMIngredient>();
 		manualIngredientCodeFallbackMappings = new HashMap<SourceIngredient, CDMIngredient>();
 		manualIngredientCodeFallbackMappingRemarks = new HashMap<SourceIngredient, String>();
@@ -548,7 +548,7 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMapping.getCurrentTime() + "     Loading manual ingredient " + type + " mappings ...");
 		if ((manualMappingFile != null) && manualMappingFile.isSelected()) {
 			Map<SourceIngredient, CDMIngredient> codeMappings = manualIngredientCodeOverruleMappings;
-			Map<SourceIngredient, String> codeMappingRemarks = manualIngredientCodeOverruleMappingRemarks;
+			Map<SourceIngredient, String> codeMappingRemarks = manualIngredientCodeMappingRemarks;
 			Map<String, CDMIngredient> nameMappings = manualIngredientNameOverruleMappings;
 			if (type.equals("fallback")) {
 				codeMappings = manualIngredientCodeFallbackMappings;
@@ -901,7 +901,7 @@ public class GenericMapping extends Mapping {
 				if (cdmIngredient != null) { // Manual mapping on ingredient code found
 					ingredientMap.put(sourceIngredient, cdmIngredient);
 					sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-					sourceIngredient.setMatchString("MANUAL CODE " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+					sourceIngredient.setMatchString("MANUAL CODE OVERRULED " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
 					matchedManualCode++;
 				}
 				
@@ -911,7 +911,7 @@ public class GenericMapping extends Mapping {
 						if (cdmIngredient != null) {
 							ingredientMap.put(sourceIngredient, cdmIngredient);
 							sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-							sourceIngredient.setMatchString("MANUAL NAME " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+							sourceIngredient.setMatchString("MANUAL NAME OVERRULED " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
 							matchedManualCode++;
 						}
 					}
@@ -986,7 +986,7 @@ public class GenericMapping extends Mapping {
 					if (cdmIngredient != null) { // Manual mapping on ingredient code found
 						ingredientMap.put(sourceIngredient, cdmIngredient);
 						sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-						sourceIngredient.setMatchString("MANUAL CODE " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+						sourceIngredient.setMatchString("MANUAL CODE FALLBACK " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
 						matchedManualCode++;
 					}
 					
@@ -996,7 +996,7 @@ public class GenericMapping extends Mapping {
 							if (cdmIngredient != null) {
 								ingredientMap.put(sourceIngredient, cdmIngredient);
 								sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
-								sourceIngredient.setMatchString("MANUAL NAME " + manualIngredientCodeOverruleMappingRemarks.get(sourceIngredient));
+								sourceIngredient.setMatchString("MANUAL NAME FALLBACK " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
 								matchedManualCode++;
 							}
 						}
@@ -1004,6 +1004,28 @@ public class GenericMapping extends Mapping {
 					
 					if ((cdmIngredient != null) && (multipleMapping)) {
 						multipleMappings--;
+					}
+				}
+			}
+			else {
+				CDMIngredient cdmIngredientManualCode = manualIngredientCodeOverruleMappings.get(sourceIngredient);
+				
+				if (cdmIngredientManualCode != null) { // Manual mapping on ingredient code found
+					ingredientMap.put(sourceIngredient, cdmIngredientManualCode);
+					sourceIngredient.setMatchingIngredient(cdmIngredientManualCode.getConceptId());
+					sourceIngredient.setMatchString("MANUAL CODE OVERRULED " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+					matchedManualCode++;
+				}
+				
+				if (cdmIngredientManualCode == null) { // No manual mapping on ingredient code found
+					if (!sourceIngredient.getIngredientName().equals("")) {
+						CDMIngredient cdmIngredientManualName = manualIngredientNameOverruleMappings.get(sourceIngredient.getIngredientName());
+						if (cdmIngredientManualName != null) {
+							ingredientMap.put(sourceIngredient, cdmIngredientManualName);
+							sourceIngredient.setMatchingIngredient(cdmIngredientManualName.getConceptId());
+							sourceIngredient.setMatchString("MANUAL NAME OVERRULED " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+							matchedManualName++;
+						}
 					}
 				}
 			}
@@ -1943,7 +1965,9 @@ public class GenericMapping extends Mapping {
 		
 		saveIngredientMapping(sourceIngredients);
 		saveDrugMapping();
-		saveDrugMappingResults();
+		if (DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes")) {
+			saveDrugMappingResults();
+		}
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
@@ -2302,17 +2326,10 @@ public class GenericMapping extends Mapping {
 		
 		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Results ...");
 
-		String header = "MappingStatus";
-		header += "," + SourceDrug.getHeader();
-		header += "," + SourceIngredient.getHeader();
-		header += "," + "SourceIngredientAmount";
-		header += "," + "SourceIngredentUnit";
-		header += "," + "StrengthMarginPercentage";
-		header += "," + "MappingType";
-		header += "," + "MappingResult";
-		//header += "," + "Results";
-		for (Integer conceptNr = 1; conceptNr <= maxResultConcepts; conceptNr++) {
-			header += "," + "Concept_" + conceptNr; 
+		String[] columns = getHeader(maxResultConcepts);
+		String header = "";
+		for (String column : columns) {
+			header += (header.equals("") ? "" : ",") + column;
 		}
 		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
 		
@@ -2330,116 +2347,14 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceDrug sourceDrug : sourceDrugs) {
-				String mappingStatus = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
-				Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
-				
-				if (sourceDrugMappings == null) {
-					System.out.println("ERROR: " + sourceDrug);
-				}
-
-				int mappingType = 0;
-				while (mappingTypeDescriptions.containsKey(mappingType)) {
-					List< Map<Integer, List<CDMConcept>>> mappingResultList = sourceDrugMappings.get(mappingType);
-					if ((mappingResultList != null) && (mappingResultList.size() > 0)) {
-						List<SourceDrugComponent> sourceDrugComponents = new ArrayList<SourceDrugComponent>();
-						sourceDrugComponents.addAll(sourceDrug.getComponents());
-						List<SourceDrugComponent> sortedSourceDrugComponents = new ArrayList<SourceDrugComponent>();
-						sortedSourceDrugComponents.addAll(sourceDrug.getComponents());
-						Collections.sort(sortedSourceDrugComponents, new Comparator<SourceDrugComponent>() {
-
-							@Override
-							public int compare(SourceDrugComponent sourceDrugComponent1, SourceDrugComponent sourceDrugComponent2) {
-								int compare = sourceDrugComponent1.getIngredient().getIngredientCode().compareTo(sourceDrugComponent2.getIngredient().getIngredientCode());
-								if (compare == 0) {
-									Double amount1 = sourceDrugComponent1.getDosage();
-									Double amount2 = sourceDrugComponent2.getDosage();
-									compare = (amount1 == null ? (amount2 == null ? 0 : -1) : (amount2 == null ? 1 : amount1.compareTo(amount2)));
-								}
-								return compare;
-							}
-							
-						});
-
-						for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
-							Map<Integer, List<CDMConcept>> mappingResult = mappingResultList.get(ingredientNr); 
-							// Mapping on source drug
-							String sourceIngredientResultsString = "*,*,*,*,*,*"; 
-							if (mappingType == INGREDIENT_MAPPING) {   // Mapping on source drug ingredients
-								SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.size() == 0 ? null : sortedSourceDrugComponents.get(ingredientNr);
-								mappingResult = mappingResultList.get(sourceDrugComponent == null ? 0 : sourceDrugComponents.indexOf(sourceDrugComponent));
-								
-								sourceIngredientResultsString = sourceDrugComponent.getIngredient().toString();
-								sourceIngredientResultsString += "," + standardizedAmount(sourceDrugComponent);
-								sourceIngredientResultsString += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
-							}
-							if (mappingResult != null) {
-								// Write the result records
-								int mappingResultType = 0;
-								while (mappingResultDescriptions.containsKey(mappingResultType)) {
-									String strengthDeviationPercentage = "";
-									if (mappingResultType == MAPPED) {
-										String key = mappingType == INGREDIENT_MAPPING ? ("Ingredient " + sourceDrug.getCode() + "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientCode()) : ("Drug " + sourceDrug.getCode());
-										if (usedStrengthDeviationPercentageMap.get(key) != null) {
-											strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
-										}
-									}
-									String resultRecord = DrugMappingStringUtilities.escapeFieldValue(mappingStatus);
-									resultRecord += "," + sourceDrug;
-									resultRecord += "," + sourceIngredientResultsString;
-									resultRecord += "," + strengthDeviationPercentage; 
-									resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingTypeDescriptions.get(mappingType));
-									resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingResultDescriptions.get(mappingResultType));
-									
-									List<CDMConcept> results = mappingResult.get(mappingResultType);
-									if ((results != null) && (results.size() > 0)) {
-										Collections.sort(results, new Comparator<CDMConcept>() {
-											@Override
-											public int compare(CDMConcept concept1, CDMConcept concept2) {
-												return (concept1 == null ? "" : concept1.getConceptId()).compareTo(concept2 == null ? "" : concept2.getConceptId());
-											}
-										});
-										for (CDMConcept result : results) {
-											if (mappingResultType == REJECTED_BY_MAXIMUM_STRENGTH_DEVIATION) {
-												resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(result == null ? "" : ((CDMDrug) result).toString() + ": " + ((CDMDrug) result).getStrengthDescription());
-											}
-											else if (mappingResultType == REJECTED_BY_FORM) {
-												if (result != null) {
-													CDMDrug cdmDrug = (CDMDrug) result;
-													String formsDescription = "";
-													for (String cdmDrugFormConceptId : cdmDrug.getForms()) {
-														if (!formsDescription.equals("")) {
-															formsDescription += " | ";
-														}
-														formsDescription += cdm.getCDMFormConceptName(cdmDrugFormConceptId) + " (" + cdmDrugFormConceptId + ")";
-													}
-													resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(cdmDrug.toString() + ": " + formsDescription);
-												}
-												else {
-													resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue("");
-												}
-											}
-											else if ((mappingResultType == DOUBLE_INGREDIENT_MAPPING) || (mappingResultType == UNMAPPED_SOURCE_INGREDIENTS)) {
-												List<SourceIngredient> sourceDrugIngredients = sourceDrug.getIngredients();
-												for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
-													CDMIngredient cdmIngredient = (sourceDrugIngredient.getMatchingIngredient() == null ? null : cdm.getCDMIngredients().get(sourceDrugIngredient.getMatchingIngredient()));
-													String description = sourceDrugIngredient.toString();
-													description += " -> " + (cdmIngredient == null ? "" : cdmIngredient.toString());
-													resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(description);
-												}
-											}
-											else {
-												resultRecord += "," + DrugMappingStringUtilities.escapeFieldValue(result == null ? "" : result.toString());
-											}
-										}
-										drugMappingResultsFile.println(resultRecord);
-									}
-									
-									mappingResultType++;
-								}
-							}
-						}
+				/**/
+				List<List<String>> sourceDrugResultRecords = getSourceDrugMappingResults(sourceDrug);
+				for (List<String> sourceDrugResultRecord : sourceDrugResultRecords) {
+					String resultRecord = "";
+					for (int column = 0; column < columns.length; column++) {
+						resultRecord += (column > 0 ? "," : "") + (column < sourceDrugResultRecord.size() ? DrugMappingStringUtilities.escapeFieldValue(sourceDrugResultRecord.get(column)) : "");
 					}
-					mappingType++;
+					drugMappingResultsFile.println(resultRecord);
 				}
 			}
 
@@ -2447,6 +2362,181 @@ public class GenericMapping extends Mapping {
 
 			System.out.println(DrugMapping.getCurrentTime() + "       Done");
 		}
+	}
+	
+	
+	private List<List<String>> getSourceDrugMappingResults(SourceDrug sourceDrug) {
+		List<List<String>> resultRecords = new ArrayList<List<String>>();
+		
+		String mappingStatus = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
+		Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
+		
+		if (sourceDrugMappings == null) {
+			System.out.println("ERROR: " + sourceDrug);
+		}
+
+		int mappingType = 0;
+		while (mappingTypeDescriptions.containsKey(mappingType)) {
+			List< Map<Integer, List<CDMConcept>>> mappingResultList = sourceDrugMappings.get(mappingType);
+			if ((mappingResultList != null) && (mappingResultList.size() > 0)) {
+				List<SourceDrugComponent> sourceDrugComponents = new ArrayList<SourceDrugComponent>();
+				sourceDrugComponents.addAll(sourceDrug.getComponents());
+				List<SourceDrugComponent> sortedSourceDrugComponents = new ArrayList<SourceDrugComponent>();
+				sortedSourceDrugComponents.addAll(sourceDrug.getComponents());
+				Collections.sort(sortedSourceDrugComponents, new Comparator<SourceDrugComponent>() {
+
+					@Override
+					public int compare(SourceDrugComponent sourceDrugComponent1, SourceDrugComponent sourceDrugComponent2) {
+						int compare = sourceDrugComponent1.getIngredient().getIngredientCode().compareTo(sourceDrugComponent2.getIngredient().getIngredientCode());
+						if (compare == 0) {
+							Double amount1 = sourceDrugComponent1.getDosage();
+							Double amount2 = sourceDrugComponent2.getDosage();
+							compare = (amount1 == null ? (amount2 == null ? 0 : -1) : (amount2 == null ? 1 : amount1.compareTo(amount2)));
+						}
+						return compare;
+					}
+					
+				});
+
+				for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
+					Map<Integer, List<CDMConcept>> mappingResult = mappingResultList.get(ingredientNr); 
+					// Mapping on source drug
+					String[] sourceIngredientResults = new String[] { "*","*", "*", "*", "*", "*" };
+					if (mappingType == INGREDIENT_MAPPING) {   // Mapping on source drug ingredients
+						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.size() == 0 ? null : sortedSourceDrugComponents.get(ingredientNr);
+						mappingResult = mappingResultList.get(sourceDrugComponent == null ? 0 : sourceDrugComponents.indexOf(sourceDrugComponent));
+						
+						sourceIngredientResults[0] = (sourceDrugComponent.getIngredient().getIngredientCode() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientCode()));
+						sourceIngredientResults[1] = (sourceDrugComponent.getIngredient().getIngredientName() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientName()));
+						sourceIngredientResults[2] = (sourceDrugComponent.getIngredient().getIngredientNameEnglish() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientNameEnglish()));
+						sourceIngredientResults[3] = (sourceDrugComponent.getIngredient().getCASNumber() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getCASNumber()));
+						sourceIngredientResults[4] = standardizedAmount(sourceDrugComponent);
+						sourceIngredientResults[5] = DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+					}
+					if (mappingResult != null) {
+						// Write the result records
+						int mappingResultType = 0;
+						while (mappingResultDescriptions.containsKey(mappingResultType)) {
+							String strengthDeviationPercentage = "";
+							if (mappingResultType == MAPPED) {
+								String key = mappingType == INGREDIENT_MAPPING ? ("Ingredient " + sourceDrug.getCode() + "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientCode()) : ("Drug " + sourceDrug.getCode());
+								if (usedStrengthDeviationPercentageMap.get(key) != null) {
+									strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
+								}
+							}
+							List<String> resultRecord = new ArrayList<String>();
+							
+							resultRecord.add(mappingStatus);
+							resultRecord.add(sourceDrug.getCode() == null ? "" : sourceDrug.getCode());
+							resultRecord.add(sourceDrug.getName() == null ? "" : sourceDrug.getName());
+							resultRecord.add(sourceDrug.getATCCodesString());
+							resultRecord.add(sourceDrug.getFormulationsString());
+							resultRecord.add(sourceDrug.getCount() == null ? "" : Long.toString(sourceDrug.getCount()));
+							for (String sourceIngredientResult : sourceIngredientResults) {
+								resultRecord.add(sourceIngredientResult);
+							}
+							resultRecord.add(strengthDeviationPercentage);
+							resultRecord.add(mappingTypeDescriptions.get(mappingType));
+							resultRecord.add(mappingResultDescriptions.get(mappingResultType));
+							
+							
+							List<CDMConcept> results = mappingResult.get(mappingResultType);
+							if ((results != null) && (results.size() > 0)) {
+								Collections.sort(results, new Comparator<CDMConcept>() {
+									@Override
+									public int compare(CDMConcept concept1, CDMConcept concept2) {
+										return (concept1 == null ? "" : concept1.getConceptId()).compareTo(concept2 == null ? "" : concept2.getConceptId());
+									}
+								});
+								for (CDMConcept result : results) {
+									if (mappingResultType == REJECTED_BY_MAXIMUM_STRENGTH_DEVIATION) {
+										resultRecord.add(result == null ? "" : ((CDMDrug) result).toString() + ": " + ((CDMDrug) result).getStrengthDescription());
+									}
+									else if (mappingResultType == REJECTED_BY_FORM) {
+										if (result != null) {
+											CDMDrug cdmDrug = (CDMDrug) result;
+											String formsDescription = "";
+											for (String cdmDrugFormConceptId : cdmDrug.getForms()) {
+												if (!formsDescription.equals("")) {
+													formsDescription += " | ";
+												}
+												formsDescription += cdm.getCDMFormConceptName(cdmDrugFormConceptId) + " (" + cdmDrugFormConceptId + ")";
+											}
+											resultRecord.add(cdmDrug.toString() + ": " + formsDescription);
+										}
+										else {
+											resultRecord.add("");
+										}
+									}
+									else if ((mappingResultType == DOUBLE_INGREDIENT_MAPPING) || (mappingResultType == UNMAPPED_SOURCE_INGREDIENTS)) {
+										List<SourceIngredient> sourceDrugIngredients = sourceDrug.getIngredients();
+										for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
+											CDMIngredient cdmIngredient = (sourceDrugIngredient.getMatchingIngredient() == null ? null : cdm.getCDMIngredients().get(sourceDrugIngredient.getMatchingIngredient()));
+											String description = sourceDrugIngredient.toString();
+											description += " -> " + (cdmIngredient == null ? "" : cdmIngredient.toString());
+											resultRecord.add(DrugMappingStringUtilities.escapeFieldValue(description));
+										}
+									}
+									else {
+										resultRecord.add(result == null ? "" : result.toString());
+									}
+								}
+								resultRecords.add(resultRecord);
+							}
+							
+							mappingResultType++;
+						}
+					}
+				}
+			}
+			mappingType++;
+		}
+		
+		return resultRecords;
+	}
+	
+	
+	public int getMaximumRecordLength(List<List<String>> sourceDrugMappingResultRecords) {
+		int maxLength = 0;
+		for (List<String> record : sourceDrugMappingResultRecords) {
+			maxLength = Math.max(maxLength, record.size());
+		}
+		return maxLength;
+	}
+	
+	
+	private String[] getHeader(int numberOfResultConcepts) {
+		String[] baseHeader = getBaseHeader();
+		String[] header = new String[baseHeader.length + numberOfResultConcepts];
+		for (int columnNr = 0; columnNr < baseHeader.length; columnNr++) {
+			header[columnNr] = baseHeader[columnNr];
+		}
+		for (Integer resultNr = 1; resultNr <= numberOfResultConcepts; resultNr++) {
+			header[baseHeader.length + resultNr - 1] = "Concept_" + resultNr; 
+		}
+		return header;
+	}
+	
+	
+	private String[] getBaseHeader() {
+		String[] header = new String[] {
+				"MappingStatus",
+				"SourceCode",
+				"SourceName",
+				"SourceATCCode",
+				"SourceFormulation",
+				"SourceCount",
+				"IngredientCode",
+				"IngredientName",
+				"IngredientNameEnglish",
+				"CASNumber",
+				"SourceIngredientAmount",
+				"SourceIngredentUnit",
+				"StrengthMarginPercentage",
+				"MappingType",
+				"MappingResult"
+		};
+		return header;
 	}
 	
 	

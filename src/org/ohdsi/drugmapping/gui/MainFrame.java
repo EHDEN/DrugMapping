@@ -18,17 +18,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -51,6 +56,7 @@ public class MainFrame {
 	public static int PREFERENCE_PRIORITIZE_BY_CONCEPT_ID;
 	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
 	
+	public static int SAVE_DRUGMAPPING_RESULTS;
 	public static int SUPPRESS_WARNINGS;
 	
 	private DrugMapping drugMapping;
@@ -116,6 +122,21 @@ public class MainFrame {
 		
 		JMenuBar menuBar = createMenu();
 		frame.setJMenuBar(menuBar);
+		
+		JTabbedPane tabbedPane = new JTabbedPane();
+		DrugMapping.disableWhenRunning(tabbedPane);
+		
+		tabbedPane.addTab("Execute", createExecutePanel());
+		tabbedPane.addTab("Results", createResultsPanel());
+		
+		frame.add(tabbedPane, BorderLayout.CENTER);
+		
+		return frame;
+	}
+	
+	
+	private JPanel createExecutePanel() {
+		JPanel executePanel = new JPanel(new BorderLayout());
 
 		JPanel databasePanel = null;
 		if (!DrugMapping.special.equals("ZINDEX")) {
@@ -126,8 +147,8 @@ public class MainFrame {
 			databasePanel.add(database);
 		}
 		
-		JPanel level1Frame = new JPanel(new BorderLayout());
-		level1Frame.setBorder(BorderFactory.createEmptyBorder());
+		JPanel level1Panel = new JPanel(new BorderLayout());
+		level1Panel.setBorder(BorderFactory.createEmptyBorder());
 
 		
 		// File settings
@@ -140,8 +161,8 @@ public class MainFrame {
 			filePanel.add(inputFile);
 		}
 		
-		JPanel level2Frame = new JPanel(new BorderLayout());
-		level2Frame.setBorder(BorderFactory.createEmptyBorder());
+		JPanel level2Panel = new JPanel(new BorderLayout());
+		level2Panel.setBorder(BorderFactory.createEmptyBorder());
 		
 		JPanel outputPanel = null;
 		// Output Folder
@@ -150,8 +171,8 @@ public class MainFrame {
 		outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
 		outputPanel.add(outputFolder);
 		
-		JPanel level3Frame = new JPanel(new BorderLayout());
-		level3Frame.setBorder(BorderFactory.createEmptyBorder());
+		JPanel level3Panel = new JPanel(new BorderLayout());
+		level3Panel.setBorder(BorderFactory.createEmptyBorder());
 
 
 		// General Settings
@@ -167,6 +188,7 @@ public class MainFrame {
 			PREFERENCE_PRIORITIZE_BY_DATE       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No"));
 			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
 			PREFERENCE_TAKE_FIRST_OR_LAST       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None"));
+			SAVE_DRUGMAPPING_RESULTS            = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsResults", "Save Drugmapping Results file:", new String[] { "Yes", "No" }, "Yes"));
 			SUPPRESS_WARNINGS                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No"));
 		}
 		
@@ -185,28 +207,54 @@ public class MainFrame {
 			}
 		});
 		buttonPanel.add(startButton);
+		DrugMapping.disableWhenRunning(startButton);
+		
 		buttonSectionPanel.add(buttonPanel, BorderLayout.WEST);
 	
 		
-		// Build frame
+		// Build panel
 		if (databasePanel != null) {
-			frame.add(databasePanel, BorderLayout.NORTH);
+			executePanel.add(databasePanel, BorderLayout.NORTH);
 		}
-		frame.add(level1Frame, BorderLayout.CENTER);
-		level1Frame.add(filePanel, BorderLayout.NORTH);
-		level1Frame.add(level2Frame, BorderLayout.CENTER);
-		level2Frame.add(outputPanel, BorderLayout.NORTH);
-		level2Frame.add(level3Frame, BorderLayout.CENTER);
+		executePanel.add(level1Panel, BorderLayout.CENTER);
+		level1Panel.add(filePanel, BorderLayout.NORTH);
+		level1Panel.add(level2Panel, BorderLayout.CENTER);
+		level2Panel.add(outputPanel, BorderLayout.NORTH);
+		level2Panel.add(level3Panel, BorderLayout.CENTER);
 		if (DrugMapping.settings != null) {
-			level3Frame.add(DrugMapping.settings, BorderLayout.NORTH);
+			level3Panel.add(DrugMapping.settings, BorderLayout.NORTH);
 		}
-		level3Frame.add(createConsolePanel(), BorderLayout.CENTER);
-		frame.add(buttonSectionPanel, BorderLayout.SOUTH);
+		level3Panel.add(createConsolePanel(), BorderLayout.CENTER);
+		executePanel.add(buttonSectionPanel, BorderLayout.SOUTH);
 		
-		DrugMapping.disableWhenRunning(startButton);
-		
-		return frame;
+		return executePanel;
 	}
+	
+	
+	private JPanel createResultsPanel() {
+		JPanel resultsPanel = new JPanel(new BorderLayout());
+		
+		JPanel searchPanel = new JPanel();
+		searchPanel.setBorder(BorderFactory.createTitledBorder("Search"));
+		searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
+		JLabel searchLabel = new JLabel("Search term: ");
+		JTextField searchField = new JTextField(20);
+		searchPanel.add(searchLabel);
+		searchPanel.add(searchField);
+
+		JPanel resultsPane = new JPanel(new BorderLayout());
+		resultsPane.setBorder(BorderFactory.createTitledBorder("Results"));
+		JTable resultsTable = new JTable(10, 5);
+		JScrollPane resultsScrollPane = new JScrollPane(resultsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
+		
+				
+		resultsPanel.add(searchPanel, BorderLayout.NORTH);
+		resultsPanel.add(resultsPane, BorderLayout.CENTER);
+		
+		return resultsPanel;
+	}
+	
 	
 	private JScrollPane createConsolePanel() {
 		JTextArea consoleArea = new JTextArea();
