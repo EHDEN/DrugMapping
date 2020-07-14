@@ -52,6 +52,8 @@ public class SourceDrugComponent {
 		}
 		this.dosage = dosageValue;
 		this.dosageUnit = dosageUnit;
+		
+		ingredient.addDrug(sourceDrug);
 	}
 	
 	

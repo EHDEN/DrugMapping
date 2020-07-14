@@ -234,6 +234,7 @@ public class DrugMapping {
 				logFolderSettings(mainFrame.getOutputFolder());
 				logGeneralSettings();
 				new GenericMapping(
+						mainFrame,
 						getDatabase(), 
 						getFile("Generic Drugs File"),
 						getFile("Ingredient Name Translation File"),

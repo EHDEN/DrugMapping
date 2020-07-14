@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import javax.swing.JFrame;
+
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.FormConversion;
 import org.ohdsi.drugmapping.IngredientNameTranslation;
@@ -119,6 +121,7 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(NO_MAPPING                                    , "No mapping found");
 	}
 	
+	private MainFrame mainFrame = null;
 	private Set<String> forms = null;
 	private Set<String> units = null;
 
@@ -162,6 +165,7 @@ public class GenericMapping extends Mapping {
 		
 	
 	public GenericMapping(
+					MainFrame mainFrame,
 					CDMDatabase database, 
 					InputFile sourceDrugsFile, 
 					InputFile ingredientNameTranslationFile, 
@@ -174,6 +178,7 @@ public class GenericMapping extends Mapping {
 					) {
 		boolean ok = true;
 		
+		this.mainFrame = mainFrame;
 		forms = new HashSet<String>();
 		units = new HashSet<String>();
 
@@ -212,7 +217,7 @@ public class GenericMapping extends Mapping {
 
 		System.out.println(DrugMapping.getCurrentTime() + " Generic Drug Mapping");
 		SourceDrug.init();
-		
+
 		// Load source drug ingredient mapping
 		ok = ok && getSourceDrugs(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT)) && (!SourceDrug.errorOccurred());
 
@@ -267,6 +272,9 @@ public class GenericMapping extends Mapping {
 
 		// Save mapping
 		if (ok) saveMapping();
+
+		// Showing Drugs List
+		if (ok) showDrugsList();
 
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
 		
@@ -1042,9 +1050,10 @@ public class GenericMapping extends Mapping {
 	
 	private Integer matchIngredientsByATC() {
 		Integer matchedByATC = 0;
+		Integer multipleMappings = 0;
 		
 		System.out.println(DrugMapping.getCurrentTime() + "     Match ingredients by ATC ...");
-		
+		/*
 		for (SourceDrug sourceDrug : sourceDrugs) {
 			List<SourceIngredient> sourceIngredients = sourceDrug.getIngredients();
 			if ((sourceDrug.getATCCodes() != null) && (sourceDrug.getATCCodes().size() > 0) && (sourceIngredients.size() == 1)) {
@@ -1069,11 +1078,46 @@ public class GenericMapping extends Mapping {
 				}
 			}
 		}
+		*/
+		
+		for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+			if (sourceIngredient.getMatchingIngredient() == null) {
+				Set<CDMIngredient> cdmATCIngredients = new HashSet<CDMIngredient>();
+				Set<SourceDrug> ingredientDrugs = sourceIngredient.getSourceDrugs();
+				Set<String> atcCodes = new HashSet<String>();
+				for (SourceDrug sourceDrug : ingredientDrugs) {
+					if (sourceDrug.getIngredients().size() == 1) {
+						atcCodes.addAll(sourceDrug.getATCCodes());
+					}
+				}
+				String matchingATCCodes = "ATC:";
+				for (String atcCode : atcCodes) {
+					Set<CDMIngredient> cdmIngredients = cdm.getCDMATCIngredientMap().get(atcCode);
+					
+					if (cdmIngredients != null) {
+						cdmATCIngredients.addAll(cdm.getCDMATCIngredientMap().get(atcCode));
+					}
+					if (cdmATCIngredients.size() > 1) {
+						multipleMappings++;
+						break;
+					}
+					matchingATCCodes = matchingATCCodes + " " + atcCode;
+				}
+				if (cdmATCIngredients.size() == 1) {
+					CDMIngredient cdmIngredient = (CDMIngredient) cdmATCIngredients.toArray()[0];
+					ingredientMap.put(sourceIngredient, cdmIngredient);
+					sourceIngredient.setMatchingIngredient(cdmIngredient.getConceptId());
+					sourceIngredient.setMatchString(matchingATCCodes);
+					matchedByATC++;
+				}
+			}
+		}
+		
 
 		report.add("Source ingredients mapped by ATC: " + DrugMappingNumberUtilities.percentage((long) matchedByATC, (long) SourceDrug.getAllIngredients().size()));
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
-		return 0;
+		return multipleMappings;
 	}
 	
 	
@@ -1970,6 +2014,30 @@ public class GenericMapping extends Mapping {
 		}
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void showDrugsList() {
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Showing Drugs List ...");
+
+		List<String[]> drugsList = new ArrayList<String[]>();
+		for (SourceDrug sourceDrug : sourceDrugs) {
+			String[] drug = new String[] {
+					manualDrugMappings.containsKey(sourceDrug) ? "Manual Mapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped"),
+					sourceDrug.getCode() == null ? "" : sourceDrug.getCode(),
+					sourceDrug.getName() == null ? "" : sourceDrug.getName(),
+					sourceDrug.getATCCodesString(),
+					sourceDrug.getFormulationsString(),
+					sourceDrug.getCount() == null ? "" : Long.toString(sourceDrug.getCount())
+			};
+			drugsList.add(drug);
+		}
+		
+		mainFrame.listDrugs(drugsList);
+			
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		
 	}
 	
 	

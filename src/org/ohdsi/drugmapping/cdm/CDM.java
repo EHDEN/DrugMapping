@@ -445,6 +445,7 @@ public class CDM {
 					}
 				}
 				else if (relationshipId.equals("Maps to")) {
+	
 					ingredientNameIndex = cdmOtherMapsToIngredientNameIndex;
 					synonymIngredientNameIndex = cdmSynonymOtherMapsToIngredientNameIndex;
 					if (drugConceptClassId.equals("Ingredient")) {
@@ -459,7 +460,7 @@ public class CDM {
 						ingredientNameIndex = cdmSubstanceMapsToIngredientNameIndex;
 						synonymIngredientNameIndex = cdmSynonymSubstanceMapsToIngredientNameIndex;
 					}
-					
+				
 					if (drugVocabularyId.equals("ATC") && drugConceptClassId.equals("ATC 5th") && (!drugConceptCode.equals(""))) {
 						atcIngredientMap = cdmATCIngredientMap;
 					}

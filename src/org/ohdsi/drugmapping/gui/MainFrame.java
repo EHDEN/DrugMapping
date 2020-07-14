@@ -1,6 +1,7 @@
 package org.ohdsi.drugmapping.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -67,6 +68,9 @@ public class MainFrame {
 	private Folder outputFolder = null; 
 	private JButton startButton = null;
 	
+	private JPanel drugsPanel;
+	private JPanel drugResultsPanel;
+	
 
 	/**
 	 * Sets an icon on a JFrame or a JDialog.
@@ -115,6 +119,7 @@ public class MainFrame {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setSize(1000, 800);
+		frame.setMinimumSize(new Dimension(800, 600));
 		frame.setTitle("OHDSI Drug Mapping Tool");
 		MainFrame.setIcon(frame);
 		frame.setLocationRelativeTo(null);
@@ -241,18 +246,60 @@ public class MainFrame {
 		JTextField searchField = new JTextField(20);
 		searchPanel.add(searchLabel);
 		searchPanel.add(searchField);
-
-		JPanel resultsPane = new JPanel(new BorderLayout());
-		resultsPane.setBorder(BorderFactory.createTitledBorder("Results"));
-		JTable resultsTable = new JTable(10, 5);
-		JScrollPane resultsScrollPane = new JScrollPane(resultsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
+		
+		JPanel drugsResultsPanel = new JPanel(new BorderLayout());
+		
+		drugsPanel = new JPanel(new BorderLayout());
+		drugsPanel.setBorder(BorderFactory.createTitledBorder("Drugs"));
+		drugsPanel.setMinimumSize(new Dimension(100, 205));
+		drugsPanel.setMaximumSize(new Dimension(100000, 205));
+		drugsPanel.setPreferredSize(new Dimension(100, 205));
+		
+		drugResultsPanel = new JPanel(new BorderLayout());
+		drugResultsPanel.setBorder(BorderFactory.createTitledBorder("Results"));
+		
+		
+		//JTable resultsTable = new JTable(10, 5);
+		//JScrollPane resultsScrollPane = new JScrollPane(resultsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		//resultsPane.add(resultsScrollPane, BorderLayout.CENTER);
 		
 				
 		resultsPanel.add(searchPanel, BorderLayout.NORTH);
-		resultsPanel.add(resultsPane, BorderLayout.CENTER);
+		resultsPanel.add(drugsResultsPanel, BorderLayout.CENTER);
+		drugsResultsPanel.add(drugsPanel, BorderLayout.NORTH);
+		drugsResultsPanel.add(drugResultsPanel, BorderLayout.CENTER);
 		
 		return resultsPanel;
+	}
+	
+	
+	public void listDrugs(List<String[]> drugList) {
+		String[] header = new String[] {
+			"Status",
+			"Code",
+			"Name",
+			"ATCCode",
+			"Formulation",
+			"Use Count"
+		};
+		String[][] drugs = new String[drugList.size()][6];
+		for (int drugNr = 0; drugNr < drugList.size(); drugNr++) {
+			String[] drug = drugList.get(drugNr);
+			for (int columnNr = 0; columnNr < header.length; columnNr++) {
+				drugs[drugNr][columnNr] = drug[columnNr]; 
+			}
+		}
+		JTable drugsTable = new JTable(drugs, header);
+		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100); // Status
+		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100); // Status
+		drugsTable.getColumnModel().getColumn(1).setMaxWidth(120); // Code
+		drugsTable.getColumnModel().getColumn(3).setMaxWidth(170); // ATCCode
+		drugsTable.getColumnModel().getColumn(4).setMaxWidth(300); // Formulation
+		drugsTable.getColumnModel().getColumn(4).setPreferredWidth(200); // Formulation
+		drugsTable.getColumnModel().getColumn(5).setMaxWidth(80);  // Use Count
+		drugsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		JScrollPane drugsScrollPane = new JScrollPane(drugsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		drugsPanel.add(drugsScrollPane, BorderLayout.CENTER);
 	}
 	
 	
@@ -515,6 +562,11 @@ public class MainFrame {
 			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath().substring(0, fileChooser.getSelectedFile().getAbsolutePath().lastIndexOf(File.separator)));
 		}
 		return fileName;
+	}
+	
+	
+	public JFrame getFrame() {
+		return frame;
 	}
 	
 	

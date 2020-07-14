@@ -21,6 +21,7 @@ public class SourceIngredient {
 	
 	private String matchString = "";
 	private String matchingIngredient = null;
+	private Set<SourceDrug> sourceDrugs = new HashSet<SourceDrug>();
 	
 	
 	public static String getHeader() {
@@ -134,6 +135,16 @@ public class SourceIngredient {
 		}
 		
 		return reducedName;
+	}
+	
+	
+	public void addDrug(SourceDrug sourceDrug) {
+		sourceDrugs.add(sourceDrug);
+	}
+	
+	
+	public Set<SourceDrug> getSourceDrugs() {
+		return sourceDrugs;
 	}
 	
 	
