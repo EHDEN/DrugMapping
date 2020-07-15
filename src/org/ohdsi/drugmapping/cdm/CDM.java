@@ -123,6 +123,12 @@ public class CDM {
 			// Connect to the database
 			RichConnection connection = database.getRichConnection(CDM.class);
 			
+			// Get CDM units
+			//getCDMUnits(connection, queryParameters, report);
+			
+			// Get CDM Forms
+			getCDMForms(connection, queryParameters, report);
+			
 			// Get CDM ingredients
 			getRxNormIngredients(connection, queryParameters, report);
 			
@@ -143,12 +149,6 @@ public class CDM {
 					
 			// Get CAS code to CDM RxNorm (Extension) Ingredient mapping
 			getCASToRxNormIngredientsMapping(connection, queryParameters, report);
-			
-			// Get CDM units
-			//getCDMUnits(connection, queryParameters, report);
-			
-			// Get CDM Forms
-			getCDMForms(connection, queryParameters, report);
 			
 			// Write Ingredients Name index to file
 			writeNameIndexesToFile();
@@ -872,6 +872,8 @@ public class CDM {
 		
 		nameSet.add(name);
 		nameSet.add(DrugMappingStringUtilities.modifyName(name));
+		nameSet.add(DrugMappingStringUtilities.sortWords(name));
+		nameSet.add(DrugMappingStringUtilities.modifyName(DrugMappingStringUtilities.sortWords(name)));
 		
 		return nameSet;
 	}

@@ -1,9 +1,8 @@
 package org.ohdsi.drugmapping.utilities;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.ohdsi.drugmapping.DrugMapping;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class DrugMappingStringUtilities {
 	
@@ -277,6 +276,34 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String sortWords(String string) {
+		String splitCharacters = " ,.-()[]/\\*+&:'\"<>_=|{};#$%^@^~`\t\n\r";
+		List<String> words = new ArrayList<String>();
+		String word = "";
+		for (int charNr = 0; charNr < string.length(); charNr++) {
+			String currentCharacter = string.substring(charNr, charNr + 1);
+			if (splitCharacters.contains(currentCharacter)) {
+				if (!word.equals("")) {
+					words.add(word);
+					word = "";
+				}
+			}
+			else {
+				word += currentCharacter;
+			}
+		}
+		if (!word.equals("")) {
+			words.add(word);
+		}
+		Collections.sort(words);
+		String result = "";
+		for (String sortedWord : words) {
+			result += (result.equals("") ? "" : " ") + sortedWord;
+		}
+		return result;
+	}
+	
+	
 	public static boolean characterInRange(char character, char startRange, char endRange) {
 		int characterValue = (int) character;
 		return ((characterValue >= (int) startRange) && (characterValue <= (int) endRange));
@@ -284,8 +311,9 @@ public class DrugMappingStringUtilities {
 	
 	
 	public static void main(String[] args) {
-		System.out.println(DrugMappingStringUtilities.convertToStandardCharacters("CARBOMEER 974P"));
-		System.out.println(DrugMappingStringUtilities.modifyName("CARBOMEER 974P"));
+		String test = "FOLLICLE STIMULATI&NG H/ORM\\ONE 75 UNT INJECT\tABLE SOLU?TION";
+		System.out.println(test);
+		System.out.println(DrugMappingStringUtilities.sortWords(test));
 	}
 
 }

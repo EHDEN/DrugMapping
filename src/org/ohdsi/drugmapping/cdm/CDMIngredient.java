@@ -3,7 +3,10 @@ package org.ohdsi.drugmapping.cdm;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredient extends CDMConcept {
@@ -11,6 +14,7 @@ public class CDMIngredient extends CDMConcept {
 	
 	private List<String> synonyms = new ArrayList<String>();
 	private List<String> synonymsNoSpaces = new ArrayList<String>();
+	private Set<CDMDrug> cdmDrugs = new HashSet<CDMDrug>();
 	
 	
 	public static String getHeader() {
@@ -126,6 +130,11 @@ public class CDMIngredient extends CDMConcept {
 		description += toString().replaceAll("\"", "'");
 		
 		return description;
+	}
+	
+	
+	public void addDrug(CDMDrug cdmDrug) {
+		cdmDrugs.add(cdmDrug);
 	}
 	
 	

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.SourceDrug;
@@ -27,6 +28,7 @@ public class FormConversion {
 	
 	private int status = STATE_OK;
 	private String fileName = "";
+	private CDM cdm = null;
 	
 	private Map<String, List<String>> formConversionMap = new HashMap<String, List<String>>();
 	
@@ -36,8 +38,10 @@ public class FormConversion {
 	}
 	
 	
-	public FormConversion(InputFile sourceFormMappingFile) {
+	public FormConversion(InputFile sourceFormMappingFile, CDM cdm) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Create Dose Forms Conversion Map ...");
+		
+		this.cdm = cdm;
 		
 		readFormConversionFile(sourceFormMappingFile);
 		if (status == STATE_EMPTY) {
@@ -63,8 +67,9 @@ public class FormConversion {
 				String sourceForm = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "DoseForm", true)).toUpperCase();
 				String priorityString = sourceFormMappingFile.get(row, "Priority", false);
 				String conceptId = sourceFormMappingFile.get(row, "ConceptId", false);
-				String conceptName = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "ConceptName", true)).toUpperCase();
+				//String conceptName = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "ConceptName", true)).toUpperCase();
 				//String comment = sourceFormMappingFile.get(row, "Comment", false);
+				String conceptName = cdm.getCDMFormConceptName(conceptId);
 				
 				Integer priority = null;
 				if (!priorityString.equals("")) {
@@ -84,6 +89,7 @@ public class FormConversion {
 				}
 				
 				if (priority != null) {
+					
 					if ((!sourceForm.equals("")) && (conceptId.equals(""))) {
 						if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 							System.out.println("    WARINING: No target form specified for '" + sourceForm + ".");
@@ -97,10 +103,10 @@ public class FormConversion {
 						}
 						String existingConversion = sourceFormConversion.get(priority);
 						if (existingConversion == null) {
-							sourceFormConversion.put(priority, conceptId);
+							sourceFormConversion.put(priority, conceptName);
 						}
 						else {
-							if (existingConversion.equals(conceptId)) {
+							if (existingConversion.equals(conceptName)) {
 								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 									System.out.println("    WARNING: Double definition found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'.");								
 								}

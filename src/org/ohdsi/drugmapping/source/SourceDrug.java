@@ -190,7 +190,7 @@ public class SourceDrug {
 	public String getATCCodesString() {
 		String atcCodes = "";
 		for (String atcCode : atcCodeList) {
-			atcCodes += atcCodes + (atcCodes.equals("") ? "" : "|") + atcCode;
+			atcCodes += (atcCodes.equals("") ? "" : "|") + atcCode;
 		}
 		return atcCodes;
 	}
@@ -204,7 +204,7 @@ public class SourceDrug {
 	public String getFormulationsString() {
 		String formulations = "";
 		for (String formulation : formulationsList) {
-			formulations += formulations + (formulations.equals("") ? "" : "|") + formulation;
+			formulations += (formulations.equals("") ? "" : "|") + formulation;
 		}
 		return formulations;
 	}

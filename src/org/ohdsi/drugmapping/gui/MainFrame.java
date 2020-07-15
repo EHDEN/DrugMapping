@@ -35,12 +35,17 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.GeneralSettings;
 import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.source.SourceDrug;
 
 public class MainFrame {
 	
@@ -50,7 +55,9 @@ public class MainFrame {
 	
 	public static int MINIMUM_USE_COUNT;
 	public static int MAXIMUM_STRENGTH_DEVIATION;
-	
+
+	public static int PREFERENCE_MATCH_COMP_FORM;
+	public static int PREFERENCE_MATCH_INGREDIENTS_TO_COMP;	
 	public static int PREFERENCE_RXNORM;
 	public static int PREFERENCE_ATC;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;
@@ -185,16 +192,18 @@ public class MainFrame {
 		if (!DrugMapping.special.equals("ZINDEX")) {
 			DrugMapping.settings = new GeneralSettings(this);
 
-			VOCABULARY_ID                       = DrugMapping.settings.addSetting(new StringValueSetting(this, "VocabularyID", "Vocabulary ID:", ""));
-			MINIMUM_USE_COUNT                   = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
-			MAXIMUM_STRENGTH_DEVIATION          = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
-			PREFERENCE_RXNORM                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
-			PREFERENCE_ATC                      = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceATC", "Prefer matching ATC:", new String[] { "Yes", "No" }, "Yes"));
-			PREFERENCE_PRIORITIZE_BY_DATE       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No"));
-			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
-			PREFERENCE_TAKE_FIRST_OR_LAST       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None"));
-			SAVE_DRUGMAPPING_RESULTS            = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsResults", "Save Drugmapping Results file:", new String[] { "Yes", "No" }, "Yes"));
-			SUPPRESS_WARNINGS                   = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No"));
+			VOCABULARY_ID                        = DrugMapping.settings.addSetting(new StringValueSetting(this, "VocabularyID", "Vocabulary ID:", ""));
+			MINIMUM_USE_COUNT                    = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
+			MAXIMUM_STRENGTH_DEVIATION           = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
+			PREFERENCE_MATCH_COMP_FORM           = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceCompForm", "Comp Form matching preference:", new String[] { "Comp before Form", "Form before Comp" }, "Form before Comp"));
+			PREFERENCE_MATCH_INGREDIENTS_TO_COMP = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceMatchIngredientsToComp", "Ingredient Matching preference:", new String[] { "Ingredient Only", "Ingredient or Comp" }, "Ingredient Only"));
+			PREFERENCE_RXNORM                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
+			PREFERENCE_ATC                       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceATC", "Prefer matching ATC:", new String[] { "Yes", "No" }, "Yes"));
+			PREFERENCE_PRIORITIZE_BY_DATE        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No"));
+			PREFERENCE_PRIORITIZE_BY_CONCEPT_ID  = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
+			PREFERENCE_TAKE_FIRST_OR_LAST        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None"));
+			SAVE_DRUGMAPPING_RESULTS             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsResults", "Save Drugmapping Results file:", new String[] { "Yes", "No" }, "Yes"));
+			SUPPRESS_WARNINGS                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No"));
 		}
 		
 		
@@ -273,7 +282,7 @@ public class MainFrame {
 	}
 	
 	
-	public void listDrugs(List<String[]> drugList) {
+	public void listDrugs(List<Object[]> drugList) {
 		String[] header = new String[] {
 			"Status",
 			"Code",
@@ -282,24 +291,69 @@ public class MainFrame {
 			"Formulation",
 			"Use Count"
 		};
-		String[][] drugs = new String[drugList.size()][6];
+		Object[][] drugs = new Object[drugList.size()][header.length + 1];
 		for (int drugNr = 0; drugNr < drugList.size(); drugNr++) {
-			String[] drug = drugList.get(drugNr);
-			for (int columnNr = 0; columnNr < header.length; columnNr++) {
+			Object[] drug = drugList.get(drugNr);
+			for (int columnNr = 0; columnNr < (header.length + 1); columnNr++) {
 				drugs[drugNr][columnNr] = drug[columnNr]; 
 			}
 		}
 		JTable drugsTable = new JTable(drugs, header);
-		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100); // Status
-		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100); // Status
-		drugsTable.getColumnModel().getColumn(1).setMaxWidth(120); // Code
-		drugsTable.getColumnModel().getColumn(3).setMaxWidth(170); // ATCCode
-		drugsTable.getColumnModel().getColumn(4).setMaxWidth(300); // Formulation
-		drugsTable.getColumnModel().getColumn(4).setPreferredWidth(200); // Formulation
-		drugsTable.getColumnModel().getColumn(5).setMaxWidth(80);  // Use Count
 		drugsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		
+		DefaultTableCellRenderer rightAlignmentRenderer = new DefaultTableCellRenderer();
+		rightAlignmentRenderer.setHorizontalAlignment(JLabel.RIGHT);
+		
+		drugsTable.setAutoCreateRowSorter(true);
+
+		/*/ Make header clickable to sort columns
+		drugsTable.getTableHeader().addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		    	sorting = true;
+		        int sortingColumn = drugsTable.columnAtPoint(e.getPoint());
+		        sorter.sortColumn(sortingColumn);
+		        sorting = false;
+		    }
+		});
+		/**/
+
+		// Set selection to first row
+		ListSelectionModel selectionModel = drugsTable.getSelectionModel();
+		selectionModel.setSelectionInterval(0, 0);
+		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		selectionModel.addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				selectDrug((SourceDrug) drugs[drugsTable.getSelectedRow()][header.length + 1]);
+			}
+		});
+		// Status
+		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100);
+		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100);
+		
+		// Code
+		drugsTable.getColumnModel().getColumn(1).setMaxWidth(120);
+		
+		// ATCCode
+		drugsTable.getColumnModel().getColumn(3).setMaxWidth(170);
+		
+		// Formulation
+		drugsTable.getColumnModel().getColumn(4).setMaxWidth(300);
+		drugsTable.getColumnModel().getColumn(4).setPreferredWidth(200);
+		
+		// Use Count
+		drugsTable.getColumnModel().getColumn(5).setMaxWidth(80);
+		drugsTable.getColumnModel().getColumn(5).setCellRenderer(rightAlignmentRenderer);
+		
 		JScrollPane drugsScrollPane = new JScrollPane(drugsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		drugsPanel.add(drugsScrollPane, BorderLayout.CENTER);
+	}
+	
+	
+	private void selectDrug(SourceDrug sourceDrug) {
+		System.out.println(sourceDrug);
 	}
 	
 	

@@ -10,6 +10,7 @@ import org.ohdsi.utilities.files.Row;
 
 public class CDMDrug extends CDMConcept {
 	private List<String> formConceptIds = new ArrayList<String>();
+	private List<String> formConceptNames = new ArrayList<String>();
 	private List<CDMIngredientStrength> ingredientStrengths = new ArrayList<CDMIngredientStrength>();
 	private List<CDMIngredient> ingredients = new ArrayList<CDMIngredient>(); 
 	private Map<String, List<CDMIngredientStrength>> ingredientsMap = new HashMap<String, List<CDMIngredientStrength>>();
@@ -33,6 +34,11 @@ public class CDMDrug extends CDMConcept {
 		if (!formConceptIds.contains(formConceptId)) {
 			formConceptIds.add(formConceptId);
 			Collections.sort(formConceptIds);
+		}
+		String formConceptName = cdm.getCDMFormConceptName(formConceptId);
+		if (!formConceptNames.contains(formConceptName)) {
+			formConceptNames.add(formConceptName);
+			Collections.sort(formConceptNames);
 		}
 	}
 	
@@ -58,8 +64,13 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public List<String> getForms() {
+	public List<String> getFormConceptIds() {
 		return formConceptIds;
+	}
+	
+	
+	public List<String> getFormConceptNames() {
+		return formConceptNames;
 	}
 	
 	
