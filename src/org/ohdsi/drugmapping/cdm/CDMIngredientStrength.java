@@ -232,7 +232,7 @@ public class CDMIngredientStrength {
 	
 	public String toString() {
 		
-		String description = ingredient.toString();
+		String description = ingredient == null ? CDMIngredient.emptyRecord() : ingredient.toString();
 		description += "," + (getNumeratorDosage() == null ? "" : getNumeratorDosage());
 		description += "," + (((numerator_unit == null) || (numerator_unit.getConceptCode() == null)) ? "" : numerator_unit.getConceptCode());
 		description += "," + (getDenominatorDosage() == null ? "" : getDenominatorDosage());

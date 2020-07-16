@@ -104,21 +104,25 @@ public class CDMDrug extends CDMConcept {
 	public void addIngredientStrength(CDMIngredientStrength ingredient) {
 		ingredientStrengths.add(ingredient);
 		ingredients.add(ingredient.getIngredient());
-		String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
-		List<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
-		if (ingredientSet == null) {
-			ingredientSet = new ArrayList<CDMIngredientStrength>();
-			ingredientsMap.put(ingredientConceptId, ingredientSet);
-		}
-		if (!ingredientSet.contains(ingredient)) {
-			ingredientSet.add(ingredient);
-			Collections.sort(ingredientSet, new Comparator<CDMIngredientStrength>() {
+		if (ingredient.getIngredient() != null) {
+			String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
+			List<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
+			if (ingredientSet == null) {
+				ingredientSet = new ArrayList<CDMIngredientStrength>();
+				ingredientsMap.put(ingredientConceptId, ingredientSet);
+			}
+			if (!ingredientSet.contains(ingredient)) {
+				ingredientSet.add(ingredient);
+				Collections.sort(ingredientSet, new Comparator<CDMIngredientStrength>() {
 
-				@Override
-				public int compare(CDMIngredientStrength ingredient1, CDMIngredientStrength ingredient2) {
-					return ingredient1.getIngredient().getConceptId().compareTo(ingredient2.getIngredient().getConceptId());
-				}
-			});
+					@Override
+					public int compare(CDMIngredientStrength ingredient1, CDMIngredientStrength ingredient2) {
+						String ingredient_concept_id1 = ingredient1.getIngredient() == null ? "" : ingredient1.getIngredient().getConceptId();
+						String ingredient_concept_id2 = ingredient1.getIngredient() == null ? "" : ingredient2.getIngredient().getConceptId();
+						return ingredient_concept_id1.compareTo(ingredient_concept_id2);
+					}
+				});
+			}
 		}
 	}
 	
@@ -181,7 +185,7 @@ public class CDMDrug extends CDMConcept {
 			if (!generatedName.equals("")) {
 				generatedName += " / ";
 			}
-			generatedName += ingredientStrength.getIngredient().getConceptName();
+			generatedName += (ingredientStrength.getIngredient() == null ? "<UNKNOWN>" : ingredientStrength.getIngredient().getConceptName());
 			if (includeDose) {
 				if (ingredientStrength.getAmountValueString() == null) {
 					generatedName += " " + (ingredientStrength.getNumeratorValueString() == null ? "1" : ingredientStrength.getNumeratorValueString());

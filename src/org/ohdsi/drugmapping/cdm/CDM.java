@@ -545,10 +545,10 @@ public class CDM {
 				if (formCount == 1) {
 					if ((cdmIngredientConceptId != null) && (!cdmIngredientConceptId.equals(""))) {
 						CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
-						if (cdmIngredient != null) {
+						//if (cdmIngredient != null) {
 							CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
 							cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
-						}
+						//}
 					}
 				}
 				lastCDMFormConceptId = cdmFormConceptId;
