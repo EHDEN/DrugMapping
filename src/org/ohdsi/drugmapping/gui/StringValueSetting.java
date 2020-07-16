@@ -18,7 +18,7 @@ public class StringValueSetting extends Setting {
 	String value;
 	
 	
-	public StringValueSetting(MainFrame mainFrame, String name, String label, String defaultValue) {
+	public StringValueSetting(MainFrameTab mainFrameTab, String name, String label, String defaultValue) {
 		valueType = Setting.SETTING_TYPE_STRING;
 		this.name = name;
 		this.label = label;
@@ -54,7 +54,7 @@ public class StringValueSetting extends Setting {
 			private void check() {
 				value = stringValueField.getText();
 				correct = (!value.trim().equals(""));
-				mainFrame.checkReadyToStart();
+				mainFrameTab.checkReadyToStart();
 			}
 		});
 		stringValueFieldPanel.add(stringValueField, BorderLayout.WEST);

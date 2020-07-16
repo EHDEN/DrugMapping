@@ -19,7 +19,7 @@ public class LongValueSetting extends Setting {
 	private Long value = null;
 
 	
-	public LongValueSetting(MainFrame mainFrame, String name, String label, Long defaultValue) {
+	public LongValueSetting(MainFrameTab mainFrameTab, String name, String label, Long defaultValue) {
 		valueType = Setting.SETTING_TYPE_LONG;
 		this.name = name;
 		this.label = label;
@@ -56,11 +56,11 @@ public class LongValueSetting extends Setting {
 				try {
 					value = Long.parseLong(longValueField.getText());
 					correct = true;
-					mainFrame.checkReadyToStart();
+					mainFrameTab.checkReadyToStart();
 				}
 				catch (NumberFormatException e) {
 					correct = false;
-					mainFrame.checkReadyToStart();
+					mainFrameTab.checkReadyToStart();
 				}
 			}
 		});

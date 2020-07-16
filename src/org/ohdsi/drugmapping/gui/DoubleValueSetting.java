@@ -18,7 +18,7 @@ public class DoubleValueSetting extends Setting {
 	Double value;
 	
 	
-	public DoubleValueSetting(MainFrame mainFrame, String name, String label, Double defaultValue) {
+	public DoubleValueSetting(MainFrameTab mainFrameTab, String name, String label, Double defaultValue) {
 		valueType = Setting.SETTING_TYPE_DOUBLE;
 		this.name = name;
 		this.label = label;
@@ -55,11 +55,11 @@ public class DoubleValueSetting extends Setting {
 				try {
 					value = Double.parseDouble(doubleValueField.getText());
 					correct = true;
-					mainFrame.checkReadyToStart();
+					mainFrameTab.checkReadyToStart();
 				}
 				catch (NumberFormatException e) {
 					correct = false;
-					mainFrame.checkReadyToStart();
+					mainFrameTab.checkReadyToStart();
 				}
 			}
 		});

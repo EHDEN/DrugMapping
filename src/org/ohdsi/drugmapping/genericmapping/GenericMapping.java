@@ -2024,7 +2024,7 @@ public class GenericMapping extends Mapping {
 		saveIngredientMapping(sourceIngredients);
 		saveDrugMapping();
 		if (DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes")) {
-			saveDrugMappingResults();
+			saveDrugMappingMappingLog();
 		}
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
@@ -2058,13 +2058,13 @@ public class GenericMapping extends Mapping {
 	
 	private void saveIngredientMapping(List<SourceIngredient> sourceIngredients) {
 		
-		System.out.println(DrugMapping.getCurrentTime() + "       Saving Ingredient Mapping Results ...");
+		System.out.println(DrugMapping.getCurrentTime() + "       Saving Ingredient Mapping Mapping Log ...");
 		
 		// Save ingredient mapping
 		String header = SourceIngredient.getMatchHeader();
 		header += "," + "SourceCount";
 		header += "," + CDMIngredient.getHeader();
-		PrintWriter ingredientMappingFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Results.csv", header);
+		PrintWriter ingredientMappingFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Mapping Log.csv", header);
 		
 		if (ingredientMappingFile != null) {
 			
@@ -2405,16 +2405,16 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private void saveDrugMappingResults() {
+	private void saveDrugMappingMappingLog() {
 		
-		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Results ...");
+		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Mapping Log ...");
 
 		String[] columns = getHeader(maxResultConcepts);
 		String header = "";
 		for (String column : columns) {
 			header += (header.equals("") ? "" : ",") + column;
 		}
-		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Results.csv", header);
+		PrintWriter drugMappingResultsFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Mapping Log.csv", header);
 		
 		if (drugMappingResultsFile != null) {
 

@@ -21,7 +21,7 @@ public class GeneralSettings extends JPanel {
 	JPanel rightSettingsListPanel = null;
 	
 	
-	public GeneralSettings(MainFrame mainFrame) {
+	public GeneralSettings() {
 		setLayout(new GridLayout(1, 2));
 		setBorder(BorderFactory.createTitledBorder("General Settings"));
 		
