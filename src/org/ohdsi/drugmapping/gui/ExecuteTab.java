@@ -144,8 +144,10 @@ public class ExecuteTab extends MainFrameTab {
 		consoleArea.setEditable(false);
 		console = new Console();
 		console.setTextArea(consoleArea);
-		System.setOut(new PrintStream(console));
-		System.setErr(new PrintStream(console));
+		if (!(System.getProperty("runInEclipse") == null ? false : System.getProperty("runInEclipse").equalsIgnoreCase("true"))) {
+			System.setOut(new PrintStream(console));
+			System.setErr(new PrintStream(console));
+		}
 		JScrollPane consoleScrollPane = new JScrollPane(consoleArea);
 		consoleScrollPane.setBorder(BorderFactory.createTitledBorder("Console"));
 		consoleScrollPane.setAutoscrolls(true);

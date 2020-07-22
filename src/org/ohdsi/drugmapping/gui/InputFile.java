@@ -31,7 +31,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -42,11 +41,10 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
@@ -71,7 +69,7 @@ public class InputFile extends JPanel {
 
 	private String fileName = null;
 	private String fieldDelimiter = "Comma";
-	private String textQualifier = "None";
+	private String textQualifier = "\"";
 	private Map<String, String> columnMapping = new HashMap<String, String>();
 	
 	private Iterator<Row> fileIterator;
@@ -239,6 +237,11 @@ public class InputFile extends JPanel {
 	
 	public void setColumnMapping(Map<String, String> columnMapping) {
 		this.columnMapping = columnMapping;
+	}
+	
+	
+	public void addColumnMapping(String column, String inputColumn) {
+		columnMapping.put(column, inputColumn);
 	}
 	
 	
@@ -600,14 +603,10 @@ public class InputFile extends JPanel {
 	
 	private boolean selectFile(Component parent, JTextField fileField) {
 		boolean result = false;
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setCurrentDirectory(new File(DrugMapping.getCurrentPath() == null ? (DrugMapping.getBasePath() == null ? System.getProperty("user.dir") : DrugMapping.getBasePath()) : DrugMapping.getCurrentPath()));
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fileChooser.setFileFilter(new FileNameExtensionFilter("CSV Files", "csv", "txt"));
-		int returnVal = fileChooser.showDialog(parent, "Select file");
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			fileField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-			DrugMapping.setCurrentPath(fileChooser.getSelectedFile().getAbsolutePath().substring(0, fileChooser.getSelectedFile().getAbsolutePath().lastIndexOf(File.separator)));
+		String fileName = DrugMappingFileUtilities.selectCSVFile(parent);
+		if (fileName != null) {
+			fileField.setText(fileName);
+			DrugMapping.setCurrentPath(fileName.substring(0, fileName.lastIndexOf(File.separator)));
 			result = true;
 		}
 		return result;

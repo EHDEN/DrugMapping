@@ -12,7 +12,7 @@ import java.util.Map;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
-import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -174,7 +174,7 @@ public class FormConversion {
 			
 			// Get all forms
 			List<String> forms = new ArrayList<String>();
-			forms.addAll(SourceDrug.getAllForms());
+			forms.addAll(Source.getAllForms());
 			Collections.sort(forms);
 			
 			// Write all forms to file

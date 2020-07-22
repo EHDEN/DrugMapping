@@ -344,8 +344,125 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										)
 								},
 								false
+						),
+						new FileDefinition(
+								"DrugMapping Mapping Log File",
+								new String[] {
+										"This file contains the log of the drug mapping."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"MappingStatus",
+												new String[] {
+														"Mapped, Unmapped, or ManualMapping"
+												}
+										),
+										new FileColumnDefinition(
+												"SourceCode",
+												new String[] {
+													"This is the code of the source drug."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceName",
+												new String[] {
+													"This is the name of the source drug."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceATCCode",
+												new String[] {
+													"These are the ATC codes of the source drug separated by |."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceFormulation",
+												new String[] {
+													"These are the formulations of the source drug separated by |."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceCount",
+												new String[] {
+													"This is the use count of the source drug."
+												}
+										),
+										new FileColumnDefinition(
+												"IngredientCode",
+												new String[] {
+													"This is the code of an ingredient of the source drug."
+												}
+										),
+										new FileColumnDefinition(
+												"IngredientName",
+												new String[] {
+													"This is the name of the ingredient of the source drug",
+													"in case of an ingredient mapping."
+												}
+										),
+										new FileColumnDefinition(
+												"IngredientNameEnglish",
+												new String[] {
+													"This is the English name of the ingredient of the source drug",
+													"in case of an ingredient mapping."
+												}
+										),
+										new FileColumnDefinition(
+												"CASNumber",
+												new String[] {
+													"This is the CAS number of the ingredient of the source drug",
+													"in case of an ingredient mapping."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceIngredientAmount",
+												new String[] {
+													"This is the amount of the ingredient in the source drug",
+													"in case of an ingredient mapping."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceIngredentUnit",
+												new String[] {
+													"This is the unit of the amount of the ingredient in the source drug",
+													"in case of an ingredient mapping."
+												}
+										),
+										new FileColumnDefinition(
+												"StrengthMarginPercentage",
+												new String[] {
+													"This is the strength margin used for the mapping",
+													"in case of an ingredient mapping."
+												}
+										),
+										new FileColumnDefinition(
+												"MappingType",
+												new String[] {
+													"This the type of the mapping: Clinical Drug, Clinical Drug Form, Clinical Drug Comp, or Ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"MappingResult",
+												new String[] {
+													"This is the mapping result for this step in the mapping process."
+												}
+										)
+								},
+								false
 						)
 				)
 			);
+	}
+	
+	
+	public FileDefinition getInputFileDefinition(String inputFileName) {
+		FileDefinition inputFileDefinition = null; 
+		for (FileDefinition fileDefinition : inputFiles) {
+			if (fileDefinition.getFileName().equals(inputFileName)) {
+				inputFileDefinition = fileDefinition;
+				break;
+			}
+		}
+		return inputFileDefinition;
 	}
 }

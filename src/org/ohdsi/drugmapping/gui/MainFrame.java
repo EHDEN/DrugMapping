@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -17,6 +18,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.cdm.CDMConcept;
+import org.ohdsi.drugmapping.source.Source;
+import org.ohdsi.drugmapping.source.SourceDrug;
 
 public class MainFrame {
 	
@@ -40,6 +44,7 @@ public class MainFrame {
 	
 	private DrugMapping drugMapping;
 	private JFrame frame;
+	private JTabbedPane tabbedPane;
 	private ExecuteTab executeTab;
 	private DrugMappingLogTab drugMappingLogTab;
 	
@@ -87,11 +92,11 @@ public class MainFrame {
 		JMenuBar menuBar = createMenu();
 		frame.setJMenuBar(menuBar);
 		
-		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane = new JTabbedPane();
 		DrugMapping.disableWhenRunning(tabbedPane);
 		
 		executeTab = new ExecuteTab(drugMapping, this);
-		drugMappingLogTab = new DrugMappingLogTab();
+		drugMappingLogTab = new DrugMappingLogTab(this);
 		
 		tabbedPane.addTab("Execute", executeTab);
 		tabbedPane.addTab("Drug Mapping Log", drugMappingLogTab);
@@ -174,6 +179,17 @@ public class MainFrame {
 				}
 			});
 			file.add(saveGeneralSettingsMenuItem);
+
+			JMenuItem loadMappingResultsMenuItem = new JMenuItem("Load Mapping Results");
+			loadMappingResultsMenuItem.setToolTipText("Load Mapping Results");
+			loadMappingResultsMenuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					drugMappingLogTab.loadDrugMappingResults();
+				}
+			});
+			file.add(loadMappingResultsMenuItem);
 		}
 		
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
@@ -192,6 +208,18 @@ public class MainFrame {
 		DrugMapping.disableWhenRunning(file);
 		
 		return menuBar;
+	}
+	
+	
+	public void selectTab(String tabName) {
+		int index = 0;
+		for (int tabNr = 0; tabNr < tabbedPane.getTabCount(); tabNr++) {
+			if (tabbedPane.getTitleAt(tabNr).equals(tabName)) {
+				index = tabNr;
+				break;
+			}
+		}
+		tabbedPane.setSelectedIndex(index);
 	}
 
 	
@@ -249,8 +277,8 @@ public class MainFrame {
 	}
 	
 	
-	public void listDrugs(List<Object[]> drugList) {
-		drugMappingLogTab.listDrugs(drugList);
+	public void listDrugs(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog) {
+		drugMappingLogTab.listDrugs(source, drugMappingLog);
 	}
 
 }

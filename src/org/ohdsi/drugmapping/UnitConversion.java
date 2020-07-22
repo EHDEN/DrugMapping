@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
-import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -144,15 +144,15 @@ public class UnitConversion {
 			
 			// Get all units
 			List<String> sortedUnits = new ArrayList<String>();
-			sortedUnits.addAll(SourceDrug.getAllUnits());
+			sortedUnits.addAll(Source.getAllUnits());
 			Collections.sort(sortedUnits);
 			
 			// Write all units to file
 			for (String unit : sortedUnits) {
 				
 				String record = DrugMappingStringUtilities.escapeFieldValue(unit, fieldDelimiter, textQualifier);
-				record += fieldDelimiter + SourceDrug.getUnitSourceDrugUsage(unit);
-				record += fieldDelimiter + SourceDrug.getUnitRecordUsage(unit);
+				record += fieldDelimiter + Source.getUnitSourceDrugUsage(unit);
+				record += fieldDelimiter + Source.getUnitRecordUsage(unit);
 				record += fieldDelimiter;
 				record += fieldDelimiter;
 				record += fieldDelimiter;

@@ -295,7 +295,7 @@ public class DrugMapping {
 	private void logGeneralSettings() {
 		System.out.println("General Settings:");
 		for (Setting setting : DrugMapping.settings.getSettings()) {
-			System.out.println(setting.getLabel() + " " + setting.getValueAsString());
+			System.out.println("  " + setting.getLabel() + " " + setting.getValueAsString());
 		}
 		System.out.println();
 	}

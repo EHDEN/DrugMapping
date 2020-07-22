@@ -48,7 +48,7 @@ public class SourceDrugComponent {
 				denominatorDosage = 1.0;
 				denominatorDosageUnit = null;
 			}
-			sourceDrug.countUnit(dosageUnit);
+			Source.countUnit(dosageUnit, sourceDrug);
 		}
 		this.dosage = dosageValue;
 		this.dosageUnit = dosageUnit;

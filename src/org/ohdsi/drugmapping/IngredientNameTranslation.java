@@ -13,7 +13,7 @@ import java.util.Set;
 
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
-import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
@@ -122,7 +122,7 @@ public class IngredientNameTranslation {
 			
 			// Get all ingredient names
 			Set<String> uniqueIngredientNames = new HashSet<String>();
-			for (SourceIngredient sourceIngredient : SourceDrug.getAllIngredients()) {
+			for (SourceIngredient sourceIngredient : Source.getAllIngredients()) {
 				uniqueIngredientNames.add(sourceIngredient.getIngredientName());
 			}
 			List<String> sortedIngredientNames = new ArrayList<String>();

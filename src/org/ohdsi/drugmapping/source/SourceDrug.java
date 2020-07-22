@@ -4,27 +4,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class SourceDrug {
 	private static boolean error = false;
-	
-	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
-	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
-	private static Map<String, Long> allUnits = new HashMap<String, Long>();
-	private static Set<String> allForms = new HashSet<String>();
-	
-	private static Map<String, SourceIngredient> ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
-	
-	private static Map<String, Set<SourceDrug>> unitsUsedInSourceDrug = new HashMap<String, Set<SourceDrug>>(); 
-	
-	private static Integer casNumbersSet = 0;
 	
 	
 	private String code = null;
@@ -36,83 +20,25 @@ public class SourceDrug {
 	private String matchString = "";
 	
 	
-	public static void init() {
-		error = false;
-		
-		allComponents = new HashSet<SourceDrugComponent>();
-		allIngredients = new HashSet<SourceIngredient>();
-		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
-		
-		casNumbersSet = 0;
-	}
-	
-	
-	public static Set<SourceDrugComponent> getAllComponents() {
-		return allComponents;
-	}
-	
-	
-	public static Set<SourceIngredient> getAllIngredients() {
-		return allIngredients;
-	}
-	
-	
-	public static Set<String> getAllUnits() {
-		return allUnits.keySet();
-	}
-	
-	
-	public static Set<String> getAllForms() {
-		return allForms;
-	}
-	
-	
-	public static Integer getUnitSourceDrugUsage(String unit) {
-		Integer usage = 0;
-		Set<SourceDrug> sourceDrugUsage = unitsUsedInSourceDrug.get(unit);
-		if (sourceDrugUsage != null) {
-			usage = sourceDrugUsage.size();
-		}
-		return usage;
-	}
-	
-	
-	public static Long getUnitRecordUsage(String unit) {
-		Long usage = allUnits.get(unit);
-		return usage == null ? 0L : usage;
-	}
-	
-	
 	public static SourceIngredient getIngredient(String ingredientCode, String ingredientName, String ingredientNameEnglish, String casNumber) {
 		error = false;
 		SourceIngredient sourceIngredient = null;
 		
 		if ((ingredientCode != null) && (!ingredientCode.equals(""))) {
-			sourceIngredient = ingredientSourceCodeIndex.get(ingredientCode);
+			sourceIngredient = Source.getIngredient(ingredientCode);
 		}
 		if (sourceIngredient == null) {
 			sourceIngredient = new SourceIngredient(ingredientCode, ingredientName, ingredientNameEnglish, casNumber);
 
-			ingredientSourceCodeIndex.put(ingredientCode, sourceIngredient);
-			allIngredients.add(sourceIngredient);
+			Source.addIngredient(sourceIngredient);
 		}
 
 		return error ? null : sourceIngredient;
 	}
 	
 	
-	public static SourceIngredient getIngredient(String ingredientCode) {
-		return ingredientSourceCodeIndex.get(ingredientCode);
-	}
-	
-	
 	public static boolean errorOccurred() {
 		return error;
-	}
-	
-	
-	public static Integer getCASNumbersSet() {
-		return casNumbersSet;
 	}
 	
 	
@@ -167,7 +93,7 @@ public class SourceDrug {
 			this.count = -1L;
 		}
 		if (this.formulationsList != null) {
-			allForms.addAll(formulationsList);
+			Source.addForms(formulationsList);
 		}
 	}
 	
@@ -227,7 +153,7 @@ public class SourceDrug {
 	
 	public SourceIngredient AddIngredient(SourceIngredient sourceIngredient, String dosage, String dosageUnit) {
 		SourceDrugComponent sourceComponent = new SourceDrugComponent(this, sourceIngredient, dosage, dosageUnit);
-		allComponents.add(sourceComponent);
+		Source.addComponent(sourceComponent);
 		components.add(sourceComponent);
 		// Keep the components sorted by ingredient code
 		Collections.sort(components, new Comparator<SourceDrugComponent>() {
@@ -306,19 +232,6 @@ public class SourceDrug {
 			}
 		}
 		return ingredients;
-	}
-	
-	
-	public void countUnit(String unit) {
-		Set<SourceDrug> sourceDrugUsage = unitsUsedInSourceDrug.get(unit);
-		if (sourceDrugUsage == null) {
-			sourceDrugUsage = new HashSet<SourceDrug>();
-			unitsUsedInSourceDrug.put(unit, sourceDrugUsage);
-		}
-		if (sourceDrugUsage.add(this)) {
-			Long recordUsage = allUnits.get(unit);
-			allUnits.put(unit, (recordUsage == null ? 0 : recordUsage) + getCount());
-		}
 	}
 	
 	
