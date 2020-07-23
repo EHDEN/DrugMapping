@@ -80,9 +80,6 @@ public class CDM {
 	private List<String> cdmFormConceptNames;                                  // List of CDM form names for sorting
 	
 	
-	private Map<String, CDMConcept> cdmConceptsForReview;
-	
-	
 	
 	public boolean LoadCDMFromDatabase(CDMDatabase database, List<String> report) {
 		boolean ok = false;
@@ -211,35 +208,6 @@ public class CDM {
 			
 			// Write Ingredients Name index to file
 			writeNameIndexesToFile();
-			
-			// Close database connection
-			connection.close();
-			
-			ok = true;
-		}
-		catch (Exception exception) {
-			ok = false;
-			exception.printStackTrace();
-		}
-		
-		return ok;
-	}
-	
-	
-	public boolean loadCDMConceptsForReviewFromDatabase(CDMDatabase database) {
-		boolean ok = false;
-
-		cdmConceptsForReview = new HashMap<String, CDMConcept>();
-		
-		try {
-			QueryParameters queryParameters = new QueryParameters();
-			queryParameters.set("@vocab", database.getVocabSchema());
-
-			// Connect to the database
-			RichConnection connection = database.getRichConnection(CDM.class);
-			
-			// Get CDM Concepts for review
-			getCDMConceptsForReview(connection, queryParameters);
 			
 			// Close database connection
 			connection.close();
@@ -419,14 +387,6 @@ public class CDM {
 		return cdmReplacedByIngredientNameIndex;
 	}
 */	
-	
-	public CDMConcept getConceptForReview(String conceptId) {
-		CDMConcept concept = null;
-		if (cdmConceptsForReview != null) {
-			concept = cdmConceptsForReview.get(conceptId);
-		}
-		return concept;
-	}
 	
 	
 	private void getRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
@@ -1003,18 +963,5 @@ public class CDM {
 		}
 		
 		DrugMappingFileUtilities.closeOutputFile(cdmRxNormIngredientsNameIndexFile);
-	}
-	
-	
-	private void getCDMConceptsForReview(RichConnection connection, QueryParameters queryParameters) {
-		
-		// Get CDM Concepts
-		for (Row queryRow : connection.queryResource("GetConceptsForReview.sql", queryParameters)) {
-			
-			CDMConcept concept = new CDMConcept(this, queryRow, "");
-			
-			cdmConceptsForReview.put(concept.getConceptId(), concept);
-		}
-		
 	}
 }

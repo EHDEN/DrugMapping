@@ -2,7 +2,6 @@ package org.ohdsi.drugmapping;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +20,6 @@ import org.ohdsi.drugmapping.gui.Folder;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
-import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
