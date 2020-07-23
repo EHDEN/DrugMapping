@@ -23,66 +23,125 @@ import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class CDM {
-	private boolean ok = false;
 
-	private Map<String, CDMIngredient> cdmIngredients = new HashMap<String, CDMIngredient>();
+	private Map<String, CDMIngredient> cdmIngredients;
 	
-	private List<CDMIngredient> cdmIngredientsList = new ArrayList<CDMIngredient>();
+	private List<CDMIngredient> cdmIngredientsList;
 	
-	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmEquivalentIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymEquivalentIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmFormOfIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymFormOfIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmFormOfIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymFormOfIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmIngredientMapsToIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymIngredientMapsToIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmSubstanceMapsToIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymSubstanceMapsToIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmPreciseIngredientMapsToIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymPreciseIngredientMapsToIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmOtherMapsToIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymOtherMapsToIngredientNameIndex;
 	
-	private Map<String, Set<CDMIngredient>> cdmReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, Set<CDMIngredient>> cdmSynonymReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
-	private Map<String, CDMIngredient> cdmReplacedByIngredientConceptIdIndex = new HashMap<String, CDMIngredient>();
+	private Map<String, Set<CDMIngredient>> cdmReplacedByIngredientNameIndex;
+	private Map<String, Set<CDMIngredient>> cdmSynonymReplacedByIngredientNameIndex;
+	private Map<String, CDMIngredient> cdmReplacedByIngredientConceptIdIndex;
 	
-	private List<String> cdmIngredientNameIndexNameList = new ArrayList<String>();
-	private Map<String, Map<String, Set<CDMIngredient>>> cdmIngredientNameIndexMap = new HashMap<String, Map<String, Set<CDMIngredient>>>();
+	private List<String> cdmIngredientNameIndexNameList;
+	private Map<String, Map<String, Set<CDMIngredient>>> cdmIngredientNameIndexMap;
 	
-	private Map<String, CDMDrug> cdmDrugs = new HashMap<String, CDMDrug>();
-	private Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugsContainingIngredient = new HashMap<Integer, Map<CDMIngredient, List<CDMDrug>>>();
+	private Map<String, CDMDrug> cdmDrugs;
+	private Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugsContainingIngredient;
 
-	private Map<String, CDMDrug> cdmDrugComps = new HashMap<String, CDMDrug>();
-	private Map<CDMIngredient, List<CDMDrug>> cdmDrugCompsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
+	private Map<String, CDMDrug> cdmDrugComps;
+	private Map<CDMIngredient, List<CDMDrug>> cdmDrugCompsContainingIngredient;
 
-	private Map<String, CDMDrug> cdmDrugForms = new HashMap<String, CDMDrug>();
-	private Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugFormsContainingIngredient = new HashMap<Integer, Map<CDMIngredient, List<CDMDrug>>>();
+	private Map<String, CDMDrug> cdmDrugForms;
+	private Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugFormsContainingIngredient;
 	
-	private Map<String, CDMConcept> cdmForms = new HashMap<String, CDMConcept>();
+	private Map<String, CDMConcept> cdmForms;
 
-	private Map<String, Set<CDMIngredient>> cdmATCIngredientMap = new HashMap<String, Set<CDMIngredient>>();
+	private Map<String, Set<CDMIngredient>> cdmATCIngredientMap;
 
-	private Map<String, CDMIngredient> cdmCASIngredientMap = new HashMap<String, CDMIngredient>();
+	private Map<String, CDMIngredient> cdmCASIngredientMap;
 	
-	private Map<String, String> cdmUnitNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM unit concept_name to CDM unit concept_id
-	private Map<String, String> cdmUnitConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM unit concept_id to CDM unit concept_name
-	private List<String> cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting
+	private Map<String, String> cdmUnitNameToConceptIdMap;                     // Map from CDM unit concept_name to CDM unit concept_id
+	private Map<String, String> cdmUnitConceptIdToNameMap;                     // Map from CDM unit concept_id to CDM unit concept_name
+	private List<String> cdmUnitConceptNames;                                  // List of CDM unit names for sorting
 
-	private Map<String, String> cdmFormNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM form concept_name to CDM form concept_id
-	private Map<String, String> cdmFormConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM form concept_id to CDM form concept_name
-	private List<String> cdmFormConceptNames = new ArrayList<String>();                                        // List of CDM form names for sorting
+	private Map<String, String> cdmFormNameToConceptIdMap;                     // Map from CDM form concept_name to CDM form concept_id
+	private Map<String, String> cdmFormConceptIdToNameMap;                     // Map from CDM form concept_id to CDM form concept_name
+	private List<String> cdmFormConceptNames;                                  // List of CDM form names for sorting
+	
+	
+	private Map<String, CDMConcept> cdmConceptsForReview;
 	
 	
 	
-	public CDM(CDMDatabase database, List<String> report) {
+	public boolean LoadCDMFromDatabase(CDMDatabase database, List<String> report) {
+		boolean ok = false;
+
+		cdmIngredients = new HashMap<String, CDMIngredient>();
+		
+		cdmIngredientsList = new ArrayList<CDMIngredient>();
+		
+		cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymEquivalentIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmFormOfIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymFormOfIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymSubstanceMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymPreciseIngredientMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymOtherMapsToIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		
+		cdmReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmSynonymReplacedByIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
+		cdmReplacedByIngredientConceptIdIndex = new HashMap<String, CDMIngredient>();
+		
+		cdmIngredientNameIndexNameList = new ArrayList<String>();
+		cdmIngredientNameIndexMap = new HashMap<String, Map<String, Set<CDMIngredient>>>();
+		
+		cdmDrugs = new HashMap<String, CDMDrug>();
+		cdmDrugsContainingIngredient = new HashMap<Integer, Map<CDMIngredient, List<CDMDrug>>>();
+
+		cdmDrugComps = new HashMap<String, CDMDrug>();
+		cdmDrugCompsContainingIngredient = new HashMap<CDMIngredient, List<CDMDrug>>();
+
+		cdmDrugForms = new HashMap<String, CDMDrug>();
+		cdmDrugFormsContainingIngredient = new HashMap<Integer, Map<CDMIngredient, List<CDMDrug>>>();
+		
+		cdmForms = new HashMap<String, CDMConcept>();
+
+		cdmATCIngredientMap = new HashMap<String, Set<CDMIngredient>>();
+
+		cdmCASIngredientMap = new HashMap<String, CDMIngredient>();
+		
+		cdmUnitNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM unit concept_name to CDM unit concept_id
+		cdmUnitConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM unit concept_id to CDM unit concept_name
+		cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting
+
+		cdmFormNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM form concept_name to CDM form concept_id
+		cdmFormConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM form concept_id to CDM form concept_name
+		cdmFormConceptNames = new ArrayList<String>();                                        // List of CDM form names for sorting
+		
 		cdmIngredientNameIndexNameList.add("Ingredient");
 		cdmIngredientNameIndexMap.put(     "Ingredient", cdmIngredientNameIndex);
 		cdmIngredientNameIndexNameList.add("SynonymIngredient");
@@ -123,7 +182,7 @@ public class CDM {
 			// Connect to the database
 			RichConnection connection = database.getRichConnection(CDM.class);
 			
-			// Get CDM units
+			// Get CDM Units
 			//getCDMUnits(connection, queryParameters, report);
 			
 			// Get CDM Forms
@@ -162,10 +221,36 @@ public class CDM {
 			ok = false;
 			exception.printStackTrace();
 		}
+		
+		return ok;
 	}
 	
 	
-	public boolean isOK() {
+	public boolean loadCDMConceptsForReviewFromDatabase(CDMDatabase database) {
+		boolean ok = false;
+
+		cdmConceptsForReview = new HashMap<String, CDMConcept>();
+		
+		try {
+			QueryParameters queryParameters = new QueryParameters();
+			queryParameters.set("@vocab", database.getVocabSchema());
+
+			// Connect to the database
+			RichConnection connection = database.getRichConnection(CDM.class);
+			
+			// Get CDM Concepts for review
+			getCDMConceptsForReview(connection, queryParameters);
+			
+			// Close database connection
+			connection.close();
+			
+			ok = true;
+		}
+		catch (Exception exception) {
+			ok = false;
+			exception.printStackTrace();
+		}
+		
 		return ok;
 	}
 	
@@ -334,6 +419,15 @@ public class CDM {
 		return cdmReplacedByIngredientNameIndex;
 	}
 */	
+	
+	public CDMConcept getConceptForReview(String conceptId) {
+		CDMConcept concept = null;
+		if (cdmConceptsForReview != null) {
+			concept = cdmConceptsForReview.get(conceptId);
+		}
+		return concept;
+	}
+	
 	
 	private void getRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
 		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredients ...");
@@ -909,5 +1003,18 @@ public class CDM {
 		}
 		
 		DrugMappingFileUtilities.closeOutputFile(cdmRxNormIngredientsNameIndexFile);
+	}
+	
+	
+	private void getCDMConceptsForReview(RichConnection connection, QueryParameters queryParameters) {
+		
+		// Get CDM Concepts
+		for (Row queryRow : connection.queryResource("GetConceptsForReview.sql", queryParameters)) {
+			
+			CDMConcept concept = new CDMConcept(this, queryRow, "");
+			
+			cdmConceptsForReview.put(concept.getConceptId(), concept);
+		}
+		
 	}
 }

@@ -14,6 +14,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.ohdsi.drugmapping.DrugMapping;
+
 public class ChoiceValueSetting extends Setting {
 	private static final long serialVersionUID = -5697418430701146284L;
 
@@ -50,6 +52,7 @@ public class ChoiceValueSetting extends Setting {
 			}
 		});
 		choiceValueFieldPanel.add(choiceValueField, BorderLayout.WEST);
+		DrugMapping.disableWhenRunning(choiceValueField);
 		
 		setValue(defaultValue);
 		

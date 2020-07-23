@@ -107,6 +107,9 @@ public class InputFile extends JPanel {
 		fileSelectCheckBox.setSelected(true);
 		fileSelectCheckBox.setEnabled(!fileDefinition.isRequired());
 		fileSelectLabelPanel.add(fileSelectCheckBox, BorderLayout.WEST);
+		if ((!fileDefinition.isRequired())) {
+			DrugMapping.disableWhenRunning(fileSelectCheckBox);
+		}
 		
 		fileLabelPanel = new JPanel(new BorderLayout());
 		fileLabel = new JLabel(labelText + ":");

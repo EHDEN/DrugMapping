@@ -36,6 +36,60 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static List<String> intelligentSplit(String string, char separator, char textQualifier) throws Exception {
+		List<String> split = new ArrayList<String>();
+		
+		if (string.length() > 0) {
+			boolean quoted = false;
+			String segment = "";
+			int characterNr = 0;
+			char nextCharacter = string.charAt(0);
+			while (characterNr < string.length()) {
+				char character = nextCharacter;
+				nextCharacter = (characterNr + 1) < string.length() ? string.charAt(characterNr + 1) : '\0';
+				
+				if (quoted) {
+					if (character == textQualifier) {
+						if (nextCharacter != '\0') {
+							if (nextCharacter == textQualifier) {
+								segment += textQualifier;
+							}
+							else {
+								quoted = false;
+							}
+						}
+						else {
+							throw new Exception("Unexpected end of string");
+						}
+					}
+					else {
+						segment += character;
+					}
+				}
+				else {
+					if (character == separator) {
+						split.add(segment);
+						segment = "";
+					}
+					else if (character == textQualifier) {
+						quoted = true;
+					}
+					else {
+						segment += character;
+					}
+				}
+				characterNr++;
+			}
+			split.add(segment);
+		}
+		else {
+			split.add("");
+		}
+		
+		return split;
+	}
+	
+	
 	public static String modifyName(String name) {
 		
 		if (name != null) {

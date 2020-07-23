@@ -143,6 +143,16 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
+	private static String standardizedAmount(SourceDrugComponent sourceDrugComponent) {
+	    DecimalFormat format5 = new DecimalFormat("##########0.00000");
+		String amount = sourceDrugComponent.getDosage() == null ? "" : format5.format(sourceDrugComponent.getDosage());
+		if (!amount.equals("")) {
+			amount = amount.contains(".") ? (amount + "00000").substring(0, amount.indexOf(".") + 6) : amount + ".00000";
+		}
+		return amount;
+	}
+	
+	
 	private MainFrame mainFrame = null;
 
 	private Map<String, CDMIngredient> manualCASMappings = null;
@@ -229,19 +239,14 @@ public class GenericMapping extends Mapping {
 		}
 
 		System.out.println(DrugMapping.getCurrentTime() + " Generic Drug Mapping");
-		Source.init();
 
 		// Load source drugs with ingredients
-		if (ok) {
-			source = new Source(sourceDrugsFile, report);
-			ok = ok && source.isOK();
-		}
+		source = new Source();
+		ok = ok && source.loadSourceDrugs(sourceDrugsFile, report);
 		
 		// Get CDM Ingredients
-		if (ok) {
-			cdm = new CDM(database, report);
-			ok = ok && cdm.isOK();
-		}	
+		cdm = new CDM();
+		ok = ok && cdm.LoadCDMFromDatabase(database, report);	
 
 		if (ok) {
 			// Get the ingredient name translation map
@@ -2302,12 +2307,11 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceDrug sourceDrug : source.getSourceDrugs()) {
-				/**/
-				List<List<String>> sourceDrugResultRecords = getSourceDrugMappingResults(sourceDrug);
+				List<List<String>> sourceDrugResultRecords = getSourceDrugMappingResults(sourceDrug, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, cdm);
 				for (List<String> sourceDrugResultRecord : sourceDrugResultRecords) {
-					String resultRecord = "";
+					String resultRecord = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
 					for (int column = 0; column < columns.length; column++) {
-						resultRecord += (column > 0 ? "," : "") + (column < sourceDrugResultRecord.size() ? DrugMappingStringUtilities.escapeFieldValue(sourceDrugResultRecord.get(column)) : "");
+						resultRecord += "," + (column < sourceDrugResultRecord.size() ? DrugMappingStringUtilities.escapeFieldValue(sourceDrugResultRecord.get(column)) : "");
 					}
 					drugMappingResultsFile.println(resultRecord);
 				}
@@ -2320,11 +2324,10 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private List<List<String>> getSourceDrugMappingResults(SourceDrug sourceDrug) {
+	public static List<List<String>> getSourceDrugMappingResults(SourceDrug sourceDrug, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingLog, Map<String, Double> strengthDeviationPercentageMap, CDM cdmData) {
 		List<List<String>> resultRecords = new ArrayList<List<String>>();
 		
-		String mappingStatus = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
-		Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
+		Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingLog.get(sourceDrug);
 		
 		if (sourceDrugMappings == null) {
 			System.out.println("ERROR: " + sourceDrug);
@@ -2375,13 +2378,12 @@ public class GenericMapping extends Mapping {
 							String strengthDeviationPercentage = "";
 							if (mappingResultType == MAPPED) {
 								String key = mappingType == INGREDIENT_MAPPING ? ("Ingredient " + sourceDrug.getCode() + "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientCode()) : ("Drug " + sourceDrug.getCode());
-								if (usedStrengthDeviationPercentageMap.get(key) != null) {
-									strengthDeviationPercentage = usedStrengthDeviationPercentageMap.get(key).toString();
+								if (strengthDeviationPercentageMap.get(key) != null) {
+									strengthDeviationPercentage = strengthDeviationPercentageMap.get(key).toString();
 								}
 							}
 							List<String> resultRecord = new ArrayList<String>();
 							
-							resultRecord.add(mappingStatus);
 							resultRecord.add(sourceDrug.getCode() == null ? "" : sourceDrug.getCode());
 							resultRecord.add(sourceDrug.getName() == null ? "" : sourceDrug.getName());
 							resultRecord.add(sourceDrug.getATCCodesString());
@@ -2405,31 +2407,48 @@ public class GenericMapping extends Mapping {
 								});
 								for (CDMConcept result : results) {
 									if (mappingResultType == REJECTED_BY_MAXIMUM_STRENGTH_DEVIATION) {
-										resultRecord.add(result == null ? "" : ((CDMDrug) result).toString() + ": " + ((CDMDrug) result).getStrengthDescription());
+										if (cdmData != null) {
+											CDMDrug cdmDrug = (CDMDrug) result;
+											resultRecord.add(result == null ? "" : (cdmDrug.toString() + ": " + cdmDrug.getStrengthDescription()));
+										}
+										else {
+											resultRecord.add(result == null ? "" : (result.toString() + ": " + result.getAdditionalInfo()));
+										}
 									}
 									else if (mappingResultType == REJECTED_BY_FORM) {
 										if (result != null) {
-											CDMDrug cdmDrug = (CDMDrug) result;
 											String formsDescription = "";
-											for (String cdmDrugFormConceptId : cdmDrug.getFormConceptIds()) {
-												if (!formsDescription.equals("")) {
-													formsDescription += " | ";
+											if (cdmData != null) {
+												CDMDrug cdmDrug = (CDMDrug) result;
+												for (String cdmDrugFormConceptId : cdmDrug.getFormConceptIds()) {
+													if (!formsDescription.equals("")) {
+														formsDescription += " | ";
+													}
+													formsDescription += cdmData.getCDMFormConceptName(cdmDrugFormConceptId) + " (" + cdmDrugFormConceptId + ")";
 												}
-												formsDescription += cdm.getCDMFormConceptName(cdmDrugFormConceptId) + " (" + cdmDrugFormConceptId + ")";
 											}
-											resultRecord.add(cdmDrug.toString() + ": " + formsDescription);
+											else {
+												// For review
+												formsDescription = ((CDMConcept) result).getAdditionalInfo();
+											}
+											resultRecord.add(result.toString() + ": " + formsDescription);
 										}
 										else {
 											resultRecord.add("");
 										}
 									}
 									else if ((mappingResultType == DOUBLE_INGREDIENT_MAPPING) || (mappingResultType == UNMAPPED_SOURCE_INGREDIENTS)) {
-										List<SourceIngredient> sourceDrugIngredients = sourceDrug.getIngredients();
-										for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
-											CDMIngredient cdmIngredient = (sourceDrugIngredient.getMatchingIngredient() == null ? null : cdm.getCDMIngredients().get(sourceDrugIngredient.getMatchingIngredient()));
-											String description = sourceDrugIngredient.toString();
-											description += " -> " + (cdmIngredient == null ? "" : cdmIngredient.toString());
-											resultRecord.add(DrugMappingStringUtilities.escapeFieldValue(description));
+										if (cdmData != null) {
+											List<SourceIngredient> sourceDrugIngredients = sourceDrug.getIngredients();
+											for (SourceIngredient sourceDrugIngredient : sourceDrugIngredients) {
+												CDMIngredient cdmIngredient = (sourceDrugIngredient.getMatchingIngredient() == null ? null : cdmData.getCDMIngredients().get(sourceDrugIngredient.getMatchingIngredient()));
+												String description = sourceDrugIngredient.toString();
+												description += " -> " + (cdmIngredient == null ? "" : cdmIngredient.toString());
+												resultRecord.add(DrugMappingStringUtilities.escapeFieldValue(description));
+											}
+										}
+										else {
+											resultRecord.add(((CDMConcept) result).getAdditionalInfo());
 										}
 									}
 									else {
@@ -2492,16 +2511,6 @@ public class GenericMapping extends Mapping {
 				"MappingResult"
 		};
 		return header;
-	}
-	
-	
-	private String standardizedAmount(SourceDrugComponent sourceDrugComponent) {
-	    DecimalFormat format5 = new DecimalFormat("##########0.00000");
-		String amount = sourceDrugComponent.getDosage() == null ? "" : format5.format(sourceDrugComponent.getDosage());
-		if (!amount.equals("")) {
-			amount = amount.contains(".") ? (amount + "00000").substring(0, amount.indexOf(".") + 6) : amount + ".00000";
-		}
-		return amount;
 	}
 	
 	
@@ -2990,7 +2999,7 @@ public class GenericMapping extends Mapping {
 	private void showDrugsList() {
 		System.out.println(DrugMapping.getCurrentTime() + "     Showing Drugs List ...");
 		
-		mainFrame.listDrugs(source, sourceDrugMappingResults);
+		mainFrame.showDrugMappingLog(source, sourceDrugMappingResults, usedStrengthDeviationPercentageMap);
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}

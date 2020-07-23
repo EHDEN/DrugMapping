@@ -2,6 +2,7 @@ package org.ohdsi.drugmapping;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +21,7 @@ import org.ohdsi.drugmapping.gui.Folder;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
@@ -30,7 +32,7 @@ public class DrugMapping {
 	public static String special = "";
 	public static Boolean autoStart = false;
 	
-	private static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
+	public static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
 	private static String currentDate = null;
 	private static String currentPath = null;	
@@ -302,6 +304,20 @@ public class DrugMapping {
 	
 	
 	public static void main(String[] args) {
+		/*
+		//String description = "1113614,ASPIRIN 81 MG DISINTEGRATING ORAL TABLET,Drug,RxNorm,Clinical Drug,S,747211,2007-12-30,2099-12-31,";
+		String description = "46234346,\"NITROFURANTOIN, MACROCRYSTALS 25 MG / NITROFURANTOIN, MONOHYDRATE 75 MG ORAL CAPSULE\",Drug,RxNorm,Clinical Drug,S,1648755,2015-07-06,2099-12-31,: ORAL CAPSULE (19082168)";
+		List<String> descriptionSplit = new ArrayList<String>();
+		try {
+			descriptionSplit = DrugMappingStringUtilities.intelligentSplit(description, ',', '"');
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (Integer segmentNr = 0; segmentNr < descriptionSplit.size(); segmentNr++) {
+			System.out.println(segmentNr + ": " + descriptionSplit.get(segmentNr));
+		}
+		/* */
 		Map<String, String> parameters = new HashMap<String, String>();
 
 		for (int i = 0; i < args.length; i++) {
@@ -317,6 +333,7 @@ public class DrugMapping {
 		
 		DrugMapping drugMapping = new DrugMapping(parameters);
 		drugMapping.Show();
+		/* */
 	}
 
 }

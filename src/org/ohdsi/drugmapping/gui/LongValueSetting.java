@@ -11,6 +11,8 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import org.ohdsi.drugmapping.DrugMapping;
+
 
 public class LongValueSetting extends Setting {
 	private static final long serialVersionUID = 5333685802924611718L;
@@ -65,6 +67,7 @@ public class LongValueSetting extends Setting {
 			}
 		});
 		longValueFieldPanel.add(longValueField, BorderLayout.WEST);
+		DrugMapping.disableWhenRunning(longValueField);
 		
 		setValue(defaultValue);
 		

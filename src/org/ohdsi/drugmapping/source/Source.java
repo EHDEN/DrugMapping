@@ -31,25 +31,6 @@ public class Source {
 	private static Integer casNumbersSet = 0;
 	
 	
-	public static void init() {
-		allComponents = new HashSet<SourceDrugComponent>();
-		allIngredients = new HashSet<SourceIngredient>();
-		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
-		
-		casNumbersSet = 0;
-	}
-	
-	
-	private boolean ok = true;
-	
-	private Set<String> forms = new HashSet<String>();
-	private Set<String> units = new HashSet<String>();
-	
-	private List<SourceDrug> sourceDrugs = new ArrayList<SourceDrug>();
-	private Map<String, SourceDrug> sourceDrugMap = new HashMap<String, SourceDrug>();
-	private List<SourceDrug> missingATC = new ArrayList<SourceDrug>();
-	
-	
 	public static Set<SourceDrugComponent> getAllComponents() {
 		return allComponents;
 	}
@@ -124,44 +105,47 @@ public class Source {
 		}
 	}
 	
+	private Set<String> forms;
+	private Set<String> units;
 	
-	public Source(InputFile sourceDrugsFile, List<String> report) {
-		ok = loadSourceDrugs(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT), report);
+	private List<SourceDrug> sourceDrugs;
+	private Map<String, SourceDrug> sourceDrugMap;
+	private List<SourceDrug> missingATC;
+	
+	
+	public boolean loadSourceDrugs(InputFile sourceDrugsFile, List<String> report) {
+		allComponents = new HashSet<SourceDrugComponent>();
+		allIngredients = new HashSet<SourceIngredient>();
+		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
+		
+		casNumbersSet = 0;
+		
+		missingATC = new ArrayList<SourceDrug>();
+		
+		return load(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT), report);
 	}
 	
 	
-	public Source(InputFile sourceDrugsFile, long minimumUseCount) {
-		ok = loadSourceDrugs(sourceDrugsFile, minimumUseCount, null);
+	public boolean loadSourceDrugs(InputFile sourceDrugsFile, long minimumUseCount) {
+		allComponents = new HashSet<SourceDrugComponent>();
+		allIngredients = new HashSet<SourceIngredient>();
+		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
+		
+		casNumbersSet = 0;
+		
+		return load(sourceDrugsFile, minimumUseCount, null);
 	}
 	
 	
-	public boolean isOK() {
-		return ok;
-	}
-	
-	
-	public Set<String> getForms() {
-		return forms;
-	}
-	
-	
-	public Set<String> getUnits() {
-		return units;
-	}
-	
-	
-	public List<SourceDrug> getSourceDrugs() {
-		return sourceDrugs;
-	}
-	
-	
-	public SourceDrug getSourceDrug(String sourceDrugCode) {
-		return sourceDrugMap.get(sourceDrugCode);
-	}
-	
-	
-	private boolean loadSourceDrugs(InputFile sourceDrugsFile, long minimumUseCount, List<String> report) {
+	private boolean load(InputFile sourceDrugsFile, long minimumUseCount, List<String> report) {
 		boolean sourceDrugError = false;
+		
+		forms = new HashSet<String>();
+		units = new HashSet<String>();
+		
+		sourceDrugs = new ArrayList<SourceDrug>();
+		sourceDrugMap = new HashMap<String, SourceDrug>();
+		
 		Integer sourceDrugCount = 0;
 		Set<String> ignoredSourceCodes = new HashSet<String>();
 		
@@ -311,6 +295,26 @@ public class Source {
 			missingATCFile.close();
 		}
 		
+	}
+	
+	
+	public Set<String> getForms() {
+		return forms;
+	}
+	
+	
+	public Set<String> getUnits() {
+		return units;
+	}
+	
+	
+	public List<SourceDrug> getSourceDrugs() {
+		return sourceDrugs;
+	}
+	
+	
+	public SourceDrug getSourceDrug(String sourceDrugCode) {
+		return sourceDrugMap.get(sourceDrugCode);
 	}
 
 }

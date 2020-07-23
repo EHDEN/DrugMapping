@@ -6,21 +6,37 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
+import org.ohdsi.drugmapping.files.FileColumnDefinition;
+import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.genericmapping.GenericMapping;
+import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceDrug;
+import org.ohdsi.drugmapping.source.SourceIngredient;
+import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
+import org.ohdsi.utilities.files.Row;
 
 public class MainFrame {
 	
@@ -47,6 +63,13 @@ public class MainFrame {
 	private JTabbedPane tabbedPane;
 	private ExecuteTab executeTab;
 	private DrugMappingLogTab drugMappingLogTab;
+
+	
+	private Source source;
+	private Map<String, InputFile> inputFilesMap;
+	private Long minimumUseCount;
+	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog = null;
+	private Map<String, Double> usedStrengthDeviationPercentageMap = null;
 	
 
 	/**
@@ -91,6 +114,7 @@ public class MainFrame {
 		
 		JMenuBar menuBar = createMenu();
 		frame.setJMenuBar(menuBar);
+		DrugMapping.disableWhenRunning(menuBar);
 		
 		tabbedPane = new JTabbedPane();
 		DrugMapping.disableWhenRunning(tabbedPane);
@@ -186,7 +210,7 @@ public class MainFrame {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					drugMappingLogTab.loadDrugMappingResults();
+					loadDrugMappingResults();
 				}
 			});
 			file.add(loadMappingResultsMenuItem);
@@ -277,8 +301,280 @@ public class MainFrame {
 	}
 	
 	
-	public void listDrugs(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog) {
-		drugMappingLogTab.listDrugs(source, drugMappingLog);
+	private void loadDrugMappingResults() {
+		String logFileName = "DrugMapping Log.txt";
+		String logFilePath = DrugMappingFileUtilities.selectCSVFile(getFrame(), logFileName, "DrugMapping Log File");
+		if (logFilePath != null) {
+			GenericMappingInputFiles mappingInputFiles = new GenericMappingInputFiles();
+			String basePath = logFilePath.substring(0, logFilePath.length() - logFileName.length());
+			getInfoFromLogFile(basePath + "DrugMapping Log.txt");
+			InputFile genericDrugsFile = inputFilesMap.get("Generic Drugs File");
+			FileDefinition mappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("DrugMapping Mapping Log File");
+			InputFile mappingLogFile = null;
+			if (mappingLogFileDefinition != null) {
+				mappingLogFile = new InputFile(mappingLogFileDefinition);
+				mappingLogFile.setFileName(basePath + "DrugMapping Mapping Log.csv");
+				for (FileColumnDefinition columnDefinition : mappingLogFileDefinition.getColumns()) {
+					String columnName = columnDefinition.getColumnName();
+					mappingLogFile.addColumnMapping(columnName, columnName);
+				}
+			}
+			if ((genericDrugsFile != null) && (mappingLogFile != null)) {
+				startLoadingMappingResults(this, genericDrugsFile, mappingLogFile);
+			}
+		}
+	}
+	
+	
+	private void getInfoFromLogFile(String logFileName) {
+		inputFilesMap = new HashMap<String, InputFile>();
+		File logFile = new File(logFileName);
+		if (logFile.exists() && logFile.canRead()) {
+			try {
+				BufferedReader logFileReader = new BufferedReader(new FileReader(logFile));
+				GenericMappingInputFiles mappingInputFiles = new GenericMappingInputFiles();
+				
+				String inputFileTag = "Input File: ";
+				String fileNameTag = "  Filename: ";
+				String fieldDelimiterTag = "  Field delimiter: ";
+				String textQualifierTag = "  Text qualifier: ";
+				String textFieldsTag = "  Fields:";
+				String generalSettingsTag = "General Settings:";
+				String settingMinimumUseCountTag = "  Minimum use count: ";
+				
+				boolean fields = false;
+				String line = logFileReader.readLine();
+				InputFile inputFile = null;
+				boolean generalSettings = false;
+				while ((line != null) && (line.equals("") || (!"1234567890".contains(line.substring(0, 1))))) {
+					if (line.startsWith(inputFileTag)) {
+						fields = false;
+						generalSettings = false;
+						String inputFileName = line.substring(inputFileTag.length()); 
+						FileDefinition inputFileDefinition = null;
+						for (FileDefinition fileDefinition : mappingInputFiles.getInputFiles()) {
+							if (fileDefinition.getFileName().equals(inputFileName)) {
+								inputFileDefinition = fileDefinition;
+								break;
+							}
+						}
+						if (inputFileDefinition != null) {
+							inputFile = new InputFile(inputFileDefinition);
+							inputFilesMap.put(inputFile.getLabelText(), inputFile);
+						}
+						else {
+							inputFile = null;
+						}
+					}
+					else if (line.startsWith(generalSettingsTag)) {
+						generalSettings = true;
+						inputFile = null;
+					}
+					else if (inputFile != null) {
+						if (line.startsWith(fileNameTag)) {
+							inputFile.setFileName(line.substring(fileNameTag.length()));
+						}
+						else if (line.startsWith(fieldDelimiterTag)) {
+							inputFile.setFieldDelimiter(line.substring(fieldDelimiterTag.length() + 1, line.length() - 1));
+						}
+						else if (line.startsWith(textQualifierTag)) {
+							inputFile.setTextQualifier(line.substring(textQualifierTag.length() + 1, line.length() - 1));
+						}
+						else if (line.startsWith(textFieldsTag)) {
+							fields = true;
+						}
+						else if (fields && line.startsWith("    ") && line.contains(" -> ")) {
+							String[] lineSplit = line.split(" -> ");
+							String genericName = lineSplit[0].trim();
+							String sourceName = lineSplit[1].trim();
+							inputFile.addColumnMapping(genericName, sourceName);
+						} 
+						else {
+							fields = false;
+						}
+					} 
+					else if (generalSettings) {
+						fields = false;
+						if (line.startsWith(settingMinimumUseCountTag)) {
+							minimumUseCount = Long.parseLong(line.substring(settingMinimumUseCountTag.length()).trim());
+						}
+					}
+					line = logFileReader.readLine();
+				}
+				logFileReader.close();
+			}
+			catch (FileNotFoundException e) {
+				JOptionPane.showMessageDialog(getFrame(), "Error opening log file '" + logFileName + "'!", "Error", JOptionPane.ERROR_MESSAGE);
+				inputFilesMap = null;
+			}
+			catch (IOException e) {
+				JOptionPane.showMessageDialog(getFrame(), "Error reading log file '" + logFileName + "'!", "Error", JOptionPane.ERROR_MESSAGE);
+				inputFilesMap = null;
+			}
+			
+		}
+	}
+	
+	
+	private void startLoadingMappingResults(MainFrame mainFrame, InputFile genericDrugsFile, InputFile mappingLogFile) {
+		if (genericDrugsFile != null) {
+			LoadMappingResultsThread mappingResultsThread = new LoadMappingResultsThread(mainFrame, genericDrugsFile, mappingLogFile);
+			mappingResultsThread.start();
+		}
+	}
+	
+	
+	private class LoadMappingResultsThread extends Thread {
+		MainFrame mainFrame;
+		InputFile genericDrugsFile;
+		InputFile drugMappingLogFile;
+		
+		public LoadMappingResultsThread(MainFrame mainFrame, InputFile genericDrugsFile, InputFile drugMappingLogFile) {
+			super();
+			this.mainFrame = mainFrame;
+			this.genericDrugsFile = genericDrugsFile;
+			this.drugMappingLogFile = drugMappingLogFile;
+		}
+		
+		public void run() {
+			for (JComponent component : DrugMapping.componentsToDisableWhenRunning)
+				component.setEnabled(false);
+			
+			source = new Source();
+			if (source.loadSourceDrugs(genericDrugsFile, minimumUseCount)) {
+				loadDrugMappingLog(drugMappingLogFile);
+				showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap);
+			}
+			else {
+				JOptionPane.showMessageDialog(mainFrame.getFrame(), "Error reading loading source drugs!", "Error", JOptionPane.ERROR_MESSAGE);
+			}
+			
+			for (JComponent component : DrugMapping.componentsToDisableWhenRunning)
+				component.setEnabled(true);
+		}
+		
+	}
+	
+	
+	private void loadDrugMappingLog(InputFile drugMappingLogFile) {
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Loading Mapping Log ...");
+		
+		usedStrengthDeviationPercentageMap = new HashMap<String, Double>();
+		if (drugMappingLogFile.openFile()) {
+			drugMappingLog = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>>();
+			
+			String lastSourceCode               = "";
+			String lastIngredientCode           = "";
+			String lastSourceIngredientAmount   = "";
+			String lastSourceIngredientUnit     = "";
+			
+			while (drugMappingLogFile.hasNext()) {
+				Row row = drugMappingLogFile.next();
+				//System.out.println("  " + row);
+				
+				//String mappingStatus            = drugMappingLogFile.get(row, "MappingStatus", true);
+				String sourceCode               = drugMappingLogFile.get(row, "SourceCode", true);
+				//String sourceName               = drugMappingLogFile.get(row, "SourceName", true);
+				//String sourceATCCode            = drugMappingLogFile.get(row, "SourceATCCode", true);
+				//String sourceFormulation        = drugMappingLogFile.get(row, "SourceFormulation", true);
+				//String sourceCount              = drugMappingLogFile.get(row, "SourceCount", true);
+				String ingredientCode           = drugMappingLogFile.get(row, "IngredientCode", true);
+				//String ingredientName           = drugMappingLogFile.get(row, "IngredientName", true);
+				String ingredientNameEnglish    = drugMappingLogFile.get(row, "IngredientNameEnglish", true);
+				//String casNumber                = drugMappingLogFile.get(row, "CASNumber", true);
+				String sourceIngredientAmount   = drugMappingLogFile.get(row, "SourceIngredientAmount", true);
+				String sourceIngredientUnit     = drugMappingLogFile.get(row, "SourceIngredentUnit", true);
+				String strengthMarginPercentage = drugMappingLogFile.get(row, "StrengthMarginPercentage", true);
+				String mappingTypeDescription   = drugMappingLogFile.get(row, "MappingType", true);
+				String mappingResultDescription = drugMappingLogFile.get(row, "MappingResult", true);
+
+				Integer mappingType = GenericMapping.getMappingTypeValue(mappingTypeDescription);
+				Integer mappingResult = GenericMapping.getMappingResultValue(mappingResultDescription);
+				
+				List<CDMConcept> conceptList = new ArrayList<CDMConcept>();
+				for (int cellNr = 15; cellNr < row.getCells().size(); cellNr++) {
+					String conceptDescription = row.getCells().get(cellNr);
+					if (!conceptDescription.equals("")) {
+						CDMConcept concept = null;
+						if ((mappingResult == GenericMapping.DOUBLE_INGREDIENT_MAPPING) || (mappingResult == GenericMapping.UNMAPPED_SOURCE_INGREDIENTS)) {
+							concept = new CDMConcept();
+							concept.setAdditionalInfo(conceptDescription);
+						}
+						else {
+							concept = new CDMConcept(conceptDescription);
+						}
+						conceptList.add(concept);
+					}
+					else {
+						break;
+					}
+				}
+				if (conceptList.size() == 0) {
+					conceptList.add(null);
+				}
+				
+				SourceDrug sourceDrug = source.getSourceDrug(sourceCode);
+				SourceIngredient sourceIngredient = ingredientCode.equals("*") ? null : Source.getIngredient(ingredientCode);
+				if ((ingredientNameEnglish != null) && (!ingredientNameEnglish.equals("")) && (!ingredientNameEnglish.equals("*"))) {
+					sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
+				}
+				
+				if ((strengthMarginPercentage != null) && (!strengthMarginPercentage.equals("")) && (!strengthMarginPercentage.equals("*"))) {
+					String key = "Drug " + sourceCode;
+					if (mappingType == GenericMapping.INGREDIENT_MAPPING) {
+						key = "Ingredient " + sourceDrug.getCode() + "," + ingredientCode;
+					}
+					usedStrengthDeviationPercentageMap.put(key, Double.parseDouble(strengthMarginPercentage));
+				}
+				
+				Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappingLog = drugMappingLog.get(sourceDrug);
+				if (sourceDrugMappingLog == null) {
+					sourceDrugMappingLog = new HashMap<Integer, List<Map<Integer, List<CDMConcept>>>>();
+					drugMappingLog.put(sourceDrug, sourceDrugMappingLog);
+				}
+				
+				List<Map<Integer, List<CDMConcept>>> sourceDrugMappingTypeLog = sourceDrugMappingLog.get(mappingType);
+				if (sourceDrugMappingTypeLog == null) {
+					sourceDrugMappingTypeLog = new ArrayList<Map<Integer, List<CDMConcept>>>();
+					sourceDrugMappingLog.put(mappingType, sourceDrugMappingTypeLog);
+				}
+
+				Map<Integer, List<CDMConcept>> sourceDrugMappingResult;
+				if (
+						sourceCode.equals(lastSourceCode) && 
+						(
+							(!ingredientCode.equals(lastIngredientCode)) || 
+							(!sourceIngredientAmount.equals(lastSourceIngredientAmount)) || 
+							(!sourceIngredientUnit.equals(lastSourceIngredientUnit))
+						)
+					) {
+					sourceDrugMappingResult = new HashMap<Integer, List<CDMConcept>>();
+					sourceDrugMappingTypeLog.add(sourceDrugMappingResult);
+				}
+				else {
+					if (sourceDrugMappingTypeLog.size() == 0) {
+						sourceDrugMappingResult = new HashMap<Integer, List<CDMConcept>>();
+						sourceDrugMappingTypeLog.add(sourceDrugMappingResult);
+					}
+				}
+				sourceDrugMappingResult = sourceDrugMappingTypeLog.get(sourceDrugMappingTypeLog.size() - 1);
+				sourceDrugMappingResult.put(mappingResult, conceptList);
+				
+				lastSourceCode               = sourceCode;
+				lastIngredientCode           = ingredientCode;
+				lastSourceIngredientAmount   = sourceIngredientAmount;
+				lastSourceIngredientUnit     = sourceIngredientUnit;
+			}
+		}
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+	}
+	
+	
+	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap) {
+		drugMappingLogTab.showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap);
+		selectTab("Drug Mapping Log");
 	}
 
 }
