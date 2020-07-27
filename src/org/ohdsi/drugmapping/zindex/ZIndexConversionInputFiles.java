@@ -295,7 +295,8 @@ public class ZIndexConversionInputFiles extends MappingInputDefinition {
 												}
 										)
 								},
-								false
+								false,
+								true
 						)
 				)
 			);

@@ -50,7 +50,7 @@ public class DrugMappingFileUtilities {
 		String fullFileName = "";
 		try {
 			// Create output file
-			fullFileName = DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + fileName;
+			fullFileName = DrugMapping.baseName + fileName;
 			outputPrintWriter = new PrintWriter(new File(fullFileName));
 			outputPrintWriter.println(header);
 		}

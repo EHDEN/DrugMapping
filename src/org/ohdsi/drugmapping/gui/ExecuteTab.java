@@ -63,9 +63,11 @@ public class ExecuteTab extends MainFrameTab {
 		filePanel.setBorder(BorderFactory.createTitledBorder("Input"));
 		
 		for (FileDefinition fileDefinition : DrugMapping.getInputFiles()) {
-			InputFile inputFile = new InputFile(fileDefinition);
-			inputFiles.add(inputFile);
-			filePanel.add(inputFile);
+			if (fileDefinition.isUsedInInterface()) {
+				InputFile inputFile = new InputFile(fileDefinition);
+				inputFiles.add(inputFile);
+				filePanel.add(inputFile);
+			}
 		}
 		
 		JPanel level2Panel = new JPanel(new BorderLayout());
@@ -102,7 +104,7 @@ public class ExecuteTab extends MainFrameTab {
 		}
 		
 		
-		// Buttons
+		// Buttons Panel
 		JPanel buttonSectionPanel = new JPanel(new BorderLayout());
 
 		// Start Button

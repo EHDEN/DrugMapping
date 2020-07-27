@@ -68,6 +68,7 @@ public class MainFrame {
 	private Source source;
 	private Map<String, InputFile> inputFilesMap;
 	private Long minimumUseCount;
+	private String baseName;
 	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog = null;
 	private Map<String, Double> usedStrengthDeviationPercentageMap = null;
 	
@@ -302,18 +303,18 @@ public class MainFrame {
 	
 	
 	private void loadDrugMappingResults() {
-		String logFileName = "DrugMapping Log.txt";
-		String logFilePath = DrugMappingFileUtilities.selectCSVFile(getFrame(), logFileName, "DrugMapping Log File");
+		String logFilePath = DrugMappingFileUtilities.selectCSVFile(getFrame(), GenericMapping.LOGFILE_NAME, "DrugMapping Log File");
 		if (logFilePath != null) {
 			GenericMappingInputFiles mappingInputFiles = new GenericMappingInputFiles();
-			String basePath = logFilePath.substring(0, logFilePath.length() - logFileName.length());
-			getInfoFromLogFile(basePath + "DrugMapping Log.txt");
+			baseName = logFilePath.substring(0, logFilePath.length() - GenericMapping.LOGFILE_NAME.length());
+			DrugMapping.baseName = baseName;
+			getInfoFromLogFile(baseName + GenericMapping.LOGFILE_NAME);
 			InputFile genericDrugsFile = inputFilesMap.get("Generic Drugs File");
 			FileDefinition mappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("DrugMapping Mapping Log File");
 			InputFile mappingLogFile = null;
 			if (mappingLogFileDefinition != null) {
 				mappingLogFile = new InputFile(mappingLogFileDefinition);
-				mappingLogFile.setFileName(basePath + "DrugMapping Mapping Log.csv");
+				mappingLogFile.setFileName(baseName + "DrugMapping Mapping Log.csv");
 				for (FileColumnDefinition columnDefinition : mappingLogFileDefinition.getColumns()) {
 					String columnName = columnDefinition.getColumnName();
 					mappingLogFile.addColumnMapping(columnName, columnName);
@@ -443,7 +444,7 @@ public class MainFrame {
 			source = new Source();
 			if (source.loadSourceDrugs(genericDrugsFile, minimumUseCount)) {
 				loadDrugMappingLog(drugMappingLogFile);
-				showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap);
+				showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, baseName, true);
 			}
 			else {
 				JOptionPane.showMessageDialog(mainFrame.getFrame(), "Error reading loading source drugs!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -572,8 +573,8 @@ public class MainFrame {
 	}
 	
 	
-	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap) {
-		drugMappingLogTab.showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap);
+	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, String baseName, boolean isSaved) {
+		drugMappingLogTab.showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, isSaved);
 		selectTab("Drug Mapping Log");
 	}
 

@@ -30,6 +30,8 @@ public class DrugMapping {
 	public static String special = "";
 	public static Boolean autoStart = false;
 	
+	public static String baseName = "";
+	
 	public static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
 	private static String currentDate = null;
@@ -129,7 +131,7 @@ public class DrugMapping {
 		else {
 			special = "";
 			inputFiles = new GenericMappingInputFiles();
-			logFileName = "DrugMapping Log.txt";
+			logFileName = GenericMapping.LOGFILE_NAME;
 		}
 		
 		mainFrame = new MainFrame(this);
@@ -194,7 +196,8 @@ public class DrugMapping {
 			basePath = new File(".").getAbsolutePath();
 		}
 		outputVersion = debug ? getOutputVersion(logFileName) : "";
-		String fullLogFileName = basePath + "/" + outputVersion + logFileName;
+		baseName = basePath + "/" + outputVersion;
+		String fullLogFileName = baseName + logFileName;
 		mainFrame.setLogFile(fullLogFileName);
 		MappingThread mappingThread = new MappingThread();
 		mappingThread.start();

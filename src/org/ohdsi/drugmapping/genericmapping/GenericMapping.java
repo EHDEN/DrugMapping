@@ -35,6 +35,8 @@ import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class GenericMapping extends Mapping {
+	
+	public static String LOGFILE_NAME = "DrugMapping Log.txt";
 
 	// Mapping types
 	// The mapping type values should start at 0 and incremented by 1.
@@ -187,7 +189,6 @@ public class GenericMapping extends Mapping {
 	private List<String> report = null;
 	
 	private String preferencesUsed = "";
-	private int maxResultConcepts = 0;
 	
 	
 		
@@ -229,8 +230,6 @@ public class GenericMapping extends Mapping {
 		notUniqueMapping = new HashMap<Integer, Set<SourceDrug>>();
 		
 		report = new ArrayList<String>();
-		
-		maxResultConcepts = 0;
 		
 		int mapping = 0;
 		while (mappingTypeDescriptions.containsKey(mapping)) {
@@ -1926,7 +1925,7 @@ public class GenericMapping extends Mapping {
 		saveIngredientMapping(sourceIngredients);
 		saveDrugMapping();
 		if (DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes")) {
-			saveDrugMappingMappingLog();
+			saveDrugMappingMappingLog(source, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, cdm);
 		}
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
@@ -2282,9 +2281,25 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private void saveDrugMappingMappingLog() {
+	public static void saveDrugMappingMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingLog, Map<String, Double> strengthDeviationPercentageMap, CDM cdmData) {
 		
 		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Mapping Log ...");
+		
+		int maxResultConcepts = 0;
+		for (SourceDrug sourceDrug : sourceDrugMappingLog.keySet()) {
+			Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugLog = sourceDrugMappingLog.get(sourceDrug); 
+			for (Integer mappingType : sourceDrugLog.keySet()) {
+				List<Map<Integer, List<CDMConcept>>> mappingTypeLog = sourceDrugLog.get(mappingType);
+				for (Map<Integer, List<CDMConcept>> componentLog : mappingTypeLog) {
+					for (Integer mappingResult : componentLog.keySet()) {
+						List<CDMConcept> result = componentLog.get(mappingResult);
+						if (result != null) {
+							maxResultConcepts = Math.max(maxResultConcepts, result.size());
+						}
+					}
+				}
+			}
+		}
 
 		String[] columns = getHeader(maxResultConcepts);
 		String header = "";
@@ -2307,9 +2322,35 @@ public class GenericMapping extends Mapping {
 			});
 			
 			for (SourceDrug sourceDrug : source.getSourceDrugs()) {
-				List<List<String>> sourceDrugResultRecords = getSourceDrugMappingResults(sourceDrug, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, cdm);
+				String mappingStatus = null;
+				Map<Integer, List<Map<Integer, List<CDMConcept>>>> drugMappingLog = sourceDrugMappingLog.get(sourceDrug);
+				if (drugMappingLog != null) { 
+					for (Integer mappingType : drugMappingLog.keySet()) {
+						List<Map<Integer, List<CDMConcept>>> sourceDrugMappingTypeLog = drugMappingLog.get(mappingType);
+						if (sourceDrugMappingTypeLog != null) {
+							for (Map<Integer, List<CDMConcept>> sourceDrugComponentMappingLog : sourceDrugMappingTypeLog) {
+								if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Overruled mapping"))) {
+									mappingStatus = "ManualMapping";
+									break;
+								}
+								else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Mapped"))) {
+									mappingStatus = "Mapped";
+									break;
+								}
+							}
+						}
+						if (mappingStatus != null) {
+							break;
+						}
+					}
+				}
+				if (mappingStatus == null) {
+					mappingStatus = "Unmapped";
+				}
+				
+				List<List<String>> sourceDrugResultRecords = getSourceDrugMappingResults(sourceDrug, sourceDrugMappingLog, strengthDeviationPercentageMap, cdmData);
 				for (List<String> sourceDrugResultRecord : sourceDrugResultRecords) {
-					String resultRecord = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
+					String resultRecord = mappingStatus; //manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : "Unmapped");
 					for (int column = 0; column < columns.length; column++) {
 						resultRecord += "," + (column < sourceDrugResultRecord.size() ? DrugMappingStringUtilities.escapeFieldValue(sourceDrugResultRecord.get(column)) : "");
 					}
@@ -2479,7 +2520,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private String[] getHeader(int numberOfResultConcepts) {
+	private static String[] getHeader(int numberOfResultConcepts) {
 		String[] baseHeader = getBaseHeader();
 		String[] header = new String[baseHeader.length + numberOfResultConcepts];
 		for (int columnNr = 0; columnNr < baseHeader.length; columnNr++) {
@@ -2492,7 +2533,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private String[] getBaseHeader() {
+	private static String[] getBaseHeader() {
 		String[] header = new String[] {
 				"MappingStatus",
 				"SourceCode",
@@ -2998,8 +3039,8 @@ public class GenericMapping extends Mapping {
 	
 	private void showDrugsList() {
 		System.out.println(DrugMapping.getCurrentTime() + "     Showing Drugs List ...");
-		
-		mainFrame.showDrugMappingLog(source, sourceDrugMappingResults, usedStrengthDeviationPercentageMap);
+
+		mainFrame.showDrugMappingLog(source, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, DrugMapping.baseName, DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes"));
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
@@ -3111,7 +3152,6 @@ public class GenericMapping extends Mapping {
 			resultMapping.put(resultType, orgConceptList);
 		}
 		orgConceptList.addAll(conceptList);
-		maxResultConcepts = Math.max(maxResultConcepts, conceptList.size());
 	}
 	
 	

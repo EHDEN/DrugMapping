@@ -2,12 +2,16 @@ package org.ohdsi.drugmapping.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -36,6 +40,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 	MainFrame mainFrame;
 	
 	private Source source;
+	private boolean isSaved = false;
 	
 	private JPanel drugsPanel;
 	private JTable drugsTable;
@@ -54,6 +59,8 @@ public class DrugMappingLogTab extends MainFrameTab {
 	private JTable logTable;
 	private LogTableModel logTableModel; 
 	private Integer lastSelectedLogRecord = null;
+	
+	private JButton saveButton;
 
 	public DrugMappingLogTab(MainFrame mainFrame) {
 		super();
@@ -118,6 +125,25 @@ public class DrugMappingLogTab extends MainFrameTab {
 		drugMappingResultPanel.setMaximumSize(new Dimension(100000, 100000));
 		drugMappingResultPanel.setPreferredSize(new Dimension(100, 200));
 		drugMappingResultPanel.setBorder(BorderFactory.createTitledBorder("Drug Mapping Results"));
+		
+		
+		// Buttons Panel
+		JPanel buttonSectionPanel = new JPanel(new BorderLayout());
+
+		// Start Button
+		JPanel buttonPanel = new JPanel(new FlowLayout());
+		saveButton = new JButton("  Save  ");
+		saveButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				GenericMapping.saveDrugMappingMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, null);
+			}
+		});
+		buttonPanel.add(saveButton);
+		saveButton.setEnabled(false);
+		
+		buttonSectionPanel.add(buttonPanel, BorderLayout.WEST);
 						
 		this.add(searchPanel, BorderLayout.NORTH);
 		this.add(drugsResultsPanel, BorderLayout.CENTER);
@@ -125,11 +151,13 @@ public class DrugMappingLogTab extends MainFrameTab {
 		drugsResultsPanel.add(drugMappingLogResultsPanel, BorderLayout.CENTER);
 		drugMappingLogResultsPanel.add(drugMappingLogPanel, BorderLayout.NORTH);
 		drugMappingLogResultsPanel.add(drugMappingResultPanel, BorderLayout.CENTER);
+		drugMappingLogResultsPanel.add(buttonSectionPanel, BorderLayout.SOUTH);
 	}
 	
 	
-	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap) {
+	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, boolean isSaved) {
 		this.source = source;
+		this.isSaved = isSaved;
 		this.drugMappingLog = drugMappingLog;
 		this.usedStrengthDeviationPercentageMap = usedStrengthDeviationPercentageMap;
 		listDrugs();
@@ -137,6 +165,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 	
 	
 	private void listDrugs() {
+		saveButton.setEnabled(!isSaved);
 		drugsList = new ArrayList<Object[]>();
 		for (SourceDrug sourceDrug : source.getSourceDrugs()) {
 			String mappingStatus = null;

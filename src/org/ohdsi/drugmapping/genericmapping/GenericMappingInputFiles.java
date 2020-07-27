@@ -84,7 +84,9 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 														"ingredient in this combination."
 												}
 										)
-								}
+								},
+								true,
+								true
 						),
 						new FileDefinition(
 								"Ingredient Name Translation File",
@@ -109,6 +111,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								IngredientNameTranslation.getDefaultFileName(),
 								"Comma",
 								"\"",
+								true,
 								true
 						),
 						new FileDefinition(
@@ -157,6 +160,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								UnitConversion.getDefaultFileName(),
 								"Comma",
 								"\"",
+								true,
 								true
 						),
 						new FileDefinition(
@@ -200,6 +204,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								FormConversion.getDefaultFileName(),
 								"Comma",
 								"\"",
+								true,
 								true
 						),
 						new FileDefinition(
@@ -230,7 +235,8 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								},
-								false
+								false,
+								true
 						),
 						new FileDefinition(
 								"Manual Ingedient Overrule Mappings File",
@@ -274,7 +280,8 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								},
-								false
+								false,
+								true
 						),
 						new FileDefinition(
 								"Manual Ingedient Fallback Mappings File",
@@ -318,7 +325,8 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								},
-								false
+								false,
+								true
 						),
 						new FileDefinition(
 								"Manual Drug Mappings File",
@@ -343,7 +351,8 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								},
-								false
+								false,
+								true
 						),
 						new FileDefinition(
 								"DrugMapping Mapping Log File",
@@ -448,6 +457,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										)
 								},
+								false,
 								false
 						)
 				)

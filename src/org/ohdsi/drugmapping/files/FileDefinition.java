@@ -12,29 +12,30 @@ public class FileDefinition {
 	private String defaultFieldDelimiter = null;
 	private String defaultTextQualifier = null;
 	private boolean required = true;
+	private boolean usedInInterface = true;
 
 	
 	public FileDefinition(String fileName, String[] description, FileColumnDefinition[] columns) {
-		initialize(fileName, description, columns, null, null, null, true);
+		initialize(fileName, description, columns, null, null, null, true, true);
 	}
 
 	
 	public FileDefinition(String fileName, String[] description, FileColumnDefinition[] columns, String defaultFile, String defaultFieldDelimiter, String defaultTextQualifier) {
-		initialize(fileName, description, columns, defaultFile, defaultFieldDelimiter, defaultTextQualifier, true);
+		initialize(fileName, description, columns, defaultFile, defaultFieldDelimiter, defaultTextQualifier, true, true);
 	}
 
 	
-	public FileDefinition(String fileName, String[] description, FileColumnDefinition[] columns, boolean required) {
-		initialize(fileName, description, columns, null, null, null, required);
+	public FileDefinition(String fileName, String[] description, FileColumnDefinition[] columns, boolean required, boolean usedInInterface) {
+		initialize(fileName, description, columns, null, null, null, required, usedInInterface);
 	}
 
 	
-	public FileDefinition(String fileName, String[] description, FileColumnDefinition[] columns, String defaultFile, String defaultFieldDelimiter, String defaultTextQualifier, boolean required) {
-		initialize(fileName, description, columns, defaultFile, defaultFieldDelimiter, defaultTextQualifier, required);
+	public FileDefinition(String fileName, String[] description, FileColumnDefinition[] columns, String defaultFile, String defaultFieldDelimiter, String defaultTextQualifier, boolean required, boolean usedInInterface) {
+		initialize(fileName, description, columns, defaultFile, defaultFieldDelimiter, defaultTextQualifier, required, usedInInterface);
 	}
 	
 	
-	private void initialize(String fileName, String[] description, FileColumnDefinition[] columns, String defaultFile, String defaultFieldDelimiter, String defaultTextQualifier, boolean required) {
+	private void initialize(String fileName, String[] description, FileColumnDefinition[] columns, String defaultFile, String defaultFieldDelimiter, String defaultTextQualifier, boolean required, boolean usedInInterface) {
 		this.fileName = fileName;
 		for (String line : description) {
 			this.description.add(line);
@@ -50,6 +51,7 @@ public class FileDefinition {
 		this.defaultFieldDelimiter = defaultFieldDelimiter;
 		this.defaultTextQualifier = defaultTextQualifier;
 		this.required = required;
+		this.usedInInterface = usedInInterface;
 	}
 	
 	
@@ -85,5 +87,9 @@ public class FileDefinition {
 	
 	public boolean isRequired() {
 		return required;
+	}
+	
+	public boolean isUsedInInterface() {
+		return usedInInterface;
 	}
 }
