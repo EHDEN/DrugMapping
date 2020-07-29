@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,6 +31,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.source.Source;
@@ -40,6 +44,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 	MainFrame mainFrame;
 	
 	private Source source;
+	private CDM cdm = null;
 	private boolean isSaved = false;
 	
 	private JPanel drugsPanel;
@@ -99,7 +104,12 @@ public class DrugMappingLogTab extends MainFrameTab {
                 	//TODO escape special characters
                     rowSorter.setRowFilter(RowFilter.regexFilter(text));
                 }
-			}
+
+                if (drugsTable.getRowCount() > 0) {
+            		ListSelectionModel selectionModel = drugsTable.getSelectionModel();
+            		selectionModel.setSelectionInterval(0, 0);
+                }
+             }
 		});
 		searchPanel.add(searchLabel);
 		searchPanel.add(searchField);
@@ -137,7 +147,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				GenericMapping.saveDrugMappingMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, null);
+				saveDrugMappingResult();
 			}
 		});
 		buttonPanel.add(saveButton);
@@ -155,8 +165,9 @@ public class DrugMappingLogTab extends MainFrameTab {
 	}
 	
 	
-	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, boolean isSaved) {
+	public void showDrugMappingLog(Source source, CDM cdm, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, boolean isSaved) {
 		this.source = source;
+		this.cdm = cdm;
 		this.isSaved = isSaved;
 		this.drugMappingLog = drugMappingLog;
 		this.usedStrengthDeviationPercentageMap = usedStrengthDeviationPercentageMap;
@@ -219,7 +230,25 @@ public class DrugMappingLogTab extends MainFrameTab {
 		drugsPanel.removeAll();
 		
 		drugListTableModel = new LogDrugListTableModel();
-		drugsTable = new JTable(drugListTableModel);
+		drugsTable = new JTable(drugListTableModel) {
+			private static final long serialVersionUID = 5410359974589005484L;
+
+			//Implement table cell tool tips.           
+            public String getToolTipText(MouseEvent e) {
+                String tip = null;
+                java.awt.Point p = e.getPoint();
+                int rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+
+                try {
+                    tip = getValueAt(rowIndex, colIndex).toString();
+                } catch (RuntimeException e1) {
+                    //catch null pointer exception if mouse is over an empty line
+                }
+
+                return tip;
+            }
+        };
 		drugsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		
 		DefaultTableCellRenderer rightAlignmentRenderer = new DefaultTableCellRenderer();
@@ -323,7 +352,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 	
 	
 	private void getSourceDrugMappingResultLog(SourceDrug sourceDrug) {
-		sourceDrugMappingResultlog = GenericMapping.getSourceDrugMappingResults(sourceDrug, drugMappingLog, usedStrengthDeviationPercentageMap, null);
+		sourceDrugMappingResultlog = GenericMapping.getSourceDrugMappingResults(sourceDrug, drugMappingLog, usedStrengthDeviationPercentageMap, cdm);
 		for (Integer recordNr = 0; recordNr < sourceDrugMappingResultlog.size(); recordNr++) {
 			sourceDrugMappingResultlog.get(recordNr).add(recordNr.toString());
 		}
@@ -335,7 +364,25 @@ public class DrugMappingLogTab extends MainFrameTab {
 		drugMappingLogPanel.removeAll();
 		
 		logTableModel = new LogTableModel();
-		logTable = new JTable(logTableModel);
+		logTable = new JTable(logTableModel) {
+			private static final long serialVersionUID = 582181068415724155L;
+
+			//Implement table cell tool tips.           
+            public String getToolTipText(MouseEvent e) {
+                String tip = null;
+                java.awt.Point p = e.getPoint();
+                int rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+
+                try {
+                    tip = getValueAt(rowIndex, colIndex).toString();
+                } catch (RuntimeException e1) {
+                    //catch null pointer exception if mouse is over an empty line
+                }
+
+                return tip;
+            }
+        };
 		logTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		
 		DefaultTableCellRenderer rightAlignmentRenderer = new DefaultTableCellRenderer();
@@ -489,6 +536,31 @@ public class DrugMappingLogTab extends MainFrameTab {
 	        }
 	        return getValueAt(0, columnIndex).getClass();
 	    }
+		
+	}
+	
+	
+	private void saveDrugMappingResult() {
+		SaveMappingResultsThread saveThread = new SaveMappingResultsThread();
+		saveThread.run();
+	}
+	
+	
+	private class SaveMappingResultsThread extends Thread {
+		
+		public SaveMappingResultsThread() {
+			super();
+		}
+		
+		public void run() {
+			for (JComponent component : DrugMapping.componentsToDisableWhenRunning)
+				component.setEnabled(false);
+
+			GenericMapping.saveDrugMappingMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, cdm);
+			
+			for (JComponent component : DrugMapping.componentsToDisableWhenRunning)
+				component.setEnabled(true);
+		}
 		
 	}
 }

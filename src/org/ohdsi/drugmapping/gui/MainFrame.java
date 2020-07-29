@@ -25,8 +25,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
-import javax.swing.WindowConstants;
 import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
@@ -68,6 +68,7 @@ public class MainFrame {
 	private Source source;
 	private Map<String, InputFile> inputFilesMap;
 	private Long minimumUseCount;
+	private boolean compBeforeForm;
 	private String baseName;
 	private Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog = null;
 	private Map<String, Double> usedStrengthDeviationPercentageMap = null;
@@ -105,7 +106,24 @@ public class MainFrame {
 	
 	private JFrame createInterface() {
 		frame = new JFrame();
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+		    	String busy = isBusy();
+		        if (
+		        		(busy == null) ||
+		        		(JOptionPane.showConfirmDialog(
+		        						frame, 
+		        						busy + "\r\n" + "Are you sure you want to exit?", "Exit?", 
+		        						JOptionPane.YES_NO_OPTION,
+		        						JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+		        ) {
+		            System.exit(0);
+		        }
+		    }
+		});
+		
 		frame.setSize(1000, 800);
 		frame.setMinimumSize(new Dimension(800, 600));
 		frame.setTitle("OHDSI Drug Mapping Tool");
@@ -236,6 +254,15 @@ public class MainFrame {
 	}
 	
 	
+	private String isBusy() {
+		String busy = null;
+		if (GenericMapping.isMapping)              busy = ((busy == null) ? "" : "\r\n") + "Mapping in progress!";
+		if (GenericMapping.isSavingDrugMapping)    busy = ((busy == null) ? "" : "\r\n") + "Saving Mapping in progress!";
+		if (GenericMapping.isSavingDrugMappingLog) busy = ((busy == null) ? "" : "\r\n") + "Saving Mapping Log in progress!";
+		return busy;
+	}
+	
+	
 	public void selectTab(String tabName) {
 		int index = 0;
 		for (int tabNr = 0; tabNr < tabbedPane.getTabCount(); tabNr++) {
@@ -309,6 +336,7 @@ public class MainFrame {
 			baseName = logFilePath.substring(0, logFilePath.length() - GenericMapping.LOGFILE_NAME.length());
 			DrugMapping.baseName = baseName;
 			getInfoFromLogFile(baseName + GenericMapping.LOGFILE_NAME);
+			GenericMapping.setMappingTypes(compBeforeForm);
 			InputFile genericDrugsFile = inputFilesMap.get("Generic Drugs File");
 			FileDefinition mappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("DrugMapping Mapping Log File");
 			InputFile mappingLogFile = null;
@@ -342,6 +370,7 @@ public class MainFrame {
 				String textFieldsTag = "  Fields:";
 				String generalSettingsTag = "General Settings:";
 				String settingMinimumUseCountTag = "  Minimum use count: ";
+				String settingCompFormPreference = "  Comp Form matching preference: ";
 				
 				boolean fields = false;
 				String line = logFileReader.readLine();
@@ -399,6 +428,9 @@ public class MainFrame {
 						if (line.startsWith(settingMinimumUseCountTag)) {
 							minimumUseCount = Long.parseLong(line.substring(settingMinimumUseCountTag.length()).trim());
 						}
+						else if (line.startsWith(settingCompFormPreference)) {
+							compBeforeForm = line.substring(settingCompFormPreference.length()).trim().equals("Comp before Form");
+						}
 					}
 					line = logFileReader.readLine();
 				}
@@ -444,7 +476,7 @@ public class MainFrame {
 			source = new Source();
 			if (source.loadSourceDrugs(genericDrugsFile, minimumUseCount)) {
 				loadDrugMappingLog(drugMappingLogFile);
-				showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, baseName, true);
+				showDrugMappingLog(source, null, drugMappingLog, usedStrengthDeviationPercentageMap, baseName, true);
 			}
 			else {
 				JOptionPane.showMessageDialog(mainFrame.getFrame(), "Error reading loading source drugs!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -466,6 +498,8 @@ public class MainFrame {
 			drugMappingLog = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>>();
 			
 			String lastSourceCode               = "";
+			Integer lastMappingType             = null;
+			Integer lastMappingResult           = null;
 			String lastIngredientCode           = "";
 			String lastSourceIngredientAmount   = "";
 			String lastSourceIngredientUnit     = "";
@@ -545,6 +579,8 @@ public class MainFrame {
 				if (
 						sourceCode.equals(lastSourceCode) && 
 						(
+							(mappingType != lastMappingType) ||
+							(mappingResult != lastMappingResult) ||
 							(!ingredientCode.equals(lastIngredientCode)) || 
 							(!sourceIngredientAmount.equals(lastSourceIngredientAmount)) || 
 							(!sourceIngredientUnit.equals(lastSourceIngredientUnit))
@@ -563,6 +599,8 @@ public class MainFrame {
 				sourceDrugMappingResult.put(mappingResult, conceptList);
 				
 				lastSourceCode               = sourceCode;
+				lastMappingType              = mappingType;
+				lastMappingResult            = mappingResult;
 				lastIngredientCode           = ingredientCode;
 				lastSourceIngredientAmount   = sourceIngredientAmount;
 				lastSourceIngredientUnit     = sourceIngredientUnit;
@@ -573,8 +611,13 @@ public class MainFrame {
 	}
 	
 	
-	public void showDrugMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, String baseName, boolean isSaved) {
-		drugMappingLogTab.showDrugMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, isSaved);
+	public void showDrugMappingLog(Source source, CDM cdm, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, String baseName, boolean isSaved) {
+		for (JComponent component : DrugMapping.componentsToDisableWhenRunning) {
+			if (component != executeTab.startButton) {
+				component.setEnabled(true);
+			}
+		}
+		drugMappingLogTab.showDrugMappingLog(source, cdm, drugMappingLog, usedStrengthDeviationPercentageMap, isSaved);
 		selectTab("Drug Mapping Log");
 	}
 
