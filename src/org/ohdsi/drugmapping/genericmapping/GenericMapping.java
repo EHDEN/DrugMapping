@@ -2679,6 +2679,7 @@ public class GenericMapping extends Mapping {
 		for (String reportLine : report) {
 			System.out.println(reportLine);
 		}
+		System.out.println();
 	}
 	
 	
