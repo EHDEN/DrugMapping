@@ -36,6 +36,7 @@ import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class MainFrame {
@@ -509,18 +510,18 @@ public class MainFrame {
 				//System.out.println("  " + row);
 				
 				//String mappingStatus            = drugMappingLogFile.get(row, "MappingStatus", true);
-				String sourceCode               = drugMappingLogFile.get(row, "SourceCode", true);
+				String sourceCode               = DrugMappingStringUtilities.unEscapeFieldValue(drugMappingLogFile.get(row, "SourceCode", true));
 				//String sourceName               = drugMappingLogFile.get(row, "SourceName", true);
 				//String sourceATCCode            = drugMappingLogFile.get(row, "SourceATCCode", true);
 				//String sourceFormulation        = drugMappingLogFile.get(row, "SourceFormulation", true);
 				//String sourceCount              = drugMappingLogFile.get(row, "SourceCount", true);
-				String ingredientCode           = drugMappingLogFile.get(row, "IngredientCode", true);
+				String ingredientCode           = DrugMappingStringUtilities.unEscapeFieldValue(drugMappingLogFile.get(row, "IngredientCode", true));
 				//String ingredientName           = drugMappingLogFile.get(row, "IngredientName", true);
-				String ingredientNameEnglish    = drugMappingLogFile.get(row, "IngredientNameEnglish", true);
+				String ingredientNameEnglish    = DrugMappingStringUtilities.unEscapeFieldValue(drugMappingLogFile.get(row, "IngredientNameEnglish", true));
 				//String casNumber                = drugMappingLogFile.get(row, "CASNumber", true);
-				String sourceIngredientAmount   = drugMappingLogFile.get(row, "SourceIngredientAmount", true);
-				String sourceIngredientUnit     = drugMappingLogFile.get(row, "SourceIngredentUnit", true);
-				String strengthMarginPercentage = drugMappingLogFile.get(row, "StrengthMarginPercentage", true);
+				String sourceIngredientAmount   = DrugMappingStringUtilities.unEscapeFieldValue(drugMappingLogFile.get(row, "SourceIngredientAmount", true));
+				String sourceIngredientUnit     = DrugMappingStringUtilities.unEscapeFieldValue(drugMappingLogFile.get(row, "SourceIngredentUnit", true));
+				String strengthMarginPercentage = DrugMappingStringUtilities.unEscapeFieldValue(drugMappingLogFile.get(row, "StrengthMarginPercentage", true));
 				String mappingTypeDescription   = drugMappingLogFile.get(row, "MappingType", true);
 				String mappingResultDescription = drugMappingLogFile.get(row, "MappingResult", true);
 
@@ -529,7 +530,7 @@ public class MainFrame {
 				
 				List<CDMConcept> conceptList = new ArrayList<CDMConcept>();
 				for (int cellNr = 15; cellNr < row.getCells().size(); cellNr++) {
-					String conceptDescription = row.getCells().get(cellNr);
+					String conceptDescription = DrugMappingStringUtilities.unEscapeFieldValue(row.getCells().get(cellNr));
 					if (!conceptDescription.equals("")) {
 						CDMConcept concept = null;
 						if ((mappingResult == GenericMapping.DOUBLE_INGREDIENT_MAPPING) || (mappingResult == GenericMapping.UNMAPPED_SOURCE_INGREDIENTS)) {
@@ -577,14 +578,11 @@ public class MainFrame {
 
 				Map<Integer, List<CDMConcept>> sourceDrugMappingResult;
 				if (
-						sourceCode.equals(lastSourceCode) && 
-						(
-							(mappingType != lastMappingType) ||
-							(mappingResult != lastMappingResult) ||
-							(!ingredientCode.equals(lastIngredientCode)) || 
-							(!sourceIngredientAmount.equals(lastSourceIngredientAmount)) || 
-							(!sourceIngredientUnit.equals(lastSourceIngredientUnit))
-						)
+						(!sourceCode.equals(lastSourceCode)) ||
+						(mappingType != lastMappingType) ||
+						(!ingredientCode.equals(lastIngredientCode)) || 
+						(!sourceIngredientAmount.equals(lastSourceIngredientAmount)) || 
+						(!sourceIngredientUnit.equals(lastSourceIngredientUnit))
 					) {
 					sourceDrugMappingResult = new HashMap<Integer, List<CDMConcept>>();
 					sourceDrugMappingTypeLog.add(sourceDrugMappingResult);
@@ -612,12 +610,12 @@ public class MainFrame {
 	
 	
 	public void showDrugMappingLog(Source source, CDM cdm, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, String baseName, boolean isSaved) {
+		drugMappingLogTab.showDrugMappingLog(source, cdm, drugMappingLog, usedStrengthDeviationPercentageMap, isSaved);
 		for (JComponent component : DrugMapping.componentsToDisableWhenRunning) {
 			if (component != executeTab.startButton) {
 				component.setEnabled(true);
 			}
 		}
-		drugMappingLogTab.showDrugMappingLog(source, cdm, drugMappingLog, usedStrengthDeviationPercentageMap, isSaved);
 		selectTab("Drug Mapping Log");
 	}
 

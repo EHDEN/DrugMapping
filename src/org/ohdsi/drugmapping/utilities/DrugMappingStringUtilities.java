@@ -36,6 +36,22 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String unEscapeFieldValue(String value) {
+		return unEscapeFieldValue(value, ",", "\"");
+	}
+	
+	
+	public static String unEscapeFieldValue(String value, String fieldDelimiter, String textQualifier) {
+		if (value == null) {
+			value = "";
+		}
+		else if (value.startsWith(textQualifier) && value.endsWith(textQualifier) && value.length() > 1) {
+			value = value.substring(1, value.length() - 1).replaceAll(textQualifier + textQualifier, textQualifier);
+		}
+		return value;
+	}
+	
+	
 	public static List<String> intelligentSplit(String string, char separator, char textQualifier) throws Exception {
 		List<String> split = new ArrayList<String>();
 		

@@ -1565,6 +1565,9 @@ public class GenericMapping extends Mapping {
 					}
 				}
 			}
+			else {
+				logMappingResult(sourceDrug, mapping, NO_MAPPING);
+			}
 		}
 
 		if (report != null) {
@@ -1774,6 +1777,9 @@ public class GenericMapping extends Mapping {
 						logMappingResult(sourceDrug, mapping, NO_MAPPING);
 					}
 				}
+			}
+			else {
+				logMappingResult(sourceDrug, mapping, NO_MAPPING);
 			}
 		}
 
@@ -2398,7 +2404,7 @@ public class GenericMapping extends Mapping {
 			System.out.println("ERROR: " + sourceDrug);
 		}
 
-		int mappingType = 0;
+		Integer mappingType = 0;
 		while (mappingTypeDescriptions.containsKey(mappingType)) {
 			List< Map<Integer, List<CDMConcept>>> mappingResultList = sourceDrugMappings.get(mappingType);
 			if ((mappingResultList != null) && (mappingResultList.size() > 0)) {
@@ -2429,12 +2435,12 @@ public class GenericMapping extends Mapping {
 						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.size() == 0 ? null : sortedSourceDrugComponents.get(ingredientNr);
 						mappingResult = mappingResultList.get(sourceDrugComponent == null ? 0 : sourceDrugComponents.indexOf(sourceDrugComponent));
 						
-						sourceIngredientResults[0] = (sourceDrugComponent.getIngredient().getIngredientCode() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientCode()));
-						sourceIngredientResults[1] = (sourceDrugComponent.getIngredient().getIngredientName() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientName()));
-						sourceIngredientResults[2] = (sourceDrugComponent.getIngredient().getIngredientNameEnglish() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getIngredientNameEnglish()));
-						sourceIngredientResults[3] = (sourceDrugComponent.getIngredient().getCASNumber() == null ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getIngredient().getCASNumber()));
+						sourceIngredientResults[0] = (sourceDrugComponent.getIngredient().getIngredientCode() == null ? "" : sourceDrugComponent.getIngredient().getIngredientCode());
+						sourceIngredientResults[1] = (sourceDrugComponent.getIngredient().getIngredientName() == null ? "" : sourceDrugComponent.getIngredient().getIngredientName());
+						sourceIngredientResults[2] = (sourceDrugComponent.getIngredient().getIngredientNameEnglish() == null ? "" : sourceDrugComponent.getIngredient().getIngredientNameEnglish());
+						sourceIngredientResults[3] = (sourceDrugComponent.getIngredient().getCASNumber() == null ? "" : sourceDrugComponent.getIngredient().getCASNumber());
 						sourceIngredientResults[4] = standardizedAmount(sourceDrugComponent);
-						sourceIngredientResults[5] = DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						sourceIngredientResults[5] = sourceDrugComponent.getDosageUnit();
 					}
 					if (mappingResult != null) {
 						// Write the result records
@@ -2467,7 +2473,9 @@ public class GenericMapping extends Mapping {
 								Collections.sort(results, new Comparator<CDMConcept>() {
 									@Override
 									public int compare(CDMConcept concept1, CDMConcept concept2) {
-										return (concept1 == null ? "" : concept1.getConceptId()).compareTo(concept2 == null ? "" : concept2.getConceptId());
+										String conceptId1 = concept1 == null ? "" : (concept1.getConceptId() == null ? concept1.getAdditionalInfo() : concept1.getConceptId());
+										String conceptId2 = concept2 == null ? "" : (concept2.getConceptId() == null ? concept2.getAdditionalInfo() : concept2.getConceptId());
+										return conceptId1.compareTo(conceptId2);
 									}
 								});
 								if ((mappingResultType == DOUBLE_INGREDIENT_MAPPING) || (mappingResultType == UNMAPPED_SOURCE_INGREDIENTS)) {
@@ -2477,7 +2485,7 @@ public class GenericMapping extends Mapping {
 											CDMIngredient cdmIngredient = (sourceDrugIngredient.getMatchingIngredient() == null ? null : cdmData.getCDMIngredients().get(sourceDrugIngredient.getMatchingIngredient()));
 											String description = sourceDrugIngredient.toString();
 											description += " -> " + (cdmIngredient == null ? "" : cdmIngredient.toString());
-											resultRecord.add(DrugMappingStringUtilities.escapeFieldValue(description));
+											resultRecord.add(description);
 										}
 									}
 									else {

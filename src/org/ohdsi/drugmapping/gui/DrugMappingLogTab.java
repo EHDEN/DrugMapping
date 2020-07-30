@@ -96,7 +96,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 			}
 			
 			private void filter() {
-                String text = searchField.getText();
+                String text = searchField.getText().toUpperCase();
                 if (text.length() == 0) {
                     rowSorter.setRowFilter(null);
                 }
