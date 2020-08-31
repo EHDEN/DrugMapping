@@ -37,6 +37,8 @@ import org.ohdsi.utilities.files.Row;
 public class GenericMapping extends Mapping {
 	
 	public static String LOGFILE_NAME = "DrugMapping Log.txt";
+	
+	private static double DEVIATION_MARGIN = 0.0000000001;
 
 	// Mapping types
 	// The mapping type values should start at 0 and incremented by 1.
@@ -2284,7 +2286,7 @@ public class GenericMapping extends Mapping {
 						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.get(ingredientNr);
 						SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
 						
-						String drugMappingReviewIngredientRecord =       drugMappingReviewRecord;
+						String drugMappingReviewIngredientRecord = drugMappingReviewRecord;
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
@@ -2296,6 +2298,19 @@ public class GenericMapping extends Mapping {
 						
 						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
 					}
+				}
+				else {
+					String drugMappingReviewIngredientRecord = drugMappingReviewRecord;
+					drugMappingReviewIngredientRecord += "," + "*";
+					drugMappingReviewIngredientRecord += "," + "*";
+					drugMappingReviewIngredientRecord += "," + "*";
+					drugMappingReviewIngredientRecord += "," + "*";
+					drugMappingReviewIngredientRecord += ",";
+					drugMappingReviewIngredientRecord += ",";
+					drugMappingReviewIngredientRecord += ",";
+					drugMappingReviewIngredientRecord += ",";
+					
+					drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
 				}
 			}
 		}
@@ -2700,7 +2715,7 @@ public class GenericMapping extends Mapping {
 				CDMIngredientStrength matchingCDMIngredient = matchingCDMIngredients.get(ingredientNr);
 				Double ingredientDeviationPercentage = getStrengthDeviationPercentage(sourceDrugComponent, matchingCDMIngredient);
 				if (ingredientDeviationPercentage != null) {
-					if (ingredientDeviationPercentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) {
+					if (ingredientDeviationPercentage.compareTo(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) <= 0) {
 						if ((bestMatchDeviationPercentage == null) || (ingredientDeviationPercentage < bestMatchDeviationPercentage)) {
 							bestMatchDeviationPercentage = ingredientDeviationPercentage;
 							bestMatchIngredientNr = ingredientNr;
@@ -2779,7 +2794,7 @@ public class GenericMapping extends Mapping {
 				CDMIngredientStrength matchingCDMIngredient = matchingCDMIngredients.get(ingredientNr);
 				Double ingredientDeviationPercentage = getStrengthDeviationPercentage(sourceDrugComponent, matchingCDMIngredient);
 				if (ingredientDeviationPercentage != null) {
-					if (ingredientDeviationPercentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) {
+					if (ingredientDeviationPercentage.compareTo(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) <= 0) {
 						if ((bestMatchDeviationPercentage == null) || (ingredientDeviationPercentage < bestMatchDeviationPercentage)) {
 							bestMatchDeviationPercentage = ingredientDeviationPercentage;
 							bestMatchIngredientNr = ingredientNr;
@@ -2812,7 +2827,7 @@ public class GenericMapping extends Mapping {
 		Double matchDeviationPercentage = null;
 		
 		Double ingredientDeviationPercentage = getStrengthDeviationPercentage(sourceDrugComponent, cdmIngredientStrength);
-		if ((ingredientDeviationPercentage != null) && (ingredientDeviationPercentage <= DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION))) {
+		if ((ingredientDeviationPercentage != null) && (ingredientDeviationPercentage.compareTo(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) <= 0)) {
 			matchDeviationPercentage = ingredientDeviationPercentage;
 		}
 		
@@ -2871,6 +2886,9 @@ public class GenericMapping extends Mapping {
 		Double cdmStrength = cdmIngredientStrength.getDosage();
 		if ((sourceStrength != null) && (cdmStrength != null)) {
 			percentage = (Math.abs(cdmStrength - sourceStrength) / sourceStrength) * 100;
+			if (percentage.compareTo(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION) + DEVIATION_MARGIN) <= 0) {
+				percentage = Math.min(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION), percentage);
+			}
 		}
 		return percentage;
 	}

@@ -17,7 +17,7 @@ OR (ingredient.domain_id = 'Drug'
     AND   ingredient.vocabulary_id LIKE 'RxNorm%'
     AND   ingredient.concept_class_id = 'Ingredient'
     AND   ingredient.standard_concept = 'S'
-    AND   ingredient.invalid_reason IS NULL
+--    AND   ingredient.invalid_reason IS NULL
 -- Exclude orphan ingredients:
 --    AND   ingredient.concept_id IN (
 --            SELECT DISTINCT ingredient_concept_id

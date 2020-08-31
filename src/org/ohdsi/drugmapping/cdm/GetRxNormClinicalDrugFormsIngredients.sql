@@ -21,7 +21,7 @@ WHERE drugform.domain_id = 'Drug'
 AND   drugform.vocabulary_id LIKE 'RxNorm%'
 AND   drugform.concept_class_id = 'Clinical Drug Form'
 AND   drugform.standard_concept = 'S'
-AND   drugform.invalid_reason IS NULL
+-- AND   drugform.invalid_reason IS NULL
 AND   has_form.relationship_id = 'RxNorm has dose form'
 GROUP BY drugform.concept_id,
          drugform.concept_name,

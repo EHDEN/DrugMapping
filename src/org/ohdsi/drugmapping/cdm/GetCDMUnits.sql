@@ -19,5 +19,4 @@ FROM units
 WHERE domain_id = 'Unit'
 AND   concept_class_id = 'Unit'
 AND   standard_concept = 'S'
-AND   invalid_reason is null
 ORDER BY concept_name
