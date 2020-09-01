@@ -2158,7 +2158,7 @@ public class GenericMapping extends Mapping {
 						String drugMappingIngredientRecord = drugMappingRecord;
 						drugMappingIngredientRecord += "," + sourceIngredient;
 						drugMappingIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
-						drugMappingIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						drugMappingIngredientRecord += "," + (standardizedAmount(sourceDrugComponent).equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
 						drugMappingIngredientRecord += "," + strengthDeviationPercentage;
 						drugMappingIngredientRecord += "," + mappingTypeDescriptions.get(mappingType);
 						drugMappingIngredientRecord += "," + (target == null ? CDMConcept.emptyRecord() : target.toString());
@@ -2197,7 +2197,7 @@ public class GenericMapping extends Mapping {
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
-						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						drugMappingReviewIngredientRecord += "," + (standardizedAmount(sourceDrugComponent).equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
 						if (target != null) {
 							drugMappingReviewIngredientRecord += "," + target.getConceptId();
 							drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(target.getConceptName());
@@ -2331,7 +2331,7 @@ public class GenericMapping extends Mapping {
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
-						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit());
+						drugMappingReviewIngredientRecord += "," + (standardizedAmount(sourceDrugComponent).equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
