@@ -2142,6 +2142,8 @@ public class GenericMapping extends Mapping {
 					});
 					
 					for (int ingredientNr = 0; ingredientNr < mappingResultList.size(); ingredientNr++) {
+						sourceToConceptRecord = "";
+						
 						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.get(ingredientNr);
 						SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
 						String key = "Ingredient " + sourceDrug.getCode() + "," + sourceDrug.getIngredients().get(ingredientNr).getIngredientCode();
@@ -2164,13 +2166,26 @@ public class GenericMapping extends Mapping {
 						drugMappingFile.println(drugMappingIngredientRecord);
 						
 						if (target != null) {
-							sourceToConceptRecord +=       "Ingredient " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+							sourceToConceptRecord +=       "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
 							sourceToConceptRecord += "," + "0";
 							sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
 							sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
 							sourceToConceptRecord += "," + target.getConceptId();
 							sourceToConceptRecord += "," + target.getVocabularyId();
 							sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
+							sourceToConceptRecord += ",";
+							sourceToConceptRecord += ",";
+							
+							sourceToConceptMapFile.println(sourceToConceptRecord);
+						}
+						else {
+							sourceToConceptRecord +=       "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+							sourceToConceptRecord += "," + "0";
+							sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+							sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+							sourceToConceptRecord += "," + "0";
+							sourceToConceptRecord += ",";
+							sourceToConceptRecord += ",";
 							sourceToConceptRecord += ",";
 							sourceToConceptRecord += ",";
 							
@@ -2230,6 +2245,19 @@ public class GenericMapping extends Mapping {
 						
 						sourceToConceptMapFile.println(sourceToConceptRecord);
 					}
+					else {
+						sourceToConceptRecord +=       "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+						sourceToConceptRecord += "," + "0";
+						sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+						sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+						sourceToConceptRecord += "," + "0";
+						sourceToConceptRecord += ",";
+						sourceToConceptRecord += ",";
+						sourceToConceptRecord += ",";
+						sourceToConceptRecord += ",";
+						
+						sourceToConceptMapFile.println(sourceToConceptRecord);
+					}
 					
 
 					drugMappingReviewRecord += "," + "*";
@@ -2261,8 +2289,21 @@ public class GenericMapping extends Mapping {
 				drugMappingRecord += "," + CDMDrug.emptyRecord();
 				
 				drugMappingFile.println(drugMappingRecord);
-				
 
+				
+				sourceToConceptRecord +=       "Drug " + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
+				sourceToConceptRecord += "," + "0";
+				sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+				sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
+				sourceToConceptRecord += "," + "0";
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				
+				sourceToConceptMapFile.println(sourceToConceptRecord);
+
+				
 				List<SourceDrugComponent> sortedSourceDrugComponents = new ArrayList<SourceDrugComponent>();
 				sortedSourceDrugComponents.addAll(sourceDrug.getComponents());
 				Collections.sort(sortedSourceDrugComponents, new Comparator<SourceDrugComponent>() {
@@ -2312,6 +2353,38 @@ public class GenericMapping extends Mapping {
 					
 					drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
 				}
+			}
+		}
+		
+		for (SourceIngredient sourceIngredient : Source.getAllIngredients()) {
+			String sourceToConceptRecord = "";
+			CDMIngredient target = ingredientMap.get(sourceIngredient);
+
+			if (target != null) {
+				sourceToConceptRecord +=       "Ingredient " + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
+				sourceToConceptRecord += "," + "0";
+				sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+				sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
+				sourceToConceptRecord += "," + target.getConceptId();
+				sourceToConceptRecord += "," + target.getVocabularyId();
+				sourceToConceptRecord += "," + DrugMapping.getCurrentDate();
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				
+				sourceToConceptMapFile.println(sourceToConceptRecord);
+			}
+			else {
+				sourceToConceptRecord +=       "Ingredient " + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
+				sourceToConceptRecord += "," + "0";
+				sourceToConceptRecord += "," + DrugMapping.settings.getStringSetting(MainFrame.VOCABULARY_ID);
+				sourceToConceptRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
+				sourceToConceptRecord += "," + "0";
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				sourceToConceptRecord += ",";
+				
+				sourceToConceptMapFile.println(sourceToConceptRecord);
 			}
 		}
 
