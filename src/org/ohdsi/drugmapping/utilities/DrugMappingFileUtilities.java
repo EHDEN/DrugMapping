@@ -21,7 +21,7 @@ public class DrugMappingFileUtilities {
 		String result = null;
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(DrugMapping.getCurrentPath() == null ? (DrugMapping.getBasePath() == null ? System.getProperty("user.dir") : DrugMapping.getBasePath()) : DrugMapping.getCurrentPath()));
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		if ((fileNameEndsWith != null) && (!fileNameEndsWith.equals(""))) {
 			fileChooser.setFileFilter(new FileFilter() {
 
