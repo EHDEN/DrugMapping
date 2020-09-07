@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class SourceIngredient {
@@ -20,7 +21,7 @@ public class SourceIngredient {
 	private List<String> ingredientMatchingNames = null;
 	
 	private String matchString = "";
-	private String matchingIngredient = null;
+	private CDMIngredient matchingIngredient = null;
 	private Set<SourceDrug> sourceDrugs = new HashSet<SourceDrug>();
 	
 	
@@ -205,12 +206,12 @@ public class SourceIngredient {
 	}
 	
 	
-	public String getMatchingIngredient() {
+	public CDMIngredient getMatchingIngredient() {
 		return matchingIngredient;
 	}
 	
 	
-	public void setMatchingIngredient(String matchingIngredient) {
+	public void setMatchingIngredient(CDMIngredient matchingIngredient) {
 		this.matchingIngredient = matchingIngredient;
 	}
 	

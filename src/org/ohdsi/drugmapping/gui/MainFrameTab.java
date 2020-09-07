@@ -8,6 +8,7 @@ import org.ohdsi.drugmapping.DrugMapping;
 public class MainFrameTab extends JPanel {
 	private static final long serialVersionUID = -2611669075696826114L;
 	
+	protected MainFrame mainFrame;
 	protected JButton startButton = null;
 
 	public MainFrameTab() {

@@ -18,7 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
@@ -41,8 +40,6 @@ import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class DrugMappingLogTab extends MainFrameTab {
 	private static final long serialVersionUID = -2535974179089673874L;
-	
-	MainFrame mainFrame;
 	
 	private Source source;
 	private CDM cdm = null;
@@ -145,7 +142,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 		// Buttons Panel
 		JPanel buttonSectionPanel = new JPanel(new BorderLayout());
 
-		// Start Button
+		// Save Button
 		JPanel buttonPanel = new JPanel(new FlowLayout());
 		saveButton = new JButton("  Save  ");
 		saveButton.addActionListener(new ActionListener() {
@@ -468,13 +465,11 @@ public class DrugMappingLogTab extends MainFrameTab {
 		
 		//mainFrame.getFrame().repaint();
 		
-		System.out.print("showSourceDrugMappingLog: ");
 		selectLogConcepts(0);
 	}
 	
 	
 	private void selectLogConcepts(Integer logNr) {
-		System.out.println((lastSelectedLogRecord == null ? "null" : lastSelectedLogRecord) + " -> " + logNr);
 		if (logNr != lastSelectedLogRecord) {
 			getSourceDrugMappingResultConcepts(logNr);
 			showDrugMappingResults(logNr);

@@ -355,6 +355,118 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								true
 						),
 						new FileDefinition(
+								"Ingredient Mapping Log File",
+								new String[] {
+										"This file contains the log of the ingredient mapping."
+						  		},
+								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"IngredientCode",
+												new String[] {
+													"This is the code of the source ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"IngredientName",
+												new String[] {
+													"This is the name of the source ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"IngredientNameEnglish",
+												new String[] {
+													"This is the English name of the source ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"CASNumber",
+												new String[] {
+													"This is the CAS number of the source ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"MatchString",
+												new String[] {
+													"This is the matching criterion used to map the source ingredient."
+												}
+										),
+										new FileColumnDefinition(
+												"SourceCount",
+												new String[] {
+													"This is the use count of the source drug."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_id",
+												new String[] {
+														"This is the concept id of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_name",
+												new String[] {
+														"This is the concept name of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"domain_id",
+												new String[] {
+														"This is the domain id of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"vocabulary_id",
+												new String[] {
+														"This is the vocabulary id of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_class_id",
+												new String[] {
+														"This is the concept class id of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"standard_concept",
+												new String[] {
+														"This is the standard concept flag of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"concept_code",
+												new String[] {
+														"This is the concept code of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"valid_start_date",
+												new String[] {
+														"This is the valid start date of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"valid_end_date",
+												new String[] {
+														"This is the valid end date of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"invalid_reason",
+												new String[] {
+														"This is the invalid reason of the CDM concept the ingredient is mapped to."
+												}
+										),
+										new FileColumnDefinition(
+												"ATC",
+												new String[] {
+													"This is the ATC code of the ingredient."
+												}
+										)
+								},
+								false,
+								false
+						),
+						new FileDefinition(
 								"DrugMapping Mapping Log File",
 								new String[] {
 										"This file contains the log of the drug mapping."

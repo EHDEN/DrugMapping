@@ -28,6 +28,7 @@ import javax.swing.JTabbedPane;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
+import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
@@ -339,18 +340,28 @@ public class MainFrame {
 			getInfoFromLogFile(baseName + GenericMapping.LOGFILE_NAME);
 			GenericMapping.setMappingTypes(compBeforeForm);
 			InputFile genericDrugsFile = inputFilesMap.get("Generic Drugs File");
-			FileDefinition mappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("DrugMapping Mapping Log File");
-			InputFile mappingLogFile = null;
-			if (mappingLogFileDefinition != null) {
-				mappingLogFile = new InputFile(mappingLogFileDefinition);
-				mappingLogFile.setFileName(baseName + "DrugMapping Mapping Log.csv");
-				for (FileColumnDefinition columnDefinition : mappingLogFileDefinition.getColumns()) {
+			FileDefinition ingredientMappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("Ingredient Mapping Log File");
+			InputFile ingredientMappingLogFile = null;
+			if (ingredientMappingLogFileDefinition != null) {
+				ingredientMappingLogFile = new InputFile(ingredientMappingLogFileDefinition);
+				ingredientMappingLogFile.setFileName(baseName + "IngredientMapping Mapping Log.csv");
+				for (FileColumnDefinition columnDefinition : ingredientMappingLogFileDefinition.getColumns()) {
 					String columnName = columnDefinition.getColumnName();
-					mappingLogFile.addColumnMapping(columnName, columnName);
+					ingredientMappingLogFile.addColumnMapping(columnName, columnName);
 				}
 			}
-			if ((genericDrugsFile != null) && (mappingLogFile != null)) {
-				startLoadingMappingResults(this, genericDrugsFile, mappingLogFile);
+			FileDefinition drugMappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("DrugMapping Mapping Log File");
+			InputFile drugMappingLogFile = null;
+			if (drugMappingLogFileDefinition != null) {
+				drugMappingLogFile = new InputFile(drugMappingLogFileDefinition);
+				drugMappingLogFile.setFileName(baseName + "DrugMapping Mapping Log.csv");
+				for (FileColumnDefinition columnDefinition : drugMappingLogFileDefinition.getColumns()) {
+					String columnName = columnDefinition.getColumnName();
+					drugMappingLogFile.addColumnMapping(columnName, columnName);
+				}
+			}
+			if ((genericDrugsFile != null) &&  (ingredientMappingLogFile != null) && (drugMappingLogFile != null)) {
+				startLoadingMappingResults(this, genericDrugsFile, ingredientMappingLogFile, drugMappingLogFile);
 			}
 		}
 	}
@@ -450,9 +461,9 @@ public class MainFrame {
 	}
 	
 	
-	private void startLoadingMappingResults(MainFrame mainFrame, InputFile genericDrugsFile, InputFile mappingLogFile) {
+	private void startLoadingMappingResults(MainFrame mainFrame, InputFile genericDrugsFile, InputFile ingredientMappingLogFile, InputFile drugMappingLogFile) {
 		if (genericDrugsFile != null) {
-			LoadMappingResultsThread mappingResultsThread = new LoadMappingResultsThread(mainFrame, genericDrugsFile, mappingLogFile);
+			LoadMappingResultsThread mappingResultsThread = new LoadMappingResultsThread(mainFrame, genericDrugsFile, ingredientMappingLogFile, drugMappingLogFile);
 			mappingResultsThread.start();
 		}
 	}
@@ -461,12 +472,14 @@ public class MainFrame {
 	private class LoadMappingResultsThread extends Thread {
 		MainFrame mainFrame;
 		InputFile genericDrugsFile;
+		InputFile ingredientMappingLogFile;
 		InputFile drugMappingLogFile;
 		
-		public LoadMappingResultsThread(MainFrame mainFrame, InputFile genericDrugsFile, InputFile drugMappingLogFile) {
+		public LoadMappingResultsThread(MainFrame mainFrame, InputFile genericDrugsFile, InputFile ingredientMappingLogFile, InputFile drugMappingLogFile) {
 			super();
 			this.mainFrame = mainFrame;
 			this.genericDrugsFile = genericDrugsFile;
+			this.ingredientMappingLogFile = ingredientMappingLogFile;
 			this.drugMappingLogFile = drugMappingLogFile;
 		}
 		
@@ -476,6 +489,7 @@ public class MainFrame {
 			
 			source = new Source();
 			if (source.loadSourceDrugs(genericDrugsFile, minimumUseCount)) {
+				loadIngredientMappingLog(ingredientMappingLogFile);
 				loadDrugMappingLog(drugMappingLogFile);
 				showDrugMappingLog(source, null, drugMappingLog, usedStrengthDeviationPercentageMap, baseName, true);
 			}
@@ -490,9 +504,50 @@ public class MainFrame {
 	}
 	
 	
+	private void loadIngredientMappingLog(InputFile ingredientMappingLogFile) {
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Loading Drug Mapping Log ...");
+		
+		if (ingredientMappingLogFile.openFile()) {
+			while (ingredientMappingLogFile.hasNext()) {
+				Row row = ingredientMappingLogFile.next();
+				
+				String ingredientCode        = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "IngredientCode", true));
+				//String ingredientName        = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "IngredientName", true));
+				//String ingredientNameEnglish = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "IngredientNameEnglish", true));
+				//String casNumber             = ingredientMappingLogFile.get(row, "CASNumber", true);
+				String matchString           = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "MatchString", true));
+				//String sourceCount           = ingredientMappingLogFile.get(row, "SourceCount", true);
+				String conceptId             = ingredientMappingLogFile.get(row, "concept_id", true).trim();
+				String conceptName           = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "concept_name", true));
+				String domainId              = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "domain_id", true));
+				String vocabularyId          = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "vocabulary_id", true));
+				String conceptClassId        = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "concept_class_id", true));
+				String standardConcept       = ingredientMappingLogFile.get(row, "standard_concept", true).trim();
+				String conceptCode           = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "concept_code", true));
+				String validStartDate        = ingredientMappingLogFile.get(row, "valid_start_date", true).trim();
+				String validEndDate          = ingredientMappingLogFile.get(row, "valid_end_date", true).trim();
+				String invalidReason         = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "invalid_reason", true));
+				//String atc                   = ingredientMappingLogFile.get(row, "ATC", true);
+				
+				SourceIngredient sourceIngredient = Source.getIngredient(ingredientCode);
+				if (sourceIngredient != null) {
+					sourceIngredient.setMatchString(matchString);
+					if (!conceptId.equals("")) {
+						CDMIngredient cdmIngredient = new CDMIngredient(null, conceptId, conceptName, domainId, vocabularyId, conceptClassId, standardConcept, conceptCode, validStartDate, validEndDate, invalidReason);
+						sourceIngredient.setMatchingIngredient(cdmIngredient);
+					}
+				}
+			}
+		}
+		
+		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+	}
+	
+	
 	private void loadDrugMappingLog(InputFile drugMappingLogFile) {
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading Mapping Log ...");
+		System.out.println(DrugMapping.getCurrentTime() + "     Loading Drug Mapping Log ...");
 		
 		usedStrengthDeviationPercentageMap = new HashMap<String, Double>();
 		if (drugMappingLogFile.openFile()) {
