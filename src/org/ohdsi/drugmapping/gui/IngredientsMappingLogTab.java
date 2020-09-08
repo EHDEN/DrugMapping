@@ -51,7 +51,6 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 	
 	private LogIngredientListTableModel ingredientListTableModel;
 	private TableRowSorter<? extends TableModel> rowSorter;
-	private SourceIngredient lastSelectedSourceIngredient = null;
 	
 	private JTable resultConceptsTable;
 	private ResultConceptsTableModel resultConceptsTableModel;
@@ -94,6 +93,10 @@ public class IngredientsMappingLogTab extends MainFrameTab {
                 	//TODO escape special characters
                     rowSorter.setRowFilter(RowFilter.regexFilter(text));
                 }
+                
+        		ingredientMappingLogPanel.removeAll();
+        		ingredientMappingResultPanel.removeAll();
+        		mainFrame.getFrame().repaint();
 
                 if (ingredientsTable.getRowCount() > 0) {
             		ListSelectionModel selectionModel = ingredientsTable.getSelectionModel();
@@ -109,7 +112,6 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 		ingredientsPanel = new JPanel(new BorderLayout());
 		ingredientsPanel.setBorder(BorderFactory.createTitledBorder("Drugs"));
 		ingredientsPanel.setMinimumSize(new Dimension(100, 500));
-		//ingredientsPanel.setMaximumSize(new Dimension(100000, 100000));
 		ingredientsPanel.setPreferredSize(new Dimension(100, 500));
 		
 		JPanel drugMappingLogResultsPanel = new JPanel(new BorderLayout());
@@ -244,12 +246,10 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 	
 	
 	private void selectIngredient(SourceIngredient sourceIngredient) {
-		if (sourceIngredient != lastSelectedSourceIngredient) {
-			//System.out.println(sourceIngredient);
-			showSourceIngredientMappingLog(sourceIngredient);
-			getSourceIngredientMappingResult(sourceIngredient);
-		}
-		lastSelectedSourceIngredient = sourceIngredient;
+		//System.out.println(sourceIngredient);
+		showSourceIngredientMappingLog(sourceIngredient);
+		getSourceIngredientMappingResult(sourceIngredient);
+		mainFrame.getFrame().repaint();
 	}
 	
 	
@@ -304,6 +304,7 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 			matchStringField.setText(sourceIngredient.getMatchString());
 			ingredientMappingLogPanel.add(matchStringField, BorderLayout.CENTER);	
 		}
+		ingredientMappingLogPanel.invalidate();
 	}
 	
 	
@@ -421,8 +422,7 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 		
 		JScrollPane resultsScrollPane = new JScrollPane(resultConceptsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		ingredientMappingResultPanel.add(resultsScrollPane, BorderLayout.CENTER);
-		
-		mainFrame.getFrame().repaint();
+		ingredientMappingResultPanel.invalidate();
 	}
 	
 	
