@@ -910,7 +910,7 @@ public class GenericMapping extends Mapping {
 					if (cdmIngredient != null) { // Manual mapping on ingredient code found
 						ingredientMap.put(sourceIngredient, cdmIngredient);
 						sourceIngredient.setMatchingIngredient(cdmIngredient);
-						sourceIngredient.setMatchString("MANUAL CODE FALLBACK " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+						sourceIngredient.setMatchString("MANUAL CODE FALLBACK " + (manualIngredientCodeMappingRemarks.get(sourceIngredient) == null ? "" : manualIngredientCodeMappingRemarks.get(sourceIngredient)));
 						matchedManualCode++;
 					}
 					
@@ -920,7 +920,7 @@ public class GenericMapping extends Mapping {
 							if (cdmIngredient != null) {
 								ingredientMap.put(sourceIngredient, cdmIngredient);
 								sourceIngredient.setMatchingIngredient(cdmIngredient);
-								sourceIngredient.setMatchString("MANUAL NAME FALLBACK " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+								sourceIngredient.setMatchString("MANUAL NAME FALLBACK " + (manualIngredientCodeMappingRemarks.get(sourceIngredient) == null ? "" : manualIngredientCodeMappingRemarks.get(sourceIngredient)));
 								matchedManualCode++;
 							}
 						}
@@ -937,7 +937,7 @@ public class GenericMapping extends Mapping {
 				if (cdmIngredientManualCode != null) { // Manual mapping on ingredient code found
 					ingredientMap.put(sourceIngredient, cdmIngredientManualCode);
 					sourceIngredient.setMatchingIngredient(cdmIngredientManualCode);
-					sourceIngredient.setMatchString("MANUAL CODE OVERRULED " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+					sourceIngredient.setMatchString("MANUAL CODE OVERRULED " + (manualIngredientCodeMappingRemarks.get(sourceIngredient) == null ? "" : manualIngredientCodeMappingRemarks.get(sourceIngredient)));
 					matchedManualCode++;
 				}
 				
@@ -947,7 +947,7 @@ public class GenericMapping extends Mapping {
 						if (cdmIngredientManualName != null) {
 							ingredientMap.put(sourceIngredient, cdmIngredientManualName);
 							sourceIngredient.setMatchingIngredient(cdmIngredientManualName);
-							sourceIngredient.setMatchString("MANUAL NAME OVERRULED " + manualIngredientCodeMappingRemarks.get(sourceIngredient));
+							sourceIngredient.setMatchString("MANUAL NAME OVERRULED " + (manualIngredientCodeMappingRemarks.get(sourceIngredient) == null ? "" : manualIngredientCodeMappingRemarks.get(sourceIngredient)));
 							matchedManualName++;
 						}
 					}
@@ -3167,7 +3167,7 @@ public class GenericMapping extends Mapping {
 	
 	
 	private void showDrugsList() {
-		System.out.println(DrugMapping.getCurrentTime() + "     Showing Drugs List ...");
+		System.out.println(DrugMapping.getCurrentTime() + "     Showing Mappings ...");
 
 		mainFrame.showDrugMappingLog(source, cdm, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, DrugMapping.baseName, DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes"));
 			

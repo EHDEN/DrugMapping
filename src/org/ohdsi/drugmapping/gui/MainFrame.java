@@ -64,6 +64,7 @@ public class MainFrame {
 	private JFrame frame;
 	private JTabbedPane tabbedPane;
 	private ExecuteTab executeTab;
+	private IngredientsMappingLogTab ingredientMappingLogTab;
 	private DrugMappingLogTab drugMappingLogTab;
 
 	
@@ -141,9 +142,11 @@ public class MainFrame {
 		DrugMapping.disableWhenRunning(tabbedPane);
 		
 		executeTab = new ExecuteTab(drugMapping, this);
+		ingredientMappingLogTab = new IngredientsMappingLogTab(this);
 		drugMappingLogTab = new DrugMappingLogTab(this);
 		
 		tabbedPane.addTab("Execute", executeTab);
+		tabbedPane.addTab("Ingredient Mapping Log", ingredientMappingLogTab);
 		tabbedPane.addTab("Drug Mapping Log", drugMappingLogTab);
 		
 		frame.add(tabbedPane, BorderLayout.CENTER);
@@ -506,7 +509,7 @@ public class MainFrame {
 	
 	private void loadIngredientMappingLog(InputFile ingredientMappingLogFile) {
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading Drug Mapping Log ...");
+		System.out.println(DrugMapping.getCurrentTime() + "     Loading Ingredient Mapping Log ...");
 		
 		if (ingredientMappingLogFile.openFile()) {
 			while (ingredientMappingLogFile.hasNext()) {
@@ -528,13 +531,14 @@ public class MainFrame {
 				String validStartDate        = ingredientMappingLogFile.get(row, "valid_start_date", true).trim();
 				String validEndDate          = ingredientMappingLogFile.get(row, "valid_end_date", true).trim();
 				String invalidReason         = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "invalid_reason", true));
-				//String atc                   = ingredientMappingLogFile.get(row, "ATC", true);
+				String atc                   = ingredientMappingLogFile.get(row, "ATC", true).trim();
 				
 				SourceIngredient sourceIngredient = Source.getIngredient(ingredientCode);
 				if (sourceIngredient != null) {
 					sourceIngredient.setMatchString(matchString);
 					if (!conceptId.equals("")) {
 						CDMIngredient cdmIngredient = new CDMIngredient(null, conceptId, conceptName, domainId, vocabularyId, conceptClassId, standardConcept, conceptCode, validStartDate, validEndDate, invalidReason);
+						cdmIngredient.setATC(atc.equals("") ? null : atc);
 						sourceIngredient.setMatchingIngredient(cdmIngredient);
 					}
 				}
@@ -555,7 +559,6 @@ public class MainFrame {
 			
 			String lastSourceCode               = "";
 			Integer lastMappingType             = null;
-			Integer lastMappingResult           = null;
 			String lastIngredientCode           = "";
 			String lastSourceIngredientAmount   = "";
 			String lastSourceIngredientUnit     = "";
@@ -653,7 +656,6 @@ public class MainFrame {
 				
 				lastSourceCode               = sourceCode;
 				lastMappingType              = mappingType;
-				lastMappingResult            = mappingResult;
 				lastIngredientCode           = ingredientCode;
 				lastSourceIngredientAmount   = sourceIngredientAmount;
 				lastSourceIngredientUnit     = sourceIngredientUnit;
@@ -665,6 +667,7 @@ public class MainFrame {
 	
 	
 	public void showDrugMappingLog(Source source, CDM cdm, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> drugMappingLog, Map<String, Double> usedStrengthDeviationPercentageMap, String baseName, boolean isSaved) {
+		ingredientMappingLogTab.showIngredientMappingLog();
 		drugMappingLogTab.showDrugMappingLog(source, cdm, drugMappingLog, usedStrengthDeviationPercentageMap, isSaved);
 		for (JComponent component : DrugMapping.componentsToDisableWhenRunning) {
 			if (component != executeTab.startButton) {

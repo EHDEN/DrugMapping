@@ -230,6 +230,8 @@ public class DrugMappingLogTab extends MainFrameTab {
 	
 	private void showDrugList() {
 		drugsPanel.removeAll();
+		drugMappingLogPanel.removeAll();
+		drugMappingResultPanel.removeAll();
 		
 		drugListTableModel = new LogDrugListTableModel();
 		drugsTable = new JTable(drugListTableModel) {
@@ -364,6 +366,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 	
 	private void showSourceDrugMappingLog() {
 		drugMappingLogPanel.removeAll();
+		drugMappingResultPanel.removeAll();
 		
 		logTableModel = new LogTableModel();
 		logTable = new JTable(logTableModel) {
@@ -591,7 +594,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 		resultConceptsTable.setAutoCreateRowSorter(false);
 
 		// Set selection to first row
-		ListSelectionModel selectionModel = logTable.getSelectionModel();
+		ListSelectionModel selectionModel = resultConceptsTable.getSelectionModel();
 		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 		// concept_id
