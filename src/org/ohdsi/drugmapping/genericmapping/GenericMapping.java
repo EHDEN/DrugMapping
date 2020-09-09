@@ -1954,7 +1954,7 @@ public class GenericMapping extends Mapping {
 		saveDrugMapping();
 		isSavingDrugMapping = false;
 		
-		if (DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes")) {
+		if (DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_LOG).equals("Yes")) {
 			saveDrugMappingMappingLog(source, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, cdm);
 		}
 			
@@ -3169,7 +3169,7 @@ public class GenericMapping extends Mapping {
 	private void showDrugsList() {
 		System.out.println(DrugMapping.getCurrentTime() + "     Showing Mappings ...");
 
-		mainFrame.showDrugMappingLog(source, cdm, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, DrugMapping.baseName, DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_RESULTS).equals("Yes"));
+		mainFrame.showDrugMappingLog(source, cdm, sourceDrugMappingResults, usedStrengthDeviationPercentageMap, DrugMapping.baseName, DrugMapping.settings.getStringSetting(MainFrame.SAVE_DRUGMAPPING_LOG).equals("Yes"));
 			
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}

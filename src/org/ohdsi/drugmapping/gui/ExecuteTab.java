@@ -99,7 +99,7 @@ public class ExecuteTab extends MainFrameTab {
 			MainFrame.PREFERENCE_PRIORITIZE_BY_DATE        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No"));
 			MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID  = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
 			MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None"));
-			MainFrame.SAVE_DRUGMAPPING_RESULTS             = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsResults", "Save Drugmapping Results file:", new String[] { "Yes", "No" }, "Yes"));
+			MainFrame.SAVE_DRUGMAPPING_LOG                 = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsLog", "Save Drugmapping Log file:", new String[] { "Yes", "No" }, "Yes"));
 			MainFrame.SUPPRESS_WARNINGS                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No"));
 		}
 		

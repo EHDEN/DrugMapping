@@ -83,24 +83,25 @@ public class FormConversion {
 				}
 				else {
 					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-						System.out.println("    WARNING: No factor found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'. Defaults to 0.");
+						System.out.println("    WARNING: No priority found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'. Defaults to 0.");
 					}
 					priority = 0;
 				}
 				
 				if (priority != null) {
+					Map<Integer, String> sourceFormConversion = tempFormConversionMap.get(sourceForm);
+					if (sourceFormConversion == null) {
+						sourceFormConversion = new HashMap<Integer, String>();
+						tempFormConversionMap.put(sourceForm, sourceFormConversion);
+					}
 					
 					if ((!sourceForm.equals("")) && (conceptId.equals(""))) {
 						if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-							System.out.println("    WARINING: No target form specified for '" + sourceForm + ".");
+							System.out.println("    WARINING: No target form specified for '" + sourceForm + ". Defaults to source form.");
 						}
+						sourceFormConversion.put(priority, sourceForm);
 					}
 					else {
-						Map<Integer, String> sourceFormConversion = tempFormConversionMap.get(sourceForm);
-						if (sourceFormConversion == null) {
-							sourceFormConversion = new HashMap<Integer, String>();
-							tempFormConversionMap.put(sourceForm, sourceFormConversion);
-						}
 						String existingConversion = sourceFormConversion.get(priority);
 						if (existingConversion == null) {
 							sourceFormConversion.put(priority, conceptName);
@@ -180,12 +181,6 @@ public class FormConversion {
 			// Write all forms to file
 			for (String form : forms) {
 				String formName = form;
-				if (formName.contains(fieldDelimiter)) {
-					if (formName.contains(textQualifier)) {
-						formName.replaceAll(textQualifier, textQualifier + textQualifier);
-					}
-					formName = textQualifier + formName + textQualifier;
-				}
 				
 				String record = DrugMappingStringUtilities.escapeFieldValue(formName, fieldDelimiter, textQualifier);
 				record += fieldDelimiter;

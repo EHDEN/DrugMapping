@@ -57,7 +57,7 @@ public class MainFrame {
 	public static int PREFERENCE_PRIORITIZE_BY_CONCEPT_ID;
 	public static int PREFERENCE_TAKE_FIRST_OR_LAST;
 	
-	public static int SAVE_DRUGMAPPING_RESULTS;
+	public static int SAVE_DRUGMAPPING_LOG;
 	public static int SUPPRESS_WARNINGS;
 	
 	private DrugMapping drugMapping;
@@ -263,7 +263,7 @@ public class MainFrame {
 		String busy = null;
 		if (GenericMapping.isMapping)              busy = ((busy == null) ? "" : "\r\n") + "Mapping in progress!";
 		if (GenericMapping.isSavingDrugMapping)    busy = ((busy == null) ? "" : "\r\n") + "Saving Mapping in progress!";
-		if (GenericMapping.isSavingDrugMappingLog) busy = ((busy == null) ? "" : "\r\n") + "Saving Mapping Log in progress!";
+		if (GenericMapping.isSavingDrugMappingLog) busy = ((busy == null) ? "" : "\r\n") + "Saving Drug Mapping Log in progress!";
 		return busy;
 	}
 	
