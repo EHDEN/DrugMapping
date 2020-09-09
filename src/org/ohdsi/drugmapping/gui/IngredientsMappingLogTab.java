@@ -94,9 +94,12 @@ public class IngredientsMappingLogTab extends MainFrameTab {
                     rowSorter.setRowFilter(RowFilter.regexFilter(text));
                 }
                 
-        		ingredientMappingLogPanel.removeAll();
-        		ingredientMappingResultPanel.removeAll();
-        		mainFrame.getFrame().repaint();
+                if (rowSorter.getViewRowCount() == 0) {
+            		ingredientMappingLogPanel.removeAll();
+            		ingredientMappingResultPanel.removeAll();
+            		mainFrame.getFrame().repaint();
+                }
+                
 
                 if (ingredientsTable.getRowCount() > 0) {
             		ListSelectionModel selectionModel = ingredientsTable.getSelectionModel();
