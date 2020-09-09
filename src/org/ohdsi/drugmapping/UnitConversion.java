@@ -86,8 +86,6 @@ public class UnitConversion {
 				if (factor != null) {
 					if ((!sourceUnit.equals("")) && (targetUnit.equals(""))) {
 						System.out.println("    WARNING: No target unit specified for '" + sourceUnit + ". Defaults to source unit with factor 1.0.");
-						targetUnit = sourceUnit;
-						factor = 1.0;
 					}
 					else {
 						Map<String, Double> sourceUnitConversion = unitConversionMap.get(sourceUnit);
@@ -187,6 +185,9 @@ public class UnitConversion {
 				if (factor != null) {
 					result = sourceValue * factor;
 				}
+			}
+			else if (sourceUnit.equals(targetUnit)) {
+				result = sourceValue;
 			}
 		}
 		return result;

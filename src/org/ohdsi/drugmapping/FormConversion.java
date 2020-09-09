@@ -99,7 +99,6 @@ public class FormConversion {
 						if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
 							System.out.println("    WARINING: No target form specified for '" + sourceForm + ". Defaults to source form.");
 						}
-						sourceFormConversion.put(priority, sourceForm);
 					}
 					else {
 						String existingConversion = sourceFormConversion.get(priority);
@@ -208,7 +207,14 @@ public class FormConversion {
 	
 	
 	public List<String> getMatchingForms(String sourceForm) {
-		return formConversionMap.get(sourceForm);
+		List<String> targetForms = formConversionMap.get(sourceForm);
+		if (targetForms == null) {
+			targetForms = new ArrayList<String>();
+		}
+		if (targetForms.size() == 0) {
+			targetForms.add(sourceForm);
+		}
+		return targetForms;
 	}
 
 }
