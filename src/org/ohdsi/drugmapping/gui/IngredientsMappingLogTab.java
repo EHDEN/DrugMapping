@@ -2,17 +2,11 @@ package org.ohdsi.drugmapping.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,14 +23,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.ohdsi.drugmapping.cdm.CDM;
-import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
-import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.source.Source;
-import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceIngredient;
-import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class IngredientsMappingLogTab extends MainFrameTab {
 	private static final long serialVersionUID = 1736241328985740613L;
