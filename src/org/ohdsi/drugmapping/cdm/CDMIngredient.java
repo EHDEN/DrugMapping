@@ -138,8 +138,13 @@ public class CDMIngredient extends CDMConcept {
 	}
 	
 	
+	public int drugUseCount() {
+		return cdmDrugs.size();
+	}
+	
+	
 	public boolean isOrphan() {
-		return cdm.isOrphanIngredient(this);
+		return drugUseCount() == 0;
 	}
 
 }

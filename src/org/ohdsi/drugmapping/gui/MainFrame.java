@@ -51,6 +51,7 @@ public class MainFrame {
 
 	public static int PREFERENCE_MATCH_COMP_FORM;
 	public static int PREFERENCE_MATCH_INGREDIENTS_TO_COMP;	
+	public static int PREFERENCE_NON_ORPHAN_INGREDIENTS;
 	public static int PREFERENCE_RXNORM;
 	public static int PREFERENCE_ATC;
 	public static int PREFERENCE_PRIORITIZE_BY_DATE;

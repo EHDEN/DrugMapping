@@ -223,29 +223,6 @@ public class CDM {
 	}
 	
 	
-	public boolean isOrphanIngredient(CDMIngredient cdmIngredient) {
-		boolean isOrphan = true;
-		for (int ingredientCount : cdmDrugsContainingIngredient.keySet()) {
-			if (cdmDrugsContainingIngredient.get(ingredientCount).get(cdmIngredient) != null) {
-				isOrphan = false;
-				break;
-			}
-		}
-		if (isOrphan) {
-			isOrphan = (cdmDrugCompsContainingIngredient.get(cdmIngredient) == null);
-		}
-		if (isOrphan) {
-			for (int ingredientCount : cdmDrugFormsContainingIngredient.keySet()) {
-				if (cdmDrugFormsContainingIngredient.get(ingredientCount).get(cdmIngredient) != null) {
-					isOrphan = false;
-					break;
-				}
-			}
-		}
-		return isOrphan;
-	}
-	
-	
 	public Map<String, CDMIngredient> getCDMIngredients() {
 		return cdmIngredients;
 	}

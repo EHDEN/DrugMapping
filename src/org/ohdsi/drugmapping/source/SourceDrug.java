@@ -88,6 +88,9 @@ public class SourceDrug {
 		}
 		try {
 			this.count = Long.valueOf(count);
+			if (this.count < 0L) {
+				this.count = 0L;
+			}
 		}
 		catch (NumberFormatException e) {
 			this.count = -1L;

@@ -222,7 +222,7 @@ public class SourceIngredient {
 	
 	
 	public void addCount(Long additionalCount) {
-		count += additionalCount == null ? 0 : additionalCount;
+		count += ((additionalCount == null) || (additionalCount < 0)) ? 0 : additionalCount;
 	}
 	
 	

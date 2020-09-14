@@ -881,8 +881,8 @@ public class GenericMapping extends Mapping {
 									
 									if (matchedCDMIngredients.size() > 1) {
 										String matchString = "Multiple mappings:";
-										for (CDMIngredient ingredient : matchedCDMIngredients) {
-											matchString += " " + ingredient.getConceptId();
+										for (CDMIngredient matchedCDMIngredient : matchedCDMIngredients) {
+											matchString += " " + matchedCDMIngredient.getConceptId();
 										}
 										sourceIngredient.setMatchString(matchString);
 										multipleMapping = true;
@@ -2945,6 +2945,23 @@ public class GenericMapping extends Mapping {
 		List<CDMConcept> remove;
 
 		preferencesUsed = "";
+		
+		// Remove orphan ingredients when there are non-orphan ingredients
+		if (conceptList.size() > 1) {
+			if ((sourceDrug == null) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_NON_ORPHAN_INGREDIENTS).equals("Yes")) {
+				Set<CDMIngredient> orphanIngredients = new HashSet<CDMIngredient>();
+				for (CDMConcept cdmConcept : conceptList) {
+					CDMIngredient cdmIngredient = (CDMIngredient) cdmConcept;
+					if (cdmIngredient.isOrphan()) {
+						orphanIngredients.add(cdmIngredient);
+					}
+				}
+				if (orphanIngredients.size() != conceptList.size()) {
+					conceptList.removeAll(orphanIngredients);
+				}
+			}
+		}
+		
 		if (conceptList.size() > 1) {
 			if ((sourceDrug != null) && DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_ATC).equals("Yes")) {
 				resultType = REJECTED_BY_ATC_PREFERENCE;

@@ -101,18 +101,20 @@ public class CDMDrug extends CDMConcept {
 	}
 	
 	
-	public void addIngredientStrength(CDMIngredientStrength ingredient) {
-		ingredientStrengths.add(ingredient);
-		ingredients.add(ingredient.getIngredient());
-		if (ingredient.getIngredient() != null) {
-			String ingredientConceptId = ingredient.getIngredient().getConceptId(); 
+	public void addIngredientStrength(CDMIngredientStrength ingredientStrength) {
+		ingredientStrengths.add(ingredientStrength);
+		CDMIngredient ingredient = ingredientStrength.getIngredient();
+		ingredients.add(ingredient);
+		if (ingredient != null) {
+			ingredient.addDrug(this);
+			String ingredientConceptId = ingredient.getConceptId(); 
 			List<CDMIngredientStrength> ingredientSet = ingredientsMap.get(ingredientConceptId);
 			if (ingredientSet == null) {
 				ingredientSet = new ArrayList<CDMIngredientStrength>();
 				ingredientsMap.put(ingredientConceptId, ingredientSet);
 			}
-			if (!ingredientSet.contains(ingredient)) {
-				ingredientSet.add(ingredient);
+			if (!ingredientSet.contains(ingredientStrength)) {
+				ingredientSet.add(ingredientStrength);
 				Collections.sort(ingredientSet, new Comparator<CDMIngredientStrength>() {
 
 					@Override
