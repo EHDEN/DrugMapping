@@ -17,7 +17,7 @@ public class SourceIngredient {
 	private String ingredientNameEnglish = "";
 	private String ingredientNameEnglishNoSpaces = "";
 	private String casNumber = null;
-	private Long count = 0L;
+	private Long count = -1L;
 	private List<String> ingredientMatchingNames = null;
 	
 	private String matchString = "";
@@ -222,7 +222,14 @@ public class SourceIngredient {
 	
 	
 	public void addCount(Long additionalCount) {
-		count += ((additionalCount == null) || (additionalCount < 0)) ? 0 : additionalCount;
+		if (additionalCount > 0) {
+			if (count < 0) {
+				count = additionalCount;
+			}
+			else {
+				count += additionalCount;
+			}
+		}
 	}
 	
 	

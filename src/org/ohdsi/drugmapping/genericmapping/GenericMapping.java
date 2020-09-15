@@ -1850,7 +1850,7 @@ public class GenericMapping extends Mapping {
 				String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientNameEnglish());
-				record += "," + sourceIngredient.getCount();
+				record += "," + (sourceIngredient.getCount() < 0 ? "?" : sourceIngredient.getCount());
 				if (cdmIngredient != null) {
 					record += "," + cdmIngredient.getConceptId();
 					record += "," + DrugMappingStringUtilities.escapeFieldValue(cdmIngredient.getConceptName());
@@ -1956,7 +1956,7 @@ public class GenericMapping extends Mapping {
 			
 			String drugMappingReviewRecord = DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getCode());
 			drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getName());
-			drugMappingReviewRecord += "," + sourceDrug.getCount();
+			drugMappingReviewRecord += "," + (sourceDrug.getCount() < 0 ? "?" : sourceDrug.getCount());
 			drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceDrug.getFormulationsString());
 			
 			if (mappingType != -1) {
@@ -2272,7 +2272,7 @@ public class GenericMapping extends Mapping {
 			Collections.sort(source.getSourceDrugs(), new Comparator<SourceDrug>() {
 				@Override
 				public int compare(SourceDrug sourceDrug1, SourceDrug sourceDrug2) {
-					int countCompare = Long.compare(sourceDrug1.getCount() == null ? 0L : sourceDrug1.getCount(), sourceDrug2.getCount() == null ? 0L : sourceDrug2.getCount()); 
+					int countCompare = Long.compare(sourceDrug1.getCount() == null ? -1L : sourceDrug1.getCount(), sourceDrug2.getCount() == null ? -1L : sourceDrug2.getCount()); 
 					int compareResult = (countCompare == 0 ? (sourceDrug1.getCode() == null ? "" : sourceDrug1.getCode()).compareTo(sourceDrug2.getCode() == null ? "" : sourceDrug2.getCode()) : -countCompare);
 					//System.out.println("Compare: " + sourceDrug1.getCode() + "," + sourceDrug1.getCount() + " <-> " + sourceDrug2.getCode() + "," + sourceDrug2.getCount() + " => " + Integer.toString(compareResult));
 					return compareResult;
