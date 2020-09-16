@@ -66,6 +66,13 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 												}
 										),
 										new FileColumnDefinition(
+												"IngredientNameEnglish",
+												new String[] {
+														"This is the English name of the ingredient of the drug."
+												},
+												false
+										),
+										new FileColumnDefinition(
 												"Dosage",
 												new String[] {
 														"This is the dosage in mg of the drug."
@@ -92,9 +99,15 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								"Ingredient Name Translation File",
 								new String[] {
 										"This file should contain the translation from source ingredient",
-										"names to English."
+										"names to English to overrule the existing translation."
 						  		},
 								new FileColumnDefinition[] {
+										new FileColumnDefinition(
+												"IngredientCode",
+												new String[] {
+														"This is the code of the source ingredient."
+												}
+										),
 										new FileColumnDefinition(
 												"IngredientName",
 												new String[] {

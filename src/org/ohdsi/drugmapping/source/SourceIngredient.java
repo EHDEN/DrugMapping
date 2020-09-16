@@ -9,13 +9,12 @@ import java.util.Set;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
-public class SourceIngredient {
+public class SourceIngredient implements Comparable<SourceIngredient> {
 	
 	private String ingredientCode = null;
 	private String ingredientName = null;
 	private String ingredientNameNoSpaces = null;
 	private String ingredientNameEnglish = "";
-	private String ingredientNameEnglishNoSpaces = "";
 	private String casNumber = null;
 	private Long count = -1L;
 	private List<String> ingredientMatchingNames = null;
@@ -66,7 +65,6 @@ public class SourceIngredient {
 		this.ingredientNameEnglish = ingredientNameEnglish;
 		this.casNumber = casNumber.equals("") ? null : casNumber;
 		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
-		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish == null ? "" : this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 
 		ingredientMatchingNames = generateMatchingNames();
 	}
@@ -139,6 +137,26 @@ public class SourceIngredient {
 	}
 	
 	
+	public int compareTo(SourceIngredient compareToIngredient) {
+		if (ingredientCode == null) {
+			if (compareToIngredient.getIngredientCode() == null) {
+				return 0;
+			}
+			else {
+				return -1;
+			}
+		}
+		else {
+			if (compareToIngredient.getIngredientCode() == null) {
+				return 1;
+			}
+			else {
+				return ingredientCode.compareTo(compareToIngredient.getIngredientCode());
+			}
+		}
+	}
+	
+	
 	public void addDrug(SourceDrug sourceDrug) {
 		sourceDrugs.add(sourceDrug);
 	}
@@ -176,13 +194,7 @@ public class SourceIngredient {
 	
 	public void setIngredientNameEnglish(String ingredientNameEnglish) {
 		this.ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish;
-		this.ingredientNameEnglishNoSpaces = this.ingredientNameEnglish.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 		ingredientMatchingNames = generateMatchingNames();
-	}
-	
-	
-	public String getIngredientNameEnglishNoSpaces() {
-		return ingredientNameEnglishNoSpaces;
 	}
 	
 	

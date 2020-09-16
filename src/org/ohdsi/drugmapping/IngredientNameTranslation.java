@@ -31,7 +31,7 @@ public class IngredientNameTranslation {
 	private int status = STATE_OK;
 	private String fileName = "";
 	
-	private Map<String, String> ingredientNameTranslationMap = new HashMap<String, String>();
+	private Map<SourceIngredient, String> ingredientNameTranslationMap = new HashMap<SourceIngredient, String>();
 	
 	
 	public static String getDefaultFileName() {
@@ -63,27 +63,37 @@ public class IngredientNameTranslation {
 			System.out.println(DrugMapping.getCurrentTime() + "        Get ingredient name translation map from file " + fileName + " ...");
 			while (ingredientNameTranslationFile.hasNext()) {
 				Row row = ingredientNameTranslationFile.next();
+
+				String ingredientCode = ingredientNameTranslationFile.get(row, "IngredientCode", true);
+				String ingredientName = ingredientNameTranslationFile.get(row, "IngredientName", false);
 				
-				String ingredientName = ingredientNameTranslationFile.get(row, "IngredientName", true);
-				ingredientName = ingredientName == null ? "" : ingredientName.toUpperCase();
-				String ingredientNameEnglish = ingredientNameTranslationFile.get(row, "IngredientNameEnglish", true);
-				ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish.toUpperCase();
-				
-				if ((!ingredientName.equals("")) && (!ingredientNameEnglish.equals(""))) {
-					String translation = ingredientNameTranslationMap.get(ingredientName);
-					if (translation != null) {
-						if (translation.equals(ingredientNameEnglish)) {
-							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-								System.out.println("    WARNING: Double translation definition for '" + ingredientName + "'. Ignored.");
+				SourceIngredient ingredient = Source.getIngredient(ingredientCode);
+				if (ingredient != null) {
+					ingredientName = ingredientName == null ? "" : ingredientName.toUpperCase();
+					String ingredientNameEnglish = ingredientNameTranslationFile.get(row, "IngredientNameEnglish", true);
+					ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish.toUpperCase();
+					
+					if ((!ingredientName.equals("")) && (!ingredientNameEnglish.equals(""))) {
+						String translation = ingredientNameTranslationMap.get(ingredient);
+						if (translation != null) {
+							if (translation.equals(ingredientNameEnglish)) {
+								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
+									System.out.println("    WARNING: Double translation definition for '" + ingredientCode + " (" + ingredientName + ")'. Ignored.");
+								}
+							}
+							else {
+								System.out.println("    ERROR: Conflicting translations for '" + ingredientCode + " (" + ingredientName + ")'.");
+								status = STATE_ERROR;
 							}
 						}
 						else {
-							System.out.println("    ERROR: Conflicting translations for '" + ingredientName + ".");
-							status = STATE_ERROR;
+							ingredientNameTranslationMap.put(ingredient, ingredientNameEnglish);
 						}
 					}
-					else {
-						ingredientNameTranslationMap.put(ingredientName, ingredientNameEnglish);
+				}
+				else {
+					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
+						System.out.println("    WARNING: Unknown ingredient '" + ingredientCode + " (" + ingredientName + ")'. Ignored.");
 					}
 				}
 			}
@@ -117,24 +127,22 @@ public class IngredientNameTranslation {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = "IngredientName";
-			header += fieldDelimiter + "IngredientNameEnglish";
+			String header = ingredientNameTranslationFile.getColumnMapping().get("IngredientCode");
+			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("IngredientName");
+			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("IngredientNameEnglish");
 			
 			mappingFileWriter.println(header);
 			
 			// Get all ingredient names
-			Set<String> uniqueIngredientNames = new HashSet<String>();
-			for (SourceIngredient sourceIngredient : Source.getAllIngredients()) {
-				uniqueIngredientNames.add(sourceIngredient.getIngredientName());
-			}
-			List<String> sortedIngredientNames = new ArrayList<String>();
-			sortedIngredientNames.addAll(uniqueIngredientNames);
-			Collections.sort(sortedIngredientNames);
+			List<SourceIngredient> sortedIngredients = new ArrayList<SourceIngredient>();
+			sortedIngredients.addAll(Source.getAllIngredients());
+			Collections.sort(sortedIngredients);
 			
 			// Write all units to file
-			for (String ingredientName : sortedIngredientNames) {
-				
-				String record = DrugMappingStringUtilities.escapeFieldValue(ingredientName, fieldDelimiter, textQualifier);
+			for (SourceIngredient ingredient : sortedIngredients) {
+
+				String record = DrugMappingStringUtilities.escapeFieldValue(ingredient.getIngredientCode(), fieldDelimiter, textQualifier);
+				record += fieldDelimiter + DrugMappingStringUtilities.escapeFieldValue(ingredient.getIngredientName(), fieldDelimiter, textQualifier);
 				record += fieldDelimiter;
 				
 				mappingFileWriter.println(record);
@@ -156,8 +164,8 @@ public class IngredientNameTranslation {
 	}
 	
 	
-	public String getNameIngredientNameEnglish(String ingredientName) {
-		return ingredientNameTranslationMap.get(ingredientName);
+	public String getNameIngredientNameEnglish(SourceIngredient ingredient) {
+		return ingredientNameTranslationMap.get(ingredient);
 	}
 
 }

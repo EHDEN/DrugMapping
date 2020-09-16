@@ -350,7 +350,10 @@ public class GenericMapping extends Mapping {
 		}
 		else {
 			for (SourceIngredient sourceIngredient : Source.getAllIngredients()) {
-				sourceIngredient.setIngredientNameEnglish(ingredientNameTranslationMap.getNameIngredientNameEnglish(sourceIngredient.getIngredientName()));
+				String ingredientNameEnglish = ingredientNameTranslationMap.getNameIngredientNameEnglish(sourceIngredient);
+				if ((ingredientNameEnglish != null) && (!ingredientNameEnglish.equals(""))) {
+					sourceIngredient.setIngredientNameEnglish(ingredientNameEnglish);
+				}
 			}
 		}
 		

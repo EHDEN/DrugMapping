@@ -133,12 +133,12 @@ public class UnitConversion {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = "SourceUnit";
-			header += fieldDelimiter + "DrugCount";
-			header += fieldDelimiter + "RecordCount";
-			header += fieldDelimiter + "Factor";
-			header += fieldDelimiter + "TargetUnit";
-			header += fieldDelimiter + "Comment";
+			String header = sourceUnitMappingFile.getColumnMapping().get("SourceUnit");
+			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("DrugCount");
+			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("RecordCount");
+			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("Factor");
+			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("TargetUnit");
+			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("Comment");
 			
 			mappingFileWriter.println(header);
 			

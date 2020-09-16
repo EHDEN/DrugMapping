@@ -164,11 +164,11 @@ public class FormConversion {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = "DoseForm";
-			header += fieldDelimiter + "Priority";
-			header += fieldDelimiter + "ConceptId";
-			header += fieldDelimiter + "ConceptName";
-			header += fieldDelimiter + "Comment";
+			String header = sourceFormMappingFile.getColumnMapping().get("DoseForm");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Priority");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("ConceptId");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("ConceptName");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Comment");
 			
 			mappingFileWriter.println(header);
 			
