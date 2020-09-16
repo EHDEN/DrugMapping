@@ -106,7 +106,7 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
-	public static String modifyName(String name) {
+	public static String standardizedName(String name) {
 		
 		if (name != null) {
 			name = " " + convertToStandardCharacters(name).toUpperCase() + " ";

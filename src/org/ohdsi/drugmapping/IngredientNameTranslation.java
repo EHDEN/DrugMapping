@@ -140,12 +140,13 @@ public class IngredientNameTranslation {
 			
 			// Write all units to file
 			for (SourceIngredient ingredient : sortedIngredients) {
-
-				String record = DrugMappingStringUtilities.escapeFieldValue(ingredient.getIngredientCode(), fieldDelimiter, textQualifier);
-				record += fieldDelimiter + DrugMappingStringUtilities.escapeFieldValue(ingredient.getIngredientName(), fieldDelimiter, textQualifier);
-				record += fieldDelimiter;
-				
-				mappingFileWriter.println(record);
+				if (ingredient.getIngredientNameEnglish().equals("")) {
+					String record = DrugMappingStringUtilities.escapeFieldValue(ingredient.getIngredientCode(), fieldDelimiter, textQualifier);
+					record += fieldDelimiter + DrugMappingStringUtilities.escapeFieldValue(ingredient.getIngredientName(), fieldDelimiter, textQualifier);
+					record += fieldDelimiter;
+					
+					mappingFileWriter.println(record);
+				}
 			}
 			
 			mappingFileWriter.close();
