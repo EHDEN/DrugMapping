@@ -866,25 +866,20 @@ public class GenericMapping extends Mapping {
 						matchList.add(matchType + ": " + matchName);
 						matchList.add(matchType + " Standardized: " + DrugMappingStringUtilities.standardizedName(matchName));
 						matchList.add(matchType + " Sorted: " + DrugMappingStringUtilities.sortWords(matchName));
-						matchList.add(matchType + " Standardized: " + DrugMappingStringUtilities.standardizedName(matchName));
 						matchList.add(matchType + " Sorted Standardized: " + DrugMappingStringUtilities.standardizedName(DrugMappingStringUtilities.sortWords(matchName)));
 
 						for (String ingredientNameIndexName : cdm.getCDMIngredientNameIndexNameList()) {
 							Map<String, Set<CDMIngredient>> ingredientNameIndex = cdm.getCDMIngredientNameIndexMap().get(ingredientNameIndexName);
-/* STANDARDIZED SEPARATION BEGIN
 							Map<String, Set<CDMIngredient>> ingredientStandardizedNameIndex = cdm.getCDMIngredientStandardizedNameIndexMap().get(ingredientNameIndexName);
-/* STANDARDIZED SEPARATION END */
 							
 							for (String searchName : matchList) {
 								matchType = searchName.substring(0, searchName.indexOf(": "));
 								searchName = searchName.substring(searchName.indexOf(": ") + 2);
 
 								Set<CDMIngredient> matchedCDMIngredients = ingredientNameIndex.get(searchName);
-/* STANDARDIZED SEPARATION BEGIN
 								if (matchType.endsWith("Standardized")) {
 									matchedCDMIngredients = ingredientStandardizedNameIndex.get(searchName);
 								}
-/* STANDARDIZED SEPARATION END */
 								if (matchedCDMIngredients != null) {
 									if (matchedCDMIngredients.size() > 1) {
 										matchedCDMIngredients = selectConcept(matchedCDMIngredients);
