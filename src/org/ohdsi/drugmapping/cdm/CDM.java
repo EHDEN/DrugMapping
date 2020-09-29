@@ -27,6 +27,16 @@ public class CDM {
 	private Map<String, CDMIngredient> cdmIngredients;
 	
 	private List<CDMIngredient> cdmIngredientsList;
+	
+	// Name indexes
+	private MappingIngredientHitLibraryNames ingredientNames;
+	private MappingIngredientHitLibraryNames ingredientNameSynonyms;
+	private MappingIngredientHitLibraryNames ingredientNameRelations;
+	
+	private String matchString = "";
+	private String nameMatchString = "";
+	private String synonymMatchString = "";
+	private String relationMatchString = "";
 
 	// Name indexes
 	private Map<String, Set<CDMIngredient>> cdmIngredientNameIndex;
@@ -120,6 +130,11 @@ public class CDM {
 		cdmIngredients = new HashMap<String, CDMIngredient>();
 		
 		cdmIngredientsList = new ArrayList<CDMIngredient>();
+		
+		// Name indexes
+		ingredientNames = new MappingIngredientHitLibraryNames();
+		ingredientNameSynonyms = new MappingIngredientHitLibraryNames();
+		ingredientNameRelations = new MappingIngredientHitLibraryNames();
 		
 		// Name indexes
 		cdmIngredientNameIndex = new HashMap<String, Set<CDMIngredient>>();
@@ -309,12 +324,17 @@ public class CDM {
 			// Close database connection
 			connection.close();
 			
+			ingredientNameSynonyms.reCalculateHitScores();
+			ingredientNameRelations.reCalculateHitScores();
+			
 			ok = true;
 		}
 		catch (Exception exception) {
 			ok = false;
 			exception.printStackTrace();
 		}
+		
+		report.add("");
 		
 		return ok;
 	}
@@ -550,6 +570,11 @@ public class CDM {
 			if ((cdmIngredientSynonym != null) && (!cdmIngredientSynonym.equals(""))) {
 				lastCdmIngredient.addSynonym(cdmIngredientSynonym);
 			}
+			
+			
+			// New version (Marcel)
+			ingredientNames.addNames(lastCdmIngredient.getConceptName(), lastCdmIngredient.getVocabularyId(), lastCdmIngredient.getConceptClassId(), "", false, lastCdmIngredient);
+			ingredientNameSynonyms.addNames(cdmIngredientSynonym, lastCdmIngredient.getVocabularyId(), lastCdmIngredient.getConceptClassId(), "", true, lastCdmIngredient);
 		}
 		if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
 			rxNormIngredientsFile.println(lastCdmIngredient.toStringWithSynonyms());
@@ -585,9 +610,9 @@ public class CDM {
 				Set<String> standardizedNameSet = getMatchingStandardizedNames(drugConceptName);
 				Set<String> synonymStandardizedNameSet = getMatchingStandardizedNames(drugSynonymName);
 				
-				Map<String, Set<CDMIngredient>> ingredientNameIndex = null;
+				Map<String, Set<CDMIngredient>> ingredientConceptNameIndex = null;
 				Map<String, Set<CDMIngredient>> synonymIngredientNameIndex = null;
-				Map<String, Set<CDMIngredient>> ingredientStandardizedNameIndex = null;
+				Map<String, Set<CDMIngredient>> ingredientStandardizedConceptNameIndex = null;
 				Map<String, Set<CDMIngredient>> synonymIngredientStandardizedNameIndex = null;
 				Map<String, Set<CDMIngredient>> atcIngredientMap = null;
 				
@@ -595,42 +620,42 @@ public class CDM {
 					atcIngredientMap = cdmATCIngredientMap;
 				}
 				else if (relationshipId.equals("Form of")) {
-					ingredientNameIndex = cdmFormOfIngredientNameIndex;
+					ingredientConceptNameIndex = cdmFormOfIngredientNameIndex;
 					synonymIngredientNameIndex = cdmSynonymFormOfIngredientNameIndex;
-					ingredientStandardizedNameIndex = cdmFormOfIngredientStandardizedNameIndex;
+					ingredientStandardizedConceptNameIndex = cdmFormOfIngredientStandardizedNameIndex;
 					synonymIngredientStandardizedNameIndex = cdmSynonymFormOfIngredientStandardizedNameIndex;
 				}
 				else if (relationshipId.equals("Concept replaced by")) {
-					ingredientNameIndex = cdmReplacedByIngredientNameIndex;
+					ingredientConceptNameIndex = cdmReplacedByIngredientNameIndex;
 					synonymIngredientNameIndex = cdmSynonymReplacedByIngredientNameIndex;
-					ingredientStandardizedNameIndex = cdmReplacedByIngredientStandardizedNameIndex;
+					ingredientStandardizedConceptNameIndex = cdmReplacedByIngredientStandardizedNameIndex;
 					synonymIngredientStandardizedNameIndex = cdmSynonymReplacedByIngredientStandardizedNameIndex;
 					if ((drugConceptId != null) && (!drugConceptId.equals(""))) {
 						cdmReplacedByIngredientConceptIdIndex.put(drugConceptId, cdmIngredient);
 					}
 				}
 				else if (relationshipId.equals("Maps to")) {
-					ingredientNameIndex = cdmOtherMapsToIngredientNameIndex;
+					ingredientConceptNameIndex = cdmOtherMapsToIngredientNameIndex;
 					synonymIngredientNameIndex = cdmSynonymOtherMapsToIngredientNameIndex;
-					ingredientStandardizedNameIndex = cdmOtherMapsToIngredientStandardizedNameIndex;
+					ingredientStandardizedConceptNameIndex = cdmOtherMapsToIngredientStandardizedNameIndex;
 					synonymIngredientStandardizedNameIndex = cdmSynonymOtherMapsToIngredientStandardizedNameIndex;
 	
 					if (drugConceptClassId.equals("Ingredient")) {
-						ingredientNameIndex = cdmIngredientMapsToIngredientNameIndex;
+						ingredientConceptNameIndex = cdmIngredientMapsToIngredientNameIndex;
 						synonymIngredientNameIndex = cdmSynonymIngredientMapsToIngredientNameIndex;
-						ingredientStandardizedNameIndex = cdmIngredientMapsToIngredientStandardizedNameIndex;
+						ingredientStandardizedConceptNameIndex = cdmIngredientMapsToIngredientStandardizedNameIndex;
 						synonymIngredientStandardizedNameIndex = cdmSynonymIngredientMapsToIngredientStandardizedNameIndex;
 					}
 					else if (drugConceptClassId.equals("Precise Ingredient")) {
-						ingredientNameIndex = cdmPreciseIngredientMapsToIngredientNameIndex;
+						ingredientConceptNameIndex = cdmPreciseIngredientMapsToIngredientNameIndex;
 						synonymIngredientNameIndex = cdmSynonymPreciseIngredientMapsToIngredientNameIndex;
-						ingredientStandardizedNameIndex = cdmPreciseIngredientMapsToIngredientStandardizedNameIndex;
+						ingredientStandardizedConceptNameIndex = cdmPreciseIngredientMapsToIngredientStandardizedNameIndex;
 						synonymIngredientStandardizedNameIndex = cdmSynonymPreciseIngredientMapsToIngredientStandardizedNameIndex;
 					}
 					else if (drugConceptClassId.equals("Substance")) {
-						ingredientNameIndex = cdmSubstanceMapsToIngredientNameIndex;
+						ingredientConceptNameIndex = cdmSubstanceMapsToIngredientNameIndex;
 						synonymIngredientNameIndex = cdmSynonymSubstanceMapsToIngredientNameIndex;
-						ingredientStandardizedNameIndex = cdmSubstanceMapsToIngredientStandardizedNameIndex;
+						ingredientStandardizedConceptNameIndex = cdmSubstanceMapsToIngredientStandardizedNameIndex;
 						synonymIngredientStandardizedNameIndex = cdmSynonymSubstanceMapsToIngredientStandardizedNameIndex;
 					}
 				
@@ -639,18 +664,18 @@ public class CDM {
 					}
 				}
 				else if (relationshipId.endsWith(" - RxNorm eq")) {
-					ingredientNameIndex = cdmEquivalentIngredientNameIndex;
+					ingredientConceptNameIndex = cdmEquivalentIngredientNameIndex;
 					synonymIngredientNameIndex = cdmSynonymEquivalentIngredientNameIndex;
-					ingredientStandardizedNameIndex = cdmEquivalentIngredientStandardizedNameIndex;
+					ingredientStandardizedConceptNameIndex = cdmEquivalentIngredientStandardizedNameIndex;
 					synonymIngredientStandardizedNameIndex = cdmSynonymEquivalentIngredientStandardizedNameIndex;
 				}
 				
-				if (ingredientNameIndex != null) {
+				if (ingredientConceptNameIndex != null) {
 					for (String name : nameSet) {
-						Set<CDMIngredient> nameIngredients = ingredientNameIndex.get(name); 
+						Set<CDMIngredient> nameIngredients = ingredientConceptNameIndex.get(name); 
 						if (nameIngredients == null) {
 							nameIngredients = new HashSet<CDMIngredient>();
-							ingredientNameIndex.put(name, nameIngredients);
+							ingredientConceptNameIndex.put(name, nameIngredients);
 						}
 						nameIngredients.add(cdmIngredient);
 					}
@@ -667,12 +692,12 @@ public class CDM {
 					}
 				}
 
-				if (ingredientStandardizedNameIndex != null) {
+				if (ingredientStandardizedConceptNameIndex != null) {
 					for (String standardizedName : standardizedNameSet) {
-						Set<CDMIngredient> standardizedNameIngredients = ingredientStandardizedNameIndex.get(standardizedName); 
+						Set<CDMIngredient> standardizedNameIngredients = ingredientStandardizedConceptNameIndex.get(standardizedName); 
 						if (standardizedNameIngredients == null) {
 							standardizedNameIngredients = new HashSet<CDMIngredient>();
-							ingredientStandardizedNameIndex.put(standardizedName, standardizedNameIngredients);
+							ingredientStandardizedConceptNameIndex.put(standardizedName, standardizedNameIngredients);
 						}
 						standardizedNameIngredients.add(cdmIngredient);
 					}
@@ -706,6 +731,10 @@ public class CDM {
 					}
 					cdmATCIngredients.add(cdmIngredient);
 				}
+				
+				// New version (Marcel)
+				ingredientNameRelations.addNames(drugConceptName, cdmIngredient.getVocabularyId(), drugConceptClassId, relationshipId, false, cdmIngredient);
+				ingredientNameRelations.addNames(drugSynonymName, cdmIngredient.getVocabularyId(), drugConceptClassId, relationshipId, true, cdmIngredient);
 			}
 		}
 		
@@ -754,6 +783,7 @@ public class CDM {
 		
 		// Build map of drugs containing ingredients
 		for (CDMDrug cdmDrug : drugs) {
+			cdmDrugs.put(cdmDrug.getConceptId(), cdmDrug);
 			int ingredientCount = cdmDrug.getIngredients().size();
 			Map<CDMIngredient, List<CDMDrug>> cdmDrugsEqualIngredientCount = cdmDrugsContainingIngredient.get(ingredientCount);
 			if (cdmDrugsEqualIngredientCount == null) {
@@ -892,15 +922,33 @@ public class CDM {
 			}
 		}
 
-		Integer atcCount = 0;
+		Integer atcDrugCount = 0;
 		for (String cdmDrugConceptId : cdmDrugs.keySet()) {
 			CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
 			if (cdmDrug.getATCs().size() > 0) {
-				atcCount++;
+				atcDrugCount++;
+			}
+		}
+
+		Integer atcDrugCompCount = 0;
+		for (String cdmDrugConceptId : cdmDrugComps.keySet()) {
+			CDMDrug cdmDrug = cdmDrugComps.get(cdmDrugConceptId);
+			if (cdmDrug.getATCs().size() > 0) {
+				atcDrugCompCount++;
+			}
+		}
+
+		Integer atcDrugFormCount = 0;
+		for (String cdmDrugConceptId : cdmDrugForms.keySet()) {
+			CDMDrug cdmDrug = cdmDrugForms.get(cdmDrugConceptId);
+			if (cdmDrug.getATCs().size() > 0) {
+				atcDrugFormCount++;
 			}
 		}
 		
-		report.add("CDM Drugs with ATC: " + DrugMappingNumberUtilities.percentage((long) atcCount, (long) cdmDrugs.size()));
+		report.add("CDM Drugs with ATC: " + DrugMappingNumberUtilities.percentage((long) atcDrugCount, (long) cdmDrugs.size()));
+		report.add("CDM Drug Comps with ATC: " + DrugMappingNumberUtilities.percentage((long) atcDrugCompCount, (long) cdmDrugComps.size()));
+		report.add("CDM Drug Forms with ATC: " + DrugMappingNumberUtilities.percentage((long) atcDrugFormCount, (long) cdmDrugForms.size()));
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 	}
 	
@@ -1114,5 +1162,456 @@ public class CDM {
 		}
 		
 		DrugMappingFileUtilities.closeOutputFile(cdmRxNormIngredientsNameIndexFile);
+	}
+
+
+	public CDMIngredient findIngredientByName(String name, String baseContext) {
+		matchString = "";
+
+		CDMIngredient cdmIngredient = findIngredientByName(name);
+		if (cdmIngredient != null) {
+			matchString = baseContext + " - Ingredient Term" + nameMatchString + (cdmIngredient.isOrphan() ? " (Orphan ingredient)" : "")  + " (\"" + name + "\")";
+			return cdmIngredient;
+		}
+
+		cdmIngredient = findIngredientBySynonym(name);
+		if (cdmIngredient != null) {
+			matchString = baseContext + " - Synonym Term" + synonymMatchString + (cdmIngredient.isOrphan() ? " (Orphan ingredient)" : "")  + " (\"" + name + "\")";
+			return cdmIngredient;
+		}
+
+		cdmIngredient = findIngredientByRelation(name);
+		if (cdmIngredient != null) {
+			matchString = baseContext + " - Ingredient Relationship" + relationMatchString + (cdmIngredient.isOrphan() ? " (Orphan ingredient)" : "")  + " (\"" + name + "\")";
+			return cdmIngredient;
+		}
+		
+		return null;
+	}
+
+
+	public CDMIngredient findIngredientByName(String name) {
+		nameMatchString = "";
+		CDMIngredient cdmIngredient = ingredientNames.findName(name);
+		if (cdmIngredient != null) {
+			nameMatchString = ingredientNames.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNames.findStandardizedName(name);
+		if (cdmIngredient != null) {
+			nameMatchString = " (Standardised)" + ingredientNames.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNames.findSortedWordsName(name);
+		if (cdmIngredient != null) {
+			nameMatchString = " (Sorted)" + ingredientNames.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNames.findStandardizedSortedWordsName(name);
+		if (cdmIngredient != null) {
+			nameMatchString = " (Sorted, Standardised)" + ingredientNames.getMatchString();
+			return cdmIngredient;
+		}
+		
+		return null;
+	}
+
+
+	public CDMIngredient findIngredientBySynonym(String name) {
+		synonymMatchString = "";
+		CDMIngredient cdmIngredient = ingredientNameSynonyms.findName(name);
+		if (cdmIngredient != null) {
+			synonymMatchString = ingredientNameSynonyms.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNameSynonyms.findStandardizedName(name);
+		if (cdmIngredient != null) {
+			synonymMatchString = " (Standardised)" + ingredientNameSynonyms.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNameSynonyms.findSortedWordsName(name);
+		if (cdmIngredient != null) {
+			synonymMatchString = " (Sorted)" + ingredientNameSynonyms.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNameSynonyms.findStandardizedSortedWordsName(name);
+		if (cdmIngredient != null) {
+			synonymMatchString = " (Sorted, Standardised)" + ingredientNameSynonyms.getMatchString();
+			return cdmIngredient;
+		}
+		
+		return null;
+	}
+	
+		
+	public CDMIngredient findIngredientByRelation(String name) {
+		relationMatchString = "";
+		
+		CDMIngredient cdmIngredient = ingredientNameRelations.findName(name);
+		if (cdmIngredient != null) {
+			relationMatchString = ingredientNameRelations.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNameRelations.findStandardizedName(name);
+		if (cdmIngredient != null) {
+			relationMatchString = " (Standardised)" + ingredientNameRelations.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNameRelations.findSortedWordsName(name);
+		if (cdmIngredient != null) {
+			relationMatchString = " (Sorted)" + ingredientNameRelations.getMatchString();
+			return cdmIngredient;
+		}
+
+		cdmIngredient = ingredientNameRelations.findStandardizedSortedWordsName(name);
+		if (cdmIngredient != null) {
+			relationMatchString = " (Sorted, Standardised)" + ingredientNameRelations.getMatchString();
+			return cdmIngredient;
+		}
+		
+		return null;
+	}
+	
+	
+	public String getMatchString() {
+		return matchString;
+	}
+	
+	
+	private class MappingIngredientHitLibraryNames {
+		private MappingIngredientHitLibrary namesLibrary; 
+		private MappingIngredientHitLibrary standardizedNamesLibrary;
+		private MappingIngredientHitLibrary sortedWordsamesLibrary;
+		private MappingIngredientHitLibrary standardizedSortedWordsamesLibrary;
+		
+		private String matchString = "";
+		
+		
+		public MappingIngredientHitLibraryNames() {
+			namesLibrary = new MappingIngredientHitLibrary();
+			standardizedNamesLibrary = new MappingIngredientHitLibrary();
+			sortedWordsamesLibrary = new MappingIngredientHitLibrary();
+			standardizedSortedWordsamesLibrary = new MappingIngredientHitLibrary();
+		}
+		
+		
+		public void addNames(String name, String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
+			name = name.toUpperCase();
+			namesLibrary.addHit(name, vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+			standardizedNamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(name), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+			sortedWordsamesLibrary.addHit(DrugMappingStringUtilities.sortWords(name), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+			standardizedSortedWordsamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(DrugMappingStringUtilities.sortWords(name)), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+		}
+		
+		
+		public CDMIngredient findName(String name) {
+			CDMIngredient cdmIngredient = namesLibrary.findBestTargetIngredient(name);
+			if (cdmIngredient != null) {
+				matchString = namesLibrary.getLastMatchString();
+			}
+			return cdmIngredient;
+		}
+		
+		
+		public CDMIngredient findStandardizedName(String name) {
+			CDMIngredient cdmIngredient = standardizedNamesLibrary.findBestTargetIngredient(DrugMappingStringUtilities.standardizedName(name));
+			if (cdmIngredient != null) {
+				matchString = standardizedNamesLibrary.getLastMatchString();
+			}
+			return cdmIngredient;
+		}
+		
+		
+		public CDMIngredient findSortedWordsName(String name) {
+			CDMIngredient cdmIngredient = sortedWordsamesLibrary.findBestTargetIngredient(DrugMappingStringUtilities.sortWords(name));
+			if (cdmIngredient != null) {
+				matchString = sortedWordsamesLibrary.getLastMatchString();
+			}
+			return cdmIngredient;
+		}
+		
+		
+		public CDMIngredient findStandardizedSortedWordsName(String name) {
+			CDMIngredient cdmIngredient = standardizedSortedWordsamesLibrary.findBestTargetIngredient(DrugMappingStringUtilities.standardizedName(DrugMappingStringUtilities.sortWords(name)));
+			if (cdmIngredient != null) {
+				matchString = standardizedSortedWordsamesLibrary.getLastMatchString();
+			}
+			return cdmIngredient;
+		}
+		
+		
+		public void reCalculateHitScores() {
+			namesLibrary.reCalculateHitScores();
+			standardizedNamesLibrary.reCalculateHitScores();
+			sortedWordsamesLibrary.reCalculateHitScores();
+			standardizedSortedWordsamesLibrary.reCalculateHitScores();
+		}
+		
+		
+		public String getMatchString() {
+			return matchString;
+		}
+	}
+	
+	
+	private class MappingIngredientHitLibrary {
+		private Map<String, MappingIngredientHits> ingredientHitsMap = new HashMap<String, MappingIngredientHits>();
+		private String lastMatchString = null; // Contains last match result 
+		
+		
+		public CDMIngredient findBestTargetIngredient(String name) {
+			CDMIngredient cdmIngredient = null;
+			MappingIngredientHits ingredientHits = findByName(name, false);
+			if (ingredientHits != null) {
+				cdmIngredient = ingredientHits.getBestTargetIngredient();
+				lastMatchString = ingredientHits.getLastMatchString();
+			}
+			return cdmIngredient;
+		}
+		
+		
+		public void addHit(String name, String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
+			findByName(name, true).addHit(vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+		}
+		
+		
+		public MappingIngredientHits findByName(String name, boolean createWhenNotFound) {
+			MappingIngredientHits ingredientHits = ingredientHitsMap.get(name);
+			if ((ingredientHits == null) && createWhenNotFound) {
+				ingredientHits = new MappingIngredientHits(name);
+				ingredientHitsMap.put(name, ingredientHits);
+			}
+			return ingredientHits;
+		}
+		
+		
+		public void reCalculateHitScores() {
+			for (String name : ingredientHitsMap.keySet()) {
+				ingredientHitsMap.get(name).reCalculateHitScores();
+			}
+		}
+		
+		
+		public String getLastMatchString() {
+			return lastMatchString;
+		}
+	}
+	
+	
+	private class MappingIngredientHits {
+		private String searchString = null;
+		private List<MappingIngredientHit> ingredientHits = new ArrayList<MappingIngredientHit>();
+		private String lastMatchString = null; // Contains last match result 
+		
+		
+		public MappingIngredientHits(String searchString) {
+			this.searchString = searchString;
+		}
+		
+		
+		public void addHit(String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
+			MappingIngredientHit ingredientHit = null;
+			for (MappingIngredientHit hit : ingredientHits) {
+				if (
+						hit.getIngredient() == cdmIngredient         &&
+						hit.getVocabulary().equals(vocabulary)       &&
+						hit.getConceptClass().equals(conceptClass)   &&
+						hit.getRelationship().equals(relationship)   &&
+						(hit.isSnonym() == synonym)
+				) {
+					ingredientHit = hit;
+				}
+			}
+			if (ingredientHit == null) {
+				ingredientHit = new MappingIngredientHit(vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+				ingredientHits.add(ingredientHit);
+			}
+		}
+		
+		
+		public List<MappingIngredientHit> getIngredientHits() {
+			return ingredientHits;
+		}
+		
+		
+		public void reCalculateHitScores() {
+			for (MappingIngredientHit ingredientHit : ingredientHits) {
+				ingredientHit.calculateHitScore();
+			}
+		}
+		
+		
+		public CDMIngredient getBestTargetIngredient() {
+			CDMIngredient result = null;
+			lastMatchString = "";
+			MappingIngredientHit bestIngredientHit = null;
+			int sameHitScoreCount = 0;
+			
+			if (ingredientHits.size() == 1) {
+				bestIngredientHit = ingredientHits.get(0);
+			}
+			else {
+				int maxHitScore = -1;
+				int minimumConceptId = Integer.MAX_VALUE;
+				
+				for (MappingIngredientHit ingredientHit : ingredientHits) {
+					if (ingredientHit.getHitScore() > maxHitScore) {
+						bestIngredientHit = ingredientHit;
+						maxHitScore = ingredientHit.getHitScore();
+						minimumConceptId = Integer.parseInt(ingredientHit.getIngredient().getConceptId());
+						sameHitScoreCount = 1;
+					}
+					else if (ingredientHit.getHitScore() == maxHitScore) {
+						sameHitScoreCount++;
+						if (Integer.parseInt(ingredientHit.getIngredient().getConceptId()) < minimumConceptId) {
+							minimumConceptId = Integer.parseInt(ingredientHit.getIngredient().getConceptId());
+							bestIngredientHit = ingredientHit;
+						}
+						
+					}
+				}
+			}
+			
+			if (bestIngredientHit != null) {
+				result = bestIngredientHit.getIngredient();
+				
+				if (bestIngredientHit.isSnonym()) {
+					lastMatchString += " Synonym of";
+				}
+				
+				if (!bestIngredientHit.getRelationship().equals("")) {
+					lastMatchString = " \"" + bestIngredientHit.getConceptClass() + "\" with relation \"" + bestIngredientHit.getRelationship() + "\"";
+				}
+				
+				if (ingredientHits.size() > 1) {
+					if (ingredientHits.size() != sameHitScoreCount) {
+						lastMatchString += " - Filter on best fit";
+					}
+					if (sameHitScoreCount > 1) {
+						lastMatchString += " - Filter on lowest concept_id";
+					}
+				}
+			}
+			
+			return result;
+		}
+		
+		
+		public String getLastMatchString() {
+			return lastMatchString;
+		}
+	}
+	
+	
+	private class MappingIngredientHit {
+		private String vocabulary = null;
+		private String conceptClass = null;
+		private String relationship = null;
+		private boolean synonym = false;
+		private CDMIngredient ingredient = null;
+		private int hitScrore = -1;
+		
+		
+		public MappingIngredientHit(String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
+			this.vocabulary = vocabulary;
+			this.conceptClass = conceptClass;
+			this.relationship = relationship;
+			this.synonym = synonym;
+			this.ingredient = cdmIngredient;
+			
+			calculateHitScore();
+		}
+		
+		
+		public String getVocabulary() {
+			return vocabulary;
+		}
+		
+		
+		public String getConceptClass() {
+			return conceptClass;
+		}
+		
+		
+		public String getRelationship() {
+			return relationship;
+		}
+		
+		
+		public boolean isSnonym() {
+			return synonym;
+		}
+		
+		
+		public CDMIngredient getIngredient() {
+			return ingredient;
+		}
+		
+		
+		public int getHitScore() {
+			return hitScrore;
+		}
+		
+		
+		public void calculateHitScore() {
+			hitScrore = 0;
+			if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_NON_ORPHAN_INGREDIENTS).equals("Yes")) {
+				hitScrore += getIngredient().isOrphan() ? 100000 : 200000;
+			}
+			if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
+				hitScrore += getVocabulary().equals("RxNorm") ? 20000 : 10000;
+			}
+			else {
+				hitScrore += getVocabulary().equals("RxNorm") ? 10000 : 20000;
+			}
+			
+			if (getRelationship().equals("Concept replaced by")) {
+				hitScrore += 4000;
+			}
+			else if (getRelationship().endsWith("RxNorm eq")) {
+				hitScrore += 3000;
+			}
+			else if (getRelationship().equals("Form of")) {
+				hitScrore += 2000;
+			}
+			else if (getRelationship().equals("Maps to")) {
+				hitScrore += 1000;
+			}
+			
+			if (getConceptClass().equals("Ingredient")) {
+				hitScrore += 800;
+			}
+			else if (getConceptClass().equals("Precise Ingredient")) {
+				hitScrore += 700;
+			}
+			else if (getConceptClass().equals("Substance")) {
+				hitScrore += 600;
+			}
+			else if (getConceptClass().equals("ATC 5th")) {
+				hitScrore += 500;
+			}
+			else if (getConceptClass().equals("ATC 4th")) {
+				hitScrore += 400;
+			}
+			else if (getConceptClass().equals("Pharma/Biol Product")) {
+				hitScrore += 300;
+			}
+			else if (getConceptClass().equals("11-digit NDC")) {
+				hitScrore += 200;
+			}
+			else if (getConceptClass().equals("9-digit NDC")) {
+				hitScrore += 100;
+			}
+
+			hitScrore += isSnonym() ? 10 : 20;
+		}
 	}
 }

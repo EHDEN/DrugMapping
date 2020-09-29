@@ -13,11 +13,26 @@ FROM @vocab.concept_relationship relationship
     ON relationship.concept_id_2 = ingredient.concept_id
   LEFT OUTER JOIN @vocab.concept_synonym synonym
     ON drug.concept_id = synonym.concept_id
-WHERE ingredient.domain_id = 'Drug'
-AND   ingredient.vocabulary_id LIKE 'RxNorm%'
-AND   ingredient.concept_class_id = 'Ingredient'
+WHERE drug.concept_id <> ingredient.concept_id
+AND   (
+		(relationship.relationship_id = 'Maps to') OR
+		(relationship.relationship_id = 'Form of') OR
+		(relationship.relationship_id = 'ATC - RxNorm') OR
+		(relationship.relationship_id = 'Concept replaced by') OR
+		(relationship.relationship_id ILIKE '%RxNorm eq')
+	  )
+AND   (
+		(drug.concept_class_id = 'Ingredient') OR
+		(drug.concept_class_id = 'Precise Ingredient') OR
+		(drug.concept_class_id = 'Substance') OR
+		(drug.concept_class_id = 'ATC 5th') OR
+		(drug.concept_class_id = 'ATC 4th') OR
+		(drug.concept_class_id = 'Pharma/Biol Product') OR
+		(drug.concept_class_id = '11-digit NDC') OR
+		(drug.concept_class_id = '9-digit NDC')
+      )
+AND   ingredient.concept_class_id ILIKE '%Ingredient'
 AND   ingredient.standard_concept = 'S'
-AND   ingredient.invalid_reason IS NULL
 ORDER BY relationship.relationship_id,
          drug.concept_id,
          synonym.concept_synonym_name,

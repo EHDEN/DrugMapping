@@ -78,29 +78,29 @@ public class SourceIngredient implements Comparable<SourceIngredient> {
 		String englishName = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish).toUpperCase();
 		
 		if (uniqueNames.add(name)) {
-			matchingNames.add("IngredientName: " + name);
+			matchingNames.add("SourceTerm: " + name);
 		}
 		if ((englishName != null) && (!englishName.equals("")) && uniqueNames.add(englishName)) {
-			matchingNames.add("IngredientName Translated: " + englishName);
+			matchingNames.add("SourceTerm (Translated): " + englishName);
 		}
 		for (Integer length = 20; length > 0; length--) {
 			String reducedName = getReducedName(name, length);
 			if (reducedName != null) {
 				if (uniqueNames.add(reducedName)) {
-					matchingNames.add("IngredientName First " + length + " words: " + reducedName);
+					matchingNames.add("First " + length + " words from SourceTerm: " + reducedName);
 				}
 				if (uniqueNames.add(reducedName + " EXTRACT")) {
-					matchingNames.add("IngredientName First " + length + " words + EXTRACT: " + reducedName + " EXTRACT");
+					matchingNames.add("First " + length + " words + \" EXTRACT\" from SourceTerm: " + reducedName + " EXTRACT");
 				}
 			}
 			if ((englishName != null) && (!englishName.equals(""))) {
 				reducedName = getReducedName(englishName, length);
 				if (reducedName != null) {
 					if (uniqueNames.add(reducedName)) {
-						matchingNames.add("IngredientName Translated First " + length + " words: " + reducedName);
+						matchingNames.add("First " + length + " words from SourceTerm (Translated): " + reducedName);
 					}
 					if (uniqueNames.add(reducedName + " EXTRACT")) {
-						matchingNames.add("IngredientName Translated First " + length + " words + EXTRACT: " + reducedName + " EXTRACT");
+						matchingNames.add("First " + length + " words + \" EXTRACT\" from SourceTerm (Translated): " + reducedName + " EXTRACT");
 					}
 				}
 			}

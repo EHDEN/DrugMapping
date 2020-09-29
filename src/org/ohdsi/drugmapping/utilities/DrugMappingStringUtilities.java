@@ -380,6 +380,14 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String removeLeadingZeros(String string) {
+		while ((!string.equals("")) && string.substring(0, 1).equals("0")) {
+			string = string.substring(1);
+		}
+		return string;
+	}
+	
+	
 	public static void main(String[] args) {
 		String test = "FOLLICLE STIMULATI&NG H/ORM\\ONE 75 UNT INJECT\tABLE SOLU?TION";
 		System.out.println(test);

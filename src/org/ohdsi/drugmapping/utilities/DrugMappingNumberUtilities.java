@@ -9,11 +9,13 @@ public class DrugMappingNumberUtilities {
 	
 	
 	public static String uniformCASNumber(String casNumber) {
-		casNumber = casNumber.replaceAll(" ", "").replaceAll("-", "");
-		if (!casNumber.equals("")) {
+		casNumber = DrugMappingStringUtilities.removeLeadingZeros(casNumber.replaceAll(" ", "").replaceAll("-", ""));
+		if ((!casNumber.equals("")) && (casNumber.length() > 3)) {
 			casNumber = casNumber.substring(0, casNumber.length() - 3) + "-" + casNumber.substring(casNumber.length() - 3, casNumber.length() - 1) + "-" + casNumber.substring(casNumber.length() - 1);
-			casNumber = ("000000"+casNumber).substring(casNumber.length() -5);
 		}
-		return  casNumber.equals("000000-00-0") ? "" : casNumber;
+		else {
+			casNumber = "";
+		}
+		return  casNumber;
 	}
 }

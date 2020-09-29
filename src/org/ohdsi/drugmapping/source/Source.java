@@ -263,7 +263,8 @@ public class Source {
 			System.out.println("  ERROR: " + fileException.getMessage());
 			sourceDrugError = true;
 		}
-		
+
+		report.add("");
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
 		return (!sourceDrugError);
