@@ -634,6 +634,7 @@ public class GenericMapping extends Mapping {
 	
 	private boolean matchIngredients() {
 		boolean ok = true;
+		Integer mappedIngredients = 0;
 
 		matchedByCDMCASNumber = 0;
 		matchedManualByCASNumber = 0; 
@@ -693,6 +694,10 @@ public class GenericMapping extends Mapping {
 					}
 				}
 			}
+			
+			if (cdmIngredient != null) {
+				mappedIngredients++;
+			}
 		}
 
 		if (report != null) {
@@ -705,7 +710,7 @@ public class GenericMapping extends Mapping {
 			report.add("Source ingredients mapped by ATC: " + DrugMappingNumberUtilities.percentage((long) matchedByATC, (long) Source.getAllIngredients().size()));
 			report.add("Source ingredients mapped fallback by code: " + DrugMappingNumberUtilities.percentage((long) matchedFallbackByCode, (long) Source.getAllIngredients().size()));
 			report.add("Source ingredients mapped fallback by name: " + DrugMappingNumberUtilities.percentage((long) matchedFallbackByName, (long) Source.getAllIngredients().size()));
-			//report.add("Source ingredients mapped total: " + DrugMappingNumberUtilities.percentage((long) ingredientMap.size(), (long) Source.getAllIngredients().size()));
+			report.add("Source ingredients mapped total: " + DrugMappingNumberUtilities.percentage((long) mappedIngredients, (long) Source.getAllIngredients().size()));
 		}
 		/* */
 		
