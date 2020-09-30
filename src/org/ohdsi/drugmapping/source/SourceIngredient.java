@@ -1,7 +1,6 @@
 package org.ohdsi.drugmapping.source;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,74 +65,7 @@ public class SourceIngredient implements Comparable<SourceIngredient> {
 		this.casNumber = casNumber.equals("") ? null : casNumber;
 		this.ingredientNameNoSpaces = this.ingredientName.replaceAll(" ", "").replaceAll("-", "").replaceAll(",", "");
 
-		ingredientMatchingNames = generateMatchingNames();
-	}
-
-	
-	private List<String> generateMatchingNames() {
-		List<String> matchingNames = new ArrayList<String>();
-		Set<String> uniqueNames = new HashSet<String>();
-
-		String name = DrugMappingStringUtilities.removeExtraSpaces(ingredientName).toUpperCase();
-		String englishName = DrugMappingStringUtilities.removeExtraSpaces(ingredientNameEnglish).toUpperCase();
-		
-		if (uniqueNames.add(name)) {
-			matchingNames.add("SourceTerm: " + name);
-		}
-		if ((englishName != null) && (!englishName.equals("")) && uniqueNames.add(englishName)) {
-			matchingNames.add("SourceTerm (Translated): " + englishName);
-		}
-		for (Integer length = 20; length > 0; length--) {
-			String reducedName = getReducedName(name, length);
-			if (reducedName != null) {
-				if (uniqueNames.add(reducedName)) {
-					matchingNames.add("First " + length + " words from SourceTerm: " + reducedName);
-				}
-				if (uniqueNames.add(reducedName + " EXTRACT")) {
-					matchingNames.add("First " + length + " words + \" EXTRACT\" from SourceTerm: " + reducedName + " EXTRACT");
-				}
-			}
-			if ((englishName != null) && (!englishName.equals(""))) {
-				reducedName = getReducedName(englishName, length);
-				if (reducedName != null) {
-					if (uniqueNames.add(reducedName)) {
-						matchingNames.add("First " + length + " words from SourceTerm (Translated): " + reducedName);
-					}
-					if (uniqueNames.add(reducedName + " EXTRACT")) {
-						matchingNames.add("First " + length + " words + \" EXTRACT\" from SourceTerm (Translated): " + reducedName + " EXTRACT");
-					}
-				}
-			}
-		}
-
-		return matchingNames;
-	}
-	
-	
-	private String getReducedName(String name, int nrWords) {
-		name += " ";
-		String reducedName = null;
-		if (nrWords > 0) {
-			int delimiterCount = 0;
-			boolean lastCharDelimiter = false;
-			for (int charNr = 1; charNr < name.length(); charNr++) {
-				if (" -[](),&+:;\"'/\\{}*%".contains(name.substring(charNr, charNr + 1))) {
-					if (!lastCharDelimiter) {
-						delimiterCount++;
-					}
-					lastCharDelimiter = true;
-				}
-				else {
-					lastCharDelimiter = false;
-				}
-				if (delimiterCount == nrWords) {
-					reducedName = name.substring(0, charNr);
-					break;
-				}
-			}
-		}
-		
-		return reducedName;
+		ingredientMatchingNames = DrugMappingStringUtilities.generateMatchingNames(ingredientName, ingredientNameEnglish);
 	}
 	
 	
@@ -194,7 +126,7 @@ public class SourceIngredient implements Comparable<SourceIngredient> {
 	
 	public void setIngredientNameEnglish(String ingredientNameEnglish) {
 		this.ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish;
-		ingredientMatchingNames = generateMatchingNames();
+		ingredientMatchingNames = DrugMappingStringUtilities.generateMatchingNames(ingredientName, ingredientNameEnglish);
 	}
 	
 	

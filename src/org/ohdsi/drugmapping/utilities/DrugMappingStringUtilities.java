@@ -2,7 +2,9 @@ package org.ohdsi.drugmapping.utilities;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DrugMappingStringUtilities {
 	
@@ -163,6 +165,73 @@ public class DrugMappingStringUtilities {
 		}
 		
 		return name;
+	}
+
+	
+	public static List<String> generateMatchingNames(String name, String englishName) {
+		List<String> matchingNames = new ArrayList<String>();
+		Set<String> uniqueNames = new HashSet<String>();
+
+		name = DrugMappingStringUtilities.removeExtraSpaces(name).toUpperCase();
+		englishName = DrugMappingStringUtilities.removeExtraSpaces(englishName).toUpperCase();
+		
+		if (uniqueNames.add(name)) {
+			matchingNames.add("SourceTerm: " + name);
+		}
+		if ((englishName != null) && (!englishName.equals("")) && uniqueNames.add(englishName)) {
+			matchingNames.add("SourceTerm (Translated): " + englishName);
+		}
+		for (Integer length = 20; length > 0; length--) {
+			String reducedName = getReducedName(name, length);
+			if (reducedName != null) {
+				if (uniqueNames.add(reducedName)) {
+					matchingNames.add("First " + length + " words from SourceTerm: " + reducedName);
+				}
+				if (uniqueNames.add(reducedName + " EXTRACT")) {
+					matchingNames.add("First " + length + " words + \" EXTRACT\" from SourceTerm: " + reducedName + " EXTRACT");
+				}
+			}
+			if ((englishName != null) && (!englishName.equals(""))) {
+				reducedName = getReducedName(englishName, length);
+				if (reducedName != null) {
+					if (uniqueNames.add(reducedName)) {
+						matchingNames.add("First " + length + " words from SourceTerm (Translated): " + reducedName);
+					}
+					if (uniqueNames.add(reducedName + " EXTRACT")) {
+						matchingNames.add("First " + length + " words + \" EXTRACT\" from SourceTerm (Translated): " + reducedName + " EXTRACT");
+					}
+				}
+			}
+		}
+
+		return matchingNames;
+	}
+	
+	
+	public static String getReducedName(String name, int nrWords) {
+		name += " ";
+		String reducedName = null;
+		if (nrWords > 0) {
+			int delimiterCount = 0;
+			boolean lastCharDelimiter = false;
+			for (int charNr = 1; charNr < name.length(); charNr++) {
+				if (" -[](),&+:;\"'/\\{}*%".contains(name.substring(charNr, charNr + 1))) {
+					if (!lastCharDelimiter) {
+						delimiterCount++;
+					}
+					lastCharDelimiter = true;
+				}
+				else {
+					lastCharDelimiter = false;
+				}
+				if (delimiterCount == nrWords) {
+					reducedName = name.substring(0, charNr);
+					break;
+				}
+			}
+		}
+		
+		return reducedName;
 	}
 	
 	
