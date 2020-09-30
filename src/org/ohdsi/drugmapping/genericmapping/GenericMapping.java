@@ -116,6 +116,40 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(NO_MAPPING                                             , "No mapping found");
 	}
 	
+	public static int TRANSLATION_WARNING               = 0;
+	public static int UNIT_MAPPING_WARNING              = 1;
+	public static int FORM_MAPPING_WARNING              = 2;
+	public static int MANUAL_CAS_MAPPING_WARNING        = 3;
+	public static int MANUAL_INGREDIENT_MAPPING_WARNING = 4;
+	public static int OVERRULE_MAPPING_WARNING          = 5;
+	public static int FALLBACK_MAPPING_WARNING          = 6;
+
+	private static Map<Integer, String> warningTypeDescriptions;
+	static {
+		warningTypeDescriptions = new HashMap<Integer  , String>();
+		warningTypeDescriptions.put(TRANSLATION_WARNING                            , "Translation warnings");
+		warningTypeDescriptions.put(UNIT_MAPPING_WARNING                           , "Unit mapping warnings");
+		warningTypeDescriptions.put(FORM_MAPPING_WARNING                           , "Doseform mapping warnings");
+		warningTypeDescriptions.put(MANUAL_CAS_MAPPING_WARNING                     , "Manual CAS ingredient mapping warnings");
+		warningTypeDescriptions.put(MANUAL_INGREDIENT_MAPPING_WARNING              , "Manual ingredient mapping warnings");
+		warningTypeDescriptions.put(OVERRULE_MAPPING_WARNING                       , "Overrule ingredient mapping warnings");
+		warningTypeDescriptions.put(FALLBACK_MAPPING_WARNING                       , "Fallback ingredient mapping warnings");
+	}
+	
+	private static Map<Integer, List<String>> warnings;
+	
+	public static void addWarning(int warningType, String warning) {
+		List<String> warningList = warnings.get(warningType);
+		if (warningList == null) {
+			warningList = new ArrayList<String>();
+			warnings.put(warningType, warningList);
+		}
+		warningList.add(warning);
+		//if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
+		//	System.out.println("    WARNING: " + warning);
+		//}
+	}
+	
 	public static boolean isMapping              = false;
 	public static boolean isSavingDrugMapping    = false;
 	public static boolean isSavingDrugMappingLog = false;
@@ -256,6 +290,7 @@ public class GenericMapping extends Mapping {
 		notUniqueMapping = new HashMap<Integer, Set<SourceDrug>>();
 		
 		report = new ArrayList<String>();
+		warnings = new HashMap<Integer, List<String>>();
 		
 		int mapping = 0;
 		while (mappingTypeDescriptions.containsKey(mapping)) {
@@ -337,6 +372,8 @@ public class GenericMapping extends Mapping {
 		if (ok && (report != null)) finalReport();
 
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
+		
+		writeWarnings();
 	}
 	
 	
@@ -431,21 +468,15 @@ public class GenericMapping extends Mapping {
 									manualCASMappings.put(casNumber, cdmIngredient);
 								}
 								else {
-									if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-										System.out.println("      WARNING: No CDM Ingredient found for concept_id " + cdmConceptId + " for CAS number " + casNumber + " in line " + lineNr + ".");
-									}
+									GenericMapping.addWarning(GenericMapping.MANUAL_CAS_MAPPING_WARNING, "No CDM Ingredient found for concept_id " + cdmConceptId + " for CAS number " + casNumber + " in line " + lineNr + ".");
 								}
 							}
 							else {
-								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-									System.out.println("      WARNING: No concept_id found in line " + lineNr + ".");
-								}
+								GenericMapping.addWarning(GenericMapping.MANUAL_CAS_MAPPING_WARNING, "No concept_id found in line " + lineNr + ".");
 							}
 						}
 						else {
-							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-								System.out.println("      WARNING: No CAS number found in line " + lineNr + ".");
-							}
+							GenericMapping.addWarning(GenericMapping.MANUAL_CAS_MAPPING_WARNING, "No CAS number found in line " + lineNr + ".");
 						}
 					}
 				}
@@ -512,9 +543,7 @@ public class GenericMapping extends Mapping {
 										codeMappingRemarks.put(sourceIngredient, remark);
 									}
 									else {
-										if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-											System.out.println("      WARNING: No source ingredient found for sourceCode " + sourceCode + " in line " + lineNr + ".");
-										}
+										GenericMapping.addWarning(GenericMapping.MANUAL_INGREDIENT_MAPPING_WARNING, "No source ingredient found for sourceCode " + sourceCode + " in line " + lineNr + ".");
 									}
 								}
 								if (!sourceName.equals("")) {
@@ -522,21 +551,15 @@ public class GenericMapping extends Mapping {
 									nameMappings.put(sourceName, cdmIngredient);
 								}
 								if ((!sourceCodeFound) && (!sourceNameFound)) {
-									if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-										System.out.println("      WARNING: No sourceCode and no sourceName found in line " + lineNr + ".");
-									}
+									GenericMapping.addWarning(GenericMapping.MANUAL_INGREDIENT_MAPPING_WARNING, "No sourceCode and no sourceName found in line " + lineNr + ".");
 								}
 							}
 							else {
-								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-									System.out.println("      WARNING: No CDM Ingredient found for concept_id " + cdmConceptId + " in line " + lineNr + ".");
-								}
+								GenericMapping.addWarning(GenericMapping.MANUAL_INGREDIENT_MAPPING_WARNING, "No CDM Ingredient found for concept_id " + cdmConceptId + " in line " + lineNr + ".");
 							}
 						}
 						else {
-							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-								System.out.println("      WARNING: No concept_id found in line " + lineNr + ".");
-							}
+							GenericMapping.addWarning(GenericMapping.MANUAL_INGREDIENT_MAPPING_WARNING, "No concept_id found in line " + lineNr + ".");
 						}
 					}
 				}
@@ -658,7 +681,7 @@ public class GenericMapping extends Mapping {
 			CDMIngredient cdmIngredientOverrule = getOverruleMapping(sourceIngredient);
 			if (cdmIngredientOverrule != null) {
 				if ((cdmIngredient != null) && (cdmIngredient == cdmIngredientOverrule)) {
-					sourceIngredient.setMatchString(sourceIngredient.getMatchString() + " OVERRULE OBSOLETE");
+					addWarning(OVERRULE_MAPPING_WARNING, sourceIngredient + " OVERRULE OBSOLETE");
 				}
 				else {
 					cdmIngredient = cdmIngredientOverrule;
@@ -677,10 +700,10 @@ public class GenericMapping extends Mapping {
 				}
 				else {
 					if (cdmIngredient == cdmIngredientFallback) {
-						sourceIngredient.setMatchString(sourceIngredient.getMatchString() + " FALLBACK OBSOLETE");
+						addWarning(FALLBACK_MAPPING_WARNING, sourceIngredient + " FALLBACK OBSOLETE");
 					}
 					else {
-						sourceIngredient.setMatchString(sourceIngredient.getMatchString() + " FALLBACK DIFFERENT");
+						addWarning(FALLBACK_MAPPING_WARNING, sourceIngredient + " FALLBACK DIFFERENT");
 					}
 				}
 			}
@@ -1852,10 +1875,14 @@ public class GenericMapping extends Mapping {
 						CDMConcept target = mappingResultList.get(sourceDrugComponents.indexOf(sourceDrugComponent)).get(MAPPED) == null ? null : mappingResultList.get(sourceDrugComponents.indexOf(sourceDrugComponent)).get(MAPPED).get(0);
 						mappingLog = sourceDrugComponent.getMatchString(); 
 						
+						String standardizedAmount = standardizedAmount(sourceDrugComponent);
+						if (standardizedAmount.equals("0.00000")) {
+							standardizedAmount = "";
+						}
 						String drugMappingIngredientRecord = drugMappingRecord;
 						drugMappingIngredientRecord += "," + sourceIngredient;
-						drugMappingIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
-						drugMappingIngredientRecord += "," + (standardizedAmount(sourceDrugComponent).equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
+						drugMappingIngredientRecord += "," + standardizedAmount;
+						drugMappingIngredientRecord += "," + (standardizedAmount.equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
 						drugMappingIngredientRecord += "," + strengthDeviationPercentage;
 						drugMappingIngredientRecord += "," + mappingTypeDescriptions.get(mappingType);
 						drugMappingIngredientRecord += "," + (target == null ? CDMConcept.emptyRecord() : target.toString());
@@ -1893,8 +1920,8 @@ public class GenericMapping extends Mapping {
 						String drugMappingReviewIngredientRecord =       drugMappingReviewRecord;
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
-						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
-						drugMappingReviewIngredientRecord += "," + (standardizedAmount(sourceDrugComponent).equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
+						drugMappingReviewIngredientRecord += "," + standardizedAmount;
+						drugMappingReviewIngredientRecord += "," + (standardizedAmount.equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
 						if (target != null) {
 							drugMappingReviewIngredientRecord += "," + target.getConceptId();
 							drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(target.getConceptName());
@@ -2024,11 +2051,16 @@ public class GenericMapping extends Mapping {
 						SourceDrugComponent sourceDrugComponent = sortedSourceDrugComponents.get(ingredientNr);
 						SourceIngredient sourceIngredient = sourceDrugComponent.getIngredient();
 						
+						String standardizedAmount = standardizedAmount(sourceDrugComponent);
+						if (standardizedAmount.equals("0.00000")) {
+							standardizedAmount = "";
+						}
+						
 						String drugMappingReviewIngredientRecord = drugMappingReviewRecord;
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
-						drugMappingReviewIngredientRecord += "," + standardizedAmount(sourceDrugComponent);
-						drugMappingReviewIngredientRecord += "," + (standardizedAmount(sourceDrugComponent).equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
+						drugMappingReviewIngredientRecord += "," + standardizedAmount;
+						drugMappingReviewIngredientRecord += "," + (standardizedAmount.equals("") ? "" : DrugMappingStringUtilities.escapeFieldValue(sourceDrugComponent.getDosageUnit()));
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
@@ -2468,6 +2500,24 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
+	private void writeWarnings() {
+		if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
+			int warningType = 0;
+			while (warningTypeDescriptions.containsKey(warningType)) {
+				List<String> warningTypeWarnings = warnings.get(warningType);
+				if (warningTypeWarnings != null) {
+					System.out.println();
+					System.out.println(warningTypeDescriptions.get(warningType));
+					for (String warning : warningTypeWarnings) {
+						System.out.println("  " + warning);
+					}
+				}
+				warningType++;
+			}
+		}
+	}
+	
+	
 	private List<CDMDrug> selectCDMDrugsWithMatchingStrength(SourceDrug sourceDrug, List<CDMDrug> cdmDrugs, int mapping) {
 		// Find CDM Clinical Drugs with corresponding ingredient strengths within margin
 		if (cdmDrugs.size() > 0) {
@@ -2483,13 +2533,16 @@ public class GenericMapping extends Mapping {
 							usedStrengthDeviationPercentage = deviationPercentage;
 							minimumDeviationDrugs.add(cdmDrug);
 						}
-						else if (deviationPercentage < usedStrengthDeviationPercentage) {
+						else if (deviationPercentage < usedStrengthDeviationPercentage - DEVIATION_MARGIN) {
 							usedStrengthDeviationPercentage = deviationPercentage;
 							rejectedByStrength.addAll(minimumDeviationDrugs);
 							minimumDeviationDrugs.add(cdmDrug);
 						}
-						else if (deviationPercentage.compareTo(usedStrengthDeviationPercentage) == 0) {
+						else if ((deviationPercentage >= usedStrengthDeviationPercentage - DEVIATION_MARGIN) && (deviationPercentage <= usedStrengthDeviationPercentage + DEVIATION_MARGIN)) {
 							minimumDeviationDrugs.add(cdmDrug);
+						}
+						else {
+							rejectedByStrength.add(cdmDrug);
 						}
 					}
 					else {
@@ -2517,13 +2570,15 @@ public class GenericMapping extends Mapping {
 		Double matchDeviationPercentage = null;
 		
 		List<SourceDrugComponent> sourceDrugComponents = sourceDrug.getComponents();
-		Map<String, List<CDMIngredientStrength>> cdmDrugComponentsMap = cdmDrug.getIngredientsMap();
+		Map<String, List<CDMIngredientStrength>> cdmDrugComponentsMap = new HashMap<String, List<CDMIngredientStrength>>();
+		for (String conceptId : cdmDrug.getIngredientsMap().keySet()) {
+			List<CDMIngredientStrength> strengthList = new ArrayList<CDMIngredientStrength>();
+			cdmDrugComponentsMap.put(conceptId, strengthList);
+			strengthList.addAll(cdmDrug.getIngredientsMap().get(conceptId));
+		}
 		
 		for (SourceDrugComponent sourceDrugComponent : sourceDrugComponents) {
-			List<CDMIngredientStrength> matchingCDMIngredients = new ArrayList<CDMIngredientStrength>(); 
-			for (CDMIngredientStrength cdmIngredient : cdmDrugComponentsMap.get(sourceDrugComponent.getIngredient().getMatchingIngredient().getConceptId())) {
-				matchingCDMIngredients.add(cdmIngredient);
-			}
+			List<CDMIngredientStrength> matchingCDMIngredients = cdmDrugComponentsMap.get(sourceDrugComponent.getIngredient().getMatchingIngredient().getConceptId());
 			Double bestMatchDeviationPercentage = null;
 			int bestMatchIngredientNr = -1;
 			for (int ingredientNr = 0; ingredientNr < matchingCDMIngredients.size(); ingredientNr++) {
@@ -2531,7 +2586,7 @@ public class GenericMapping extends Mapping {
 				Double ingredientDeviationPercentage = getStrengthDeviationPercentage(sourceDrugComponent, matchingCDMIngredient);
 				if (ingredientDeviationPercentage != null) {
 					if (ingredientDeviationPercentage.compareTo(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) <= 0) {
-						if ((bestMatchDeviationPercentage == null) || (ingredientDeviationPercentage < bestMatchDeviationPercentage)) {
+						if ((bestMatchDeviationPercentage == null) || (ingredientDeviationPercentage.compareTo(bestMatchDeviationPercentage + DEVIATION_MARGIN) < 0)) {
 							bestMatchDeviationPercentage = ingredientDeviationPercentage;
 							bestMatchIngredientNr = ingredientNr;
 						}
@@ -2565,12 +2620,12 @@ public class GenericMapping extends Mapping {
 		for (CDMDrug cdmDrug : cdmDrugs) {
 			Double averageDeviationPercentage = averageMatchingStrength(sourceDrug, cdmDrug);
 			if (averageDeviationPercentage != null) {
-				if ((lowestAverageStrengthDeviation == null) || (lowestAverageStrengthDeviation.compareTo(averageDeviationPercentage) > 0)) {
+				if ((lowestAverageStrengthDeviation == null) || lowestAverageStrengthDeviation > (averageDeviationPercentage + DEVIATION_MARGIN)) {
 					lowestAverageStrengthDeviation = averageDeviationPercentage;
 					lowestAverageStrengthDeviationDrugs = new ArrayList<CDMDrug>();
 					lowestAverageStrengthDeviationDrugs.add(cdmDrug);
 				}
-				else if (lowestAverageStrengthDeviation.compareTo(averageDeviationPercentage) == 0) {
+				else if ((lowestAverageStrengthDeviation >= (averageDeviationPercentage - DEVIATION_MARGIN)) && (lowestAverageStrengthDeviation <= (averageDeviationPercentage + DEVIATION_MARGIN))) {
 					lowestAverageStrengthDeviationDrugs.add(cdmDrug);
 				}
 			}
@@ -2586,27 +2641,24 @@ public class GenericMapping extends Mapping {
 		Double averageCount = 0.0;
 		
 		List<SourceDrugComponent> sourceDrugComponents = sourceDrug.getComponents();
-		Map<String, List<CDMIngredientStrength>> cdmDrugComponentsMap = cdmDrug.getIngredientsMap();
+		Map<String, List<CDMIngredientStrength>> cdmDrugComponentsMap = new HashMap<String, List<CDMIngredientStrength>>();
+		for (String conceptId : cdmDrug.getIngredientsMap().keySet()) {
+			List<CDMIngredientStrength> strengthList = new ArrayList<CDMIngredientStrength>();
+			cdmDrugComponentsMap.put(conceptId, strengthList);
+			strengthList.addAll(cdmDrug.getIngredientsMap().get(conceptId));
+		}
 		
 		for (SourceDrugComponent sourceDrugComponent : sourceDrugComponents) {
-			List<CDMIngredientStrength> matchingCDMIngredients = new ArrayList<CDMIngredientStrength>(); 
-			for (CDMIngredientStrength cdmIngredient : cdmDrugComponentsMap.get(sourceDrugComponent.getIngredient().getMatchingIngredient().getConceptId())) {
-				matchingCDMIngredients.add(cdmIngredient);
-			}
+			List<CDMIngredientStrength> matchingCDMIngredients = cdmDrugComponentsMap.get(sourceDrugComponent.getIngredient().getMatchingIngredient().getConceptId());
 			Double bestMatchDeviationPercentage = null;
 			int bestMatchIngredientNr = -1;
 			for (int ingredientNr = 0; ingredientNr < matchingCDMIngredients.size(); ingredientNr++) {
 				CDMIngredientStrength matchingCDMIngredient = matchingCDMIngredients.get(ingredientNr);
 				Double ingredientDeviationPercentage = getStrengthDeviationPercentage(sourceDrugComponent, matchingCDMIngredient);
 				if (ingredientDeviationPercentage != null) {
-					if (ingredientDeviationPercentage.compareTo(DrugMapping.settings.getDoubleSetting(MainFrame.MAXIMUM_STRENGTH_DEVIATION)) <= 0) {
-						if ((bestMatchDeviationPercentage == null) || (ingredientDeviationPercentage < bestMatchDeviationPercentage)) {
-							bestMatchDeviationPercentage = ingredientDeviationPercentage;
-							bestMatchIngredientNr = ingredientNr;
-						}
-					}
-					else {
-						break;
+					if ((bestMatchDeviationPercentage == null) || (ingredientDeviationPercentage < bestMatchDeviationPercentage)) {
+						bestMatchDeviationPercentage = ingredientDeviationPercentage;
+						bestMatchIngredientNr = ingredientNr;
 					}
 				}
 				else {

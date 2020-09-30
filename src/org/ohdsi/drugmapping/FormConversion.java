@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ohdsi.drugmapping.cdm.CDM;
+import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.Source;
@@ -82,9 +83,7 @@ public class FormConversion {
 					}
 				}
 				else {
-					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-						System.out.println("    WARNING: No priority found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'. Defaults to 0.");
-					}
+					GenericMapping.addWarning(GenericMapping.FORM_MAPPING_WARNING, "No priority found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'. Defaults to 0.");
 					priority = 0;
 				}
 				
@@ -96,9 +95,7 @@ public class FormConversion {
 					}
 					
 					if ((!sourceForm.equals("")) && (conceptId.equals(""))) {
-						if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-							System.out.println("    WARINING: No target form specified for '" + sourceForm + ". Defaults to source form.");
-						}
+						GenericMapping.addWarning(GenericMapping.FORM_MAPPING_WARNING, "No target form specified for '" + sourceForm + ". Defaults to source form.");
 					}
 					else {
 						String existingConversion = sourceFormConversion.get(priority);
@@ -107,9 +104,7 @@ public class FormConversion {
 						}
 						else {
 							if (existingConversion.equals(conceptName)) {
-								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-									System.out.println("    WARNING: Double definition found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'.");								
-								}
+								GenericMapping.addWarning(GenericMapping.FORM_MAPPING_WARNING, "Double definition found for conversion from  '" + sourceForm + "' to '" + conceptName + "(" + conceptId + ")'.");
 							}
 							else {
 								System.out.println("    ERROR: Conflicting definition found for conversion from  '" + sourceForm + "'.");

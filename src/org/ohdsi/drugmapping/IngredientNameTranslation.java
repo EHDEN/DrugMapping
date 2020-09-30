@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.Source;
@@ -74,9 +76,7 @@ public class IngredientNameTranslation {
 						String translation = ingredientNameTranslationMap.get(ingredient);
 						if (translation != null) {
 							if (translation.equals(ingredientNameEnglish)) {
-								if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-									System.out.println("    WARNING: Double translation definition for '" + ingredientCode + " (" + ingredientName + ")'. Ignored.");
-								}
+								GenericMapping.addWarning(GenericMapping.TRANSLATION_WARNING, "Double translation definition for '" + ingredientCode + " (" + ingredientName + ")'. Ignored.");
 							}
 							else {
 								System.out.println("    ERROR: Conflicting translations for '" + ingredientCode + " (" + ingredientName + ")'.");
@@ -89,9 +89,7 @@ public class IngredientNameTranslation {
 					}
 				}
 				else {
-					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-						System.out.println("    WARNING: Unknown ingredient '" + ingredientCode + " (" + ingredientName + ")'. Ignored.");
-					}
+					GenericMapping.addWarning(GenericMapping.TRANSLATION_WARNING, "Unknown ingredient '" + ingredientCode + " (" + ingredientName + ")'. Ignored.");
 				}
 			}
 			

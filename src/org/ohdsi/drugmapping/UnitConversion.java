@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.Source;
@@ -77,15 +78,13 @@ public class UnitConversion {
 					}
 				}
 				else {
-					if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-						System.out.println("    WARNING: No factor found for conversion from  '" + sourceUnit + "' to '" + targetUnit + "'. Defaults to 1.0.");
-					}
+					GenericMapping.addWarning(GenericMapping.UNIT_MAPPING_WARNING, "No factor found for conversion from  '" + sourceUnit + "' to '" + targetUnit + "'. Defaults to 1.0.");
 					factor = 1.0;
 				}
 				
 				if (factor != null) {
 					if ((!sourceUnit.equals("")) && (targetUnit.equals(""))) {
-						System.out.println("    WARNING: No target unit specified for '" + sourceUnit + ". Defaults to source unit with factor 1.0.");
+						GenericMapping.addWarning(GenericMapping.UNIT_MAPPING_WARNING, "No target unit specified for '" + sourceUnit + ". Defaults to source unit with factor 1.0.");
 					}
 					else {
 						Map<String, Double> sourceUnitConversion = unitConversionMap.get(sourceUnit);
@@ -95,9 +94,7 @@ public class UnitConversion {
 						}
 						Double existingFactor = sourceUnitConversion.get(targetUnit);
 						if (existingFactor != null) {
-							if (DrugMapping.settings.getStringSetting(MainFrame.SUPPRESS_WARNINGS).equals("No")) {
-								System.out.println("    WARNING: Double conversion from  '" + sourceUnit + "' to '" + targetUnit + "' found: " + existingFactor + " (old) and " + factor + " (new). Last one used.");
-							}
+							GenericMapping.addWarning(GenericMapping.UNIT_MAPPING_WARNING, "Double conversion from  '" + sourceUnit + "' to '" + targetUnit + "' found: " + existingFactor + " (old) and " + factor + " (new). Last one used.");
 						}
 						sourceUnitConversion.put(targetUnit, factor);
 					}
