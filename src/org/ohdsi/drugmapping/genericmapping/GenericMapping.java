@@ -402,6 +402,7 @@ public class GenericMapping extends Mapping {
 		
 		writeWarnings();
 
+		System.out.println();
 		System.out.println(DrugMapping.getCurrentTime() + " Finished");
 	}
 	
