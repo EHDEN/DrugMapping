@@ -264,7 +264,9 @@ public class Source {
 			sourceDrugError = true;
 		}
 
-		report.add("");
+		if (report != null) {
+			report.add("");
+		}
 		System.out.println(DrugMapping.getCurrentTime() + "     Done");
 		
 		return (!sourceDrugError);

@@ -115,7 +115,7 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(SELECTED_BY_LAST_PREFERENCE                            , "Rejected because last is used");
 		mappingResultDescriptions.put(OVERRULED_MAPPING                                      , "Overruled mapping");
 		mappingResultDescriptions.put(MAPPED                                                 , "Mapped");
-		mappingResultDescriptions.put(INCOMPLETE                                             , "Incomplete Mapping");
+		mappingResultDescriptions.put(INCOMPLETE                                             , "Incomplete mapping");
 		mappingResultDescriptions.put(NO_MAPPING                                             , "No mapping found");
 	}
 	
@@ -1547,7 +1547,6 @@ public class GenericMapping extends Mapping {
 							if (sourceDrugIngredient.getMatchingIngredient() != null) {
 								CDMIngredient cdmIngredient = sourceDrugIngredient.getMatchingIngredient();
 								automaticMappings.set(componentNr, cdmIngredient);
-								mappedSourceDrugs.add(sourceDrug);
 							}
 						}
 					}
@@ -2231,6 +2230,7 @@ public class GenericMapping extends Mapping {
 		
 		System.out.println(DrugMapping.getCurrentTime() + "       Saving Drug Mapping Mapping Log ...");
 		
+		// Count the maximum number of concepts in the results
 		int maxResultConcepts = 0;
 		for (SourceDrug sourceDrug : sourceDrugMappingLog.keySet()) {
 			Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugLog = sourceDrugMappingLog.get(sourceDrug); 
@@ -2247,6 +2247,7 @@ public class GenericMapping extends Mapping {
 			}
 		}
 
+		// Add the concept column headers
 		String[] columns = getHeader(maxResultConcepts);
 		String header = "";
 		for (String column : columns) {
@@ -2595,8 +2596,8 @@ public class GenericMapping extends Mapping {
 			}
 		}
 		
-		dataCoverageTotal = dataCoverageClinicalDrugs + dataCoverageClinicalDrugComps + dataCoverageClinicalDrugForms + dataCoverageClinicalDrugSplitted;
-		mappingTotal = mappingClinicalDrugs + mappingClinicalDrugComps + mappingClinicalDrugForms + mappingClinicalDrugToIngredient;
+		dataCoverageTotal = dataCoverageClinicalDrugs + dataCoverageClinicalDrugComps + dataCoverageClinicalDrugForms + dataCoverageClinicalDrugToIngredient + dataCoverageClinicalDrugSplitted;
+		mappingTotal = mappingClinicalDrugs + mappingClinicalDrugComps + mappingClinicalDrugForms + mappingClinicalDrugToIngredient + mappingClinicalDrugSplitted;
 		
 		report.add("");
 		report.add("Source drugs mapped to single CDM Clinical Drug: " + DrugMappingNumberUtilities.percentage((long) mappingClinicalDrugs, (long) source.getSourceDrugs().size()));

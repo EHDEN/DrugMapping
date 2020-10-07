@@ -617,7 +617,7 @@ public class MainFrame {
 				
 				if ((strengthMarginPercentage != null) && (!strengthMarginPercentage.equals("")) && (!strengthMarginPercentage.equals("*"))) {
 					String key = "Drug " + sourceCode;
-					if (mappingType == GenericMapping.INGREDIENT_MAPPING) {
+					if ((mappingType == GenericMapping.INGREDIENT_MAPPING) || (mappingType == GenericMapping.SPLITTED_MAPPING)) {
 						key = "Ingredient " + sourceDrug.getCode() + "," + ingredientCode;
 					}
 					usedStrengthDeviationPercentageMap.put(key, Double.parseDouble(strengthMarginPercentage));

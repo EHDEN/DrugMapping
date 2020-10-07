@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
@@ -68,6 +69,8 @@ public class DrugMappingLogTab extends MainFrameTab {
 	private ResultConceptsTableModel resultConceptsTableModel;
 	
 	private JButton saveButton;
+	
+	private boolean debug = false;
 
 	public DrugMappingLogTab(MainFrame mainFrame) {
 		super();
@@ -104,6 +107,9 @@ public class DrugMappingLogTab extends MainFrameTab {
                 }
                 else {
                 	//TODO escape special characters
+                	if (text.equals("101")) {
+                		debug = true;
+                	}
                     rowSorter.setRowFilter(RowFilter.regexFilter(text));
                 }
                 
@@ -197,7 +203,11 @@ public class DrugMappingLogTab extends MainFrameTab {
 					if (sourceDrugMappingTypeLog != null) {
 						for (Map<Integer, List<CDMConcept>> sourceDrugComponentMappingLog : sourceDrugMappingTypeLog) {
 							if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Overruled mapping"))) {
-								mappingStatus = "ManualMapping";
+								mappingStatus = "Manual Mapping";
+								break;
+							}
+							else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Incomplete mapping"))) {
+								mappingStatus = "Incomplete Mapping";
 								break;
 							}
 							else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Mapped"))) {
@@ -287,8 +297,9 @@ public class DrugMappingLogTab extends MainFrameTab {
 			}
 		});
 		// Status
-		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100);
-		drugsTable.getColumnModel().getColumn(0).setMaxWidth(100);
+		drugsTable.getColumnModel().getColumn(0).setMinWidth(120);
+		drugsTable.getColumnModel().getColumn(0).setMaxWidth(120);
+		drugsTable.getColumnModel().getColumn(0).setPreferredWidth(120);
 		
 		// Code
 		drugsTable.getColumnModel().getColumn(1).setMaxWidth(120);
@@ -414,16 +425,16 @@ public class DrugMappingLogTab extends MainFrameTab {
 				if (!e.getValueIsAdjusting()) {
 					int index = logTable.getSelectedRow();
 					if (index != -1) {
-						System.out.print("logTable valueChanged: ");
+						//System.out.print("logTable valueChanged: ");
 						selectLogConcepts(index);
 					}
 				}
-				else {
-					int index = logTable.getSelectedRow();
-					if (index != -1) {
-						System.out.println("logTable valueChanged: " + Integer.toString(index) + " IsAdjusting");
-					}
-				}
+				//else {
+				//	int index = logTable.getSelectedRow();
+				//	if (index != -1) {
+				//		System.out.println("logTable valueChanged: " + Integer.toString(index) + " IsAdjusting");
+				//	}
+				//}
 			}
 		});
 		
@@ -481,8 +492,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 	private void selectLogConcepts(Integer logNr) {
 		if (logNr != lastSelectedLogRecord) {
 			//System.out.println("  " + logNr);
-			getSourceDrugMappingResultConcepts(logNr);
-			showDrugMappingResults(logNr);
+			showSourceDrugMappingResultConcepts(logNr);
 		}
 		lastSelectedLogRecord = logNr;
 	}
@@ -539,7 +549,8 @@ public class DrugMappingLogTab extends MainFrameTab {
 	}
 	
 	
-	private void getSourceDrugMappingResultConcepts(Integer logNr) {
+	private void showSourceDrugMappingResultConcepts(Integer logNr) {
+		boolean showAsText = false;
 		sourceDrugMappingResultConcepts = new ArrayList<List<String>>();
 		for (int columnNr = 14; columnNr < (sourceDrugMappingResultLog.get(logNr).size() - 1); columnNr++) {
 			String result = sourceDrugMappingResultLog.get(logNr).get(columnNr).trim();
@@ -547,11 +558,18 @@ public class DrugMappingLogTab extends MainFrameTab {
 				List<String> concept = null;
 				String extraInfo = "";
 				try {
-					concept = DrugMappingStringUtilities.intelligentSplit(result, ',', '"');
-					String invalidReason = concept.get(concept.size() - 1); 
-					if (invalidReason.contains(":")) {
-						extraInfo = invalidReason.substring(invalidReason.indexOf(":") + 1).trim();
-						concept.set(concept.size() - 1, invalidReason.substring(0, invalidReason.indexOf(":")).trim());
+					if (showAsText || result.contains("->")) {
+						concept = new ArrayList<String>();
+						concept.add(result);
+						showAsText = true;
+					}
+					else {
+						concept = DrugMappingStringUtilities.intelligentSplit(result, ',', '"');
+						String invalidReason = concept.get(concept.size() - 1); 
+						if (invalidReason.contains(":")) {
+							extraInfo = invalidReason.substring(invalidReason.indexOf(":") + 1).trim();
+							concept.set(concept.size() - 1, invalidReason.substring(0, invalidReason.indexOf(":")).trim());
+						}
 					}
 				} catch (Exception e) {
 					concept = new ArrayList<String>();
@@ -571,88 +589,104 @@ public class DrugMappingLogTab extends MainFrameTab {
 				sourceDrugMappingResultConcepts.add(concept);
 			}
 		}
-		showDrugMappingResults(logNr);
+		showDrugMappingResults(logNr, showAsText);
 	}
 	
 	
-	private void showDrugMappingResults(Integer logNr) {
+	private void showDrugMappingResults(Integer logNr, boolean showAsText) {
 		drugMappingResultPanel.removeAll();
-		
+		drugMappingResultPanel.setBorder(BorderFactory.createTitledBorder(sourceDrugMappingResultLog.get(logNr).get(13)));
+
 		if (sourceDrugMappingResultConcepts.size() > 0) {
-			resultConceptsTableModel = new ResultConceptsTableModel();
-			resultConceptsTable = new JTable(resultConceptsTableModel) {
-				private static final long serialVersionUID = 582181068415724155L;
+			
+			JScrollPane resultsScrollPane = null;
+			
+			if (showAsText) {
+				String results = "";
+				for (List<String> result : sourceDrugMappingResultConcepts) {
+					if ((result.size() > 0) && (result.get(0).trim().length() > 0)) {
+						results += (results.equals("") ? "" : "\r\n") + result.get(0);
+					}
+				}
+				JTextArea resultsTextArea = new JTextArea(results);
+				resultsTextArea.setEditable(false);
+				
+				resultsScrollPane = new JScrollPane(resultsTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			}
+			else {
+				resultConceptsTableModel = new ResultConceptsTableModel();
+				resultConceptsTable = new JTable(resultConceptsTableModel) {
+					private static final long serialVersionUID = 582181068415724155L;
 
-				//Implement table cell tool tips.           
-	            public String getToolTipText(MouseEvent e) {
-	                String tip = null;
-	                java.awt.Point p = e.getPoint();
-	                int rowIndex = rowAtPoint(p);
-	                int colIndex = columnAtPoint(p);
+					//Implement table cell tool tips.           
+		            public String getToolTipText(MouseEvent e) {
+		                String tip = null;
+		                java.awt.Point p = e.getPoint();
+		                int rowIndex = rowAtPoint(p);
+		                int colIndex = columnAtPoint(p);
 
-	                try {
-	                    tip = getValueAt(rowIndex, colIndex).toString();
-	                } catch (RuntimeException e1) {
-	                    //catch null pointer exception if mouse is over an empty line
-	                }
+		                try {
+		                    tip = getValueAt(rowIndex, colIndex).toString();
+		                } catch (RuntimeException e1) {
+		                    //catch null pointer exception if mouse is over an empty line
+		                }
 
-	                return tip;
-	            }
-	        };
-	        resultConceptsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-			
-			resultConceptsTable.setAutoCreateRowSorter(false);
+		                return tip;
+		            }
+		        };
+		        resultConceptsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+				
+				resultConceptsTable.setAutoCreateRowSorter(false);
 
-			// Set selection to first row
-			ListSelectionModel selectionModel = resultConceptsTable.getSelectionModel();
-			selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			
-			// concept_id
-			resultConceptsTable.getColumnModel().getColumn(0).setMaxWidth(80);
-			resultConceptsTable.getColumnModel().getColumn(0).setPreferredWidth(80);
-			
-			// concept_name
-			resultConceptsTable.getColumnModel().getColumn(1).setMaxWidth(800);
-			resultConceptsTable.getColumnModel().getColumn(1).setPreferredWidth(500);
-			
-			// domain_id
-			resultConceptsTable.getColumnModel().getColumn(2).setMaxWidth(80);
-			resultConceptsTable.getColumnModel().getColumn(2).setPreferredWidth(80);
-			
-			// vocabulary_id
-			resultConceptsTable.getColumnModel().getColumn(3).setMaxWidth(150);
-			resultConceptsTable.getColumnModel().getColumn(3).setPreferredWidth(150);
-			
-			// concept_class_id
-			resultConceptsTable.getColumnModel().getColumn(4).setMaxWidth(150);
-			resultConceptsTable.getColumnModel().getColumn(4).setPreferredWidth(150);
-			
-			// standard_concept
-			resultConceptsTable.getColumnModel().getColumn(5).setMaxWidth(100);
-			resultConceptsTable.getColumnModel().getColumn(5).setPreferredWidth(100);
-			
-			// concept_code
-			resultConceptsTable.getColumnModel().getColumn(6).setMaxWidth(100);
-			resultConceptsTable.getColumnModel().getColumn(6).setPreferredWidth(100);
-			
-			// valid_start_date
-			resultConceptsTable.getColumnModel().getColumn(7).setMaxWidth(100);
-			resultConceptsTable.getColumnModel().getColumn(7).setPreferredWidth(100);
-			
-			// valid_end_date
-			resultConceptsTable.getColumnModel().getColumn(8).setMaxWidth(100);
-			resultConceptsTable.getColumnModel().getColumn(8).setPreferredWidth(100);
-			
-			// invalid_reason
-			resultConceptsTable.getColumnModel().getColumn(9).setMaxWidth(100);
-			resultConceptsTable.getColumnModel().getColumn(9).setPreferredWidth(100);
-			
-			// extra_info
-			resultConceptsTable.getColumnModel().getColumn(10).setPreferredWidth(150);
-
-			drugMappingResultPanel.setBorder(BorderFactory.createTitledBorder(sourceDrugMappingResultLog.get(logNr).get(13)));
-			
-			JScrollPane resultsScrollPane = new JScrollPane(resultConceptsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				// Set selection to first row
+				ListSelectionModel selectionModel = resultConceptsTable.getSelectionModel();
+				selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+				
+				// concept_id
+				resultConceptsTable.getColumnModel().getColumn(0).setMaxWidth(80);
+				resultConceptsTable.getColumnModel().getColumn(0).setPreferredWidth(80);
+				
+				// concept_name
+				resultConceptsTable.getColumnModel().getColumn(1).setMaxWidth(800);
+				resultConceptsTable.getColumnModel().getColumn(1).setPreferredWidth(500);
+				
+				// domain_id
+				resultConceptsTable.getColumnModel().getColumn(2).setMaxWidth(80);
+				resultConceptsTable.getColumnModel().getColumn(2).setPreferredWidth(80);
+				
+				// vocabulary_id
+				resultConceptsTable.getColumnModel().getColumn(3).setMaxWidth(150);
+				resultConceptsTable.getColumnModel().getColumn(3).setPreferredWidth(150);
+				
+				// concept_class_id
+				resultConceptsTable.getColumnModel().getColumn(4).setMaxWidth(150);
+				resultConceptsTable.getColumnModel().getColumn(4).setPreferredWidth(150);
+				
+				// standard_concept
+				resultConceptsTable.getColumnModel().getColumn(5).setMaxWidth(100);
+				resultConceptsTable.getColumnModel().getColumn(5).setPreferredWidth(100);
+				
+				// concept_code
+				resultConceptsTable.getColumnModel().getColumn(6).setMaxWidth(100);
+				resultConceptsTable.getColumnModel().getColumn(6).setPreferredWidth(100);
+				
+				// valid_start_date
+				resultConceptsTable.getColumnModel().getColumn(7).setMaxWidth(100);
+				resultConceptsTable.getColumnModel().getColumn(7).setPreferredWidth(100);
+				
+				// valid_end_date
+				resultConceptsTable.getColumnModel().getColumn(8).setMaxWidth(100);
+				resultConceptsTable.getColumnModel().getColumn(8).setPreferredWidth(100);
+				
+				// invalid_reason
+				resultConceptsTable.getColumnModel().getColumn(9).setMaxWidth(100);
+				resultConceptsTable.getColumnModel().getColumn(9).setPreferredWidth(100);
+				
+				// extra_info
+				resultConceptsTable.getColumnModel().getColumn(10).setPreferredWidth(150);
+				
+				resultsScrollPane = new JScrollPane(resultConceptsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			}
 			drugMappingResultPanel.add(resultsScrollPane, BorderLayout.CENTER);
 		}
 		
@@ -701,6 +735,12 @@ public class DrugMappingLogTab extends MainFrameTab {
 	    public Class<?> getColumnClass(int columnIndex) {
 	        if (sourceDrugMappingResultConcepts.isEmpty()) {
 	            return Object.class;
+	        }
+	        if (debug) {
+	        	System.out.print(columnIndex + ": ");
+	        	System.out.flush();
+	        	System.out.print(getValueAt(0, columnIndex));
+	        	System.out.flush();
 	        }
 	        return getValueAt(0, columnIndex).getClass();
 	    }
