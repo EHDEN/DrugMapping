@@ -399,10 +399,10 @@ public class GenericMapping extends Mapping {
 		
 		// Create the final report
 		if (ok && (report != null)) finalReport();
-
-		System.out.println(DrugMapping.getCurrentTime() + " Finished");
 		
 		writeWarnings();
+
+		System.out.println(DrugMapping.getCurrentTime() + " Finished");
 	}
 	
 	
