@@ -11,9 +11,9 @@ import java.util.Map;
 
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
-import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceIngredient;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -39,7 +39,7 @@ public class IngredientNameTranslation {
 	
 	
 	public IngredientNameTranslation(InputFile ingredientNameTranslationFile) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Create Ingredient Name Translation Map ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Create Ingredient Name Translation Map ...");
 		
 		if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.isSelected()) {
 			readIngredientNameTranslationFile(ingredientNameTranslationFile);
@@ -48,7 +48,7 @@ public class IngredientNameTranslation {
 			}
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
@@ -59,7 +59,7 @@ public class IngredientNameTranslation {
 	private void readIngredientNameTranslationFile(InputFile ingredientNameTranslationFile) {
 		if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.openFile(true)) {
 			fileName = ingredientNameTranslationFile.getFileName();
-			System.out.println(DrugMapping.getCurrentTime() + "        Get ingredient name translation map from file " + fileName + " ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Get ingredient name translation map from file " + fileName + " ...");
 			while (ingredientNameTranslationFile.hasNext()) {
 				Row row = ingredientNameTranslationFile.next();
 
@@ -93,7 +93,7 @@ public class IngredientNameTranslation {
 				}
 			}
 			
-			System.out.println(DrugMapping.getCurrentTime() + "        Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Done");
 		}
 		else {
 			System.out.println("    ERROR: No ingredient name translation file found.");
@@ -116,7 +116,7 @@ public class IngredientNameTranslation {
 		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
 		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
 
-		System.out.println(DrugMapping.getCurrentTime() + "        Write ingredient name translation map to file " + fileName + " ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Write ingredient name translation map to file " + fileName + " ...");
 		
 		File mappingFile = new File(fileName);
 		try {
@@ -146,7 +146,7 @@ public class IngredientNameTranslation {
 			
 			mappingFileWriter.close();
 			
-			System.out.println(DrugMapping.getCurrentTime() + "        Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Done");
 		} 
 		catch (FileNotFoundException exception) {
 			System.out.println("    ERROR: Cannot create ingredient name translation file '" + fileName + "'.");

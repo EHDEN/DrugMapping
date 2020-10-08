@@ -11,6 +11,8 @@ import java.util.NoSuchElementException;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.Mapping;
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
+import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingNumberUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
@@ -101,12 +103,12 @@ public class ZIndexConversion extends Mapping {
 		
 		String translationType = null; 
 
-		System.out.println(DrugMapping.getCurrentTime() + " Converting ZIndex Files ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + " Converting ZIndex Files ...");
 		
 
 		// Load GNK file
 		if (ok) {
-			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GNK File ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Loading ZIndex GNK File ...");
 			try {
 				if (gnkFile.openFile()) {
 					while (gnkFile.hasNext()) {
@@ -146,13 +148,13 @@ public class ZIndexConversion extends Mapping {
 				System.out.println("  ERROR: " + fileException.getMessage());
 				ok = false;
 			}
-			System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 		}
 
 		
 		// Load GSK file
 		if (ok) {
-			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GSK File ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Loading ZIndex GSK File ...");
 			try {
 				if (gskFile.openFile()) {
 					while (gskFile.hasNext()) {
@@ -189,13 +191,13 @@ public class ZIndexConversion extends Mapping {
 				System.out.println("  ERROR: " + fileException.getMessage());
 				ok = false;
 			}
-			System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 		}
 		
 		
 		// Load GPK file
 		if (ok) {
-			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GPK File ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Loading ZIndex GPK File ...");
 			try {
 				if (gpkFile.openFile()) {
 					while (gpkFile.hasNext()) {
@@ -248,13 +250,13 @@ public class ZIndexConversion extends Mapping {
 				System.out.println("  ERROR: " + fileException.getMessage());
 				ok = false;
 			}
-			System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 		}
 		
 
 		// Load GPK Statistics File
 		if (ok) {
-			System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GPK Statistics File ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Loading ZIndex GPK Statistics File ...");
 			try {
 				if (gpkStatsFile.openFile()) {
 					while (gpkStatsFile.hasNext()) {
@@ -281,14 +283,14 @@ public class ZIndexConversion extends Mapping {
 				System.out.println("  ERROR: " + fileException.getMessage());
 				ok = false;
 			}
-			System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 		}
 		
 		// Load GPK IPCI Compositions File
 		if (ok) {
 			if ((gpkIPCIFile != null) && gpkIPCIFile.isSelected()) {
 				try {
-					System.out.println(DrugMapping.getCurrentTime() + "   Loading ZIndex GPK IPCI Compositions File ...");
+					System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Loading ZIndex GPK IPCI Compositions File ...");
 					if (gpkIPCIFile.openFile()) {
 						
 						IPCIDerivation = true;
@@ -340,7 +342,7 @@ public class ZIndexConversion extends Mapping {
 							}
 						}
 					}
-					System.out.println(DrugMapping.getCurrentTime() + "   Done");
+					System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 				}
 				catch (NoSuchElementException fileException) {
 					System.out.println("  ERROR: " + fileException.getMessage());
@@ -348,14 +350,14 @@ public class ZIndexConversion extends Mapping {
 				}
 			}
 			else {
-				System.out.println(DrugMapping.getCurrentTime() + "     No GPK IPCI Compositions File used.");
+				System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     No GPK IPCI Compositions File used.");
 			}
 		}
 		
 
 		// Analyze ZIndex
 		if (ok) {
-			System.out.println(DrugMapping.getCurrentTime() + "   Analyzing ZIndex ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Analyzing ZIndex ...");
 			for (int gpkCode : gpkList) {
 				String[] gpk = gpkMap.get(gpkCode);
 				
@@ -671,7 +673,7 @@ public class ZIndexConversion extends Mapping {
 					outputMap.put(gpkCode, outputIngredients);
 				}
 			}
-			System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 		}
 		
 
@@ -681,8 +683,10 @@ public class ZIndexConversion extends Mapping {
 				
 				// Write output file
 				if (ok && (outputMap.size() > 0)) {
-					String gpkFullFileName = DrugMapping.getBasePath() + "/" + DrugMapping.getCurrentDate() + " ZIndex" + (IPCIDerivation ? " IPCI" : "") + " - GPK Full" + (translationType == null ? "" : " - " + translationType) + ".csv";
-					System.out.println(DrugMapping.getCurrentTime() + "   Writing out to: " + gpkFullFileName);
+					String gpkFullFileName = DrugMappingFileUtilities.getNextFileName(DrugMapping.getBasePath(), " ZIndex" + (IPCIDerivation ? " IPCI" : "") + " - GPK" + (translationType == null ? "" : " - " + translationType) + ".csv");
+					gpkFullFileName = DrugMapping.getBasePath() + (DrugMapping.getBasePath().contains("\\") ? "\\" : "/") + gpkFullFileName;
+					
+					System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Writing out to: " + gpkFullFileName);
 					
 					try {
 						PrintWriter gpkFullFile = new PrintWriter(new File(gpkFullFileName));
@@ -765,10 +769,10 @@ public class ZIndexConversion extends Mapping {
 				System.out.println("  ERROR: Cannot open GPK file '" + gpkFile.getFileName() + "'");
 				ok = false;
 			}
-			System.out.println(DrugMapping.getCurrentTime() + "   Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "   Done");
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + " Finished" + (ok ? "" : " WITH ERRORS"));
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + " Finished" + (ok ? "" : " WITH ERRORS"));
 	}
 	
 	

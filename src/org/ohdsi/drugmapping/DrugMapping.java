@@ -1,8 +1,6 @@
 package org.ohdsi.drugmapping;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +18,7 @@ import org.ohdsi.drugmapping.gui.Folder;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.zindex.ZIndexConversion;
 import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
@@ -34,7 +33,6 @@ public class DrugMapping {
 	
 	public static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
-	private static String currentDate = null;
 	private static String currentPath = null;	
 	private static String basePath = new File(".").getAbsolutePath();
 	private static MappingInputDefinition inputFiles = null;
@@ -43,27 +41,10 @@ public class DrugMapping {
 	private MainFrame mainFrame;
 	
 	
-	public static String getCurrentDate() {
-		if (currentDate == null) {
-			Calendar cal = Calendar.getInstance();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); 
-			currentDate = sdf.format(cal.getTime());
-		}
-		return currentDate;
-	}
-	
-	
-	public static String getCurrentTime() {
-		Calendar cal = Calendar.getInstance();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
-		return sdf.format(cal.getTime());
-	}
-	
-	
 	private static String getOutputVersion(String logFileName) {
 		String version = "";
 		
-		String date = getCurrentDate();
+		String date = DrugMappingDateUtilities.getCurrentDate();
 		
 		for (Integer versionNr = 1; versionNr < 100; versionNr++) {
 			String versionNrString = ("00" + versionNr).substring(versionNr.toString().length());

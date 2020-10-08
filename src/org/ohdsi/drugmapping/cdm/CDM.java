@@ -16,6 +16,7 @@ import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingNumberUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
@@ -278,7 +279,7 @@ public class CDM {
 	
 	
 	private void getRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredients ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Ingredients ...");
 		
 		PrintWriter rxNormIngredientsFile = null;
 		String fileName = DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "DrugMapping RxNorm Ingredients.csv";
@@ -323,12 +324,12 @@ public class CDM {
 		}
 		
 		report.add("Used RxNorm Ingredients found: " + Integer.toString(cdmIngredients.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getRxNormIngredientRelationships(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Ingredient Relationships ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Ingredient Relationships ...");
 		
 		for (Row queryRow : connection.queryResource("GetRxNormIngredientRelationships.sql", queryParameters)) {
 			String relationshipId = queryRow.get("relationship_id", true);
@@ -378,12 +379,12 @@ public class CDM {
 			}
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getRxNormClinicalDrugsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
 
 		Set<CDMDrug> drugs = new HashSet<CDMDrug>();
 		String lastCDMFormConceptId = "xxxxxxxx";
@@ -441,12 +442,12 @@ public class CDM {
 		}
 
 		report.add("RxNorm Clinical Drugs found: " + Integer.toString(cdmDrugs.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getRxNormClinicalDrugCompsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Comps with ingredients ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Comps with ingredients ...");
 
 		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugCompsIngredients.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("drugcomp_concept_id", true);
@@ -477,12 +478,12 @@ public class CDM {
 		}
 
 		report.add("RxNorm Clinical Drug Comps found: " + Integer.toString(cdmDrugComps.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getRxNormClinicalDrugFormsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
 		
 		Set<CDMDrug> drugForms = new HashSet<CDMDrug>();
 		String lastCDMFormConceptId = "xxxxxxxx";
@@ -539,12 +540,12 @@ public class CDM {
 		}
 
 		report.add("RxNorm Clinical Drug Forms found: " + Integer.toString(cdmDrugForms.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getRxNormDrugATCs(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM RxNorm Drug ATCs ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Drug ATCs ...");
 		
 		for (Row queryRow : connection.queryResource("GetRxNormDrugATCs.sql", queryParameters)) {
 			String cdmDrugConceptId = queryRow.get("concept_id", true);
@@ -589,12 +590,12 @@ public class CDM {
 		report.add("CDM Drugs with ATC: " + DrugMappingNumberUtilities.percentage((long) atcDrugCount, (long) cdmDrugs.size()));
 		report.add("CDM Drug Comps with ATC: " + DrugMappingNumberUtilities.percentage((long) atcDrugCompCount, (long) cdmDrugComps.size()));
 		report.add("CDM Drug Forms with ATC: " + DrugMappingNumberUtilities.percentage((long) atcDrugFormCount, (long) cdmDrugForms.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getCASToRxNormIngredientsMapping(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM CAS number to Ingredient mapping ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM CAS number to Ingredient mapping ...");
 		
 		Integer casCount = 0;
 		for (Row queryRow : connection.queryResource("GetCASMapsToRxNormIngredients.sql", queryParameters)) {
@@ -695,13 +696,13 @@ public class CDM {
 		}
 		
 		report.add("CDM Ingredients with CAS number: " + DrugMappingNumberUtilities.percentage((long) casCount, (long) cdmIngredients.size()));
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	@SuppressWarnings("unused")
 	private void getCDMUnits(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM units ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM units ...");
 		
 		// Get CDM Forms
 		for (Row queryRow : connection.queryResource("GetCDMUnits.sql", queryParameters)) {
@@ -722,12 +723,12 @@ public class CDM {
 		//	System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
 		//}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void getCDMForms(RichConnection connection, QueryParameters queryParameters, List<String> report) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Get CDM forms ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM forms ...");
 		
 		// Get CDM Forms
 		for (Row queryRow : connection.queryResource("GetCDMForms.sql", queryParameters)) {
@@ -748,7 +749,7 @@ public class CDM {
 		//	System.out.println("        " + cdmFormNameToConceptIdMap.get(concept_name) + "," + concept_name);
 		//}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 
 

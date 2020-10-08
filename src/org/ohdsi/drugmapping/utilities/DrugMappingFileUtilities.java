@@ -67,4 +67,24 @@ public class DrugMappingFileUtilities {
 			outputFile.close();
 		}
 	}
+	
+	
+	public static String getNextFileName(String path, String baseFileName) {
+		String date = DrugMappingDateUtilities.getCurrentDate();
+		Integer sequenceNr = 0;
+		String fileName = null;
+		File file = null;
+		do {
+			sequenceNr++;
+			if (sequenceNr == 100) {
+				fileName = date + " 01 " + baseFileName; // Start at 01 again.
+				file = null;
+			}
+			else {
+				fileName = date + " " + ("00" + sequenceNr.toString()).substring(sequenceNr.toString().length()) + " " + baseFileName;
+				file = new File(path + "/" + fileName);
+			}
+		} while ((file != null) && file.exists());
+		return fileName;
+	}
 }

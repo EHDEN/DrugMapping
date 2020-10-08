@@ -36,6 +36,7 @@ import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceIngredient;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
@@ -510,7 +511,7 @@ public class MainFrame {
 	
 	private void loadIngredientMappingLog(InputFile ingredientMappingLogFile) {
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading Ingredient Mapping Log ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading Ingredient Mapping Log ...");
 		
 		if (ingredientMappingLogFile.openFile()) {
 			while (ingredientMappingLogFile.hasNext()) {
@@ -546,13 +547,13 @@ public class MainFrame {
 			}
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
 	private void loadDrugMappingLog(InputFile drugMappingLogFile) {
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading Drug Mapping Log ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading Drug Mapping Log ...");
 		
 		usedStrengthDeviationPercentageMap = new HashMap<String, Double>();
 		if (drugMappingLogFile.openFile()) {
@@ -663,7 +664,7 @@ public class MainFrame {
 			}
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	

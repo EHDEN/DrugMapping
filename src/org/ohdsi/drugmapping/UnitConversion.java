@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
-import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.Source;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -38,14 +38,14 @@ public class UnitConversion {
 	
 	
 	public UnitConversion(InputFile sourceUnitMappingFile) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Create Units Conversion Map ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Create Units Conversion Map ...");
 		
 		readUnitConversionFile(sourceUnitMappingFile);
 		if (status == STATE_EMPTY) {
 			createUnitConversionFile(sourceUnitMappingFile);
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
@@ -56,7 +56,7 @@ public class UnitConversion {
 	private void readUnitConversionFile(InputFile sourceUnitMappingFile) {
 		if ((sourceUnitMappingFile != null) && sourceUnitMappingFile.openFile(true)) {
 			fileName = sourceUnitMappingFile.getFileName();
-			System.out.println(DrugMapping.getCurrentTime() + "        Get unit conversion map from file " + fileName + " ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Get unit conversion map from file " + fileName + " ...");
 			while (sourceUnitMappingFile.hasNext()) {
 				Row row = sourceUnitMappingFile.next();
 				
@@ -101,7 +101,7 @@ public class UnitConversion {
 				}
 			}
 			
-			System.out.println(DrugMapping.getCurrentTime() + "        Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Done");
 		}
 		else {
 			System.out.println("    ERROR: No unit conversion file found.");
@@ -124,7 +124,7 @@ public class UnitConversion {
 		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
 		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
 
-		System.out.println(DrugMapping.getCurrentTime() + "        Write unit conversion map to file " + fileName + " ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Write unit conversion map to file " + fileName + " ...");
 		
 		File mappingFile = new File(fileName);
 		try {
@@ -159,7 +159,7 @@ public class UnitConversion {
 			
 			mappingFileWriter.close();
 			
-			System.out.println(DrugMapping.getCurrentTime() + "        Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Done");
 		} 
 		catch (FileNotFoundException exception) {
 			System.out.println("    ERROR: Cannot create unit mapping file '" + fileName + "'.");

@@ -12,8 +12,8 @@ import java.util.Map;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
-import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.source.Source;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -40,7 +40,7 @@ public class FormConversion {
 	
 	
 	public FormConversion(InputFile sourceFormMappingFile, CDM cdm) {
-		System.out.println(DrugMapping.getCurrentTime() + "     Create Dose Forms Conversion Map ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Create Dose Forms Conversion Map ...");
 		
 		this.cdm = cdm;
 		
@@ -49,7 +49,7 @@ public class FormConversion {
 			createFormConversionFile(sourceFormMappingFile);
 		}
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 	
 	
@@ -61,7 +61,7 @@ public class FormConversion {
 		Map<String, Map<Integer, String>> tempFormConversionMap = new HashMap<String, Map<Integer, String>>();
 		if ((sourceFormMappingFile != null) && sourceFormMappingFile.openFile(true)) {
 			fileName = sourceFormMappingFile.getFileName();
-			System.out.println(DrugMapping.getCurrentTime() + "        Get form conversion map from file " + fileName + " ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Get form conversion map from file " + fileName + " ...");
 			while (sourceFormMappingFile.hasNext()) {
 				Row row = sourceFormMappingFile.next();
 				
@@ -130,7 +130,7 @@ public class FormConversion {
 				}
 			}
 			
-			System.out.println(DrugMapping.getCurrentTime() + "        Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Done");
 		}
 		else {
 			System.out.println("    ERROR: No dose form conversion file found.");
@@ -153,7 +153,7 @@ public class FormConversion {
 		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
 		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
 
-		System.out.println(DrugMapping.getCurrentTime() + "        Write dose form conversion map to file " + fileName + " ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Write dose form conversion map to file " + fileName + " ...");
 		
 		File mappingFile = new File(fileName);
 		try {
@@ -187,7 +187,7 @@ public class FormConversion {
 			
 			mappingFileWriter.close();
 			
-			System.out.println(DrugMapping.getCurrentTime() + "        Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Done");
 		} 
 		catch (FileNotFoundException exception) {
 			System.out.println("    ERROR: Cannot create dose form mapping file '" + fileName + "'.");

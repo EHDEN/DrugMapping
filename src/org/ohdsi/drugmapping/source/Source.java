@@ -14,6 +14,7 @@ import java.util.Set;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingNumberUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
@@ -149,7 +150,7 @@ public class Source {
 		Integer sourceDrugCount = 0;
 		Set<String> ignoredSourceCodes = new HashSet<String>();
 		
-		System.out.println(DrugMapping.getCurrentTime() + "     Loading source drugs ...");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading source drugs ...");
 		
 		try {
 			if (sourceDrugsFile.openFile()) {
@@ -267,7 +268,7 @@ public class Source {
 		if (report != null) {
 			report.add("");
 		}
-		System.out.println(DrugMapping.getCurrentTime() + "     Done");
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 		
 		return (!sourceDrugError);
 	}

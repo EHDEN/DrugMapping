@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class Mapping {
@@ -15,7 +16,7 @@ public class Mapping {
 	
 	public static void loadReplacements(InputFile replacementsFile) {
 		if (!replacementsFile.getFileName().equals("")) {
-			System.out.println(DrugMapping.getCurrentTime() + " Loading replacements ...");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + " Loading replacements ...");
 			if (replacementsFile.openFile()) {
 				while (replacementsFile.hasNext()) {
 					Row row = replacementsFile.next();
@@ -27,7 +28,7 @@ public class Mapping {
 					replacementOrder.add(replace);
 				}
 			}
-			System.out.println(DrugMapping.getCurrentTime() + " Finished");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + " Finished");
 		}
 	}
 
