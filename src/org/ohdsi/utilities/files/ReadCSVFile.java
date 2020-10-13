@@ -43,12 +43,13 @@ public class ReadCSVFile implements Iterable<List<String>> {
 		this.charSet = charSet;
 		try {
 			FileInputStream textFileStream = new FileInputStream(filename);
-			streamReader = new InputStreamReader(textFileStream, charSet);
+			//streamReader = new InputStreamReader(textFileStream, charSet);
+			streamReader = new InputStreamReader(textFileStream);
 			//bufferedReader = new BufferedReader(new InputStreamReader(textFileStream, charSet));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		//} catch (UnsupportedEncodingException e) {
+		//	e.printStackTrace();
 		}		
 	}
 	
@@ -60,11 +61,12 @@ public class ReadCSVFile implements Iterable<List<String>> {
 	public ReadCSVFile(String filename) {
 		try {
 			FileInputStream textFileStream = new FileInputStream(filename);
-			streamReader = new InputStreamReader(textFileStream, charSet);
+			//streamReader = new InputStreamReader(textFileStream, charSet);
+			streamReader = new InputStreamReader(textFileStream);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		//} catch (UnsupportedEncodingException e) {
+		//	e.printStackTrace();
 		}
 	}
 
@@ -80,20 +82,22 @@ public class ReadCSVFile implements Iterable<List<String>> {
 	}
 
 	public ReadCSVFile(InputStream inputstream) {
-		try {
-			streamReader = new InputStreamReader(inputstream, charSet);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		//try {
+			//streamReader = new InputStreamReader(inputstream, charSet);
+			streamReader = new InputStreamReader(inputstream);
+		//} catch (UnsupportedEncodingException e) {
+		//	e.printStackTrace();
+		//}
 	}
 	
 	public ReadCSVFile(InputStream inputstream, String charSet) {
 		this.charSet = charSet;
-		try {
-			streamReader = new InputStreamReader(inputstream, charSet);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		//try {
+			//streamReader = new InputStreamReader(inputstream, charSet);
+			streamReader = new InputStreamReader(inputstream);
+		//} catch (UnsupportedEncodingException e) {
+		//	e.printStackTrace();
+		//}
 	}
 
 	public ReadCSVFile(InputStream inputstream, char delimiter, String charSet) {
