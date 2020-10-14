@@ -236,7 +236,7 @@ public class DrugMappingStringUtilities {
 	
 	
 	public static String cleanString(String string) {
-		return string == null ? null : removeExtraSpaces(string.trim().replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ").replaceAll("\t", " ").replaceAll("ß", "SS").replaceAll("•", "*"));
+		return string == null ? null : removeExtraSpaces(string.trim().replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ").replaceAll("\t", " ").replaceAll("ÃŸ", "SS").replaceAll("â€¢", "*"));
 	}
 
 	
@@ -258,147 +258,150 @@ public class DrugMappingStringUtilities {
 						(!characterInRange(character, 'A', 'Z')) &&
 						(!characterInRange(character, '0', '9'))
 				) {
-					if (characterInRange(character, 'À', 'Å')) {
+					if (characterInRange(character, 'Ã€', 'Ã…')) {
 						convertedText += 'A';
 					}
-					else if (character == 'Æ') {
+					else if (character == 'Ã†') {
 						convertedText += "AE";
 					}
-					else if (character == 'Ç') {
+					else if (character == 'Ã‡') {
 						convertedText += "C";
 					}
-					else if (characterInRange(character, 'È', 'Ë')) {
+					else if (characterInRange(character, 'Ãˆ', 'Ã‹')) {
 						convertedText += 'E';
 					}
-					else if (characterInRange(character, 'Ì', 'Ï')) {
+					else if (characterInRange(character, 'ÃŒ', 'Ã')) {
 						convertedText += 'I';
 					}
-					else if (character == 'Ğ') {
+					else if (character == 'Ã') {
 						convertedText += "D";
 					}
-					else if (character == 'Ñ') {
+					else if (character == 'Ã‘') {
 						convertedText += "N";
 					}
-					else if (characterInRange(character, 'Ò', 'Ö')) {
+					else if (characterInRange(character, 'Ã’', 'Ã–')) {
 						convertedText += 'O';
 					}
-					else if (character == 'Ø') {
+					else if (character == 'Ã˜') {
 						convertedText += "O";
 					}
-					else if (characterInRange(character, 'Ù', 'Ü')) {
+					else if (characterInRange(character, 'Ã™', 'Ãœ')) {
 						convertedText += 'U';
 					}
-					else if (character == 'İ') {
+					else if (character == 'Ã') {
 						convertedText += "Y";
 					}
-					else if (character == 'İ') {
+					else if (character == 'Ã') {
 						convertedText += "Y";
 					}
-					else if (character == 'Ş') {
+					else if (character == 'Ã') {
 						convertedText += "SH";
 					}
-					else if (character == 'ß') {
+					else if (character == 'Î±') {
+						convertedText += "a";
+					}
+					else if (character == 'ÃŸ') {
 						convertedText += "B";
 					}
-					else if (characterInRange(character, 'à', 'å')) {
+					else if (characterInRange(character, 'Ã ', 'Ã¥')) {
 						convertedText += 'a';
 					}
-					else if (character == 'æ') {
+					else if (character == 'Ã¦') {
 						convertedText += "ae";
 					}
-					else if (character == 'ç') {
+					else if (character == 'Ã§') {
 						convertedText += "c";
 					}
-					else if (characterInRange(character, 'è', 'ë')) {
+					else if (characterInRange(character, 'Ã¨', 'Ã«')) {
 						convertedText += 'e';
 					}
-					else if (characterInRange(character, 'ì', 'ï')) {
+					else if (characterInRange(character, 'Ã¬', 'Ã¯')) {
 						convertedText += 'i';
 					}
-					else if (character == 'ğ') {
+					else if (character == 'Ã°') {
 						convertedText += "o";
 					}
-					else if (character == 'ñ') {
+					else if (character == 'Ã±') {
 						convertedText += "n";
 					}
-					else if (characterInRange(character, 'ò', 'ö')) {
+					else if (characterInRange(character, 'Ã²', 'Ã¶')) {
 						convertedText += 'o';
 					}
-					else if (character == 'ø') {
+					else if (character == 'Ã¸') {
 						convertedText += "o";
 					}
-					else if (characterInRange(character, 'ù', 'ü')) {
+					else if (characterInRange(character, 'Ã¹', 'Ã¼')) {
 						convertedText += 'u';
 					}
-					else if (character == 'ı') {
+					else if (character == 'Ã½') {
 						convertedText += "y";
 					}
-					else if (character == 'ÿ') {
+					else if (character == 'Ã¿') {
 						convertedText += "y";
 					}
-					else if (character == 'ş') {
+					else if (character == 'Ã¾') {
 						convertedText += "sh";
 					}
 
 					// Other characters
-					else if (character == '×') {
+					else if (character == 'Ã—') {
 						convertedText += "x";
 					}
-					else if (character == '÷') {
+					else if (character == 'Ã·') {
 						convertedText += "/";
 					}
-					else if (character == 'µ') {
+					else if (character == 'Âµ') {
 						convertedText += "u";
 					}
-					else if (character == '¶') {
+					else if (character == 'Â¶') {
 						convertedText += "n";
 					}
-					else if (character == '¹') {
+					else if (character == 'Â¹') {
 						convertedText += "1";
 					}
-					else if (character == '²') {
+					else if (character == 'Â²') {
 						convertedText += "2";
 					}
-					else if (character == '³') {
+					else if (character == 'Â³') {
 						convertedText += "3";
 					}
-					else if (character == '–') {
+					else if (character == 'â€“') {
 						convertedText += "-";
 					}
-					else if (character == '¢') {
+					else if (character == 'Â¢') {
 						convertedText += "c";
 					}
-					else if (character == '¡') {
+					else if (character == 'Â¡') {
 						convertedText += "!";
 					}
-					else if (character == '¥') {
+					else if (character == 'Â¥') {
 						convertedText += "Y";
 					}
-					else if (character == 'ª') {
+					else if (character == 'Âª') {
 						convertedText += "a";
 					}
-					else if (character == 'º') {
+					else if (character == 'Âº') {
 						convertedText += "o";
 					}
-					else if (character == '¿') {
+					else if (character == 'Â¿') {
 						convertedText += "?";
 					}
-					else if (character == '©') {
+					else if (character == 'Â©') {
 						convertedText += "(C)";
 					}
-					else if (character == '®') {
+					else if (character == 'Â®') {
 						convertedText += "(R)";
 					}
-					else if (character == '¼') {
+					else if (character == 'Â¼') {
 						convertedText += "1/4";
 					}
-					else if (character == '½') {
+					else if (character == 'Â½') {
 						convertedText += "1/2";
 					}
-					else if (character == '¾') {
+					else if (character == 'Â¾') {
 						convertedText += "3/4";
 					}
-					else if (character == '•') {
+					else if (character == 'â€¢') {
 						convertedText += "*";
 					}
 					else {
