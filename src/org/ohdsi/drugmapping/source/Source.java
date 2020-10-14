@@ -165,13 +165,19 @@ public class Source {
 						
 						if (sourceDrug == null) {
 							sourceDrugCount++;
-							sourceDrug = new SourceDrug(
-												sourceCode, 
-												DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceName", true)).toUpperCase(), 
-												DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceATCCode", true)).toUpperCase(), 
-												DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceFormulation", true)).toUpperCase(), 
-												sourceDrugsFile.get(row, "SourceCount", true).trim()
-												);
+							
+							String sourceName = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceName", true));
+							String sourceATC = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceATCCode", true));
+							String sourceFormulation = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceFormulation", true));
+							String sourceCount = sourceDrugsFile.get(row, "SourceCount", true);
+							
+							sourceName = sourceName == null ? null : sourceName.toUpperCase();
+							sourceATC = sourceATC == null ? null : sourceATC.toUpperCase();
+							sourceFormulation = sourceFormulation == null ? null : sourceFormulation.toUpperCase();
+							sourceCount = sourceCount == null ? "0" : sourceCount.trim();
+							
+							sourceDrug = new SourceDrug(sourceCode, sourceName, sourceATC, sourceFormulation, sourceCount);
+							
 							if (sourceDrug.getCount() >= minimumUseCount) {
 								sourceDrugs.add(sourceDrug);
 								sourceDrugMap.put(sourceCode, sourceDrug);
@@ -191,14 +197,20 @@ public class Source {
 						}
 
 						if (sourceDrug != null) {
-							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", true).trim().toUpperCase(); 
-							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true).trim().toUpperCase().replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ");
+							String ingredientCode        = sourceDrugsFile.get(row, "IngredientCode", true); 
+							String ingredientName        = sourceDrugsFile.get(row, "IngredientName", true);
 							String ingredientNameEnglish = sourceDrugsFile.get(row, "IngredientNameEnglish", false);
-							String dosage                = sourceDrugsFile.get(row, "Dosage", true).trim(); 
-							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true).trim(); 
-							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true).trim();
+							String dosage                = sourceDrugsFile.get(row, "Dosage", true); 
+							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true); 
+							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true);
+
+							ingredientCode        = ingredientCode == null ? null : ingredientCode.trim().toUpperCase(); 
+							ingredientName        = ingredientName == null ? "" : ingredientName.trim().toUpperCase().replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ");
+							ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish.trim();
+							dosage                = dosage == null ? "" : dosage.trim(); 
+							dosageUnit            = dosageUnit == null ? "" : dosageUnit.trim(); 
+							casNumber             = casNumber == null ? "" : casNumber.trim();
 							
-							if (ingredientCode != null) ingredientCode = ingredientCode.trim(); 
 							ingredientName        = DrugMappingStringUtilities.cleanString(ingredientName).toUpperCase();
 							ingredientNameEnglish = ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.cleanString(ingredientNameEnglish).toUpperCase();
 							casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
