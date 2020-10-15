@@ -64,7 +64,7 @@ public class UnitConversion {
 				//String drugCountString = sourceUnitMappingFile.get(row, "DrugCount", false);
 				//String recordCountString = sourceUnitMappingFile.get(row, "RecordCount", false);
 				String factorString = sourceUnitMappingFile.get(row, "Factor", true);
-				String targetUnit = DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "TargetUnit", true)).toUpperCase();
+				String targetUnit = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "TargetUnit", true)));
 				//String comment = row.get("Comment", false);
 				
 				Double factor = null;

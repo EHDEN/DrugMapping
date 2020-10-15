@@ -111,7 +111,7 @@ public class DrugMappingStringUtilities {
 	public static String standardizedName(String name) {
 		
 		if (name != null) {
-			name = " " + convertToStandardCharacters(name).toUpperCase() + " ";
+			name = " " + safeToUpperCase(convertToStandardCharacters(name)) + " ";
 			
 			name = name.replaceAll("-", " ");
 			name = name.replaceAll(",", " ");
@@ -172,8 +172,8 @@ public class DrugMappingStringUtilities {
 		List<String> matchingNames = new ArrayList<String>();
 		Set<String> uniqueNames = new HashSet<String>();
 
-		name = DrugMappingStringUtilities.removeExtraSpaces(name).toUpperCase();
-		englishName = DrugMappingStringUtilities.removeExtraSpaces(englishName).toUpperCase();
+		name = safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(name));
+		englishName = safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(englishName));
 		
 		if (uniqueNames.add(name)) {
 			matchingNames.add("SourceTerm: " + name);
@@ -418,6 +418,27 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String safeToUpperCase(String string) {
+		String safeUpperCaseString = "";
+		
+		for (int charNr = 0; charNr < string.length(); charNr++) {
+			Character character = string.charAt(charNr);
+			if (
+					((character >=  97) && (character <= 122)) ||
+					((character >= 224) && (character <= 246)) ||
+					((character >= 248) && (character <= 253))
+			) {
+				safeUpperCaseString += Character.toUpperCase(character);
+			}
+			else {
+				safeUpperCaseString += character;
+			}
+		}
+		
+		return safeUpperCaseString;
+	}
+	
+	
 	public static String sortWords(String string) {
 		String splitCharacters = " ,.-()[]/\\*+&:'\"<>_=|{};#$%^@^~`\t\n\r";
 		List<String> words = new ArrayList<String>();
@@ -459,11 +480,13 @@ public class DrugMappingStringUtilities {
 		return string;
 	}
 	
-	
+	/*
 	public static void main(String[] args) {
-		String test = "FOLLICLE STIMULATI&NG H/ORM\\ONE 75 UNT INJECT\tABLE SOLU?TION";
-		System.out.println(test);
-		System.out.println(DrugMappingStringUtilities.sortWords(test));
+		String source = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ €ÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
+		System.out.println(source);
+		String destination = safeToUpperCase(source);
+		System.out.println(destination);
 	}
+	*/
 
 }

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredient extends CDMConcept {
@@ -77,7 +78,7 @@ public class CDMIngredient extends CDMConcept {
 	
 	
 	public void addSynonym(String synonym) {
-		synonym = synonym.replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+		synonym = DrugMappingStringUtilities.safeToUpperCase(synonym.replaceAll("\n", " ").replaceAll("\r", " ").trim());
 		if (!synonyms.contains(synonym)) {
 			synonyms.add(synonym);
 			Collections.sort(synonyms);

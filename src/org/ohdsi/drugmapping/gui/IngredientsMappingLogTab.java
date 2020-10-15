@@ -26,6 +26,7 @@ import javax.swing.table.TableRowSorter;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceIngredient;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 public class IngredientsMappingLogTab extends MainFrameTab {
 	private static final long serialVersionUID = 1736241328985740613L;
@@ -74,7 +75,7 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 			}
 			
 			private void filter() {
-                String text = searchField.getText().toUpperCase();
+                String text = DrugMappingStringUtilities.safeToUpperCase(searchField.getText());
                 if (text.length() == 0) {
                     rowSorter.setRowFilter(null);
                 }

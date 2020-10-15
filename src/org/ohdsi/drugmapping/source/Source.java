@@ -171,9 +171,9 @@ public class Source {
 							String sourceFormulation = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceFormulation", true));
 							String sourceCount = sourceDrugsFile.get(row, "SourceCount", true);
 							
-							sourceName = sourceName == null ? null : sourceName.toUpperCase();
-							sourceATC = sourceATC == null ? null : sourceATC.toUpperCase();
-							sourceFormulation = sourceFormulation == null ? null : sourceFormulation.toUpperCase();
+							sourceName = sourceName == null ? null : DrugMappingStringUtilities.safeToUpperCase(sourceName);
+							sourceATC = sourceATC == null ? null : DrugMappingStringUtilities.safeToUpperCase(sourceATC);
+							sourceFormulation = sourceFormulation == null ? null : DrugMappingStringUtilities.safeToUpperCase(sourceFormulation);
 							sourceCount = sourceCount == null ? "0" : sourceCount.trim();
 							
 							sourceDrug = new SourceDrug(sourceCode, sourceName, sourceATC, sourceFormulation, sourceCount);
@@ -204,15 +204,15 @@ public class Source {
 							String dosageUnit            = sourceDrugsFile.get(row, "DosageUnit", true); 
 							String casNumber             = sourceDrugsFile.get(row, "CASNumber", true);
 
-							ingredientCode        = ingredientCode == null ? null : ingredientCode.trim().toUpperCase(); 
-							ingredientName        = ingredientName == null ? "" : ingredientName.trim().toUpperCase().replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ");
+							ingredientCode        = ingredientCode == null ? null : DrugMappingStringUtilities.safeToUpperCase(ingredientCode.trim()); 
+							ingredientName        = ingredientName == null ? "" : DrugMappingStringUtilities.safeToUpperCase(ingredientName.trim()).replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\r", " ");
 							ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish.trim();
 							dosage                = dosage == null ? "" : dosage.trim(); 
 							dosageUnit            = dosageUnit == null ? "" : dosageUnit.trim(); 
 							casNumber             = casNumber == null ? "" : casNumber.trim();
 							
-							ingredientName        = DrugMappingStringUtilities.cleanString(ingredientName).toUpperCase();
-							ingredientNameEnglish = ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.cleanString(ingredientNameEnglish).toUpperCase();
+							ingredientName        = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.cleanString(ingredientName));
+							ingredientNameEnglish = ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.cleanString(ingredientNameEnglish));
 							casNumber = DrugMappingNumberUtilities.uniformCASNumber(casNumber);
 
 							SourceIngredient sourceIngredient = null;

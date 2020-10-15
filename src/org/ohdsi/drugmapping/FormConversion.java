@@ -65,10 +65,10 @@ public class FormConversion {
 			while (sourceFormMappingFile.hasNext()) {
 				Row row = sourceFormMappingFile.next();
 				
-				String sourceForm = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "DoseForm", true)).toUpperCase();
+				String sourceForm = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "DoseForm", true)));
 				String priorityString = sourceFormMappingFile.get(row, "Priority", false);
 				String conceptId = sourceFormMappingFile.get(row, "ConceptId", false);
-				//String conceptName = DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "ConceptName", true)).toUpperCase();
+				//String conceptName = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "ConceptName", true)));
 				//String comment = sourceFormMappingFile.get(row, "Comment", false);
 				String conceptName = cdm.getCDMFormConceptName(conceptId);
 				

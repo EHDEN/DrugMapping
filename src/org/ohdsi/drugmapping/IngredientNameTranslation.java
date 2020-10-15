@@ -68,9 +68,9 @@ public class IngredientNameTranslation {
 				
 				SourceIngredient ingredient = Source.getIngredient(ingredientCode);
 				if (ingredient != null) {
-					ingredientName = ingredientName == null ? "" : ingredientName.toUpperCase();
+					ingredientName = ingredientName == null ? "" : DrugMappingStringUtilities.safeToUpperCase(ingredientName);
 					String ingredientNameEnglish = ingredientNameTranslationFile.get(row, "IngredientNameEnglish", true);
-					ingredientNameEnglish = ingredientNameEnglish == null ? "" : ingredientNameEnglish.toUpperCase();
+					ingredientNameEnglish = ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.safeToUpperCase(ingredientNameEnglish);
 					
 					if ((!ingredientName.equals("")) && (!ingredientNameEnglish.equals(""))) {
 						String translation = ingredientNameTranslationMap.get(ingredient);

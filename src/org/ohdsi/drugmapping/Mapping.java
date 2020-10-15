@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class Mapping {
@@ -20,8 +21,8 @@ public class Mapping {
 			if (replacementsFile.openFile()) {
 				while (replacementsFile.hasNext()) {
 					Row row = replacementsFile.next();
-					String replace = replacementsFile.get(row, "Replace", true).toUpperCase();
-					String by = replacementsFile.get(row, "By", true).toUpperCase();
+					String replace = DrugMappingStringUtilities.safeToUpperCase(replacementsFile.get(row, "Replace", true));
+					String by = DrugMappingStringUtilities.safeToUpperCase(replacementsFile.get(row, "By", true));
 					
 					System.out.println("    Replace \"" + replace + "\" by \"" + by);
 					replacements.put(replace, by);
@@ -34,7 +35,7 @@ public class Mapping {
 
 	
 	public String getReplacement(String orgString) {
-		String replacement = orgString.toUpperCase();
+		String replacement = DrugMappingStringUtilities.safeToUpperCase(orgString);
 		for (String replace : replacementOrder) {
 			String replaceBy = replacements.get(replace);
 			if (replace.startsWith("^")) {

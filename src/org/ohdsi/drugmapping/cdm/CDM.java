@@ -310,7 +310,7 @@ public class CDM {
 				lastCdmIngredient = cdmIngredient;
 			}
 			
-			String cdmIngredientSynonym = queryRow.get("concept_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String cdmIngredientSynonym = DrugMappingStringUtilities.safeToUpperCase(queryRow.get("concept_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim());
 			
 			ingredientNames.addNames(lastCdmIngredient.getConceptName(), lastCdmIngredient.getVocabularyId(), lastCdmIngredient.getConceptClassId(), "", false, lastCdmIngredient);
 			ingredientNameSynonyms.addNames(cdmIngredientSynonym, lastCdmIngredient.getVocabularyId(), lastCdmIngredient.getConceptClassId(), "", true, lastCdmIngredient);
@@ -334,12 +334,12 @@ public class CDM {
 		for (Row queryRow : connection.queryResource("GetRxNormIngredientRelationships.sql", queryParameters)) {
 			String relationshipId = queryRow.get("relationship_id", true);
 			//String drugConceptId = queryRow.get("drug_concept_id", true);
-			String drugConceptName = queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String drugConceptName = DrugMappingStringUtilities.safeToUpperCase(queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim());
 			String drugVocabularyId = queryRow.get("drug_vocabulary_id", true);
 			String drugConceptClassId = queryRow.get("drug_concept_class_id", true);
 			String drugConceptCode = queryRow.get("drug_concept_code", true);
 			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
-			String drugSynonymName = queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim().toUpperCase();
+			String drugSynonymName = DrugMappingStringUtilities.safeToUpperCase(queryRow.get("drug_synonym_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim());
 			
 			CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 			
@@ -892,7 +892,7 @@ public class CDM {
 		
 		
 		public void addNames(String name, String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
-			name = name.toUpperCase();
+			name = DrugMappingStringUtilities.safeToUpperCase(name);
 			namesLibrary.addHit(name, vocabulary, conceptClass, relationship, synonym, cdmIngredient);
 			standardizedNamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(name), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
 			sortedWordsamesLibrary.addHit(DrugMappingStringUtilities.sortWords(name), vocabulary, conceptClass, relationship, synonym, cdmIngredient);

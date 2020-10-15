@@ -2,6 +2,7 @@ package org.ohdsi.drugmapping.cdm;
 
 import java.util.List;
 
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredientStrength {
@@ -81,7 +82,7 @@ public class CDMIngredientStrength {
 		
 		if (amount_value != null) {
 			dosage = amount_value;
-			unit = amount_unit.getConceptCode().toUpperCase();
+			unit = DrugMappingStringUtilities.safeToUpperCase(amount_unit.getConceptCode());
 		}
 		else {
 			if (numerator_value != null) {
