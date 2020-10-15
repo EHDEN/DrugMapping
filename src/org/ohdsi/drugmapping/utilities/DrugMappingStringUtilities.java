@@ -1,8 +1,10 @@
 package org.ohdsi.drugmapping.utilities;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -107,6 +109,30 @@ public class DrugMappingStringUtilities {
 		return split;
 	}
 	
+	public static String join(Collection<?> s, String delimiter) {
+		StringBuffer buffer = new StringBuffer();
+		Iterator<?> iter = s.iterator();
+		if (iter.hasNext()) {
+			buffer.append(iter.next().toString());
+		}
+		while (iter.hasNext()) {
+			buffer.append(delimiter);
+			buffer.append(iter.next().toString());
+		}
+		return buffer.toString();
+	}
+	
+	public static String join(Object[] objects, String delimiter) {
+		StringBuffer buffer = new StringBuffer();
+		if (objects.length != 0)
+			buffer.append(objects[0].toString());
+		for (int i = 1; i < objects.length; i++) {
+			buffer.append(delimiter);
+			buffer.append(objects[i].toString());
+		}
+		return buffer.toString();
+	}
+	
 	
 	public static String standardizedName(String name) {
 		
@@ -172,7 +198,7 @@ public class DrugMappingStringUtilities {
 		List<String> matchingNames = new ArrayList<String>();
 		Set<String> uniqueNames = new HashSet<String>();
 
-		name = safeToUpperCase(removeExtraSpaces(name));
+		name = safeToUpperCase(removeExtraSpaces(name).toUpperCase());
 		englishName = safeToUpperCase(removeExtraSpaces(englishName));
 		
 		if (uniqueNames.add(name)) {
@@ -418,11 +444,29 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String convertToANSI(String string) {
+		String ansiString = "";
+		
+		for (int charNr = 0; charNr < string.length(); charNr++) {
+			Character character = string.charAt(charNr);
+			if (character == 'α') {
+				character = 'a';
+			}
+			ansiString += character;
+		}
+		
+		return ansiString;
+	}
+	
+	
 	public static String safeToUpperCase(String string) {
 		String safeUpperCaseString = "";
 		
 		for (int charNr = 0; charNr < string.length(); charNr++) {
 			Character character = string.charAt(charNr);
+			if (character == 'α') {
+				character = 'A';
+			}
 			if (
 					((character >=  97) && (character <= 122)) ||
 					((character >= 224) && (character <= 246)) ||
@@ -480,13 +524,11 @@ public class DrugMappingStringUtilities {
 		return string;
 	}
 	
-	/*
+	
 	public static void main(String[] args) {
-		String source = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ €ÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ";
-		System.out.println(source);
-		String destination = safeToUpperCase(source);
-		System.out.println(destination);
+		String test = "FOLLICLE STIMULATI&NG H/ORM\\ONE 75 UNT INJECT\tABLE SOLU?TION";
+		System.out.println(test);
+		System.out.println(DrugMappingStringUtilities.sortWords(test));
 	}
-	*/
 
 }

@@ -45,6 +45,7 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
 import org.ohdsi.utilities.files.Row;
 
@@ -330,7 +331,7 @@ public class InputFile extends JPanel {
 		else {
 			value = row.get(mappedFieldName, required);
 		}
-		return value;
+		return value == null ? null : DrugMappingStringUtilities.convertToANSI(value);
 	}
 	
 	
