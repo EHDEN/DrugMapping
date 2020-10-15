@@ -172,8 +172,8 @@ public class DrugMappingStringUtilities {
 		List<String> matchingNames = new ArrayList<String>();
 		Set<String> uniqueNames = new HashSet<String>();
 
-		name = safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(name));
-		englishName = safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(englishName));
+		name = safeToUpperCase(removeExtraSpaces(name));
+		englishName = safeToUpperCase(removeExtraSpaces(englishName));
 		
 		if (uniqueNames.add(name)) {
 			matchingNames.add("SourceTerm: " + name);
