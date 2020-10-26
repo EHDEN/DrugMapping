@@ -9,13 +9,15 @@ import java.util.Set;
 
 import javax.swing.JComponent;
 import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.files.InputFileDefinition;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
-import org.ohdsi.drugmapping.gui.Folder;
-import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
+import org.ohdsi.drugmapping.gui.files.FolderGUI;
+import org.ohdsi.drugmapping.gui.files.InputFileGUI;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 
 public class DrugMapping { 
@@ -31,7 +33,7 @@ public class DrugMapping {
 	
 	private static String currentPath = null;	
 	private static String basePath = new File(".").getAbsolutePath();
-	private static MappingInputDefinition inputFiles = null;
+	private static InputFileDefinition inputFiles = null;
 	
 	private String logFileName;
 	private MainFrame mainFrame;
@@ -145,7 +147,7 @@ public class DrugMapping {
 	}
 	
 	
-	private InputFile getFile(String fileName) {
+	private InputFileGUI getFile(String fileName) {
 		return mainFrame.getInputFile(fileName);
 	}
 	
@@ -183,27 +185,27 @@ public class DrugMapping {
 			}
 			else {
 				logDatabaseSettings(getDatabase());
-				logFileSettings("Generic Drugs File", getFile("Generic Drugs File"));
-				logFileSettings("Ingredient Name Translation File", getFile("Ingredient Name Translation File"));
-				logFileSettings("Unit Mapping File", getFile("Unit Mapping File"));
-				logFileSettings("Dose Form Mapping File", getFile("Dose Form Mapping File"));
-				logFileSettings("Manual CAS Mappings File", getFile("Manual CAS Mappings File"));
-				logFileSettings("Manual Ingedient Overrule Mappings File", getFile("Manual Ingedient Overrule Mappings File"));
-				logFileSettings("Manual Ingedient Fallback Mappings File", getFile("Manual Ingedient Fallback Mappings File"));
-				logFileSettings("Manual Drug Mappings File", getFile("Manual Drug Mappings File"));
+				getFile("Generic Drugs File").logFileSettings();
+				getFile("Ingredient Name Translation File").logFileSettings();
+				getFile("Unit Mapping File").logFileSettings();
+				getFile("Dose Form Mapping File").logFileSettings();
+				getFile("Manual CAS Mappings File").logFileSettings();
+				getFile("Manual Ingedient Overrule Mappings File").logFileSettings();
+				getFile("Manual Ingedient Fallback Mappings File").logFileSettings();
+				getFile("Manual Drug Mappings File").logFileSettings();
 				logFolderSettings(mainFrame.getOutputFolder());
 				logGeneralSettings();
 				new GenericMapping(
 						mainFrame,
 						getDatabase(), 
-						getFile("Generic Drugs File"),
-						getFile("Ingredient Name Translation File"),
-						getFile("Unit Mapping File"),
-						getFile("Dose Form Mapping File"),
-						getFile("Manual CAS Mappings File"), 
-						getFile("Manual Ingedient Overrule Mappings File"), 
-						getFile("Manual Ingedient Fallback Mappings File"), 
-						getFile("Manual Drug Mappings File")
+						(DelimitedInputFileGUI) getFile("Generic Drugs File"),
+						(DelimitedInputFileGUI) getFile("Ingredient Name Translation File"),
+						(DelimitedInputFileGUI) getFile("Unit Mapping File"),
+						(DelimitedInputFileGUI) getFile("Dose Form Mapping File"),
+						(DelimitedInputFileGUI) getFile("Manual CAS Mappings File"), 
+						(DelimitedInputFileGUI) getFile("Manual Ingedient Overrule Mappings File"), 
+						(DelimitedInputFileGUI) getFile("Manual Ingedient Fallback Mappings File"), 
+						(DelimitedInputFileGUI) getFile("Manual Drug Mappings File")
 						);
 			}
 
@@ -227,24 +229,7 @@ public class DrugMapping {
 	}
 	
 	
-	private void logFileSettings(String fileId, InputFile file) {
-		if (file.getFileName() != null) {
-			System.out.println("Input File: " + fileId);
-			System.out.println("  Filename: " + file.getFileName());
-			System.out.println("  Field delimiter: '" + file.getFieldDelimiter() + "'");
-			System.out.println("  Text qualifier: '" + file.getTextQualifier() + "'");
-			System.out.println("  Fields:");
-			List<String> columns = file.getColumns();
-			Map<String, String> columnMapping = file.getColumnMapping();
-			for (String column : columns) {
-				System.out.println("    " + column + " -> " + columnMapping.get(column));
-			}
-			System.out.println();
-		}
-	}
-	
-	
-	private void logFolderSettings(Folder folder) {
+	private void logFolderSettings(FolderGUI folder) {
 		if (folder.getFolderName() != null) {
 			System.out.println(folder.getName() + ": " + folder.getFolderName());
 			System.out.println();

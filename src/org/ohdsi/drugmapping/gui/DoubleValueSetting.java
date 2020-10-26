@@ -11,8 +11,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.ohdsi.drugmapping.DrugMapping;
-
 public class DoubleValueSetting extends Setting {
 	private static final long serialVersionUID = -3800881489329031554L;
 
@@ -66,7 +64,7 @@ public class DoubleValueSetting extends Setting {
 			}
 		});
 		doubleValueFieldPanel.add(doubleValueField, BorderLayout.WEST);
-		DrugMapping.disableWhenRunning(doubleValueField);
+		disableWhenRunning(doubleValueField);
 		
 		setValue(defaultValue);
 		

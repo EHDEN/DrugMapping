@@ -1,6 +1,9 @@
 package org.ohdsi.drugmapping.gui;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+
+import org.ohdsi.drugmapping.DrugMapping;
 
 public class Setting extends JPanel {
 	private static final long serialVersionUID = -1756870820181266594L;
@@ -11,11 +14,17 @@ public class Setting extends JPanel {
 	public static final int SETTING_TYPE_DOUBLE  = 1;
 	public static final int SETTING_TYPE_STRING  = 2;
 	public static final int SETTING_TYPE_BOOLEAN = 3;
-	
+		
 	protected boolean correct = false;
 	protected String name = "";
 	protected String label = "";
 	protected int valueType = -1;
+	
+	
+	public void disableWhenRunning(JComponent component) {
+		DrugMapping.disableWhenRunning(component);
+	}
+	
 
 	public void initialize() {
 		// Should be overloaded
@@ -51,5 +60,6 @@ public class Setting extends JPanel {
 	public boolean isSetCorrectly() {
 		return correct;
 	};
+	
 
 }

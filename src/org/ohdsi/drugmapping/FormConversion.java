@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.ohdsi.drugmapping.cdm.CDM;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
-import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class FormConversion {
 	public static int STATE_NOT_FOUND = 0;
@@ -39,7 +39,7 @@ public class FormConversion {
 	}
 	
 	
-	public FormConversion(InputFile sourceFormMappingFile, CDM cdm) {
+	public FormConversion(DelimitedInputFileGUI sourceFormMappingFile, CDM cdm) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Create Dose Forms Conversion Map ...");
 		
 		this.cdm = cdm;
@@ -57,13 +57,13 @@ public class FormConversion {
 		return fileName;
 	}
 	
-	private void readFormConversionFile(InputFile sourceFormMappingFile) {
+	private void readFormConversionFile(DelimitedInputFileGUI sourceFormMappingFile) {
 		Map<String, Map<Integer, String>> tempFormConversionMap = new HashMap<String, Map<Integer, String>>();
-		if ((sourceFormMappingFile != null) && sourceFormMappingFile.openFile(true)) {
+		if ((sourceFormMappingFile != null) && sourceFormMappingFile.openFileForReading(true)) {
 			fileName = sourceFormMappingFile.getFileName();
 			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Get form conversion map from file " + fileName + " ...");
 			while (sourceFormMappingFile.hasNext()) {
-				Row row = sourceFormMappingFile.next();
+				DelimitedFileRow row = sourceFormMappingFile.next();
 				
 				String sourceForm = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "DoseForm", true)));
 				String priorityString = sourceFormMappingFile.get(row, "Priority", false);
@@ -139,7 +139,7 @@ public class FormConversion {
 	}
 	
 	
-	private void createFormConversionFile(InputFile sourceFormMappingFile) {
+	private void createFormConversionFile(DelimitedInputFileGUI sourceFormMappingFile) {
 		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
@@ -150,8 +150,8 @@ public class FormConversion {
 			textQualifierName = sourceFormMappingFile.getTextQualifier();
 		}
 		
-		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
-		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
+		String fieldDelimiter = Character.toString(DelimitedInputFileGUI.fieldDelimiter(fieldDelimiterName));
+		String textQualifier = Character.toString(DelimitedInputFileGUI.textQualifier(textQualifierName));
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Write dose form conversion map to file " + fileName + " ...");
 		

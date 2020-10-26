@@ -12,12 +12,12 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.ohdsi.drugmapping.DrugMapping;
-import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingNumberUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class Source {
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
@@ -114,7 +114,7 @@ public class Source {
 	private List<SourceDrug> missingATC;
 	
 	
-	public boolean loadSourceDrugs(InputFile sourceDrugsFile, List<String> report) {
+	public boolean loadSourceDrugs(DelimitedInputFileGUI sourceDrugsFile, List<String> report) {
 		allComponents = new HashSet<SourceDrugComponent>();
 		allIngredients = new HashSet<SourceIngredient>();
 		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
@@ -127,7 +127,7 @@ public class Source {
 	}
 	
 	
-	public boolean loadSourceDrugs(InputFile sourceDrugsFile, long minimumUseCount) {
+	public boolean loadSourceDrugs(DelimitedInputFileGUI sourceDrugsFile, long minimumUseCount) {
 		allComponents = new HashSet<SourceDrugComponent>();
 		allIngredients = new HashSet<SourceIngredient>();
 		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
@@ -138,7 +138,7 @@ public class Source {
 	}
 	
 	
-	private boolean load(InputFile sourceDrugsFile, long minimumUseCount, List<String> report) {
+	private boolean load(DelimitedInputFileGUI sourceDrugsFile, long minimumUseCount, List<String> report) {
 		boolean sourceDrugError = false;
 		
 		forms = new HashSet<String>();
@@ -153,10 +153,10 @@ public class Source {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading source drugs ...");
 		
 		try {
-			if (sourceDrugsFile.openFile()) {
+			if (sourceDrugsFile.openFileForReading()) {
 				
 				while (sourceDrugsFile.hasNext()) {
-					Row row = sourceDrugsFile.next();
+					DelimitedFileRow row = sourceDrugsFile.next();
 					
 					String sourceCode = sourceDrugsFile.get(row, "SourceCode", true).trim();
 					

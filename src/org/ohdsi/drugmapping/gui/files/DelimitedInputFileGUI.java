@@ -1,4 +1,4 @@
-package org.ohdsi.drugmapping.gui;
+package org.ohdsi.drugmapping.gui.files;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -7,8 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +26,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -41,39 +38,29 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.ohdsi.drugmapping.DrugMapping;
+import javax.swing.filechooser.FileFilter;
+
+import org.ohdsi.drugmapping.files.DelimitedFileWithHeader;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
-import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
+import org.ohdsi.drugmapping.gui.JTextFieldLimit;
+import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
-import org.ohdsi.utilities.files.Row;
 
-public class InputFile extends JPanel {
+public class DelimitedInputFileGUI extends InputFileGUI {
 	private static final long serialVersionUID = -8908651240263793215L;
 	
 	private final String[] FIELD_DELIMITERS = new String[]{ "Tab", "Semicolon", "Comma", "Space", "Other" };
 	private final String[] TEXT_QUALIFIERS  = new String[]{ "\"", "'", "None" };
-	private final String   CHAR_SET         = "ISO-8859-1";
 	
-	private final int FILE_LABEL_SIZE = 260;
-	
-	private FileDefinition fileDefinition;
-	private String labelText;
-	
-	private JPanel fileLabelPanel;
-	private JCheckBox fileSelectCheckBox;
-	private JLabel fileLabel;
-	private JTextField fileNameField;
-	private JButton fileSelectButton;
 	private List<JComboBox<String>> comboBoxList;
 
-	private String fileName = null;
 	private String fieldDelimiter = "Comma";
 	private String textQualifier = "\"";
 	private Map<String, String> columnMapping = new HashMap<String, String>();
 	
-	private Iterator<Row> fileIterator;
+	private Iterator<DelimitedFileRow> fileIterator;
 	
 	
 	public static char fieldDelimiter(String delimiterName) {
@@ -91,78 +78,12 @@ public class InputFile extends JPanel {
 	}
 	
 	
-	public InputFile(FileDefinition fileDefinition) {
-		this.fileDefinition = fileDefinition;
-		this.labelText = fileDefinition.getFileName();
+	public DelimitedInputFileGUI(Component parent, FileDefinition fileDefinition) {
+		super(parent, fileDefinition);
 		
 		for (FileColumnDefinition column : fileDefinition.getColumns()) {
 			columnMapping.put(column.getColumnName(), null);
 		}
-		
-		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-		
-		JPanel fileSelectLabelPanel = new JPanel(new BorderLayout());
-		fileSelectLabelPanel.setMinimumSize(new Dimension(FILE_LABEL_SIZE, fileSelectLabelPanel.getHeight()));
-		fileSelectLabelPanel.setPreferredSize(new Dimension(FILE_LABEL_SIZE, fileSelectLabelPanel.getHeight()));
-		fileSelectCheckBox = new JCheckBox();
-		fileSelectCheckBox.setSelected(true);
-		fileSelectCheckBox.setEnabled(!fileDefinition.isRequired());
-		fileSelectLabelPanel.add(fileSelectCheckBox, BorderLayout.WEST);
-		if ((!fileDefinition.isRequired())) {
-			DrugMapping.disableWhenRunning(fileSelectCheckBox);
-		}
-		
-		fileLabelPanel = new JPanel(new BorderLayout());
-		fileLabel = new JLabel(labelText + ":");
-		fileLabelPanel.add(fileLabel, BorderLayout.WEST);
-		
-		fileSelectLabelPanel.add(fileLabelPanel, BorderLayout.CENTER);
-		
-		fileNameField = new JTextField();
-		fileNameField.setText(fileDefinition.getDefaultFile());
-		fileNameField.setPreferredSize(new Dimension(10000, fileNameField.getHeight()));
-		fileNameField.setEditable(false);
-
-		fileSelectButton = new JButton("Select");
-
-		add(fileSelectLabelPanel);
-		add(fileNameField);
-		add(new JLabel("  "));
-		add(fileSelectButton);
-		
-		final InputFile currentInputFile = this;
-		fileSelectButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				defineFile(currentInputFile);
-			}
-		});
-		
-		fileLabel.addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if (fileSelectCheckBox.isEnabled()) {
-					fileSelectCheckBox.setSelected(!fileSelectCheckBox.isSelected());
-				}
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent arg0) {}
-
-			@Override
-			public void mouseExited(MouseEvent arg0) {}
-
-			@Override
-			public void mousePressed(MouseEvent arg0) {}
-
-			@Override
-			public void mouseReleased(MouseEvent arg0) {}
-			
-		});
-		
-		DrugMapping.disableWhenRunning(fileSelectButton);
 		
 		if (fileDefinition.getDefaultFieldDelimiter() != null) {
 			setFieldDelimiter(fileDefinition.getDefaultFieldDelimiter());
@@ -171,37 +92,6 @@ public class InputFile extends JPanel {
 		if (fileDefinition.getDefaultTextQualifier() != null) {
 			setTextQualifier(fileDefinition.getDefaultTextQualifier());
 		}
-	}
-	
-	
-	public String getLabelText() {
-		return labelText;
-	}
-	
-	
-	public JLabel getLabel() {
-		return fileLabel;
-	}
-	
-	
-	public JTextField getFileNameLabel() {
-		return fileNameField;
-	}
-	
-	
-	public JButton getSelectButton() {
-		return fileSelectButton;
-	}
-	
-	
-	public String getFileName() {
-		return fileName;
-	}
-	
-	
-	public void setFileName(String fileName) {
-		fileNameField.setText(fileName);
-		this.fileName = fileName;
 	}
 	
 	
@@ -227,7 +117,7 @@ public class InputFile extends JPanel {
 	
 	public List<String> getColumns() {
 		List<String> columns = new ArrayList<String>();
-		for (FileColumnDefinition column : fileDefinition.getColumns()) {
+		for (FileColumnDefinition column : getFileDefinition().getColumns()) {
 			columns.add(column.getColumnName());
 		}
 		return columns;
@@ -249,16 +139,6 @@ public class InputFile extends JPanel {
 	}
 	
 	
-	public boolean isSelected() {
-		return fileSelectCheckBox.isSelected();
-	}
-	
-	
-	public void setSelected(boolean selected) {
-		fileSelectCheckBox.setSelected(selected);
-	}
-	
-	
 	public boolean fileExists() {
 		boolean exists = false;
 		if (getFileName() != null) {
@@ -271,48 +151,12 @@ public class InputFile extends JPanel {
 	}
 	
 	
-	public boolean openFile() {
-		return openFile(false);
-	}
-	
-	
-	public boolean openFile(boolean suppressError) {
-		boolean result = false;
-		
-		if (getFileName() != null) {
-			File inputFile = new File(getFileName());
-			if (inputFile.exists() && inputFile.canRead()) {
-				char delmiter = fieldDelimiter(fieldDelimiter);
-				char textDelimiter = textQualifier(textQualifier);
-				
-				ReadCSVFileWithHeader readFile = new ReadCSVFileWithHeader(getFileName(), delmiter, textDelimiter);
-				if (readFile.isOpen()) {
-					result = true;
-					fileIterator = readFile.iterator();
-				}
-				else {
-					if (!suppressError) {
-						JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			}
-			else {
-				if (!suppressError) {
-					JOptionPane.showMessageDialog(null, "Cannot read file '" + getFileName() + "'!", "Error", JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		}
-		
-		return result;
-	}
-	
-	
 	public boolean hasNext() {
 		return fileIterator.hasNext();
 	}
 	
 	
-	public Row next() {
+	public DelimitedFileRow next() {
 		return fileIterator.next();
 	}
 	
@@ -322,7 +166,7 @@ public class InputFile extends JPanel {
 	}
 	
 	
-	public String get(Row row, String fieldName, boolean required) {
+	public String get(DelimitedFileRow row, String fieldName, boolean required) {
 		String value = null;
 		String mappedFieldName = columnMapping.get(fieldName);	
 		if (required && (mappedFieldName == null)) {
@@ -331,58 +175,12 @@ public class InputFile extends JPanel {
 		else {
 			value = row.get(mappedFieldName, required);
 		}
-		return value == null ? null : DrugMappingStringUtilities.convertToANSI(value);
+		return DrugMappingStringUtilities.convertToANSI(value);
 	}
 	
 	
-	public List<String> getSettings() {
-		List<String> settings = new ArrayList<String>();
-
-		settings.add("#");
-		settings.add("# " + getLabelText());
-		settings.add("#");
-		settings.add("");
-		settings.add(labelText + ".filename=" + fileName);
-		settings.add(labelText + ".fieldDelimiter=" + fieldDelimiter);
-		settings.add(labelText + ".textQualifier=" + textQualifier);
-		settings.add(labelText + ".selected=" + (isSelected() ? "Yes" : "No"));
-		for (String column : getColumns()) {
-			settings.add(labelText + ".column." + column + "=" + (columnMapping.get(column) == null ? "" : columnMapping.get(column)));
-		}
-		
-		return settings;
-	}
-	
-	
-	public void putSettings(List<String> settings) {
-		for (String setting : settings) {
-			if ((!setting.trim().equals("")) && (!setting.substring(0, 1).equals("#"))) {
-				int equalSignIndex = setting.indexOf("=");
-				String settingPath = setting.substring(0, equalSignIndex);
-				String value = setting.substring(equalSignIndex + 1).trim();
-				String[] settingPathSplit = settingPath.split("\\.");
-				if ((settingPathSplit.length > 0) && (settingPathSplit[0].equals(getLabelText()))) {
-					if ((settingPathSplit.length == 3) && (settingPathSplit[1].equals("column"))) { // Column mapping
-						if (getColumns().contains(settingPathSplit[2])) {
-							columnMapping.put(settingPathSplit[2], value);
-						}
-					}
-					else if (settingPathSplit.length == 2) {
-						if (settingPathSplit[1].equals("filename")) setFileName(value);
-						else if (settingPathSplit[1].equals("fieldDelimiter")) setFieldDelimiter(value);
-						else if (settingPathSplit[1].equals("textQualifier")) setTextQualifier(value);
-						else if (settingPathSplit[1].equals("selected")) setSelected(value.toUpperCase().equals("YES"));
-						else {
-							// Unknown setting
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	
-	private void defineFile(InputFile inputFile) {
+	void defineFile(InputFileGUI inputFile) {
+		DelimitedInputFileGUI delimitedInputFile = (DelimitedInputFileGUI) inputFile;
 		JDialog fileDialog = new JDialog();
 		fileDialog.setLayout(new BorderLayout());
 		fileDialog.setModal(true);
@@ -394,7 +192,7 @@ public class InputFile extends JPanel {
 		
 		// File section
 		JPanel fileSectionPanel = new JPanel(new BorderLayout());
-		fileSectionPanel.setBorder(BorderFactory.createTitledBorder(inputFile.labelText));
+		fileSectionPanel.setBorder(BorderFactory.createTitledBorder(getLabelText()));
 		JPanel fileSectionSubPanel = new JPanel(new BorderLayout());
 		
 		JPanel fileDescriptionPanel = new JPanel(new BorderLayout());
@@ -403,7 +201,7 @@ public class InputFile extends JPanel {
 		fileDescriptionField.setEditable(false);
 		fileDescriptionField.setBackground(fileDescriptionPanel.getBackground());
 		String description = "";
-		for (String line : fileDefinition.getDescription()) {
+		for (String line : getFileDefinition().getDescription()) {
 			if (!description.equals("")) {
 				description += "\n";
 			}
@@ -416,7 +214,7 @@ public class InputFile extends JPanel {
 		fileChooserPanel.setLayout(new BoxLayout(fileChooserPanel, BoxLayout.X_AXIS));
 		fileChooserPanel.setBorder(BorderFactory.createEmptyBorder());
 		
-		JTextField fileField = new JTextField(inputFile.getFileName());
+		JTextField fileField = new JTextField(delimitedInputFile.getFileName());
 		fileField.setEditable(false);
 		
 		JButton fileButton = new JButton("Browse");
@@ -435,7 +233,7 @@ public class InputFile extends JPanel {
 		for (String delimiter : FIELD_DELIMITERS) {
 			JRadioButton radioButton = new JRadioButton(delimiter);
 			radioButton.setActionCommand(delimiter);
-			radioButton.setSelected(delimiter.equals(inputFile.getFieldDelimiter()));
+			radioButton.setSelected(delimiter.equals(delimitedInputFile.getFieldDelimiter()));
 			fieldDelimiterButtons.add(radioButton);
 			fileDelimiterSubPanel.add(radioButton);
 			if (delimiter.equals("Other")) {
@@ -462,7 +260,7 @@ public class InputFile extends JPanel {
 		for (String qualifier : TEXT_QUALIFIERS) {
 			JRadioButton radioButton = new JRadioButton(qualifier);
 			radioButton.setActionCommand(qualifier);
-			radioButton.setSelected(qualifier.equals(inputFile.getTextQualifier()));
+			radioButton.setSelected(qualifier.equals(delimitedInputFile.getTextQualifier()));
 			textQualifierButtons.add(radioButton);
 			fileTextQualifierSubPanel.add(radioButton);
 		}
@@ -491,7 +289,7 @@ public class InputFile extends JPanel {
 		boolean first = true;
 		JPanel lastPanel = mappingScrollPanel; 
 		comboBoxList = new ArrayList<JComboBox<String>>();
-		for (FileColumnDefinition column : fileDefinition.getColumns()) {
+		for (FileColumnDefinition column : getFileDefinition().getColumns()) {
 			if (!first) {
 				JPanel newPanel = new JPanel(new BorderLayout());
 				lastPanel.add(newPanel, BorderLayout.CENTER);
@@ -533,7 +331,7 @@ public class InputFile extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				String fieldDelimiter = geFieldDelimiterFromInput(fieldDelimiterButtons, otherDelimiter.getText());
 				String textQualifier = textQualifierButtons.getSelection().getActionCommand();
-				if (saveFileSettings(inputFile, fileField.getText(), fieldDelimiter, textQualifier, comboBoxList)) {
+				if (saveFileSettings(delimitedInputFile, fileField.getText(), fieldDelimiter, textQualifier, comboBoxList)) {
 					fileDialog.dispose();
 				}				
 			}
@@ -599,21 +397,9 @@ public class InputFile extends JPanel {
 		fileDialog.add(mappingSectionPanel, BorderLayout.CENTER);
 		fileDialog.add(buttonSectionPanel, BorderLayout.SOUTH);
 		
-		updateColumns(fileName, fieldDelimiter, comboBoxList);
+		updateColumns(getFileName(), fieldDelimiter, comboBoxList);
 		
 		fileDialog.setVisible(true);
-	}
-	
-	
-	private boolean selectFile(Component parent, JTextField fileField) {
-		boolean result = false;
-		String fileName = DrugMappingFileUtilities.selectCSVFile(parent);
-		if (fileName != null) {
-			fileField.setText(fileName);
-			DrugMapping.setCurrentPath(fileName.substring(0, fileName.lastIndexOf(File.separator)));
-			result = true;
-		}
-		return result;
 	}
 	
 	
@@ -626,7 +412,7 @@ public class InputFile extends JPanel {
 	}
 	
 	
-	private boolean saveFileSettings(InputFile inputFile, String fileName, String fieldDelimiter, String textQualifier, List<JComboBox<String>> comboBoxList) {
+	private boolean saveFileSettings(DelimitedInputFileGUI inputFile, String fileName, String fieldDelimiter, String textQualifier, List<JComboBox<String>> comboBoxList) {
 		boolean saveOK = false;
 		boolean columnMappingComplete = true;
 		for (int columnNr = 0; columnNr < inputFile.getColumns().size(); columnNr++) {
@@ -682,7 +468,7 @@ public class InputFile extends JPanel {
 			String[] columns = fileHeader.split(translateDelimiter(fieldDelimiter));
 			int columnNr = 0;
 			for (JComboBox<String> comboBox : comboBoxList) {
-				String columnName = fileDefinition.getColumns()[columnNr].getColumnName();
+				String columnName = getFileDefinition().getColumns()[columnNr].getColumnName();
 				String mappedColumn = columnMapping.get(columnName);
 				int itemNrToSelect = 0;
 				
@@ -715,7 +501,7 @@ public class InputFile extends JPanel {
 		String header = "";
 		try {
 			FileInputStream inputstream = new FileInputStream(fileName);
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputstream, CHAR_SET));
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputstream));
 			header = bufferedReader.readLine();
 			bufferedReader.close();
 			inputstream.close();
@@ -727,6 +513,147 @@ public class InputFile extends JPanel {
 			JOptionPane.showMessageDialog(null, "Cannot read  file!", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		return header;
+	}
+	
+
+	@Override
+	public List<String> getSettings() {
+		List<String> settings = new ArrayList<String>();
+
+		settings.add("#");
+		settings.add("# " + getLabelText());
+		settings.add("#");
+		settings.add("");
+		settings.add(getLabelText() + ".filename=" + getFileName());
+		settings.add(getLabelText() + ".selected=" + (isSelected() ? "Yes" : "No"));
+		if (getFileDefinition().getFileType() == FileDefinition.DELIMITED_FILE) {
+			settings.add(getLabelText() + ".fieldDelimiter=" + getFieldDelimiter());
+			settings.add(getLabelText() + ".textQualifier=" + getTextQualifier());
+			for (String column : getColumns()) {
+				settings.add(getLabelText() + ".column." + column + "=" + (getColumnMapping().get(column) == null ? "" : getColumnMapping().get(column)));
+			}
+		}
+		
+		return settings;
+	}
+	
+
+	@Override
+	public void putSettings(List<String> settings) {
+		for (String setting : settings) {
+			if ((!setting.trim().equals("")) && (!setting.substring(0, 1).equals("#"))) {
+				int equalSignIndex = setting.indexOf("=");
+				String settingPath = setting.substring(0, equalSignIndex);
+				String value = setting.substring(equalSignIndex + 1).trim();
+				String[] settingPathSplit = settingPath.split("\\.");
+				if ((settingPathSplit.length > 0) && (settingPathSplit[0].equals(getLabelText()))) {
+					if ((settingPathSplit.length == 3) && (settingPathSplit[1].equals("column"))) { // Column mapping
+						if (getColumns().contains(settingPathSplit[2])) {
+							getColumnMapping().put(settingPathSplit[2], value);
+						}
+					}
+					else if (settingPathSplit.length == 2) {
+						if (settingPathSplit[1].equals("filename")) setFileName(value);
+						else if (settingPathSplit[1].equals("fieldDelimiter")) setFieldDelimiter(value);
+						else if (settingPathSplit[1].equals("selected")) setSelected(value.toUpperCase().equals("YES"));
+						else if (settingPathSplit[1].equals("textQualifier")) setTextQualifier(value);
+						else {
+							// Unknown setting
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	@Override
+	List<FileFilter> getFileFilters() {
+		List<FileFilter> fileFilters = new ArrayList<FileFilter>();
+		fileFilters.add(new FileFilter() {
+
+	        @Override
+	        public boolean accept(File f) {
+	            return f.getName().endsWith(".csv");
+	        }
+
+	        @Override
+	        public String getDescription() {
+	            return "Comma Separated File";
+	        }
+
+	    });
+		fileFilters.add(new FileFilter() {
+
+	        @Override
+	        public boolean accept(File f) {
+	            return f.getName().endsWith(".tsv");
+	        }
+
+	        @Override
+	        public String getDescription() {
+	            return "Tab Separated File";
+	        }
+
+	    });
+		return fileFilters;
+	}
+	
+	
+	@Override
+	public boolean openFileForReading() {
+		return openFileForReading(false);
+	}
+	
+	
+	@Override
+	public boolean openFileForReading(boolean suppressError) {
+		boolean result = false;
+		
+		if (getFileName() != null) {
+			File inputFile = new File(getFileName());
+			if (inputFile.exists() && inputFile.canRead()) {
+				char delimiter = fieldDelimiter(fieldDelimiter);
+				char textDelimiter = textQualifier(textQualifier);
+				
+				DelimitedFileWithHeader readFile = new DelimitedFileWithHeader(getFileName(), delimiter, textDelimiter);
+				if (readFile.openForReading()) {
+					result = true;
+					fileIterator = readFile.iterator();
+				}
+				else {
+					if (!suppressError) {
+						JOptionPane.showMessageDialog(null, "Couldn't open file for reading!", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}
+			else {
+				if (!suppressError) {
+					JOptionPane.showMessageDialog(null, "Cannot read file '" + getFileName() + "'!", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		}
+		
+		return result;
+	}
+
+
+	@Override
+	public void logFileSettings() {
+		if (getFileName() != null) {
+			System.out.println("Input File: " + getFileDefinition().getFileName());
+			System.out.println("  Filename: " + getFileName());
+			System.out.println("  File type: " + FileDefinition.getFileTypeName(getFileType()));
+			System.out.println("  Field delimiter: '" + getFieldDelimiter() + "'");
+			System.out.println("  Text qualifier: '" + getTextQualifier() + "'");
+			System.out.println("  Fields:");
+			List<String> columns = getColumns();
+			Map<String, String> columnMapping = getColumnMapping();
+			for (String column : columns) {
+				System.out.println("    " + column + " -> " + columnMapping.get(column));
+			}
+			System.out.println();
+		}
 	}
 
 }

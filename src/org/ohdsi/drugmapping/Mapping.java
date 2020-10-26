@@ -5,22 +5,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class Mapping {
 	private static Map<String, String> replacements = new HashMap<String, String>();
 	private static List<String> replacementOrder = new ArrayList<String>();
 	
 	
-	public static void loadReplacements(InputFile replacementsFile) {
+	public static void loadReplacements(DelimitedInputFileGUI replacementsFile) {
 		if (!replacementsFile.getFileName().equals("")) {
 			System.out.println(DrugMappingDateUtilities.getCurrentTime() + " Loading replacements ...");
-			if (replacementsFile.openFile()) {
+			if (replacementsFile.openFileForReading()) {
 				while (replacementsFile.hasNext()) {
-					Row row = replacementsFile.next();
+					DelimitedFileRow row = replacementsFile.next();
 					String replace = DrugMappingStringUtilities.safeToUpperCase(replacementsFile.get(row, "Replace", true));
 					String by = DrugMappingStringUtilities.safeToUpperCase(replacementsFile.get(row, "By", true));
 					

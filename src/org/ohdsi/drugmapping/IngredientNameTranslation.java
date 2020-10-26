@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
-import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class IngredientNameTranslation {
 	public static int STATE_NOT_FOUND = 0;
@@ -38,7 +38,7 @@ public class IngredientNameTranslation {
 	}
 	
 	
-	public IngredientNameTranslation(InputFile ingredientNameTranslationFile) {
+	public IngredientNameTranslation(DelimitedInputFileGUI ingredientNameTranslationFile) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Create Ingredient Name Translation Map ...");
 		
 		if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.isSelected()) {
@@ -56,12 +56,12 @@ public class IngredientNameTranslation {
 		return fileName;
 	}
 	
-	private void readIngredientNameTranslationFile(InputFile ingredientNameTranslationFile) {
-		if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.openFile(true)) {
+	private void readIngredientNameTranslationFile(DelimitedInputFileGUI ingredientNameTranslationFile) {
+		if ((ingredientNameTranslationFile != null) && ingredientNameTranslationFile.openFileForReading(true)) {
 			fileName = ingredientNameTranslationFile.getFileName();
 			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Get ingredient name translation map from file " + fileName + " ...");
 			while (ingredientNameTranslationFile.hasNext()) {
-				Row row = ingredientNameTranslationFile.next();
+				DelimitedFileRow row = ingredientNameTranslationFile.next();
 
 				String ingredientCode = ingredientNameTranslationFile.get(row, "IngredientCode", true);
 				String ingredientName = ingredientNameTranslationFile.get(row, "IngredientName", false);
@@ -102,7 +102,7 @@ public class IngredientNameTranslation {
 	}
 	
 	
-	private void createIngredientNameTranslationFile(InputFile ingredientNameTranslationFile) {
+	private void createIngredientNameTranslationFile(DelimitedInputFileGUI ingredientNameTranslationFile) {
 		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
@@ -113,8 +113,8 @@ public class IngredientNameTranslation {
 			textQualifierName = ingredientNameTranslationFile.getTextQualifier();
 		}
 		
-		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
-		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
+		String fieldDelimiter = Character.toString(DelimitedInputFileGUI.fieldDelimiter(fieldDelimiterName));
+		String textQualifier = Character.toString(DelimitedInputFileGUI.textQualifier(textQualifierName));
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Write ingredient name translation map to file " + fileName + " ...");
 		

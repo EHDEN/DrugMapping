@@ -22,9 +22,10 @@ import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.cdm.CDMDrug;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
 import org.ohdsi.drugmapping.cdm.CDMIngredientStrength;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
-import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceDrugComponent;
@@ -33,7 +34,6 @@ import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingNumberUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class GenericMapping extends Mapping {
 	
@@ -275,14 +275,14 @@ public class GenericMapping extends Mapping {
 	public GenericMapping(
 					MainFrame mainFrame,
 					CDMDatabase database, 
-					InputFile sourceDrugsFile, 
-					InputFile ingredientNameTranslationFile, 
-					InputFile unitMappingFile, 
-					InputFile formMappingFile, 
-					InputFile manualCASMappingFile, 
-					InputFile manualIngredientOverruleMappingFile,
-					InputFile manualIngredientFallbackMappingFile, 
-					InputFile manualDrugMappingFile
+					DelimitedInputFileGUI sourceDrugsFile, 
+					DelimitedInputFileGUI ingredientNameTranslationFile, 
+					DelimitedInputFileGUI unitMappingFile, 
+					DelimitedInputFileGUI formMappingFile, 
+					DelimitedInputFileGUI manualCASMappingFile, 
+					DelimitedInputFileGUI manualIngredientOverruleMappingFile,
+					DelimitedInputFileGUI manualIngredientFallbackMappingFile, 
+					DelimitedInputFileGUI manualDrugMappingFile
 					) {
 		boolean ok = true;
 		isMapping = true;
@@ -408,7 +408,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getIngredientNameTranslationMap(InputFile ingredientNameTranslationFile) {
+	private boolean getIngredientNameTranslationMap(DelimitedInputFileGUI ingredientNameTranslationFile) {
 		boolean ok = true;
 		
 		// Create Translation Map
@@ -435,7 +435,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getUnitConversion(InputFile unitMappingFile) {
+	private boolean getUnitConversion(DelimitedInputFileGUI unitMappingFile) {
 		boolean ok = true;
 		
 		// Create Units Map
@@ -454,7 +454,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getFormConversion(InputFile formMappingFile) {
+	private boolean getFormConversion(DelimitedInputFileGUI formMappingFile) {
 		boolean ok = true;
 		
 		// Create Units Map
@@ -473,18 +473,18 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getManualCASMappings(InputFile manualMappingFile) {
+	private boolean getManualCASMappings(DelimitedInputFileGUI manualMappingFile) {
 		boolean ok = true;
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading manual CAS mappings ...");
 		if ((manualMappingFile != null) && manualMappingFile.isSelected()) {
 			try {
 				
-				if (manualMappingFile.openFile(true)) {
+				if (manualMappingFile.openFileForReading(true)) {
 					Integer lineNr = 1;
 					while (manualMappingFile.hasNext()) {
 						lineNr++;
-						Row row = manualMappingFile.next();
+						DelimitedFileRow row = manualMappingFile.next();
 						
 						String casNumber = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "CASNumber", true));
 						String cdmConceptId = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "concept_id", true));
@@ -530,7 +530,7 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getManualIngredientMappings(InputFile manualMappingFile, String type) {
+	private boolean getManualIngredientMappings(DelimitedInputFileGUI manualMappingFile, String type) {
 		boolean ok = true;
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading manual ingredient " + type + " mappings ...");
@@ -545,12 +545,12 @@ public class GenericMapping extends Mapping {
 			}
 			try {
 				
-				if (manualMappingFile.openFile(true)) {
+				if (manualMappingFile.openFileForReading(true)) {
 
 					Integer lineNr = 1;
 					while (manualMappingFile.hasNext()) {
 						lineNr++;
-						Row row = manualMappingFile.next();
+						DelimitedFileRow row = manualMappingFile.next();
 						
 						String sourceCode = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "SourceCode", true));
 						String sourceName = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "SourceName", true));
@@ -613,17 +613,17 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	private boolean getManualDrugMappings(InputFile manualMappingFile) {
+	private boolean getManualDrugMappings(DelimitedInputFileGUI manualMappingFile) {
 		boolean ok = true;
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading manual drug mappings ...");
 		if ((manualMappingFile != null) && manualMappingFile.isSelected()) {
 			try {
 				
-				if (manualMappingFile.openFile(true)) {
+				if (manualMappingFile.openFileForReading(true)) {
 					
 					while (manualMappingFile.hasNext()) {
-						Row row = manualMappingFile.next();
+						DelimitedFileRow row = manualMappingFile.next();
 						
 						String sourceCode = manualMappingFile.get(row, "SourceCode", true).trim();
 						String cdmConceptId = manualMappingFile.get(row, "concept_id", true).trim();

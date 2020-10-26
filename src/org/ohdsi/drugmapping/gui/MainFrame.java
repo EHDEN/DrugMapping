@@ -29,17 +29,20 @@ import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
+import org.ohdsi.drugmapping.gui.files.FolderGUI;
+import org.ohdsi.drugmapping.gui.files.InputFileGUI;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.source.SourceDrug;
 import org.ohdsi.drugmapping.source.SourceIngredient;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingFileUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class MainFrame {
 	
@@ -71,7 +74,7 @@ public class MainFrame {
 
 	
 	private Source source;
-	private Map<String, InputFile> inputFilesMap;
+	private Map<String, InputFileGUI> inputFilesMap;
 	private Long minimumUseCount;
 	private boolean compBeforeForm;
 	private String baseName;
@@ -316,12 +319,12 @@ public class MainFrame {
 	}
 	
 	
-	public InputFile getInputFile(String fileName) {
+	public InputFileGUI getInputFile(String fileName) {
 		return executeTab.getInputFile(fileName);
 	}
 	
 	
-	public Folder getOutputFolder() {
+	public FolderGUI getOutputFolder() {
 		return executeTab.getOutputFolder();
 	}
 	
@@ -344,11 +347,11 @@ public class MainFrame {
 			DrugMapping.baseName = baseName;
 			getInfoFromLogFile(baseName + GenericMapping.LOGFILE_NAME);
 			GenericMapping.setMappingTypes(compBeforeForm);
-			InputFile genericDrugsFile = inputFilesMap.get("Generic Drugs File");
+			DelimitedInputFileGUI genericDrugsFile = (DelimitedInputFileGUI) inputFilesMap.get("Generic Drugs File");
 			FileDefinition ingredientMappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("Ingredient Mapping Log File");
-			InputFile ingredientMappingLogFile = null;
+			DelimitedInputFileGUI ingredientMappingLogFile = null;
 			if (ingredientMappingLogFileDefinition != null) {
-				ingredientMappingLogFile = new InputFile(ingredientMappingLogFileDefinition);
+				ingredientMappingLogFile = (DelimitedInputFileGUI) InputFileGUI.getInputFile(getFrame(), ingredientMappingLogFileDefinition);
 				ingredientMappingLogFile.setFileName(baseName + "IngredientMapping Mapping Log.csv");
 				for (FileColumnDefinition columnDefinition : ingredientMappingLogFileDefinition.getColumns()) {
 					String columnName = columnDefinition.getColumnName();
@@ -356,9 +359,9 @@ public class MainFrame {
 				}
 			}
 			FileDefinition drugMappingLogFileDefinition = mappingInputFiles.getInputFileDefinition("DrugMapping Mapping Log File");
-			InputFile drugMappingLogFile = null;
+			DelimitedInputFileGUI drugMappingLogFile = null;
 			if (drugMappingLogFileDefinition != null) {
-				drugMappingLogFile = new InputFile(drugMappingLogFileDefinition);
+				drugMappingLogFile = (DelimitedInputFileGUI) InputFileGUI.getInputFile(getFrame(), drugMappingLogFileDefinition);
 				drugMappingLogFile.setFileName(baseName + "DrugMapping Mapping Log.csv");
 				for (FileColumnDefinition columnDefinition : drugMappingLogFileDefinition.getColumns()) {
 					String columnName = columnDefinition.getColumnName();
@@ -373,7 +376,7 @@ public class MainFrame {
 	
 	
 	private void getInfoFromLogFile(String logFileName) {
-		inputFilesMap = new HashMap<String, InputFile>();
+		inputFilesMap = new HashMap<String, InputFileGUI>();
 		File logFile = new File(logFileName);
 		if (logFile.exists() && logFile.canRead()) {
 			try {
@@ -391,7 +394,7 @@ public class MainFrame {
 				
 				boolean fields = false;
 				String line = logFileReader.readLine();
-				InputFile inputFile = null;
+				DelimitedInputFileGUI inputFile = null;
 				boolean generalSettings = false;
 				while ((line != null) && (line.equals("") || (!"1234567890".contains(line.substring(0, 1))))) {
 					if (line.startsWith(inputFileTag)) {
@@ -406,7 +409,7 @@ public class MainFrame {
 							}
 						}
 						if (inputFileDefinition != null) {
-							inputFile = new InputFile(inputFileDefinition);
+							inputFile = (DelimitedInputFileGUI) InputFileGUI.getInputFile(getFrame(), inputFileDefinition);
 							inputFilesMap.put(inputFile.getLabelText(), inputFile);
 						}
 						else {
@@ -466,7 +469,7 @@ public class MainFrame {
 	}
 	
 	
-	private void startLoadingMappingResults(MainFrame mainFrame, InputFile genericDrugsFile, InputFile ingredientMappingLogFile, InputFile drugMappingLogFile) {
+	private void startLoadingMappingResults(MainFrame mainFrame, DelimitedInputFileGUI genericDrugsFile, DelimitedInputFileGUI ingredientMappingLogFile, DelimitedInputFileGUI drugMappingLogFile) {
 		if (genericDrugsFile != null) {
 			LoadMappingResultsThread mappingResultsThread = new LoadMappingResultsThread(mainFrame, genericDrugsFile, ingredientMappingLogFile, drugMappingLogFile);
 			mappingResultsThread.start();
@@ -476,11 +479,11 @@ public class MainFrame {
 	
 	private class LoadMappingResultsThread extends Thread {
 		MainFrame mainFrame;
-		InputFile genericDrugsFile;
-		InputFile ingredientMappingLogFile;
-		InputFile drugMappingLogFile;
+		DelimitedInputFileGUI genericDrugsFile;
+		DelimitedInputFileGUI ingredientMappingLogFile;
+		DelimitedInputFileGUI drugMappingLogFile;
 		
-		public LoadMappingResultsThread(MainFrame mainFrame, InputFile genericDrugsFile, InputFile ingredientMappingLogFile, InputFile drugMappingLogFile) {
+		public LoadMappingResultsThread(MainFrame mainFrame, DelimitedInputFileGUI genericDrugsFile, DelimitedInputFileGUI ingredientMappingLogFile, DelimitedInputFileGUI drugMappingLogFile) {
 			super();
 			this.mainFrame = mainFrame;
 			this.genericDrugsFile = genericDrugsFile;
@@ -509,13 +512,13 @@ public class MainFrame {
 	}
 	
 	
-	private void loadIngredientMappingLog(InputFile ingredientMappingLogFile) {
+	private void loadIngredientMappingLog(DelimitedInputFileGUI ingredientMappingLogFile) {
 		
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading Ingredient Mapping Log ...");
 		
-		if (ingredientMappingLogFile.openFile()) {
+		if (ingredientMappingLogFile.openFileForReading()) {
 			while (ingredientMappingLogFile.hasNext()) {
-				Row row = ingredientMappingLogFile.next();
+				DelimitedFileRow row = ingredientMappingLogFile.next();
 				
 				String ingredientCode        = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "IngredientCode", true));
 				//String ingredientName        = DrugMappingStringUtilities.unEscapeFieldValue(ingredientMappingLogFile.get(row, "IngredientName", true));
@@ -551,12 +554,12 @@ public class MainFrame {
 	}
 	
 	
-	private void loadDrugMappingLog(InputFile drugMappingLogFile) {
+	private void loadDrugMappingLog(DelimitedInputFileGUI drugMappingLogFile) {
 		
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Loading Drug Mapping Log ...");
 		
 		usedStrengthDeviationPercentageMap = new HashMap<String, Double>();
-		if (drugMappingLogFile.openFile()) {
+		if (drugMappingLogFile.openFileForReading()) {
 			drugMappingLog = new HashMap<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>>();
 			
 			String lastSourceCode               = "";
@@ -566,7 +569,7 @@ public class MainFrame {
 			String lastSourceIngredientUnit     = "";
 			
 			while (drugMappingLogFile.hasNext()) {
-				Row row = drugMappingLogFile.next();
+				DelimitedFileRow row = drugMappingLogFile.next();
 				//System.out.println("  " + row);
 				
 				//String mappingStatus            = drugMappingLogFile.get(row, "MappingStatus", true);

@@ -9,12 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
-import org.ohdsi.drugmapping.gui.InputFile;
+import org.ohdsi.drugmapping.gui.files.DelimitedInputFileGUI;
 import org.ohdsi.drugmapping.source.Source;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class UnitConversion {
 	public static int STATE_NOT_FOUND = 0;
@@ -37,7 +37,7 @@ public class UnitConversion {
 	}
 	
 	
-	public UnitConversion(InputFile sourceUnitMappingFile) {
+	public UnitConversion(DelimitedInputFileGUI sourceUnitMappingFile) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Create Units Conversion Map ...");
 		
 		readUnitConversionFile(sourceUnitMappingFile);
@@ -53,12 +53,12 @@ public class UnitConversion {
 		return fileName;
 	}
 	
-	private void readUnitConversionFile(InputFile sourceUnitMappingFile) {
-		if ((sourceUnitMappingFile != null) && sourceUnitMappingFile.openFile(true)) {
+	private void readUnitConversionFile(DelimitedInputFileGUI sourceUnitMappingFile) {
+		if ((sourceUnitMappingFile != null) && sourceUnitMappingFile.openFileForReading(true)) {
 			fileName = sourceUnitMappingFile.getFileName();
 			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Get unit conversion map from file " + fileName + " ...");
 			while (sourceUnitMappingFile.hasNext()) {
-				Row row = sourceUnitMappingFile.next();
+				DelimitedFileRow row = sourceUnitMappingFile.next();
 				
 				String sourceUnit = DrugMappingStringUtilities.removeExtraSpaces(sourceUnitMappingFile.get(row, "SourceUnit", true));
 				//String drugCountString = sourceUnitMappingFile.get(row, "DrugCount", false);
@@ -110,7 +110,7 @@ public class UnitConversion {
 	}
 	
 	
-	private void createUnitConversionFile(InputFile sourceUnitMappingFile) {
+	private void createUnitConversionFile(DelimitedInputFileGUI sourceUnitMappingFile) {
 		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
@@ -121,8 +121,8 @@ public class UnitConversion {
 			textQualifierName = sourceUnitMappingFile.getTextQualifier();
 		}
 		
-		String fieldDelimiter = Character.toString(InputFile.fieldDelimiter(fieldDelimiterName));
-		String textQualifier = Character.toString(InputFile.textQualifier(textQualifierName));
+		String fieldDelimiter = Character.toString(DelimitedInputFileGUI.fieldDelimiter(fieldDelimiterName));
+		String textQualifier = Character.toString(DelimitedInputFileGUI.textQualifier(textQualifierName));
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "        Write unit conversion map to file " + fileName + " ...");
 		

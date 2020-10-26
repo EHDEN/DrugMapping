@@ -9,7 +9,7 @@ public class JTextFieldLimit extends PlainDocument {
 	
 	private int limit;
 
-	  JTextFieldLimit(int limit) {
+	  public JTextFieldLimit(int limit) {
 	   super();
 	   this.limit = limit;
 	   }

@@ -26,6 +26,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.GeneralSettings;
 import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.gui.files.FolderGUI;
+import org.ohdsi.drugmapping.gui.files.InputFileGUI;
 
 public class ExecuteTab extends MainFrameTab {
 	private static final long serialVersionUID = 8907817283501911409L;
@@ -33,9 +35,9 @@ public class ExecuteTab extends MainFrameTab {
 	
 	private MainFrame mainFrame;
 	private CDMDatabase database = null;
-	private List<InputFile> inputFiles = new ArrayList<InputFile>();
+	private List<InputFileGUI> inputFiles = new ArrayList<InputFileGUI>();
 	private Console console;
-	private Folder outputFolder = null; 
+	private FolderGUI outputFolder = null; 
 
 	
 	public ExecuteTab(DrugMapping drugMapping, MainFrame mainFrame) {
@@ -64,7 +66,7 @@ public class ExecuteTab extends MainFrameTab {
 		
 		for (FileDefinition fileDefinition : DrugMapping.getInputFiles()) {
 			if (fileDefinition.isUsedInInterface()) {
-				InputFile inputFile = new InputFile(fileDefinition);
+				InputFileGUI inputFile = InputFileGUI.getInputFile(mainFrame.getFrame(), fileDefinition);
 				inputFiles.add(inputFile);
 				filePanel.add(inputFile);
 			}
@@ -77,7 +79,7 @@ public class ExecuteTab extends MainFrameTab {
 		// Output Folder
 		outputPanel = new JPanel(new GridLayout(0, 1));
 		outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
-		outputFolder = new Folder("Output Folder", "Output Folder", DrugMapping.getBasePath());
+		outputFolder = new FolderGUI("Output Folder", "Output Folder", DrugMapping.getBasePath());
 		outputPanel.add(outputFolder);
 		
 		JPanel level3Panel = new JPanel(new BorderLayout());
@@ -190,7 +192,7 @@ public class ExecuteTab extends MainFrameTab {
 			if (outputFolder != null) {
 				outputFolder.putSettings(fileSettings);
 			}
-			for (InputFile inputFile : inputFiles) {
+			for (InputFileGUI inputFile : inputFiles) {
 				inputFile.putSettings(fileSettings);
 			}
 		}
@@ -204,7 +206,7 @@ public class ExecuteTab extends MainFrameTab {
 			settings.add("");
 			settings.add("");
 		}
-		for (InputFile inputFile : inputFiles) {
+		for (InputFileGUI inputFile : inputFiles) {
 			settings.addAll(inputFile.getSettings());
 			settings.add("");
 			settings.add("");
@@ -308,10 +310,10 @@ public class ExecuteTab extends MainFrameTab {
 	}
 	
 	
-	public InputFile getInputFile(String fileName) {
-		InputFile file = null;
+	public InputFileGUI getInputFile(String fileName) {
+		InputFileGUI file = null;
 		
-		for (InputFile inputFile : inputFiles) {
+		for (InputFileGUI inputFile : inputFiles) {
 			if (inputFile.getLabelText().equals(fileName)) {
 				file = inputFile;
 				break;
@@ -322,7 +324,7 @@ public class ExecuteTab extends MainFrameTab {
 	}
 	
 	
-	public Folder getOutputFolder() {
+	public FolderGUI getOutputFolder() {
 		return outputFolder;
 	}
 	

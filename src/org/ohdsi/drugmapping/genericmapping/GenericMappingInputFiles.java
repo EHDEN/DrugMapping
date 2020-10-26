@@ -5,12 +5,12 @@ import java.util.Arrays;
 
 import org.ohdsi.drugmapping.FormConversion;
 import org.ohdsi.drugmapping.IngredientNameTranslation;
-import org.ohdsi.drugmapping.MappingInputDefinition;
 import org.ohdsi.drugmapping.UnitConversion;
 import org.ohdsi.drugmapping.files.FileColumnDefinition;
 import org.ohdsi.drugmapping.files.FileDefinition;
+import org.ohdsi.drugmapping.files.InputFileDefinition;
 
-public class GenericMappingInputFiles extends MappingInputDefinition {
+public class GenericMappingInputFiles extends InputFileDefinition {
 
 	
 	public GenericMappingInputFiles() {
@@ -21,6 +21,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								new String[] {
 										"This file should contain the genric drugs from the source database."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"SourceCode",
@@ -101,6 +102,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										"This file should contain the translation from source ingredient",
 										"names to English to overrule the existing translation."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"IngredientCode",
@@ -132,6 +134,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								new String[] {
 										"This file should contain the mapping from source units to CDM units."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"SourceUnit",
@@ -181,6 +184,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								new String[] {
 										"This file should contain the mapping from source dose forms to CDM dose forms."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"DoseForm",
@@ -226,6 +230,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										"This file should contain mappings of CAS numbers to CDM Ingredient concepts",
 										"that overrule the automatic CAS mapping."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"CASNumber",
@@ -258,6 +263,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										"CDM Ingredient concepts that are used to correct incorrect automatic",
 										"mappings."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"SourceCode",
@@ -303,6 +309,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										"CDM Ingredient concepts that are used when no automatic mapping",
 										"could be made."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"SourceCode",
@@ -348,6 +355,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 										"clinical drugs, clinical drug comps, or clinical drug forms",
 										"that overrule the automated mapping."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"SourceCode",
@@ -372,6 +380,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								new String[] {
 										"This file contains the log of the ingredient mapping."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"IngredientCode",
@@ -484,6 +493,7 @@ public class GenericMappingInputFiles extends MappingInputDefinition {
 								new String[] {
 										"This file contains the log of the drug mapping."
 						  		},
+								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
 												"MappingStatus",

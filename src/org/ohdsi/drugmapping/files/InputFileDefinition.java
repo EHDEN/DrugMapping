@@ -1,10 +1,8 @@
-package org.ohdsi.drugmapping;
+package org.ohdsi.drugmapping.files;
 
 import java.util.List;
 
-import org.ohdsi.drugmapping.files.FileDefinition;
-
-public class MappingInputDefinition {
+public class InputFileDefinition {
 	protected List<FileDefinition> inputFiles;
 
 	
