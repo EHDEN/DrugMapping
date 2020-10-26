@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-
 import org.ohdsi.drugmapping.files.FileDefinition;
 import org.ohdsi.drugmapping.genericmapping.GenericMapping;
 import org.ohdsi.drugmapping.genericmapping.GenericMappingInputFiles;
@@ -19,8 +17,6 @@ import org.ohdsi.drugmapping.gui.InputFile;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.gui.Setting;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
-import org.ohdsi.drugmapping.zindex.ZIndexConversion;
-import org.ohdsi.drugmapping.zindex.ZIndexConversionInputFiles;
 
 public class DrugMapping { 
 	public static GeneralSettings settings = null;
@@ -99,15 +95,7 @@ public class DrugMapping {
 		debug = (parameters.get("debug") != null);
 
 		if (special != null) {
-			special = special.toUpperCase();
-			if (special.equals("ZINDEX")) {
-				inputFiles = new ZIndexConversionInputFiles();
-				logFileName = "ZIndex - Conversion - Log.txt";
-			}
-			else {
-				JOptionPane.showMessageDialog(null, "Unknown special definition '" + special + "'!", "Dialog",JOptionPane.ERROR_MESSAGE);
-				System.exit(1);
-			}
+			// No specials defined
 		}
 		else {
 			special = "";
@@ -191,19 +179,7 @@ public class DrugMapping {
 			for (JComponent component : componentsToDisableWhenRunning)
 				component.setEnabled(false);
 			
-			if (special.equals("ZINDEX")) {
-				logFileSettings("ZIndex GPK File", getFile("ZIndex GPK File"));
-				logFileSettings("ZIndex GSK File", getFile("ZIndex GSK File"));
-				logFileSettings("ZIndex GNK File", getFile("ZIndex GNK File"));
-				logFileSettings("ZIndex GPK Statistics File", getFile("ZIndex GPK Statistics File"));
-				logFileSettings("ZIndex GPK IPCI Compositions File", getFile("ZIndex GPK IPCI Compositions File"));
-				new ZIndexConversion(
-						getFile("ZIndex GPK File"), 
-						getFile("ZIndex GSK File"), 
-						getFile("ZIndex GNK File"), 
-						getFile("ZIndex GPK Statistics File"), 
-						getFile("ZIndex GPK IPCI Compositions File")
-						);
+			if (special.equals("??????")) {
 			}
 			else {
 				logDatabaseSettings(getDatabase());
