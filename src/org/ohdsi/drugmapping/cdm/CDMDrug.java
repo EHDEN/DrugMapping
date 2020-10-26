@@ -6,7 +6,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.ohdsi.utilities.files.Row;
+
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 
 public class CDMDrug extends CDMConcept {
 	private List<String> formConceptIds = new ArrayList<String>();
@@ -25,7 +26,7 @@ public class CDMDrug extends CDMConcept {
 		return CDMConcept.getHeader(prefix);
 	}
 
-	public CDMDrug(CDM cdm, Row queryRow, String prefix) {
+	public CDMDrug(CDM cdm, DelimitedFileRow queryRow, String prefix) {
 		super(cdm, queryRow, prefix);
 	}
 	

@@ -2,8 +2,8 @@ package org.ohdsi.drugmapping.cdm;
 
 import java.util.List;
 
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredientStrength {
 	private String amount_value_string      = null;
@@ -43,7 +43,7 @@ public class CDMIngredientStrength {
 	}
 	
 	
-	public CDMIngredientStrength(CDM cdm, Row queryRow, String prefix, CDMIngredient ingredient) {
+	public CDMIngredientStrength(CDM cdm, DelimitedFileRow queryRow, String prefix, CDMIngredient ingredient) {
 		List<String> fieldNames = queryRow.getFieldNames();
 		if (fieldNames.contains(prefix + "amount_value"))                amount_value_string      = queryRow.get(prefix + "amount_value", true);
 		if (fieldNames.contains(prefix + "amount_unit_concept_id"))      amount_unit              = new CDMConcept(cdm, queryRow, prefix + "amount_unit_");

@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class CDMIngredient extends CDMConcept {
 	private String atc = null;
@@ -47,7 +47,7 @@ public class CDMIngredient extends CDMConcept {
 	}
 
 	
-	public CDMIngredient(CDM cdm, Row queryRow, String prefix) {
+	public CDMIngredient(CDM cdm, DelimitedFileRow queryRow, String prefix) {
 		super(cdm, queryRow, prefix);
 	}
 

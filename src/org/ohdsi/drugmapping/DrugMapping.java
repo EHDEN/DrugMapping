@@ -247,19 +247,6 @@ public class DrugMapping {
 	
 	
 	public static void main(String[] args) {
-		/*
-		//String description = "1113614,ASPIRIN 81 MG DISINTEGRATING ORAL TABLET,Drug,RxNorm,Clinical Drug,S,747211,2007-12-30,2099-12-31,";
-		String description = "46234346,\"NITROFURANTOIN, MACROCRYSTALS 25 MG / NITROFURANTOIN, MONOHYDRATE 75 MG ORAL CAPSULE\",Drug,RxNorm,Clinical Drug,S,1648755,2015-07-06,2099-12-31,: ORAL CAPSULE (19082168)";
-		List<String> descriptionSplit = new ArrayList<String>();
-		try {
-			descriptionSplit = DrugMappingStringUtilities.intelligentSplit(description, ',', '"');
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		for (Integer segmentNr = 0; segmentNr < descriptionSplit.size(); segmentNr++) {
-			System.out.println(segmentNr + ": " + descriptionSplit.get(segmentNr));
-		}
 		/* */
 		Map<String, String> parameters = new HashMap<String, String>();
 

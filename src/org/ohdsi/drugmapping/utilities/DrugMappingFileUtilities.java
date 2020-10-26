@@ -87,4 +87,27 @@ public class DrugMappingFileUtilities {
 		} while ((file != null) && file.exists());
 		return fileName;
 	}
+	
+	
+	public static String replaceIllegalCharactersInFileName(String fileName) {
+		String ILLEGAL_CHARACTERS = "<>:\"/\\|?*";
+		for (int illegalCharNr = 0; illegalCharNr < ILLEGAL_CHARACTERS.length(); illegalCharNr++) {
+			String illegalCharacter = ILLEGAL_CHARACTERS.substring(illegalCharNr, illegalCharNr + 1);
+			System.out.println(illegalCharacter);
+			if (illegalCharacter.equals("\\")) {
+				illegalCharacter += "\\";
+			}
+			else if (illegalCharacter.equals("|")) {
+				illegalCharacter = "\\" + illegalCharacter;
+			}
+			else if (illegalCharacter.equals("?")) {
+				illegalCharacter = "\\" + illegalCharacter;
+			}
+			else if (illegalCharacter.equals("*")) {
+				illegalCharacter = "\\" + illegalCharacter;
+			}
+			fileName = fileName.replaceAll(illegalCharacter, "_");
+		}
+		return fileName;
+	}
 }

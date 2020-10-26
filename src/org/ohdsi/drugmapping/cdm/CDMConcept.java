@@ -3,8 +3,8 @@ package org.ohdsi.drugmapping.cdm;
 import java.io.PrintWriter;
 import java.util.List;
 
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class CDMConcept {
 	protected CDM cdm = null;
@@ -61,7 +61,7 @@ public class CDMConcept {
 	public CDMConcept() {}
 		
 	
-	public CDMConcept(CDM cdm, Row queryRow, String prefix) {
+	public CDMConcept(CDM cdm, DelimitedFileRow queryRow, String prefix) {
 		this.cdm = cdm;
 		
 		concept_id       = queryRow.get(prefix + "concept_id", true).trim();

@@ -11,15 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ohdsi.databases.QueryParameters;
-import org.ohdsi.databases.RichConnection;
 import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.gui.CDMDatabase;
 import org.ohdsi.drugmapping.gui.MainFrame;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingNumberUtilities;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
-import org.ohdsi.utilities.files.Row;
 
 public class CDM {
 
@@ -98,46 +96,48 @@ public class CDM {
 		cdmFormConceptNames = new ArrayList<String>();                                         // List of CDM form names for sorting
 		
 		try {
-			QueryParameters queryParameters = new QueryParameters();
-			queryParameters.set("@vocab", database.getVocabSchema());
-
 			// Connect to the database
-			RichConnection connection = database.getRichConnection(CDM.class);
-			
-			// Get CDM Units
-			//getCDMUnits(connection, queryParameters, report);
-			
-			// Get CDM Forms
-			getCDMForms(connection, queryParameters, report);
-			
-			// Get CDM ingredients
-			getRxNormIngredients(connection, queryParameters, report);
-			
-			// Get CDM Ingredient relationships
-			getRxNormIngredientRelationships(connection, queryParameters, report);
+			if (database.connect(CDM.class)) {
+				// Get CDM Units
+				//getCDMUnits(database, report);
+				
+				// Get CDM Forms
+				getCDMForms(database, report);
+				
+				// Get CDM ingredients
+				getRxNormIngredients(database, report);
+				
+				// Get CDM Ingredient relationships
+				getRxNormIngredientRelationships(database, report);
 
-			// Get RxNorm Clinical Drugs with Form and Ingredients
-			getRxNormClinicalDrugsWithIngredients(connection, queryParameters, report);
-					
-			// Get RxNorm Clinical Drugs with Form and Ingredients
-			getRxNormClinicalDrugCompsWithIngredients(connection, queryParameters, report);
-					
-			// Get RxNorm Clinical Drugs with Form and Ingredients
-			getRxNormClinicalDrugFormsWithIngredients(connection, queryParameters, report);
+				// Get RxNorm Clinical Drugs with Form and Ingredients
+				getRxNormClinicalDrugsWithIngredients(database, report);
+						
+				// Get RxNorm Clinical Drugs with Form and Ingredients
+				getRxNormClinicalDrugCompsWithIngredients(database, report);
+						
+				// Get RxNorm Clinical Drugs with Form and Ingredients
+				getRxNormClinicalDrugFormsWithIngredients(database, report);
 
-			// Get CDM RxNorm Drug ATCs
-			getRxNormDrugATCs(connection, queryParameters, report);
-					
-			// Get CAS code to CDM RxNorm (Extension) Ingredient mapping
-			getCASToRxNormIngredientsMapping(connection, queryParameters, report);
+				// Get CDM RxNorm Drug ATCs
+				getRxNormDrugATCs(database, report);
+						
+				// Get CAS code to CDM RxNorm (Extension) Ingredient mapping
+				getCASToRxNormIngredientsMapping(database, report);
+				
+				// Close database connection
+				database.disconnect();
+				
+				ingredientNameSynonyms.reCalculateHitScores();
+				ingredientNameRelations.reCalculateHitScores();
+				
+				ok = true;
+			}
+			else {
+				System.out.println("ERROR: Counld not connect to the database.");
+				ok = false;
+			}
 			
-			// Close database connection
-			connection.close();
-			
-			ingredientNameSynonyms.reCalculateHitScores();
-			ingredientNameRelations.reCalculateHitScores();
-			
-			ok = true;
 		}
 		catch (Exception exception) {
 			ok = false;
@@ -278,7 +278,7 @@ public class CDM {
 */	
 	
 	
-	private void getRxNormIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getRxNormIngredients(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Ingredients ...");
 		
 		PrintWriter rxNormIngredientsFile = null;
@@ -295,7 +295,9 @@ public class CDM {
 		
 		// Get RxNorm ingredients
 		CDMIngredient lastCdmIngredient = null;
-		for (Row queryRow : connection.queryResource("GetRxNormIngredients.sql", queryParameters)) {
+		database.excuteQueryResource("GetRxNormIngredients.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String cdmIngredientConceptId = queryRow.get("concept_id", true).trim();
 			if ((lastCdmIngredient == null) || (!lastCdmIngredient.getConceptId().equals(cdmIngredientConceptId))) {
 				if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
@@ -328,10 +330,12 @@ public class CDM {
 	}
 	
 	
-	private void getRxNormIngredientRelationships(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getRxNormIngredientRelationships(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Ingredient Relationships ...");
-		
-		for (Row queryRow : connection.queryResource("GetRxNormIngredientRelationships.sql", queryParameters)) {
+
+		database.excuteQueryResource("GetRxNormIngredientRelationships.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String relationshipId = queryRow.get("relationship_id", true);
 			//String drugConceptId = queryRow.get("drug_concept_id", true);
 			String drugConceptName = DrugMappingStringUtilities.safeToUpperCase(queryRow.get("drug_concept_name", true).replaceAll("\n", " ").replaceAll("\r", " ").trim());
@@ -383,13 +387,15 @@ public class CDM {
 	}
 	
 	
-	private void getRxNormClinicalDrugsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getRxNormClinicalDrugsWithIngredients(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Clinical Drugs with ingredients ...");
 
 		Set<CDMDrug> drugs = new HashSet<CDMDrug>();
 		String lastCDMFormConceptId = "xxxxxxxx";
 		int formCount = 0;
-		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugsIngredients.sql", queryParameters)) {
+		database.excuteQueryResource("GetRxNormClinicalDrugsIngredients.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String cdmDrugConceptId = queryRow.get("drug_concept_id", true);
 			String cdmFormConceptId = queryRow.get("form_concept_id", true);
 			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
@@ -446,10 +452,12 @@ public class CDM {
 	}
 	
 	
-	private void getRxNormClinicalDrugCompsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getRxNormClinicalDrugCompsWithIngredients(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Comps with ingredients ...");
 
-		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugCompsIngredients.sql", queryParameters)) {
+		database.excuteQueryResource("GetRxNormClinicalDrugCompsIngredients.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String cdmDrugConceptId = queryRow.get("drugcomp_concept_id", true);
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
 				CDMDrug cdmDrugComp = cdmDrugComps.get(cdmDrugConceptId);
@@ -482,13 +490,15 @@ public class CDM {
 	}
 	
 	
-	private void getRxNormClinicalDrugFormsWithIngredients(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getRxNormClinicalDrugFormsWithIngredients(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Clinical Drug Forms with ingredients ...");
 		
 		Set<CDMDrug> drugForms = new HashSet<CDMDrug>();
 		String lastCDMFormConceptId = "xxxxxxxx";
 		int formCount = 0;
-		for (Row queryRow : connection.queryResource("GetRxNormClinicalDrugFormsIngredients.sql", queryParameters)) {
+		database.excuteQueryResource("GetRxNormClinicalDrugFormsIngredients.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String cdmDrugConceptId = queryRow.get("drugform_concept_id", true);
 			String cdmFormConceptId = queryRow.get("form_concept_id", true);
 			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
@@ -544,10 +554,12 @@ public class CDM {
 	}
 	
 	
-	private void getRxNormDrugATCs(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getRxNormDrugATCs(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Drug ATCs ...");
-		
-		for (Row queryRow : connection.queryResource("GetRxNormDrugATCs.sql", queryParameters)) {
+
+		database.excuteQueryResource("GetRxNormDrugATCs.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String cdmDrugConceptId = queryRow.get("concept_id", true);
 			String cdmDrugATC = queryRow.get("atc", true);
 			
@@ -594,11 +606,13 @@ public class CDM {
 	}
 	
 	
-	private void getCASToRxNormIngredientsMapping(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getCASToRxNormIngredientsMapping(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM CAS number to Ingredient mapping ...");
 		
 		Integer casCount = 0;
-		for (Row queryRow : connection.queryResource("GetCASMapsToRxNormIngredients.sql", queryParameters)) {
+		database.excuteQueryResource("GetCASMapsToRxNormIngredients.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			String cdmCASNr = DrugMappingNumberUtilities.uniformCASNumber(queryRow.get("casnr", true));
 			String cdmIngredientConceptId = queryRow.get("concept_id", true);
 			
@@ -701,11 +715,13 @@ public class CDM {
 	
 	
 	@SuppressWarnings("unused")
-	private void getCDMUnits(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getCDMUnits(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM units ...");
 		
 		// Get CDM Forms
-		for (Row queryRow : connection.queryResource("GetCDMUnits.sql", queryParameters)) {
+		database.excuteQueryResource("GetCDMUnits.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			
 			String concept_id   = queryRow.get("concept_id", true).trim();
 			String concept_name = queryRow.get("concept_name", true).trim();
@@ -727,11 +743,13 @@ public class CDM {
 	}
 	
 	
-	private void getCDMForms(RichConnection connection, QueryParameters queryParameters, List<String> report) {
+	private void getCDMForms(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM forms ...");
 		
 		// Get CDM Forms
-		for (Row queryRow : connection.queryResource("GetCDMForms.sql", queryParameters)) {
+		database.excuteQueryResource("GetCDMForms.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
 			
 			CDMConcept formConcept = new CDMConcept(this, queryRow, "");
 			

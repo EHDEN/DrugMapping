@@ -9,8 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,12 +25,13 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.ohdsi.databases.DBConnector;
 import org.ohdsi.databases.DbType;
-import org.ohdsi.databases.QueryDB;
+import org.ohdsi.databases.QueryParameters;
 import org.ohdsi.databases.RichConnection;
+import org.ohdsi.databases.RichConnection.QueryResult;
 import org.ohdsi.drugmapping.DBSettings;
 import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.utilities.StringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -41,6 +40,11 @@ public class CDMDatabase extends JPanel {
 	
 	private final int DATABASE_LABEL_SIZE = 260;
 
+	private String cachePath = null;
+	private QueryParameters queryParameters = null;
+	private QueryResult queryResult = null;
+	private Iterator<Row> queryResultIterator = null;
+	
 	private JLabel serverLabel;
 	private JTextField serverField;
 	private JButton serverSelectButton;
@@ -53,9 +57,7 @@ public class CDMDatabase extends JPanel {
 	private JTextField			databaseVocabSchemaField;
 	
 	private DBSettings dbSettings = null;
-	private Connection connection = null;
-	
-	private Iterator<Row> queryIterator = null;
+	private RichConnection connection = null;
 	
 	
 	public CDMDatabase() {
@@ -149,14 +151,18 @@ public class CDMDatabase extends JPanel {
 	}
 	
 	
-	public boolean connect() {
+	public boolean connect(Class<?> context) {
 		boolean connectionOK = false;
+
+		queryParameters = new QueryParameters();
+		queryParameters.set("@vocab", getVocabSchema());
 		
 		disconnect();
 		
 		try {
-			connection = DBConnector.connect(dbSettings.server, dbSettings.domain, dbSettings.user, dbSettings.password, dbSettings.dbType);
+			connection = new RichConnection(dbSettings.server, dbSettings.domain, dbSettings.user, dbSettings.password, dbSettings.dbType);
 			if (connection != null) {
+				connection.setContext(context);
 				connectionOK = true;
 			}
 		} catch (RuntimeException e) {
@@ -167,50 +173,47 @@ public class CDMDatabase extends JPanel {
 	}
 	
 	
-	public boolean excuteQuery(String query) {
-		// Automatically closes connection when at end of query result.
-		if (connection == null) {
-			if (!connect()) {
-				return false;
-			}
+	public boolean excuteQueryResource(String resourceName) {
+		boolean result = true;
+		try {
+			queryResult = connection.queryResource(resourceName, queryParameters);
+			queryResultIterator = queryResult.iterator();
+		} catch (RuntimeException e) {
+			queryResult = null;
+			result = false;
 		}
-		QueryDB queryDB = new QueryDB(query, connection);
-		queryIterator = queryDB.iterator(); 
-		
-		return (queryIterator != null);
+		return result;
 	}
 	
 	
 	public boolean hasNext() {
 		boolean hasNext = false;
-		if (queryIterator != null) {
-			hasNext = queryIterator.hasNext();
+		if (queryResult != null) {
+			hasNext = queryResultIterator.hasNext();
 			if (!hasNext) {
-				connection = null;
-				queryIterator = null;
+				queryResultIterator = null;
 			}
 		}
 		return hasNext;
 	}
 	
 	
-	public Row next() {
-		Row row = null;
-		if (queryIterator != null) {
-			row = queryIterator.next();
+	public DelimitedFileRow next() {
+		DelimitedFileRow delimitedFileRow = null;
+		if (queryResultIterator != null) {
+			Row row = queryResultIterator.next();
+			if (row != null) {
+				delimitedFileRow = new DelimitedFileRow(row.getCells(), row.getfieldName2ColumnIndex());
+			}
 		}
-		return row;
+		return delimitedFileRow;
 	}
 	
 	
 	public void disconnect() {
 		// Close current connection
 		if (connection != null) {
-			try {
-				connection.close();
-			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(e.getMessage(), 80), "Error disconnecting from server", JOptionPane.ERROR_MESSAGE);
-			}
+			connection.close();
 			connection = null;
 		}
 	}

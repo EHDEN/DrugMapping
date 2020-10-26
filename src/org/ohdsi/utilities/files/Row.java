@@ -119,7 +119,7 @@ public class Row {
 		return cells;
 	}
 	
-	protected Map<String, Integer> getfieldName2ColumnIndex() {
+	public Map<String, Integer> getfieldName2ColumnIndex() {
 		return fieldName2ColumnIndex;
 	}
 	
