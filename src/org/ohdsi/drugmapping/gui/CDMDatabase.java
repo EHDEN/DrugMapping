@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +19,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -32,6 +35,7 @@ import org.ohdsi.databases.RichConnection.QueryResult;
 import org.ohdsi.drugmapping.DBSettings;
 import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.drugmapping.files.DelimitedFileRow;
+import org.ohdsi.drugmapping.files.DelimitedFileWithHeader;
 import org.ohdsi.utilities.StringUtilities;
 import org.ohdsi.utilities.files.Row;
 
@@ -40,11 +44,20 @@ public class CDMDatabase extends JPanel {
 	
 	private final int DATABASE_LABEL_SIZE = 260;
 
-	private String cachePath = null;
+	private String cdmCacheLocation = null;
+	private String cdmCache = null;
+	private String cdmCacheFileName = null;
+	private boolean readFromCache = false;
+	private DelimitedFileWithHeader cache = null;
+	private Iterator<DelimitedFileRow> cacheIterator = null;
+	private boolean headerWritten = false;
+	
 	private QueryParameters queryParameters = null;
 	private QueryResult queryResult = null;
 	private Iterator<Row> queryResultIterator = null;
-	
+
+	private JPanel serverLabelPanel;
+	private JCheckBox serverRefreshCacheCheckBox;
 	private JLabel serverLabel;
 	private JTextField serverField;
 	private JButton serverSelectButton;
@@ -61,19 +74,44 @@ public class CDMDatabase extends JPanel {
 	
 	
 	public CDMDatabase() {
+		try {
+			cdmCacheLocation = new File(DrugMapping.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath() + File.separator + "CDM Cache";
+			File cdmCacheFolder = new File(cdmCacheLocation); 
+			if ((!cdmCacheFolder.mkdir()) && (!cdmCacheFolder.exists())) {
+				cdmCacheLocation = null;
+			}
+		} catch (URISyntaxException e1) {
+			cdmCacheLocation = null;
+		}
+		if (cdmCacheLocation == null) {
+			System.out.println("WARNING: No CDM Cache location available!");
+		}
+		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
+		JPanel serverRefreshLabelPanel = new JPanel(new BorderLayout());
+		serverRefreshLabelPanel.setMinimumSize(new Dimension(DATABASE_LABEL_SIZE, serverRefreshLabelPanel.getHeight()));
+		serverRefreshLabelPanel.setPreferredSize(new Dimension(DATABASE_LABEL_SIZE, serverRefreshLabelPanel.getHeight()));
+		serverRefreshCacheCheckBox = new JCheckBox();
+		serverRefreshCacheCheckBox.setSelected(false);
+		serverRefreshCacheCheckBox.setToolTipText("Refresh Cache");
+		serverRefreshLabelPanel.add(serverRefreshCacheCheckBox, BorderLayout.WEST);
+		DrugMapping.disableWhenRunning(serverRefreshCacheCheckBox);
+		
+		serverLabelPanel = new JPanel(new BorderLayout());
 		serverLabel = new JLabel("CDM Database:");
-		serverLabel.setMinimumSize(new Dimension(DATABASE_LABEL_SIZE, serverLabel.getHeight()));
-		serverLabel.setPreferredSize(new Dimension(DATABASE_LABEL_SIZE, serverLabel.getHeight()));
+		serverLabelPanel.add(serverLabel, BorderLayout.WEST);
+		
+		serverRefreshLabelPanel.add(serverLabelPanel, BorderLayout.CENTER);
 		
 		serverField = new JTextField();
 		serverField.setText("");
 		serverField.setEditable(false);
+		serverField.setPreferredSize(new Dimension(10000, serverField.getHeight()));
 
 		serverSelectButton = new JButton("Select");
 
-		add(serverLabel);
+		add(serverRefreshLabelPanel);
 		add(serverField);
 		add(new JLabel("  "));
 		add(serverSelectButton);
@@ -159,14 +197,26 @@ public class CDMDatabase extends JPanel {
 		
 		disconnect();
 		
-		try {
-			connection = new RichConnection(dbSettings.server, dbSettings.domain, dbSettings.user, dbSettings.password, dbSettings.dbType);
-			if (connection != null) {
-				connection.setContext(context);
+		if (cdmCacheLocation != null) {
+			cdmCache = cdmCacheLocation + File.separator + serverField.getText();
+			File cdmCacheFolder = new File(cdmCache);
+			if ((!serverRefreshCacheCheckBox.isSelected()) && cdmCacheFolder.canRead()) {
+				readFromCache = true;
 				connectionOK = true;
 			}
-		} catch (RuntimeException e) {
-			JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(e.getMessage(), 80), "Error connecting to server", JOptionPane.ERROR_MESSAGE);
+			else {
+				readFromCache = false;
+				cdmCacheFolder.mkdir();
+				try {
+					connection = new RichConnection(dbSettings.server, dbSettings.domain, dbSettings.user, dbSettings.password, dbSettings.dbType);
+					if (connection != null) {
+						connection.setContext(context);
+						connectionOK = true;
+					}
+				} catch (RuntimeException e) {
+					JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(e.getMessage(), 80), "Error connecting to server", JOptionPane.ERROR_MESSAGE);
+				}
+			}
 		}
 		
 		return connectionOK;
@@ -175,12 +225,32 @@ public class CDMDatabase extends JPanel {
 	
 	public boolean excuteQueryResource(String resourceName) {
 		boolean result = true;
-		try {
-			queryResult = connection.queryResource(resourceName, queryParameters);
-			queryResultIterator = queryResult.iterator();
-		} catch (RuntimeException e) {
-			queryResult = null;
-			result = false;
+		cdmCacheFileName = cdmCache + File.separator + resourceName + ".csv";
+		if (readFromCache) {
+			if (new File(cdmCacheFileName).canRead()) {
+				cache = new DelimitedFileWithHeader(cdmCacheFileName);
+				result = cache.openForReading();
+				if (result) {
+					cacheIterator = cache.iterator();
+				}
+			}
+			else {
+				result = false;
+			}
+		}
+		else {
+			try {
+				queryResult = connection.queryResource(resourceName, queryParameters);
+				queryResultIterator = queryResult.iterator();
+			} catch (RuntimeException e) {
+				queryResult = null;
+				result = false;
+			}
+			cache = new DelimitedFileWithHeader(cdmCacheFileName);
+			headerWritten = false;
+			if (!cache.openForWriting()) {
+				cache = null;
+			}
 		}
 		return result;
 	}
@@ -188,10 +258,21 @@ public class CDMDatabase extends JPanel {
 	
 	public boolean hasNext() {
 		boolean hasNext = false;
-		if (queryResult != null) {
-			hasNext = queryResultIterator.hasNext();
-			if (!hasNext) {
-				queryResultIterator = null;
+		if (readFromCache) {
+			hasNext = cacheIterator.hasNext();
+		}
+		else {
+			if (queryResult != null) {
+				hasNext = queryResultIterator.hasNext();
+				if (!hasNext) {
+					queryResultIterator = null;
+					if (cache != null) {
+						cache.closeForWriting();
+						cache = null;
+						cdmCacheFileName = null;
+						cacheIterator = null;
+					}
+				}
 			}
 		}
 		return hasNext;
@@ -200,10 +281,22 @@ public class CDMDatabase extends JPanel {
 	
 	public DelimitedFileRow next() {
 		DelimitedFileRow delimitedFileRow = null;
-		if (queryResultIterator != null) {
-			Row row = queryResultIterator.next();
-			if (row != null) {
-				delimitedFileRow = new DelimitedFileRow(row.getCells(), row.getfieldName2ColumnIndex());
+		if (readFromCache) {
+			delimitedFileRow = cacheIterator.next();
+		}
+		else {
+			if (queryResultIterator != null) {
+				Row row = queryResultIterator.next();
+				if (row != null) {
+					delimitedFileRow = new DelimitedFileRow(row.getCells(), row.getfieldName2ColumnIndex());
+					if (cache != null) {
+						if (!headerWritten) {
+							cache.setHeader(delimitedFileRow.getFieldNames());
+							headerWritten = true;
+						}
+						cache.writeRow(delimitedFileRow);
+					}
+				}
 			}
 		}
 		return delimitedFileRow;
@@ -216,6 +309,10 @@ public class CDMDatabase extends JPanel {
 			connection.close();
 			connection = null;
 		}
+		cache = null;
+		cdmCacheFileName = null;
+		cacheIterator = null;
+		headerWritten = false;
 	}
 	
 	

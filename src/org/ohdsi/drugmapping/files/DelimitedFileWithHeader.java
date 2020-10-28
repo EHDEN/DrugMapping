@@ -1,6 +1,7 @@
 package org.ohdsi.drugmapping.files;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,8 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 	private DelimitedFile delimitedFile = null;
 	
 	private RowIterator rowIterator = null;
+	
+	private List<String> header = null;
 
 	public DelimitedFileWithHeader(String fileName) {
 		this(fileName, DEFAULT_DELIMITER, DEFAULT_TEXT_DELIMITER, null);
@@ -143,5 +146,48 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 		public Set<String> getColumns() {
 			return fieldName2ColumnIndex.keySet();
 		}
+	}
+	
+	
+	public boolean openForWriting() {
+		boolean result = false;
+		delimitedFile = new DelimitedFile(fileName);
+		if (delimitedFile.openForWriting()) {
+			if (header != null) {
+				delimitedFile.writeRecord(header);
+			}
+			result = true;
+		}
+		else {
+			delimitedFile = null;
+		}
+		return result;
+	}
+	
+	
+	public void setHeader(List<String> header) {
+		this.header = header;
+		if (delimitedFile != null) {
+			delimitedFile.writeRecord(header);
+		}
+	}
+	
+	
+	public void writeRow(DelimitedFileRow row) {
+		if (delimitedFile != null) {
+			List<String> record = new ArrayList<String>();
+			for (String column : header) {
+				String value = row.get(column, false);
+				record.add(value == null ? "" : value);
+			}
+			delimitedFile.writeRecord(record);
+		}
+	}
+	
+	
+	public void closeForWriting() {
+		delimitedFile.closeForWriting();
+		delimitedFile = null;
+		header = null;
 	}
 }

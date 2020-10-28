@@ -1,15 +1,19 @@
 package org.ohdsi.drugmapping.files;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
 
 public class DelimitedFile implements Iterable<List<String>> {
@@ -21,8 +25,13 @@ public class DelimitedFile implements Iterable<List<String>> {
 	
 	private InputStream inputStream = null; 
 	private String fileName = null;
+	
+	private PrintWriter outputWriter = null;
+
 	private char delimiter = DEFAULT_DELIMITER;
 	private char textDelimiter = DEFAULT_TEXT_DELIMITER;
+	private String delimiterString = Character.toString(DEFAULT_DELIMITER);
+	private String textDelimiterString = Character.toString(DEFAULT_TEXT_DELIMITER);
 	private String charSet = null; 
 	
 
@@ -56,6 +65,9 @@ public class DelimitedFile implements Iterable<List<String>> {
 		this.delimiter = delimiter;
 		this.textDelimiter = textDelimiter;
 		this.charSet = charSet;
+		
+		delimiterString = Character.toString(delimiter);
+		textDelimiterString = Character.toString(textDelimiter);
 	}
 
 	
@@ -118,6 +130,33 @@ public class DelimitedFile implements Iterable<List<String>> {
 	
 	public Iterator<List<String>> getIterator() {
 		return iterator();
+	}
+	
+	
+	public boolean openForWriting() {
+		boolean result = false;
+		File file = new File(fileName);
+		try {
+			outputWriter = new PrintWriter(file);
+			result = true;
+		} catch (FileNotFoundException e) {
+			result = false;
+		}
+		return result;
+	}
+	
+	
+	public void writeRecord(List<String> record) {
+		String recordString = "";
+		for (String column : record) {
+			recordString += (recordString.equals("") ? "" : delimiterString) + DrugMappingStringUtilities.escapeFieldValue(column, delimiterString, textDelimiterString);
+		}
+		outputWriter.println(recordString);
+	}
+	
+	
+	public void closeForWriting() {
+		outputWriter.close();
 	}
 
 	

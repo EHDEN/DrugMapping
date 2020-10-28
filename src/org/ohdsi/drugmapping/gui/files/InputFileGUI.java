@@ -12,7 +12,6 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -69,6 +68,7 @@ public abstract class InputFileGUI extends JPanel {
 		fileSelectCheckBox = new JCheckBox();
 		fileSelectCheckBox.setSelected(true);
 		fileSelectCheckBox.setEnabled(!fileDefinition.isRequired());
+		fileSelectCheckBox.setToolTipText("Select/Deselect file");
 		fileSelectLabelPanel.add(fileSelectCheckBox, BorderLayout.WEST);
 		if ((!fileDefinition.isRequired())) {
 			DrugMapping.disableWhenRunning(fileSelectCheckBox);
