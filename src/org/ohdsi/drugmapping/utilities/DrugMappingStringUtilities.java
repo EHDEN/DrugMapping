@@ -445,14 +445,17 @@ public class DrugMappingStringUtilities {
 	
 	
 	public static String convertToANSI(String string) {
-		String ansiString = "";
+		String ansiString = null;
 		
-		for (int charNr = 0; charNr < string.length(); charNr++) {
-			Character character = string.charAt(charNr);
-			if (character == 'α') {
-				character = 'a';
+		if (string != null) {
+			ansiString = "";
+			for (int charNr = 0; charNr < string.length(); charNr++) {
+				Character character = string.charAt(charNr);
+				if (character == 'α') {
+					character = 'a';
+				}
+				ansiString += character;
 			}
-			ansiString += character;
 		}
 		
 		return ansiString;
