@@ -1,5 +1,7 @@
 package org.ohdsi.drugmapping.utilities;
 
+import java.text.DecimalFormat;
+
 public class DrugMappingNumberUtilities {
 
 	
@@ -17,5 +19,29 @@ public class DrugMappingNumberUtilities {
 			casNumber = "";
 		}
 		return  casNumber;
+	}
+	
+	
+	public static String doubleWithPrecision(Double value, Integer precision) {
+		String zeroString = "00000000000000000000000000000000000000000000000000000000000000000000000000";
+        DecimalFormat df = new DecimalFormat("#");
+		if (precision >= 0) {
+	        df.setMaximumFractionDigits(precision);
+		}
+		
+		String valueString = null;
+		if (value != null) {
+	        valueString = df.format(value);
+		}
+		if (valueString != null) {
+			if (precision >= 0) {
+				valueString =  df.format((double) Math.round(value * Math.pow(10, precision)) / Math.pow(10, precision));
+				if (!valueString.contains(".")) {
+					valueString += ".";
+				}
+				valueString = (valueString + zeroString).substring(0, valueString.indexOf(".") + precision + 1);
+			}
+		}
+		return valueString;
 	}
 }
