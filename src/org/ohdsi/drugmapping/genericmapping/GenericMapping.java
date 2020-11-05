@@ -39,7 +39,7 @@ public class GenericMapping extends Mapping {
 	
 	public static String LOGFILE_NAME = "DrugMapping Log.txt";
 	
-	private static double DEVIATION_MARGIN = 0.0000000001;
+	private static double DEVIATION_MARGIN = 0.000001;
 
 	// Mapping types
 	// The mapping type values should start at 0 and incremented by 1.

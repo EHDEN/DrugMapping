@@ -327,7 +327,7 @@ public class DrugMappingStringUtilities {
 						convertedText += "a";
 					}
 					else if (character == 'ß') {
-						convertedText += "B";
+						convertedText += "SS";
 					}
 					else if (characterInRange(character, 'à', 'å')) {
 						convertedText += 'a';

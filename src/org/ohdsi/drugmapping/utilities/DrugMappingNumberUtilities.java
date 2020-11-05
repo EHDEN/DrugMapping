@@ -41,6 +41,9 @@ public class DrugMappingNumberUtilities {
 				}
 				valueString = (valueString + zeroString).substring(0, valueString.indexOf(".") + precision + 1);
 			}
+			if (valueString.startsWith(".")) {
+				valueString = "0" + valueString;
+			}
 		}
 		return valueString;
 	}
