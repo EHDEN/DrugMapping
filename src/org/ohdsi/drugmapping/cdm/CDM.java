@@ -128,6 +128,7 @@ public class CDM {
 				// Close database connection
 				database.disconnect();
 				
+				ingredientNames.reCalculateHitScores();
 				ingredientNameSynonyms.reCalculateHitScores();
 				ingredientNameRelations.reCalculateHitScores();
 				
@@ -909,12 +910,12 @@ public class CDM {
 		}
 		
 		
-		public void addNames(String name, String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
+		public void addNames(String name, String searchVocabulary, String searchConceptClass, String searchRelationship, boolean synonym, CDMIngredient cdmIngredient) {
 			name = DrugMappingStringUtilities.safeToUpperCase(name);
-			namesLibrary.addHit(name, vocabulary, conceptClass, relationship, synonym, cdmIngredient);
-			standardizedNamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(name), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
-			sortedWordsamesLibrary.addHit(DrugMappingStringUtilities.sortWords(name), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
-			standardizedSortedWordsamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(DrugMappingStringUtilities.sortWords(name)), vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+			namesLibrary.addHit(name, searchVocabulary, searchConceptClass, searchRelationship, synonym, cdmIngredient);
+			standardizedNamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(name), searchVocabulary, searchConceptClass, searchRelationship, synonym, cdmIngredient);
+			sortedWordsamesLibrary.addHit(DrugMappingStringUtilities.sortWords(name), searchVocabulary, searchConceptClass, searchRelationship, synonym, cdmIngredient);
+			standardizedSortedWordsamesLibrary.addHit(DrugMappingStringUtilities.standardizedName(DrugMappingStringUtilities.sortWords(name)), searchVocabulary, searchConceptClass, searchRelationship, synonym, cdmIngredient);
 		}
 		
 		
@@ -984,8 +985,8 @@ public class CDM {
 		}
 		
 		
-		public void addHit(String name, String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
-			findByName(name, true).addHit(vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+		public void addHit(String name, String searchVocabulary, String searchConceptClass, String searchRelationship, boolean synonym, CDMIngredient cdmIngredient) {
+			findByName(name, true).addHit(searchVocabulary, searchConceptClass, searchRelationship, synonym, cdmIngredient);
 		}
 		
 		
@@ -1017,21 +1018,21 @@ public class CDM {
 		private String lastMatchString = null; // Contains last match result 
 		
 		
-		public void addHit(String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
+		public void addHit(String searchVocabulary, String searchConceptClass, String searchRelationship, boolean synonym, CDMIngredient cdmIngredient) {
 			MappingIngredientHit ingredientHit = null;
 			for (MappingIngredientHit hit : ingredientHits) {
 				if (
 						hit.getIngredient() == cdmIngredient         &&
-						hit.getVocabulary().equals(vocabulary)       &&
-						hit.getConceptClass().equals(conceptClass)   &&
-						hit.getRelationship().equals(relationship)   &&
+						hit.getSearchVocabulary().equals(searchVocabulary)       &&
+						hit.getSearchConceptClass().equals(searchConceptClass)   &&
+						hit.getSearchRelationship().equals(searchRelationship)   &&
 						(hit.isSnonym() == synonym)
 				) {
 					ingredientHit = hit;
 				}
 			}
 			if (ingredientHit == null) {
-				ingredientHit = new MappingIngredientHit(vocabulary, conceptClass, relationship, synonym, cdmIngredient);
+				ingredientHit = new MappingIngredientHit(searchVocabulary, searchConceptClass, searchRelationship, synonym, cdmIngredient);
 				ingredientHits.add(ingredientHit);
 			}
 		}
@@ -1082,8 +1083,8 @@ public class CDM {
 					lastMatchString += " Synonym of";
 				}
 				
-				if (!bestIngredientHit.getRelationship().equals("")) {
-					lastMatchString = " \"" + bestIngredientHit.getConceptClass() + "\" with relation \"" + bestIngredientHit.getRelationship() + "\"";
+				if (!bestIngredientHit.getSearchRelationship().equals("")) {
+					lastMatchString += " \"" + bestIngredientHit.getSearchConceptClass() + "\" with relation \"" + bestIngredientHit.getSearchRelationship() + "\"";
 				}
 				
 				if (ingredientHits.size() > 1) {
@@ -1107,18 +1108,18 @@ public class CDM {
 	
 	
 	private class MappingIngredientHit {
-		private String vocabulary = null;
-		private String conceptClass = null;
-		private String relationship = null;
+		private String searchVocabulary = null;
+		private String searchConceptClass = null;
+		private String searchRelationship = null;
 		private boolean synonym = false;
 		private CDMIngredient ingredient = null;
 		private int hitScrore = -1;
 		
 		
-		public MappingIngredientHit(String vocabulary, String conceptClass, String relationship, boolean synonym, CDMIngredient cdmIngredient) {
-			this.vocabulary = vocabulary;
-			this.conceptClass = conceptClass;
-			this.relationship = relationship;
+		public MappingIngredientHit(String searchVocabulary, String searchConceptClass, String searchRelationship, boolean synonym, CDMIngredient cdmIngredient) {
+			this.searchVocabulary = searchVocabulary;
+			this.searchConceptClass = searchConceptClass;
+			this.searchRelationship = searchRelationship;
 			this.synonym = synonym;
 			this.ingredient = cdmIngredient;
 			
@@ -1126,18 +1127,18 @@ public class CDM {
 		}
 		
 		
-		public String getVocabulary() {
-			return vocabulary;
+		public String getSearchVocabulary() {
+			return searchVocabulary;
 		}
 		
 		
-		public String getConceptClass() {
-			return conceptClass;
+		public String getSearchConceptClass() {
+			return searchConceptClass;
 		}
 		
 		
-		public String getRelationship() {
-			return relationship;
+		public String getSearchRelationship() {
+			return searchRelationship;
 		}
 		
 		
@@ -1162,47 +1163,47 @@ public class CDM {
 				hitScrore += getIngredient().isOrphan() ? 100000 : 200000;
 			}
 			if (DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_RXNORM).equals("RxNorm")) {
-				hitScrore += getVocabulary().equals("RxNorm") ? 20000 : 10000;
+				hitScrore += getSearchVocabulary().equals("RxNorm") ? 20000 : 10000;
 			}
 			else {
-				hitScrore += getVocabulary().equals("RxNorm") ? 10000 : 20000;
+				hitScrore += getSearchVocabulary().equals("RxNorm") ? 10000 : 20000;
 			}
 			
-			if (getRelationship().equals("Concept replaced by")) {
+			if (getSearchRelationship().equals("Concept replaced by")) {
 				hitScrore += 4000;
 			}
-			else if (getRelationship().endsWith("RxNorm eq")) {
+			else if (getSearchRelationship().endsWith("RxNorm eq")) {
 				hitScrore += 3000;
 			}
-			else if (getRelationship().equals("Form of")) {
+			else if (getSearchRelationship().equals("Form of")) {
 				hitScrore += 2000;
 			}
-			else if (getRelationship().equals("Maps to")) {
+			else if (getSearchRelationship().equals("Maps to")) {
 				hitScrore += 1000;
 			}
 			
-			if (getConceptClass().equals("Ingredient")) {
+			if (getSearchConceptClass().equals("Ingredient")) {
 				hitScrore += 800;
 			}
-			else if (getConceptClass().equals("Precise Ingredient")) {
+			else if (getSearchConceptClass().equals("Precise Ingredient")) {
 				hitScrore += 700;
 			}
-			else if (getConceptClass().equals("Substance")) {
+			else if (getSearchConceptClass().equals("Substance")) {
 				hitScrore += 600;
 			}
-			else if (getConceptClass().equals("ATC 5th")) {
+			else if (getSearchConceptClass().equals("ATC 5th")) {
 				hitScrore += 500;
 			}
-			else if (getConceptClass().equals("ATC 4th")) {
+			else if (getSearchConceptClass().equals("ATC 4th")) {
 				hitScrore += 400;
 			}
-			else if (getConceptClass().equals("Pharma/Biol Product")) {
+			else if (getSearchConceptClass().equals("Pharma/Biol Product")) {
 				hitScrore += 300;
 			}
-			else if (getConceptClass().equals("11-digit NDC")) {
+			else if (getSearchConceptClass().equals("11-digit NDC")) {
 				hitScrore += 200;
 			}
-			else if (getConceptClass().equals("9-digit NDC")) {
+			else if (getSearchConceptClass().equals("9-digit NDC")) {
 				hitScrore += 100;
 			}
 
