@@ -167,7 +167,7 @@ public class Source {
 							sourceDrugCount++;
 							
 							String sourceName = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceName", true));
-							String sourceATC = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceATCCode", true));
+							String sourceATC = DrugMappingStringUtilities.uniformATCCode(DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceATCCode", true)));
 							String sourceFormulation = DrugMappingStringUtilities.cleanString(sourceDrugsFile.get(row, "SourceFormulation", true));
 							String sourceCount = sourceDrugsFile.get(row, "SourceCount", true);
 							

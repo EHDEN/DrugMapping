@@ -486,6 +486,30 @@ public class DrugMappingStringUtilities {
 	}
 	
 	
+	public static String uniformATCCode(String atcCode) {
+		String alfa = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		String numeric = "1234567890";
+		String[] atcFormat = new String[] { alfa, numeric, numeric, alfa, alfa, numeric, numeric };
+		
+		if (atcCode != null) {
+			atcCode = safeToUpperCase(atcCode.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll("\t", ""));
+			if ((atcCode.length() > 0) && (atcCode.length() < 8)) {
+				for (int charNr = 0; charNr < atcCode.length(); charNr++) {
+					if (!atcFormat[charNr].contains(atcCode.substring(charNr, charNr + 1))) {
+						atcCode = null;
+						break;
+					}
+				}
+			}
+			else {
+				atcCode = null;
+			}
+		}
+		
+		return atcCode;
+	}
+	
+	
 	public static String sortWords(String string) {
 		String splitCharacters = " ,.-()[]/\\*+&:'\"<>_=|{};#$%^@^~`\t\n\r";
 		List<String> words = new ArrayList<String>();

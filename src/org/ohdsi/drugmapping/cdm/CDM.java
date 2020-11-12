@@ -562,7 +562,7 @@ public class CDM {
 		while (database.hasNext()) {
 			DelimitedFileRow queryRow = database.next();
 			String cdmDrugConceptId = queryRow.get("concept_id", true);
-			String cdmDrugATC = queryRow.get("atc", true);
+			String cdmDrugATC = DrugMappingStringUtilities.uniformATCCode(queryRow.get("atc", true));
 			
 			CDMDrug cdmDrug = cdmDrugs.get(cdmDrugConceptId);
 			if (cdmDrug == null) {

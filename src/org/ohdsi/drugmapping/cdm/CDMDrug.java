@@ -45,17 +45,19 @@ public class CDMDrug extends CDMConcept {
 	
 	
 	public void addATC(String atc) {
-		if (atcList.size() > 0) {
-			if (atc.length() > atcList.get(0).length()) {
-				atcList = new ArrayList<String>();
+		if (atc != null) {
+			if (atcList.size() > 0) {
+				if (atc.length() > atcList.get(0).length()) {
+					atcList = new ArrayList<String>();
+					atcList.add(atc);
+				}
+				else if (atc.length() == atcList.get(0).length()) {
+					atcList.add(atc);
+				}
+			}
+			else {
 				atcList.add(atc);
 			}
-			else if (atc.length() == atcList.get(0).length()) {
-				atcList.add(atc);
-			}
-		}
-		else {
-			atcList.add(atc);
 		}
 	}
 	
