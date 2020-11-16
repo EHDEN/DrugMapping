@@ -493,16 +493,34 @@ public class DrugMappingStringUtilities {
 		
 		if (atcCode != null) {
 			atcCode = safeToUpperCase(atcCode.trim().replaceAll(" ", "").replaceAll("-", "").replaceAll("\t", ""));
-			if ((atcCode.length() > 0) && (atcCode.length() < 8)) {
-				for (int charNr = 0; charNr < atcCode.length(); charNr++) {
-					if (!atcFormat[charNr].contains(atcCode.substring(charNr, charNr + 1))) {
-						atcCode = null;
-						break;
-					}
+			
+			List<String> atcCodeList = new ArrayList<String>();
+			if (atcCode.contains("|")) {
+				String[] atcCodeSplit = atcCode.split("\\|");
+				for (String atc : atcCodeSplit) {
+					atcCodeList.add(atc);
 				}
 			}
 			else {
-				atcCode = null;
+				atcCodeList.add(atcCode);
+			}
+			
+			atcCode = "";
+			for (String atc : atcCodeList) {
+				if ((atc.length() > 0) && (atc.length() < 8)) {
+					for (int charNr = 0; charNr < atc.length(); charNr++) {
+						if (!atcFormat[charNr].contains(atc.substring(charNr, charNr + 1))) {
+							atc = null;
+							break;
+						}
+					}
+				}
+				else {
+					atc = null;
+				}
+				if (atc != null) {
+					atcCode += ((!atcCode.equals("")) ? "|" : "") + atc;
+				}
 			}
 		}
 		
