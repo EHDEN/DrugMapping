@@ -1909,7 +1909,7 @@ public class GenericMapping extends Mapping {
 		header += "," + "concept_id";
 		header += "," + "concept_name";
 		header += "," + "concept_class";
-		header += "," + "Mapping_log";
+		header += "," + "MappingLog";
 		
 		PrintWriter drugMappingReviewFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
 
