@@ -63,13 +63,13 @@ public class IngredientNameTranslation {
 			while (ingredientNameTranslationFile.hasNext()) {
 				DelimitedFileRow row = ingredientNameTranslationFile.next();
 
-				String ingredientCode = ingredientNameTranslationFile.get(row, "IngredientCode", true);
-				String ingredientName = ingredientNameTranslationFile.get(row, "IngredientName", false);
+				String ingredientCode = ingredientNameTranslationFile.get(row, "SourceIngredientId", true);
+				String ingredientName = ingredientNameTranslationFile.get(row, "SourceIngredientName", false);
 				
 				SourceIngredient ingredient = Source.getIngredient(ingredientCode);
 				if (ingredient != null) {
 					ingredientName = ingredientName == null ? "" : DrugMappingStringUtilities.safeToUpperCase(ingredientName);
-					String ingredientNameEnglish = ingredientNameTranslationFile.get(row, "IngredientNameEnglish", true);
+					String ingredientNameEnglish = ingredientNameTranslationFile.get(row, "SourceIngredientNameEnglish", true);
 					ingredientNameEnglish = ingredientNameEnglish == null ? "" : DrugMappingStringUtilities.safeToUpperCase(ingredientNameEnglish);
 					
 					if ((!ingredientName.equals("")) && (!ingredientNameEnglish.equals(""))) {
