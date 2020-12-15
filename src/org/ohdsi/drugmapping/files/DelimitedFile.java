@@ -286,6 +286,9 @@ public class DelimitedFile implements Iterable<List<String>> {
 						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
+						else {
+							EOL = true;
+						}
 						wasDelimitedText = false;
 					}
 					else if (buffer[bufferPosition] == '\n') {
@@ -293,7 +296,7 @@ public class DelimitedFile implements Iterable<List<String>> {
 						if (delimitedText) {
 							line.set(columnNr, line.get(columnNr) + buffer[bufferPosition]);
 						}
-						else {
+						else if (!line.get(columnNr).equals("")) {
 							EOL = true;
 						}
 						wasDelimitedText = false;
