@@ -122,9 +122,9 @@ public class IngredientNameTranslation {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = ingredientNameTranslationFile.getColumnMapping().get("IngredientCode");
-			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("IngredientName");
-			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("IngredientNameEnglish");
+			String header = ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientId");
+			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientName");
+			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientNameEnglish");
 			
 			mappingFileWriter.println(header);
 			

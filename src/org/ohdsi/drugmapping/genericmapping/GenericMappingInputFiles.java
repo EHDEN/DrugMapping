@@ -105,19 +105,19 @@ public class GenericMappingInputFiles extends InputFileDefinition {
 								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
-												"IngredientCode",
+												"SourceIngredientId",
 												new String[] {
 														"This is the code of the source ingredient."
 												}
 										),
 										new FileColumnDefinition(
-												"IngredientName",
+												"SourceIngredientName",
 												new String[] {
 														"This is the source ingredient name."
 												}
 										),
 										new FileColumnDefinition(
-												"IngredientNameEnglish",
+												"SourceIngredientNameEnglish",
 												new String[] {
 														"This is the English ingredient name."
 												}
@@ -200,19 +200,19 @@ public class GenericMappingInputFiles extends InputFileDefinition {
 												}
 										),
 										new FileColumnDefinition(
-												"ConceptId",
+												"concept_id",
 												new String[] {
 														"This is the concept_id of the target CDM dose form."
 												}
 										),
 										new FileColumnDefinition(
-												"ConceptName",
+												"concept_name",
 												new String[] {
 														"This is the concept_name of the target CDM dose form."
 												}
 										),
 										new FileColumnDefinition(
-												"Comment",
+												"Comments",
 												new String[] {
 														"This is a comment."
 												}
@@ -266,7 +266,7 @@ public class GenericMappingInputFiles extends InputFileDefinition {
 								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
-												"SourceCode",
+												"SourceId",
 												new String[] {
 														"This is the code of the source ingredient.",
 														"When empty drugs starting with the SourceName are mapped."
@@ -312,7 +312,7 @@ public class GenericMappingInputFiles extends InputFileDefinition {
 								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
-												"SourceCode",
+												"SourceId",
 												new String[] {
 														"This is the code of the source ingredient.",
 														"When empty drugs starting with the SourceName are mapped."
@@ -358,7 +358,7 @@ public class GenericMappingInputFiles extends InputFileDefinition {
 								FileDefinition.DELIMITED_FILE,
 								new FileColumnDefinition[] {
 										new FileColumnDefinition(
-												"SourceCode",
+												"SourceId",
 												new String[] {
 														"This is the code of the source drug."
 												}

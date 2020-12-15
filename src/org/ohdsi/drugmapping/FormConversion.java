@@ -67,9 +67,9 @@ public class FormConversion {
 				
 				String sourceForm = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "DoseForm", true)));
 				String priorityString = sourceFormMappingFile.get(row, "Priority", false);
-				String conceptId = sourceFormMappingFile.get(row, "ConceptId", false);
-				//String conceptName = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "ConceptName", true)));
-				//String comment = sourceFormMappingFile.get(row, "Comment", false);
+				String conceptId = sourceFormMappingFile.get(row, "concept_id", false);
+				//String conceptName = DrugMappingStringUtilities.safeToUpperCase(DrugMappingStringUtilities.removeExtraSpaces(sourceFormMappingFile.get(row, "concept_name", true)));
+				//String comment = sourceFormMappingFile.get(row, "Comments", false);
 				String conceptName = cdm.getCDMFormConceptName(conceptId);
 				
 				Integer priority = null;
@@ -161,9 +161,9 @@ public class FormConversion {
 			
 			String header = sourceFormMappingFile.getColumnMapping().get("DoseForm");
 			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Priority");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("ConceptId");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("ConceptName");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Comment");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("concept_id");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("concept_name");
+			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Comments");
 			
 			mappingFileWriter.println(header);
 			

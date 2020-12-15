@@ -552,7 +552,7 @@ public class GenericMapping extends Mapping {
 						lineNr++;
 						DelimitedFileRow row = manualMappingFile.next();
 						
-						String sourceCode = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "SourceCode", true));
+						String sourceCode = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "SourceId", true));
 						String sourceName = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "SourceName", true));
 						String cdmConceptId = DrugMappingStringUtilities.removeExtraSpaces(manualMappingFile.get(row, "concept_id", true));
 						//String cdmConceptName = manualMappingFile.get(row, "concept_name", true).trim();
