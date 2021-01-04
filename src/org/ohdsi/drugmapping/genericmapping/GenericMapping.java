@@ -1820,8 +1820,8 @@ public class GenericMapping extends Mapping {
 		header += "," + "SourceRecordCount";
 		header += "," + "concept_id";
 		header += "," + "concept_name";
-		header += "," + "concept_vocabulary_id";
 		header += "," + "concept_class_id";
+		header += "," + "vocabulary_id";
 		header += "," + "MatchLog";
 		PrintWriter ingredientMappingReviewFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Review.csv", header);
 		
@@ -1837,8 +1837,8 @@ public class GenericMapping extends Mapping {
 				if (cdmIngredient != null) {
 					record += "," + cdmIngredient.getConceptId();
 					record += "," + DrugMappingStringUtilities.escapeFieldValue(cdmIngredient.getConceptName());
-					record += "," + cdmIngredient.getVocabularyId();
 					record += "," + cdmIngredient.getConceptClassId();
+					record += "," + cdmIngredient.getVocabularyId();
 					record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getMatchString());
 				}
 				else {
@@ -1909,6 +1909,7 @@ public class GenericMapping extends Mapping {
 		header += "," + "concept_id";
 		header += "," + "concept_name";
 		header += "," + "concept_class";
+		header += "," + "vocabulary_id";
 		header += "," + "MappingLog";
 		
 		PrintWriter drugMappingReviewFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
@@ -2032,7 +2033,7 @@ public class GenericMapping extends Mapping {
 						}
 						
 
-						String drugMappingReviewIngredientRecord =       drugMappingReviewRecord;
+						String drugMappingReviewIngredientRecord = drugMappingReviewRecord;
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
 						drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
 						drugMappingReviewIngredientRecord += "," + standardizedAmount;
@@ -2041,9 +2042,11 @@ public class GenericMapping extends Mapping {
 							drugMappingReviewIngredientRecord += "," + target.getConceptId();
 							drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(target.getConceptName());
 							drugMappingReviewIngredientRecord += "," + target.getConceptClassId();
+							drugMappingReviewIngredientRecord += "," + target.getVocabularyId();
 							drugMappingReviewIngredientRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingLog);
 						}
 						else {
+							drugMappingReviewIngredientRecord += ",";
 							drugMappingReviewIngredientRecord += ",";
 							drugMappingReviewIngredientRecord += ",";
 							drugMappingReviewIngredientRecord += ",";
@@ -2107,6 +2110,7 @@ public class GenericMapping extends Mapping {
 						drugMappingReviewRecord += "," + target.getConceptId();
 						drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(target.getConceptName());
 						drugMappingReviewRecord += "," + target.getConceptClassId();
+						drugMappingReviewRecord += "," + target.getVocabularyId();
 						drugMappingReviewRecord += "," + DrugMappingStringUtilities.escapeFieldValue(mappingLog);
 					}
 					else {
@@ -2183,6 +2187,7 @@ public class GenericMapping extends Mapping {
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
+						drugMappingReviewIngredientRecord += ",";
 						
 						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
 					}
@@ -2193,6 +2198,7 @@ public class GenericMapping extends Mapping {
 					drugMappingReviewIngredientRecord += "," + "*";
 					drugMappingReviewIngredientRecord += "," + "*";
 					drugMappingReviewIngredientRecord += "," + "*";
+					drugMappingReviewIngredientRecord += ",";
 					drugMappingReviewIngredientRecord += ",";
 					drugMappingReviewIngredientRecord += ",";
 					drugMappingReviewIngredientRecord += ",";

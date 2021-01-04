@@ -106,8 +106,7 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 	
 	@Override
 	public Iterator<DelimitedFileRow> iterator() {
-		rowIterator = new RowIterator();
-		return rowIterator;
+		return new RowIterator();
 	}
 
 	
@@ -120,8 +119,10 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 		public RowIterator() {
 			iterator = delimitedFile.iteratorWithHeader();
 			fieldName2ColumnIndex = new HashMap<String, Integer>();
-			for (String header : iterator.next())
-				fieldName2ColumnIndex.put(header, fieldName2ColumnIndex.size());
+			if (iterator.hasNext()) {
+				for (String header : iterator.next())
+					fieldName2ColumnIndex.put(header, fieldName2ColumnIndex.size());
+			}
 		}
 
 		
