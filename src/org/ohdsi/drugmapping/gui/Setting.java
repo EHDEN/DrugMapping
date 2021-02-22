@@ -19,6 +19,7 @@ public class Setting extends JPanel {
 	protected String name = "";
 	protected String label = "";
 	protected int valueType = -1;
+	protected boolean isSpecial = false;
 	
 	
 	public void disableWhenRunning(JComponent component) {
@@ -54,6 +55,11 @@ public class Setting extends JPanel {
 	
 	public int getValueType() {
 		return valueType;
+	}
+	
+	
+	public boolean isSpecial() {
+		return isSpecial;
 	}
 	
 	

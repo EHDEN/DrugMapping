@@ -19,11 +19,12 @@ public class LongValueSetting extends Setting {
 	private Long value = null;
 
 	
-	public LongValueSetting(MainFrameTab mainFrameTab, String name, String label, Long defaultValue) {
+	public LongValueSetting(MainFrameTab mainFrameTab, String name, String label, Long defaultValue, Boolean isSpecial) {
 		valueType = Setting.SETTING_TYPE_LONG;
 		this.name = name;
 		this.label = label;
 		this.value = defaultValue;
+		this.isSpecial = isSpecial;
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder());

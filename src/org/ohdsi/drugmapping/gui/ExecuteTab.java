@@ -48,13 +48,11 @@ public class ExecuteTab extends MainFrameTab {
 		setLayout(new BorderLayout());
 
 		JPanel databasePanel = null;
-		if (!DrugMapping.special.equals("ZINDEX")) {
-			// Database settings
-			databasePanel = new JPanel(new GridLayout(0, 1));
-			databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Vocabulary"));
-			database = new CDMDatabase();
-			databasePanel.add(database);
-		}
+		// Database settings
+		databasePanel = new JPanel(new GridLayout(0, 1));
+		databasePanel.setBorder(BorderFactory.createTitledBorder("CDM Vocabulary"));
+		database = new CDMDatabase();
+		databasePanel.add(database);
 		
 		JPanel level1Panel = new JPanel(new BorderLayout());
 		level1Panel.setBorder(BorderFactory.createEmptyBorder());
@@ -76,6 +74,7 @@ public class ExecuteTab extends MainFrameTab {
 		level2Panel.setBorder(BorderFactory.createEmptyBorder());
 		
 		JPanel outputPanel = null;
+		
 		// Output Folder
 		outputPanel = new JPanel(new GridLayout(0, 1));
 		outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
@@ -85,27 +84,22 @@ public class ExecuteTab extends MainFrameTab {
 		JPanel level3Panel = new JPanel(new BorderLayout());
 		level3Panel.setBorder(BorderFactory.createEmptyBorder());
 
-
 		// General Settings
-		DrugMapping.settings = null;
-		if (!DrugMapping.special.equals("ZINDEX")) {
-			DrugMapping.settings = new GeneralSettings();
+		DrugMapping.settings = new GeneralSettings();
 
-			MainFrame.VOCABULARY_ID                        = DrugMapping.settings.addSetting(new StringValueSetting(this, "VocabularyID", "Vocabulary ID:", ""));
-			MainFrame.MINIMUM_USE_COUNT                    = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", 1L));
-			MainFrame.MAXIMUM_STRENGTH_DEVIATION           = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0));
-			MainFrame.PREFERENCE_MATCH_COMP_FORM           = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceCompForm", "Comp Form matching preference:", new String[] { "Comp before Form", "Form before Comp" }, "Form before Comp"));
-			MainFrame.PREFERENCE_MATCH_INGREDIENTS_TO_COMP = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceMatchIngredientsToComp", "Ingredient Matching preference:", new String[] { "Ingredient Only", "Ingredient or Comp" }, "Ingredient Only"));
-			MainFrame.PREFERENCE_NON_ORPHAN_INGREDIENTS    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceNonOrphans", "Prefer not-orphan ingredients:", new String[] { "Yes", "No" }, "Yes"));
-			MainFrame.PREFERENCE_RXNORM                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm"));
-			MainFrame.PREFERENCE_ATC                       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceATC", "Prefer matching ATC:", new String[] { "Yes", "No" }, "Yes"));
-			MainFrame.PREFERENCE_PRIORITIZE_BY_DATE        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No"));
-			MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID  = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)"));
-			MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None"));
-			MainFrame.SAVE_DRUGMAPPING_LOG                 = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsLog", "Save Drugmapping Log file:", new String[] { "Yes", "No" }, "Yes"));
-			MainFrame.SUPPRESS_WARNINGS                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No"));
-		}
-		
+		MainFrame.VOCABULARY_ID                        = DrugMapping.settings.addSetting(new StringValueSetting(this, "VocabularyID", "Vocabulary ID:", "", false));
+		MainFrame.MINIMUM_USE_COUNT                    = DrugMapping.settings.addSetting(new LongValueSetting(this, "minimumUseCount", "Minimum use count:", -1L, true));
+		MainFrame.MAXIMUM_STRENGTH_DEVIATION           = DrugMapping.settings.addSetting(new DoubleValueSetting(this, "maximumStrengthDeviationPercentage", "Maximum strength deviation percentage:", 20.0, true));
+		MainFrame.PREFERENCE_MATCH_COMP_FORM           = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceCompForm", "Comp Form matching preference:", new String[] { "Comp before Form", "Form before Comp" }, "Form before Comp", true));
+		MainFrame.PREFERENCE_MATCH_INGREDIENTS_TO_COMP = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceMatchIngredientsToComp", "Ingredient Matching preference:", new String[] { "Ingredient Only", "Ingredient or Comp" }, "Ingredient Only", true));
+		MainFrame.PREFERENCE_NON_ORPHAN_INGREDIENTS    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceNonOrphans", "Prefer not-orphan ingredients:", new String[] { "Yes", "No" }, "Yes", true));
+		MainFrame.PREFERENCE_RXNORM                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceRxNorm", "RxNorm preference:", new String[] { "RxNorm", "RxNorm Extension", "None" }, "RxNorm", true));
+		MainFrame.PREFERENCE_ATC                       = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "preferenceATC", "Prefer matching ATC:", new String[] { "Yes", "No" }, "Yes", true));
+		MainFrame.PREFERENCE_PRIORITIZE_BY_DATE        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByDate", "Valid start date preference:", new String[] { "Latest", "Oldest", "No" }, "No", true));
+		MainFrame.PREFERENCE_PRIORITIZE_BY_CONCEPT_ID  = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "prioritizeByConceptId", "Concept_id preference:", new String[] { "Smallest (= oldest)", "Largest (= newest)", "No" }, "Smallest (= oldest)", true));
+		MainFrame.PREFERENCE_TAKE_FIRST_OR_LAST        = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "takeFirstOrLast", "First or last preferece:", new String[] { "First", "Last", "None" }, "None", true));
+		MainFrame.SAVE_DRUGMAPPING_LOG                 = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "saveDrugMappingsLog", "Save Drugmapping Log file:", new String[] { "Yes", "No" }, "Yes", true));
+		MainFrame.SUPPRESS_WARNINGS                    = DrugMapping.settings.addSetting(new ChoiceValueSetting(this, "suppressWarnings", "Suppress warnings:", new String[] { "Yes", "No" }, "No", false));
 		
 		// Buttons Panel
 		JPanel buttonSectionPanel = new JPanel(new BorderLayout());
@@ -135,7 +129,7 @@ public class ExecuteTab extends MainFrameTab {
 		level1Panel.add(level2Panel, BorderLayout.CENTER);
 		level2Panel.add(outputPanel, BorderLayout.NORTH);
 		level2Panel.add(level3Panel, BorderLayout.CENTER);
-		if (DrugMapping.settings != null) {
+		if ((DrugMapping.settings != null) && DrugMapping.settings.hasVisibleSettings()) {
 			level3Panel.add(DrugMapping.settings, BorderLayout.NORTH);
 		}
 		level3Panel.add(createConsolePanel(), BorderLayout.CENTER);

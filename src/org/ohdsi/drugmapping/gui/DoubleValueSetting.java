@@ -18,11 +18,12 @@ public class DoubleValueSetting extends Setting {
 	Double value;
 	
 	
-	public DoubleValueSetting(MainFrameTab mainFrameTab, String name, String label, Double defaultValue) {
+	public DoubleValueSetting(MainFrameTab mainFrameTab, String name, String label, Double defaultValue, Boolean isSpecial) {
 		valueType = Setting.SETTING_TYPE_DOUBLE;
 		this.name = name;
 		this.label = label;
 		this.value = defaultValue;
+		this.isSpecial = isSpecial;
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder());

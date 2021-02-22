@@ -22,11 +22,12 @@ public class ChoiceValueSetting extends Setting {
 	String value = null;
 	
 	
-	public ChoiceValueSetting(MainFrameTab mainFrameTab, String name, String label, String[] choices, String defaultValue) {
+	public ChoiceValueSetting(MainFrameTab mainFrameTab, String name, String label, String[] choices, String defaultValue, Boolean isSpecial) {
 		valueType = Setting.SETTING_TYPE_STRING;
 		this.name = name;
 		this.label = label;
 		this.value = defaultValue;
+		this.isSpecial = isSpecial;
 		
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(BorderFactory.createEmptyBorder());

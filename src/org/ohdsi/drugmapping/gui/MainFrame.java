@@ -139,10 +139,6 @@ public class MainFrame {
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(new BorderLayout());
 		
-		JMenuBar menuBar = createMenu();
-		frame.setJMenuBar(menuBar);
-		DrugMapping.disableWhenRunning(menuBar);
-		
 		tabbedPane = new JTabbedPane();
 		DrugMapping.disableWhenRunning(tabbedPane);
 		
@@ -154,6 +150,10 @@ public class MainFrame {
 		tabbedPane.addTab("Ingredient Mapping Log", ingredientMappingLogTab);
 		tabbedPane.addTab("Drug Mapping Log", drugMappingLogTab);
 		
+		JMenuBar menuBar = createMenu();
+		frame.setJMenuBar(menuBar);
+		DrugMapping.disableWhenRunning(menuBar);
+		
 		frame.add(tabbedPane, BorderLayout.CENTER);
 		
 		return frame;
@@ -163,30 +163,28 @@ public class MainFrame {
 	private JMenuBar createMenu() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu file = new JMenu("File");
+
+		JMenuItem loadDatabaseSettingsMenuItem = new JMenuItem("Load Database Settings");
+		loadDatabaseSettingsMenuItem.setToolTipText("Load Database Settings");
+		loadDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				executeTab.loadDatabaseSettingsFile();
+			}
+		});
+		file.add(loadDatabaseSettingsMenuItem);
 		
-		if (!DrugMapping.special.equals("ZINDEX")) {
-			JMenuItem loadDatabaseSettingsMenuItem = new JMenuItem("Load Database Settings");
-			loadDatabaseSettingsMenuItem.setToolTipText("Load Database Settings");
-			loadDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
+		JMenuItem saveDatabaseSettingsMenuItem = new JMenuItem("Save Database Settings");
+		saveDatabaseSettingsMenuItem.setToolTipText("Save Database Settings");
+		saveDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
 
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					executeTab.loadDatabaseSettingsFile();
-				}
-			});
-			file.add(loadDatabaseSettingsMenuItem);
-			
-			JMenuItem saveDatabaseSettingsMenuItem = new JMenuItem("Save Database Settings");
-			saveDatabaseSettingsMenuItem.setToolTipText("Save Database Settings");
-			saveDatabaseSettingsMenuItem.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					executeTab.saveDatabaseSettingsFile();
-				}
-			});
-			file.add(saveDatabaseSettingsMenuItem);
-		}
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				executeTab.saveDatabaseSettingsFile();
+			}
+		});
+		file.add(saveDatabaseSettingsMenuItem);
 		
 		JMenuItem loadFileSettingsMenuItem = new JMenuItem("Load File Settings");
 		loadFileSettingsMenuItem.setToolTipText("Load File Settings");
@@ -210,7 +208,7 @@ public class MainFrame {
 		});
 		file.add(saveFileSettingsMenuItem);
 
-		if (!DrugMapping.special.equals("ZINDEX")) {
+		if ((DrugMapping.settings != null) && DrugMapping.settings.hasVisibleSettings()) {
 			JMenuItem loadGeneralSettingsMenuItem = new JMenuItem("Load General Settings");
 			loadGeneralSettingsMenuItem.setToolTipText("Load General Settings");
 			loadGeneralSettingsMenuItem.addActionListener(new ActionListener() {
@@ -232,18 +230,18 @@ public class MainFrame {
 				}
 			});
 			file.add(saveGeneralSettingsMenuItem);
-
-			JMenuItem loadMappingResultsMenuItem = new JMenuItem("Load Mapping Results");
-			loadMappingResultsMenuItem.setToolTipText("Load Mapping Results");
-			loadMappingResultsMenuItem.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					loadDrugMappingResults();
-				}
-			});
-			file.add(loadMappingResultsMenuItem);
 		}
+
+		JMenuItem loadMappingResultsMenuItem = new JMenuItem("Load Mapping Results");
+		loadMappingResultsMenuItem.setToolTipText("Load Mapping Results");
+		loadMappingResultsMenuItem.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				loadDrugMappingResults();
+			}
+		});
+		file.add(loadMappingResultsMenuItem);
 		
 		JMenuItem exitMenuItem = new JMenuItem("Exit");
 		exitMenuItem.setToolTipText("Exit application");

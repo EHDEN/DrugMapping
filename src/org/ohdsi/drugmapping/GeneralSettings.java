@@ -16,6 +16,7 @@ public class GeneralSettings extends JPanel {
 	private static final long serialVersionUID = 4495095183509328565L;
 	
 	List<Setting> generalSettings = new ArrayList<Setting>();
+	List<Setting> visibleSettings = new ArrayList<Setting>();
 	JPanel leftSettingsListPanel = null;
 	JPanel rightSettingsListPanel = null;
 	
@@ -46,9 +47,14 @@ public class GeneralSettings extends JPanel {
 		
 		leftSettingsListPanel.removeAll();
 		rightSettingsListPanel.removeAll();
-		int leftCount = (generalSettings.size() / 2) + (generalSettings.size() % 2);
-		for (int settingNr = 0; settingNr < generalSettings.size(); settingNr++) {
-			setting = generalSettings.get(settingNr);
+		
+		if (DrugMapping.special || (!setting.isSpecial())) {
+			visibleSettings.add(setting);
+		}
+		
+		int leftCount = (visibleSettings.size() / 2) + (visibleSettings.size() % 2);
+		for (int settingNr = 0; settingNr < visibleSettings.size(); settingNr++) {
+			setting = visibleSettings.get(settingNr);
 			if (settingNr < leftCount) {
 				leftSettingsListPanel.add(setting);
 			}
@@ -66,6 +72,11 @@ public class GeneralSettings extends JPanel {
 	}
 	
 	
+	public boolean hasVisibleSettings() {
+		return visibleSettings.size() > 0;
+	}
+	
+	
 	public List<String> getSettingsSave() {
 		List<String> settings = new ArrayList<String>();
 
@@ -73,7 +84,7 @@ public class GeneralSettings extends JPanel {
 		settings.add("# General Settings");
 		settings.add("#");
 		settings.add("");
-		for (Setting generalSetting : generalSettings) {
+		for (Setting generalSetting : visibleSettings) {
 			settings.add(generalSetting.getName() + "=" + generalSetting.getValueAsString());
 		}
 		

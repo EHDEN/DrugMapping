@@ -24,7 +24,7 @@ public class DrugMapping {
 	public static GeneralSettings settings = null;
 	public static String outputVersion = "";
 	public static boolean debug = false;
-	public static String special = "";
+	public static boolean special = false;
 	public static Boolean autoStart = false;
 	
 	public static String baseName = "";
@@ -93,17 +93,11 @@ public class DrugMapping {
 		List<String> fileSettings = null;
 		List<String> generalSettings = null;
 		autoStart = false;
-		special = parameters.get("special");
+		special = (parameters.get("special") != null);
 		debug = (parameters.get("debug") != null);
 
-		if (special != null) {
-			// No specials defined
-		}
-		else {
-			special = "";
-			inputFiles = new GenericMappingInputFiles();
-			logFileName = GenericMapping.LOGFILE_NAME;
-		}
+		inputFiles = new GenericMappingInputFiles();
+		logFileName = GenericMapping.LOGFILE_NAME;
 		
 		mainFrame = new MainFrame(this);
 		
@@ -180,34 +174,32 @@ public class DrugMapping {
 		public void run() {
 			for (JComponent component : componentsToDisableWhenRunning)
 				component.setEnabled(false);
-			
-			if (special.equals("??????")) {
-			}
-			else {
-				logDatabaseSettings(getDatabase());
-				getFile("Generic Drugs File").logFileSettings();
-				getFile("Ingredient Name Translation File").logFileSettings();
-				getFile("Unit Mapping File").logFileSettings();
-				getFile("Dose Form Mapping File").logFileSettings();
-				getFile("Manual CAS Mappings File").logFileSettings();
-				getFile("Manual Ingedient Overrule Mappings File").logFileSettings();
-				getFile("Manual Ingedient Fallback Mappings File").logFileSettings();
-				getFile("Manual Drug Mappings File").logFileSettings();
-				logFolderSettings(mainFrame.getOutputFolder());
+
+			logDatabaseSettings(getDatabase());
+			getFile("Generic Drugs File").logFileSettings();
+			getFile("Ingredient Name Translation File").logFileSettings();
+			getFile("Unit Mapping File").logFileSettings();
+			getFile("Dose Form Mapping File").logFileSettings();
+			getFile("Manual CAS Mappings File").logFileSettings();
+			getFile("Manual Ingedient Overrule Mappings File").logFileSettings();
+			getFile("Manual Ingedient Fallback Mappings File").logFileSettings();
+			getFile("Manual Drug Mappings File").logFileSettings();
+			logFolderSettings(mainFrame.getOutputFolder());
+			if (special) {
 				logGeneralSettings();
-				new GenericMapping(
-						mainFrame,
-						getDatabase(), 
-						(DelimitedInputFileGUI) getFile("Generic Drugs File"),
-						(DelimitedInputFileGUI) getFile("Ingredient Name Translation File"),
-						(DelimitedInputFileGUI) getFile("Unit Mapping File"),
-						(DelimitedInputFileGUI) getFile("Dose Form Mapping File"),
-						(DelimitedInputFileGUI) getFile("Manual CAS Mappings File"), 
-						(DelimitedInputFileGUI) getFile("Manual Ingedient Overrule Mappings File"), 
-						(DelimitedInputFileGUI) getFile("Manual Ingedient Fallback Mappings File"), 
-						(DelimitedInputFileGUI) getFile("Manual Drug Mappings File")
-						);
 			}
+			new GenericMapping(
+					mainFrame,
+					getDatabase(), 
+					(DelimitedInputFileGUI) getFile("Generic Drugs File"),
+					(DelimitedInputFileGUI) getFile("Ingredient Name Translation File"),
+					(DelimitedInputFileGUI) getFile("Unit Mapping File"),
+					(DelimitedInputFileGUI) getFile("Dose Form Mapping File"),
+					(DelimitedInputFileGUI) getFile("Manual CAS Mappings File"), 
+					(DelimitedInputFileGUI) getFile("Manual Ingedient Overrule Mappings File"), 
+					(DelimitedInputFileGUI) getFile("Manual Ingedient Fallback Mappings File"), 
+					(DelimitedInputFileGUI) getFile("Manual Drug Mappings File")
+					);
 
 			mainFrame.closeLogFile();
 			
