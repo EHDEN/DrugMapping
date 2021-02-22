@@ -27,8 +27,9 @@ _Generic Drugs File_
 | SourceATCCode | The ATC code if available. |
 | SourceFormulation | The formulation of the source drug. |
 | SourceCount | The number of records in the database containing the source drug. |
-| IngredientName | The original name of an active ingredient of the source drug. |
-| IngredientNameEnglish | Optional. The English name of the ingredient. |
+| IngredientCode | The original code of an active ingredient of the source drug. |
+| IngredientName | The original name of the ingredient of the source drug. |
+| IngredientNameEnglish | Optional. The English name of the ingredient of the source drug. |
 | Dosage | The dosage of the ingredient in the source drug. |
 | DosageUnit | The unit of the dosage of the ingredient in the source drug. |
 | CASNumber | The CAS-number of the ingredient if available. |
