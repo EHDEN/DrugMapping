@@ -81,7 +81,7 @@ public abstract class InputFileGUI extends JPanel {
 		fileSelectLabelPanel.add(fileLabelPanel, BorderLayout.CENTER);
 		
 		fileNameField = new JTextField();
-		fileNameField.setText(fileDefinition.getDefaultFile());
+		fileNameField.setText("");
 		fileNameField.setPreferredSize(new Dimension(10000, fileNameField.getHeight()));
 		fileNameField.setEditable(false);
 

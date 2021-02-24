@@ -67,5 +67,9 @@ public class Setting extends JPanel {
 		return correct;
 	};
 	
+	
+	public String toString() {
+		return getName() + "=" + getValueAsString();
+	}
 
 }

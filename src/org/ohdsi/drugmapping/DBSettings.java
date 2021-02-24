@@ -6,10 +6,6 @@ import java.util.List;
 import org.ohdsi.databases.DbType;
 
 public class DBSettings {
-	public static int	DATABASE	= 1;
-	public static int	CSVFILES	= 2;
-	
-	public int			dataType;
 	public List<String>	tables		= new ArrayList<String>();
 	
 	// Database settings
@@ -23,4 +19,17 @@ public class DBSettings {
 	
 	// CSV file settings
 	public char			delimiter	= ',';
+	
+	
+	public String toString() {
+		String description = "Database Settings [";
+		if (name     != null) description += "\n    " + "Name=" + name;
+		if (dbType   != null) description += "\n    " + "Type=" + dbType.toString();
+		if (server   != null) description += "\n    " + "Server=" + server;
+		if (user     != null) description += "\n    " + "User=" + user;
+		if (database != null) description += "\n    " + "Vocab Schema=" + database;
+		if (domain   != null) description += "\n    " + "Domain=" + domain;
+		description += "\n]";
+		return description;
+	}
 }

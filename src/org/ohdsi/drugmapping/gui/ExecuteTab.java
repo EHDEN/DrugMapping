@@ -201,9 +201,12 @@ public class ExecuteTab extends MainFrameTab {
 			settings.add("");
 		}
 		for (InputFileGUI inputFile : inputFiles) {
-			settings.addAll(inputFile.getSettings());
-			settings.add("");
-			settings.add("");
+			List<String> inputFileSettings = inputFile.getSettings();
+			if (inputFileSettings != null) {
+				settings.addAll(inputFileSettings);
+				settings.add("");
+				settings.add("");
+			}
 		}
 		saveSettingsToFile(settings);
 	}

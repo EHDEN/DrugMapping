@@ -35,7 +35,7 @@ public class FormConversion {
 	
 	
 	public static String getDefaultFileName() {
-		return DrugMapping.getBasePath() + "/" + DEFAULT_FILENAME;
+		return DrugMapping.getBasePath() + File.separator + DEFAULT_FILENAME;
 	}
 	
 	
@@ -143,11 +143,13 @@ public class FormConversion {
 		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
+		boolean newFile = true;
 		
-		if ((sourceFormMappingFile != null) && (!sourceFormMappingFile.getFileName().equals(""))) {
+		if ((sourceFormMappingFile != null) && (sourceFormMappingFile.getFileName() != null) && (!sourceFormMappingFile.getFileName().equals(""))) {
 			fileName = sourceFormMappingFile.getFileName();
 			fieldDelimiterName = sourceFormMappingFile.getFieldDelimiter();
 			textQualifierName = sourceFormMappingFile.getTextQualifier();
+			newFile = false;
 		}
 		
 		String fieldDelimiter = Character.toString(DelimitedInputFileGUI.fieldDelimiter(fieldDelimiterName));
@@ -159,11 +161,11 @@ public class FormConversion {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = sourceFormMappingFile.getColumnMapping().get("DoseForm");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Priority");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("concept_id");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("concept_name");
-			header += fieldDelimiter + sourceFormMappingFile.getColumnMapping().get("Comments");
+			String header =            (newFile ? "DoseForm"     : sourceFormMappingFile.getColumnMapping().get("DoseForm"));
+			header += fieldDelimiter + (newFile ? "Priority"     : sourceFormMappingFile.getColumnMapping().get("Priority"));
+			header += fieldDelimiter + (newFile ? "concept_id"   : sourceFormMappingFile.getColumnMapping().get("concept_id"));
+			header += fieldDelimiter + (newFile ? "concept_name" : sourceFormMappingFile.getColumnMapping().get("concept_name"));
+			header += fieldDelimiter + (newFile ? "Comments"     : sourceFormMappingFile.getColumnMapping().get("Comments"));
 			
 			mappingFileWriter.println(header);
 			

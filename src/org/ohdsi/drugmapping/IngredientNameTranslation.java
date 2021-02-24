@@ -34,7 +34,7 @@ public class IngredientNameTranslation {
 	
 	
 	public static String getDefaultFileName() {
-		return DrugMapping.getBasePath() + "/" + DEFAULT_FILENAME;
+		return DrugMapping.getBasePath() + File.separator + DEFAULT_FILENAME;
 	}
 	
 	
@@ -106,11 +106,13 @@ public class IngredientNameTranslation {
 		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
+		boolean newFile = true;
 		
-		if ((ingredientNameTranslationFile != null) && (!ingredientNameTranslationFile.getFileName().equals(""))) {
+		if ((ingredientNameTranslationFile != null) && (ingredientNameTranslationFile.getFileName() != null) && (!ingredientNameTranslationFile.getFileName().equals(""))) {
 			fileName = ingredientNameTranslationFile.getFileName();
 			fieldDelimiterName = ingredientNameTranslationFile.getFieldDelimiter();
 			textQualifierName = ingredientNameTranslationFile.getTextQualifier();
+			newFile = false;
 		}
 		
 		String fieldDelimiter = Character.toString(DelimitedInputFileGUI.fieldDelimiter(fieldDelimiterName));
@@ -122,9 +124,9 @@ public class IngredientNameTranslation {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientId");
-			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientName");
-			header += fieldDelimiter + ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientNameEnglish");
+			String header =            (newFile ? "SourceIngredientId"          : ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientId"));
+			header += fieldDelimiter + (newFile ? "SourceIngredientName"        : ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientName"));
+			header += fieldDelimiter + (newFile ? "SourceIngredientNameEnglish" : ingredientNameTranslationFile.getColumnMapping().get("SourceIngredientNameEnglish"));
 			
 			mappingFileWriter.println(header);
 			

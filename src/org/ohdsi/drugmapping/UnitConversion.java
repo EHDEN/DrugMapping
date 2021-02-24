@@ -33,7 +33,7 @@ public class UnitConversion {
 	
 	
 	public static String getDefaultFileName() {
-		return DrugMapping.getBasePath() + "/" + DEFAULT_FILENAME;
+		return DrugMapping.getBasePath() + File.separator + DEFAULT_FILENAME;
 	}
 	
 	
@@ -114,11 +114,13 @@ public class UnitConversion {
 		fileName = getDefaultFileName();
 		String fieldDelimiterName = "Comma";
 		String textQualifierName = "\"";
+		boolean newFile = true;
 		
-		if ((sourceUnitMappingFile != null) && (!sourceUnitMappingFile.getFileName().equals(""))) {
+		if ((sourceUnitMappingFile != null) && (sourceUnitMappingFile.getFileName() != null) && (!sourceUnitMappingFile.getFileName().equals(""))) {
 			fileName = sourceUnitMappingFile.getFileName();
 			fieldDelimiterName = sourceUnitMappingFile.getFieldDelimiter();
 			textQualifierName = sourceUnitMappingFile.getTextQualifier();
+			newFile = false;
 		}
 		
 		String fieldDelimiter = Character.toString(DelimitedInputFileGUI.fieldDelimiter(fieldDelimiterName));
@@ -130,12 +132,12 @@ public class UnitConversion {
 		try {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
-			String header = sourceUnitMappingFile.getColumnMapping().get("SourceUnit");
-			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("DrugCount");
-			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("RecordCount");
-			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("Factor");
-			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("TargetUnit");
-			header += fieldDelimiter + sourceUnitMappingFile.getColumnMapping().get("Comment");
+			String header =            (newFile ? "SourceUnit"  : sourceUnitMappingFile.getColumnMapping().get("SourceUnit"));
+			header += fieldDelimiter + (newFile ? "DrugCount"   : sourceUnitMappingFile.getColumnMapping().get("DrugCount"));
+			header += fieldDelimiter + (newFile ? "RecordCount" : sourceUnitMappingFile.getColumnMapping().get("RecordCount"));
+			header += fieldDelimiter + (newFile ? "Factor"      : sourceUnitMappingFile.getColumnMapping().get("Factor"));
+			header += fieldDelimiter + (newFile ? "TargetUnit"  : sourceUnitMappingFile.getColumnMapping().get("TargetUnit"));
+			header += fieldDelimiter + (newFile ? "Comment"     : sourceUnitMappingFile.getColumnMapping().get("Comment"));
 			
 			mappingFileWriter.println(header);
 			

@@ -534,7 +534,6 @@ public class CDMDatabase extends JPanel {
 	private DBSettings getDBSettingsFromInput() {
 		DBSettings dbSettings = new DBSettings();
 		dbSettings.name = databaseNameField.getText();
-		dbSettings.dataType = DBSettings.DATABASE;
 		dbSettings.user = databaseUserField.getText();
 		dbSettings.password = databasePasswordField.getText();
 		dbSettings.server = databaseServerField.getText();

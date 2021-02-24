@@ -32,7 +32,7 @@ public class DrugMapping {
 	public static Set<JComponent> componentsToDisableWhenRunning = new HashSet<JComponent>();
 	
 	private static String currentPath = null;	
-	private static String basePath = new File(".").getAbsolutePath();
+	private static String basePath = new File(".").getAbsolutePath().substring(0, new File(".").getAbsolutePath().length() - 2);
 	private static InputFileDefinition inputFiles = null;
 	
 	private String logFileName;

@@ -518,19 +518,22 @@ public class DelimitedInputFileGUI extends InputFileGUI {
 
 	@Override
 	public List<String> getSettings() {
-		List<String> settings = new ArrayList<String>();
+		List<String> settings = null;
 
-		settings.add("#");
-		settings.add("# " + getLabelText());
-		settings.add("#");
-		settings.add("");
-		settings.add(getLabelText() + ".filename=" + getFileName());
-		settings.add(getLabelText() + ".selected=" + (isSelected() ? "Yes" : "No"));
-		if (getFileDefinition().getFileType() == FileDefinition.DELIMITED_FILE) {
-			settings.add(getLabelText() + ".fieldDelimiter=" + getFieldDelimiter());
-			settings.add(getLabelText() + ".textQualifier=" + getTextQualifier());
-			for (String column : getColumns()) {
-				settings.add(getLabelText() + ".column." + column + "=" + (getColumnMapping().get(column) == null ? "" : getColumnMapping().get(column)));
+		if (getFileName() != null) {
+			settings = new ArrayList<String>();
+			settings.add("#");
+			settings.add("# " + getLabelText());
+			settings.add("#");
+			settings.add("");
+			settings.add(getLabelText() + ".filename=" + getFileName());
+			settings.add(getLabelText() + ".selected=" + (isSelected() ? "Yes" : "No"));
+			if (getFileDefinition().getFileType() == FileDefinition.DELIMITED_FILE) {
+				settings.add(getLabelText() + ".fieldDelimiter=" + getFieldDelimiter());
+				settings.add(getLabelText() + ".textQualifier=" + getTextQualifier());
+				for (String column : getColumns()) {
+					settings.add(getLabelText() + ".column." + column + "=" + (getColumnMapping().get(column) == null ? "" : getColumnMapping().get(column)));
+				}
 			}
 		}
 		

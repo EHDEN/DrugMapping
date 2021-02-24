@@ -53,13 +53,13 @@ public class GeneralSettings extends JPanel {
 		}
 		
 		int leftCount = (visibleSettings.size() / 2) + (visibleSettings.size() % 2);
-		for (int settingNr = 0; settingNr < visibleSettings.size(); settingNr++) {
-			setting = visibleSettings.get(settingNr);
-			if (settingNr < leftCount) {
-				leftSettingsListPanel.add(setting);
+		for (int visibleSettingNr = 0; visibleSettingNr < visibleSettings.size(); visibleSettingNr++) {
+			Setting visibleSetting = visibleSettings.get(visibleSettingNr);
+			if (visibleSettingNr < leftCount) {
+				leftSettingsListPanel.add(visibleSetting);
 			}
 			else {
-				rightSettingsListPanel.add(setting);
+				rightSettingsListPanel.add(visibleSetting);
 			}
 		}
 		
@@ -137,5 +137,15 @@ public class GeneralSettings extends JPanel {
 			value = generalSettings.get(index).getValueAsString();
 		}
 		return value;
+	}
+	
+	
+	public String toString() {
+		String description = "General Settings [";
+		for (Setting setting : generalSettings) {
+			description += "\n    " + setting;
+		}
+		description += "\n]";
+		return description;
 	}
 }
