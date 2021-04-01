@@ -134,7 +134,7 @@ public class MainFrame {
 		
 		frame.setSize(1000, 800);
 		frame.setMinimumSize(new Dimension(800, 600));
-		frame.setTitle("OHDSI Drug Mapping Tool");
+		frame.setTitle("OHDSI Drug Mapping Tool " + DrugMapping.version);
 		MainFrame.setIcon(frame);
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(new BorderLayout());
