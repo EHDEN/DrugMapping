@@ -290,6 +290,7 @@ public class GenericMapping extends Mapping {
 		isMapping = true;
 		
 		this.mainFrame = mainFrame;
+		this.mainFrame.setGenericMapping(this);
 		
 		setMappingTypes(DrugMapping.settings.getStringSetting(MainFrame.PREFERENCE_MATCH_COMP_FORM).equals("Comp before Form"));
 		
@@ -1948,7 +1949,7 @@ public class GenericMapping extends Mapping {
 		PrintWriter drugMappingReviewFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
 
 		for (SourceDrug sourceDrug : source.getSourceDrugs()) {
-			String mappingStatus = manualDrugMappings.containsKey(sourceDrug) ? "ManualMapping" : (mappedSourceDrugs.contains(sourceDrug) ? "Mapped" : (partiallyMappedSourceDrugs.contains(sourceDrug) ? "Incomplete" : "Unmapped"));
+			String mappingStatus = getMappingStatus(sourceDrug);
 			Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
 			
 			// Get the mapping type
@@ -2282,7 +2283,30 @@ public class GenericMapping extends Mapping {
 	}
 	
 	
-	public static void saveDrugMappingMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingLog, Map<String, Double> strengthDeviationPercentageMap, CDM cdmData) {
+	private String getMappingStatus(SourceDrug sourceDrug) {
+		String mappingStatus = "Unmapped";
+		if (manualDrugMappings.containsKey(sourceDrug)) {
+			mappingStatus = "ManualMapping";
+		}
+		else if (mappedSourceDrugs.contains(sourceDrug)) {
+			Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappings = sourceDrugMappingResults.get(sourceDrug);
+			int mapping = 0;
+			while (mappingTypeDescriptions.get(mapping) != null) {
+				if ((sourceDrugMappings.get(mapping) != null) && (sourceDrugMappings.get(mapping).get(0).get(MAPPED) != null)) {
+					mappingStatus = mappingTypeDescriptions.get(mapping);
+					break;
+				}
+				mapping++;
+			}
+		}
+		else if (partiallyMappedSourceDrugs.contains(sourceDrug)) {
+			mappingStatus = "Incomplete";
+		}
+		return mappingStatus;
+	}
+	
+	
+	public void saveDrugMappingMappingLog(Source source, Map<SourceDrug, Map<Integer, List<Map<Integer, List<CDMConcept>>>>> sourceDrugMappingLog, Map<String, Double> strengthDeviationPercentageMap, CDM cdmData) {
 		isSavingDrugMappingLog = true;
 		
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Saving Drug Mapping Mapping Log ...");
@@ -2342,7 +2366,7 @@ public class GenericMapping extends Mapping {
 									break;
 								}
 								else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Mapped"))) {
-									mappingStatus = "Mapped";
+									mappingStatus = getMappingStatus(sourceDrug);
 									break;
 								}
 							}

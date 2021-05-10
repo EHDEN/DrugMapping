@@ -42,6 +42,8 @@ import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 public class DrugMappingLogTab extends MainFrameTab {
 	private static final long serialVersionUID = -2535974179089673874L;
 	
+	private GenericMapping genericMapping;
+	
 	private Source source;
 	private CDM cdm = null;
 	private boolean isSaved = false;
@@ -72,8 +74,9 @@ public class DrugMappingLogTab extends MainFrameTab {
 	
 	private boolean debug = false;
 
-	public DrugMappingLogTab(MainFrame mainFrame) {
+	public DrugMappingLogTab(GenericMapping genericMapping, MainFrame mainFrame) {
 		super();
+		this.genericMapping = genericMapping;
 		this.mainFrame = mainFrame;
 		
 		setLayout(new BorderLayout());
@@ -211,7 +214,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 								break;
 							}
 							else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Mapped"))) {
-								mappingStatus = "Mapped";
+								mappingStatus = GenericMapping.mappingTypeDescriptions.get(mappingType);
 								break;
 							}
 						}
@@ -297,9 +300,9 @@ public class DrugMappingLogTab extends MainFrameTab {
 			}
 		});
 		// Status
-		drugsTable.getColumnModel().getColumn(0).setMinWidth(120);
-		drugsTable.getColumnModel().getColumn(0).setMaxWidth(120);
-		drugsTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+		drugsTable.getColumnModel().getColumn(0).setMinWidth(160);
+		drugsTable.getColumnModel().getColumn(0).setMaxWidth(160);
+		drugsTable.getColumnModel().getColumn(0).setPreferredWidth(160);
 		
 		// Code
 		drugsTable.getColumnModel().getColumn(1).setMaxWidth(120);
@@ -764,7 +767,7 @@ public class DrugMappingLogTab extends MainFrameTab {
 			for (JComponent component : DrugMapping.componentsToDisableWhenRunning)
 				component.setEnabled(false);
 
-			GenericMapping.saveDrugMappingMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, cdm);
+			genericMapping.saveDrugMappingMappingLog(source, drugMappingLog, usedStrengthDeviationPercentageMap, cdm);
 			
 			for (JComponent component : DrugMapping.componentsToDisableWhenRunning)
 				component.setEnabled(true);

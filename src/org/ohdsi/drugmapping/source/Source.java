@@ -23,10 +23,11 @@ public class Source {
 	private static Set<SourceDrugComponent> allComponents = new HashSet<SourceDrugComponent>();
 	private static Set<SourceIngredient> allIngredients = new HashSet<SourceIngredient>();
 	private static Map<String, Long> allUnits = new HashMap<String, Long>();
-	private static Set<String> allForms = new HashSet<String>();
+	private static Map<String, Long> allForms = new HashMap<String, Long>();
 	
 	private static Map<String, SourceIngredient> ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
-	
+
+	private static Map<String, Set<SourceDrug>> formsUsedInSourceDrug = new HashMap<String, Set<SourceDrug>>();
 	private static Map<String, Set<SourceDrug>> unitsUsedInSourceDrug = new HashMap<String, Set<SourceDrug>>();
 	
 	private static Integer casNumbersSet = 0;
@@ -58,23 +59,43 @@ public class Source {
 	}
 	
 	
+	public static Set<String> getAllForms() {
+		return allForms.keySet();
+	}
+	
+	
+	public static void addForms(List<String> forms, SourceDrug sourceDrug) {
+		for (String form : forms) {
+			Long recordUseCount = allForms.get(form);
+			allForms.put(form, recordUseCount == null ? sourceDrug.getCount() : (recordUseCount + sourceDrug.getCount()));
+			Set<SourceDrug> sourceDrugUsage = formsUsedInSourceDrug.get(form);
+			if (sourceDrugUsage == null) {
+				sourceDrugUsage = new HashSet<SourceDrug>();
+				formsUsedInSourceDrug.put(form, sourceDrugUsage);
+			}
+			sourceDrugUsage.add(sourceDrug);
+		}
+	}
+	
+	
+	public static Integer getFormSourceDrugUsage(String unit) {
+		Integer usage = 0;
+		Set<SourceDrug> sourceDrugUsage = formsUsedInSourceDrug.get(unit);
+		if (sourceDrugUsage != null) {
+			usage = sourceDrugUsage.size();
+		}
+		return usage;
+	}
+	
+	
+	public static Long getFormRecordUsage(String form) {
+		Long usage = allForms.get(form);
+		return usage == null ? 0L : usage;
+	}
+	
+	
 	public static Set<String> getAllUnits() {
 		return allUnits.keySet();
-	}
-	
-	
-	public static Set<String> getAllForms() {
-		return allForms;
-	}
-	
-	
-	public static void addForms(List<String> forms) {
-		allForms.addAll(forms);
-	}
-	
-	
-	public static Integer getCASNumbersSet() {
-		return casNumbersSet;
 	}
 	
 	
@@ -91,6 +112,11 @@ public class Source {
 	public static Long getUnitRecordUsage(String unit) {
 		Long usage = allUnits.get(unit);
 		return usage == null ? 0L : usage;
+	}
+	
+	
+	public static Integer getCASNumbersSet() {
+		return casNumbersSet;
 	}
 	
 	

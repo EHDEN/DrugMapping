@@ -162,6 +162,8 @@ public class FormConversion {
 			PrintWriter mappingFileWriter = new PrintWriter(mappingFile);
 			
 			String header =            (newFile ? "DoseForm"     : sourceFormMappingFile.getColumnMapping().get("DoseForm"));
+			header += fieldDelimiter + (newFile ? "DrugCount"    : sourceFormMappingFile.getColumnMapping().get("DrugCount"));
+			header += fieldDelimiter + (newFile ? "RecordCount"  : sourceFormMappingFile.getColumnMapping().get("RecordCount"));
 			header += fieldDelimiter + (newFile ? "Priority"     : sourceFormMappingFile.getColumnMapping().get("Priority"));
 			header += fieldDelimiter + (newFile ? "concept_id"   : sourceFormMappingFile.getColumnMapping().get("concept_id"));
 			header += fieldDelimiter + (newFile ? "concept_name" : sourceFormMappingFile.getColumnMapping().get("concept_name"));
@@ -179,6 +181,8 @@ public class FormConversion {
 				String formName = form;
 				
 				String record = DrugMappingStringUtilities.escapeFieldValue(formName, fieldDelimiter, textQualifier);
+				record += fieldDelimiter + Source.getFormSourceDrugUsage(formName);
+				record += fieldDelimiter + Source.getFormRecordUsage(formName);
 				record += fieldDelimiter;
 				record += fieldDelimiter;
 				record += fieldDelimiter;

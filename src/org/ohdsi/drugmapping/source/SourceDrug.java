@@ -96,7 +96,7 @@ public class SourceDrug {
 			this.count = -1L;
 		}
 		if (this.formulationsList != null) {
-			Source.addForms(formulationsList);
+			Source.addForms(formulationsList, this);
 		}
 	}
 	

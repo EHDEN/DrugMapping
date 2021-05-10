@@ -66,6 +66,7 @@ public class MainFrame {
 	public static int SUPPRESS_WARNINGS;
 	
 	private DrugMapping drugMapping;
+	private GenericMapping genericMapping;
 	private JFrame frame;
 	private JTabbedPane tabbedPane;
 	private ExecuteTab executeTab;
@@ -112,6 +113,11 @@ public class MainFrame {
 	}
 	
 	
+	public void setGenericMapping(GenericMapping genericMapping) {
+		this.genericMapping = genericMapping;
+	}
+	
+	
 	private JFrame createInterface() {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -144,7 +150,7 @@ public class MainFrame {
 		
 		executeTab = new ExecuteTab(drugMapping, this);
 		ingredientMappingLogTab = new IngredientsMappingLogTab(this);
-		drugMappingLogTab = new DrugMappingLogTab(this);
+		drugMappingLogTab = new DrugMappingLogTab(genericMapping, this);
 		
 		tabbedPane.addTab("Execute", executeTab);
 		tabbedPane.addTab("Ingredient Mapping Log", ingredientMappingLogTab);
