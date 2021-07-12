@@ -21,7 +21,7 @@ import org.ohdsi.drugmapping.gui.files.InputFileGUI;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 
 public class DrugMapping { 
-	public static String version = "v0.0.2";
+	public static String version = "v0.0.3";
 	
 	public static GeneralSettings settings = null;
 	public static String outputVersion = "";

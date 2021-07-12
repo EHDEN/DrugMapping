@@ -628,7 +628,7 @@ public class GenericMapping extends Mapping {
 					while (manualMappingFile.hasNext()) {
 						DelimitedFileRow row = manualMappingFile.next();
 						
-						String sourceCode = manualMappingFile.get(row, "SourceCode", true).trim();
+						String sourceCode = manualMappingFile.get(row, "SourceId", true).trim();
 						String cdmConceptId = manualMappingFile.get(row, "concept_id", true).trim();
 						
 						SourceDrug sourceDrug = source.getSourceDrug(sourceCode);
@@ -641,7 +641,7 @@ public class GenericMapping extends Mapping {
 						}
 						System.out.println("Mapping " + (sourceDrug == null ? sourceCode : sourceDrug) + " -> " + (cdmDrug == null ? cdmConceptId : cdmDrug));
 						if (sourceDrug == null) {
-							System.out.println("    ERROR: SourceCode " + sourceCode + " does not exist!");
+							System.out.println("    ERROR: SourceId " + sourceCode + " does not exist!");
 							ok = false;
 						}
 						if (cdmDrug == null) {
