@@ -58,6 +58,8 @@ public class CDM {
 	private Map<String, String> cdmFormConceptIdToNameMap;                     // Map from CDM form concept_id to CDM form concept_name
 	private List<String> cdmFormConceptNames;                                  // List of CDM form names for sorting
 	
+	private Map<String, CDMDrug> cdmCVXVaccines;
+	
 	
 	
 	public boolean LoadCDMFromDatabase(CDMDatabase database, List<String> report) {
@@ -89,11 +91,13 @@ public class CDM {
 		
 		cdmUnitNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM unit concept_name to CDM unit concept_id
 		cdmUnitConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM unit concept_id to CDM unit concept_name
-		cdmUnitConceptNames = new ArrayList<String>();                                        // List of CDM unit names for sorting
+		cdmUnitConceptNames = new ArrayList<String>();                                 // List of CDM unit names for sorting
 
 		cdmFormNameToConceptIdMap = new HashMap<String, String>();                     // Map from CDM form concept_name to CDM form concept_id
 		cdmFormConceptIdToNameMap = new HashMap<String, String>();                     // Map from CDM form concept_id to CDM form concept_name
-		cdmFormConceptNames = new ArrayList<String>();                                         // List of CDM form names for sorting
+		cdmFormConceptNames = new ArrayList<String>();                                 // List of CDM form names for sorting
+		
+		cdmCVXVaccines = new HashMap<String, CDMDrug>();
 		
 		try {
 			// Connect to the database
@@ -124,6 +128,9 @@ public class CDM {
 						
 				// Get CAS code to CDM RxNorm (Extension) Ingredient mapping
 				getCASToRxNormIngredientsMapping(database, report);
+				
+				// Get CVX Vaccines
+				getCVXVaccines(database, report);
 				
 				// Close database connection
 				database.disconnect();
@@ -195,6 +202,11 @@ public class CDM {
 
 	public Map<String, CDMIngredient> getCDMCASIngredientMap() {
 		return cdmCASIngredientMap;
+	}
+
+
+	public Map<String, CDMDrug> getCDMCVXVaccines() {
+		return cdmCVXVaccines;
 	}
 	
 	
@@ -276,7 +288,64 @@ public class CDM {
 	public Map<String, Set<CDMIngredient>> getCDMReplacedByIngredientNameIndex() {
 		return cdmReplacedByIngredientNameIndex;
 	}
-*/	
+*/
+	
+	
+	@SuppressWarnings("unused")
+	private void getCDMUnits(CDMDatabase database, List<String> report) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM units ...");
+		
+		// Get CDM Forms
+		database.excuteQueryResource("GetCDMUnits.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
+			
+			String concept_id   = queryRow.get("concept_id", true).trim();
+			String concept_name = queryRow.get("concept_name", true).trim();
+			
+			cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
+			cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
+			if (!cdmUnitConceptNames.contains(concept_name)) {
+				cdmUnitConceptNames.add(concept_name);
+			}
+		}
+		
+		Collections.sort(cdmUnitConceptNames);
+		
+		//for (String concept_name : cdmUnitConceptNames) {
+		//	System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
+		//}
+		
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void getCDMForms(CDMDatabase database, List<String> report) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM forms ...");
+		
+		// Get CDM Forms
+		database.excuteQueryResource("GetCDMForms.sql");
+		while (database.hasNext()) {
+			DelimitedFileRow queryRow = database.next();
+			
+			CDMConcept formConcept = new CDMConcept(this, queryRow, "");
+			
+			cdmForms.put(formConcept.getConceptId(), formConcept);
+			cdmFormNameToConceptIdMap.put(formConcept.getConceptName(), formConcept.getConceptId());
+			cdmFormConceptIdToNameMap.put(formConcept.getConceptId(), formConcept.getConceptName());
+			if (!cdmFormConceptNames.contains(formConcept.getConceptName())) {
+				cdmFormConceptNames.add(formConcept.getConceptName());
+			}
+		}
+		
+		Collections.sort(cdmFormConceptNames);
+		
+		//for (String concept_name : cdmFormConceptNames) {
+		//	System.out.println("        " + cdmFormNameToConceptIdMap.get(concept_name) + "," + concept_name);
+		//}
+		
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
 	
 	
 	private void getRxNormIngredients(CDMDatabase database, List<String> report) {
@@ -715,59 +784,19 @@ public class CDM {
 	}
 	
 	
-	@SuppressWarnings("unused")
-	private void getCDMUnits(CDMDatabase database, List<String> report) {
-		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM units ...");
+	private void getCVXVaccines(CDMDatabase database, List<String> report) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM Standard CVX Vaccine Concepts ...");
 		
-		// Get CDM Forms
-		database.excuteQueryResource("GetCDMUnits.sql");
+		Integer cvxCount = 0;
+		database.excuteQueryResource("GetCVX.sql");
 		while (database.hasNext()) {
 			DelimitedFileRow queryRow = database.next();
-			
-			String concept_id   = queryRow.get("concept_id", true).trim();
-			String concept_name = queryRow.get("concept_name", true).trim();
-			
-			cdmUnitNameToConceptIdMap.put(concept_name, concept_id);
-			cdmUnitConceptIdToNameMap.put(concept_id, concept_name);
-			if (!cdmUnitConceptNames.contains(concept_name)) {
-				cdmUnitConceptNames.add(concept_name);
-			}
+			CDMDrug cvxConcept = new CDMDrug(this, queryRow, "");
+			cdmCVXVaccines.put(cvxConcept.getConceptId(), cvxConcept);
+			cvxCount++;
 		}
 		
-		Collections.sort(cdmUnitConceptNames);
-		
-		//for (String concept_name : cdmUnitConceptNames) {
-		//	System.out.println("        " + cdmUnitNameToConceptIdMap.get(concept_name) + "," + concept_name);
-		//}
-		
-		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
-	}
-	
-	
-	private void getCDMForms(CDMDatabase database, List<String> report) {
-		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM forms ...");
-		
-		// Get CDM Forms
-		database.excuteQueryResource("GetCDMForms.sql");
-		while (database.hasNext()) {
-			DelimitedFileRow queryRow = database.next();
-			
-			CDMConcept formConcept = new CDMConcept(this, queryRow, "");
-			
-			cdmForms.put(formConcept.getConceptId(), formConcept);
-			cdmFormNameToConceptIdMap.put(formConcept.getConceptName(), formConcept.getConceptId());
-			cdmFormConceptIdToNameMap.put(formConcept.getConceptId(), formConcept.getConceptName());
-			if (!cdmFormConceptNames.contains(formConcept.getConceptName())) {
-				cdmFormConceptNames.add(formConcept.getConceptName());
-			}
-		}
-		
-		Collections.sort(cdmFormConceptNames);
-		
-		//for (String concept_name : cdmFormConceptNames) {
-		//	System.out.println("        " + cdmFormNameToConceptIdMap.get(concept_name) + "," + concept_name);
-		//}
-		
+		report.add("CDM Standard CVX Vaccine Concepts: " + Integer.toString(cvxCount));
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 	}
 

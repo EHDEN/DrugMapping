@@ -639,6 +639,9 @@ public class GenericMapping extends Mapping {
 						if (cdmDrug == null) {
 							cdmDrug = cdm.getCDMDrugForms().get(cdmConceptId);
 						}
+						if (cdmDrug == null) {
+							cdmDrug = cdm.getCDMCVXVaccines().get(cdmConceptId);
+						}
 						System.out.println("Mapping " + (sourceDrug == null ? sourceCode : sourceDrug) + " -> " + (cdmDrug == null ? cdmConceptId : cdmDrug));
 						if (sourceDrug == null) {
 							System.out.println("    ERROR: SourceId " + sourceCode + " does not exist!");
