@@ -42,6 +42,14 @@ import org.ohdsi.utilities.files.Row;
 public class CDMDatabase extends JPanel {
 	private static final long serialVersionUID = -5203643429301521906L;
 	
+	public static String DATABASE_TYPE_POSTGRESQL = "PostgreSQL";
+	public static String DATABASE_TYPE_ORACLE     = "Oracle";
+	public static String DATABASE_TYPE_SQLSERVER  = "SQL Server";
+	public static String DATABASE_TYPE_MYSQL      = "MySQL";
+	public static String DATABASE_TYPE_AZURE      = "Azure";
+	
+	private static String[] DATABASE_TYPES = new String[] { DATABASE_TYPE_POSTGRESQL, DATABASE_TYPE_ORACLE, DATABASE_TYPE_SQLSERVER };
+	
 	private final int DATABASE_LABEL_SIZE = 260;
 
 	private String cdmCacheLocation = null;
@@ -175,7 +183,7 @@ public class CDMDatabase extends JPanel {
 				String settingVariable = setting.substring(0, equalSignIndex);
 				String value = setting.substring(equalSignIndex + 1);
 				if (settingVariable.equals("name")) dbSettings.name = value;
-				if (settingVariable.equals("dbtype")) dbSettings.dbType = new DbType(value);
+				if (settingVariable.equals("dbtype")) dbSettings.dbType = DbType.getDbType(value);
 				if (settingVariable.equals("server")) dbSettings.server = value;
 				if (settingVariable.equals("user")) dbSettings.user = value;
 				if (settingVariable.equals("password")) dbSettings.password = value;
@@ -344,8 +352,8 @@ public class CDMDatabase extends JPanel {
 		databaseNameField.setToolTipText("A pretty name for the database");
 		databaseDefinitionPanel.add(databaseNameField);
 		databaseDefinitionPanel.add(new JLabel("Data type:"));
-		databaseTypeField = new JComboBox<String>(new String[] { "PostgreSQL", "Oracle", "SQL Server" });
-		databaseTypeField.setToolTipText("Select the type of server where the CDM and vocabulary will be stored");
+		databaseTypeField = new JComboBox<String>(DATABASE_TYPES);
+		databaseTypeField.setToolTipText("Select the type of server where the vocabulary is stored");
 		databaseDefinitionPanel.add(databaseTypeField);
 		databaseDefinitionPanel.add(new JLabel("Server location:"));
 		databaseServerField = new JTextField("");
@@ -365,27 +373,26 @@ public class CDMDatabase extends JPanel {
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
 				
-				if (arg0.getItem().toString().equals("Oracle")) {
-					databaseServerField.setToolTipText(
-							"For Oracle servers this field contains the SID, servicename, and optionally the port: '<host>/<sid>', '<host>:<port>/<sid>', '<host>/<service name>', or '<host>:<port>/<service name>'");
-					databaseUserField.setToolTipText("For Oracle servers this field contains the name of the user used to log in");
-					databasePasswordField.setToolTipText("For Oracle servers this field contains the password corresponding to the user");
-					databaseVocabSchemaField
-							.setToolTipText("For Oracle servers this field contains the schema (i.e. 'user' in Oracle terms) containing the target tables");
-				} else if (arg0.getItem().toString().equals("PostgreSQL")) {
-					databaseServerField.setToolTipText("For PostgreSQL servers this field contains the host name and database name (<host>/<database>)");
-					databaseUserField.setToolTipText("The user used to log in to the server");
-					databasePasswordField.setToolTipText("The password used to log in to the server");
-					databaseVocabSchemaField.setToolTipText("For PostgreSQL servers this field contains the schema containing the target tables");
+				if (arg0.getItem().toString().equals(DATABASE_TYPE_ORACLE)) {
+					databaseServerField.setToolTipText("For Oracle servers this field contains the SID, servicename, and optionally the port: '<host>/<sid>', '<host>:<port>/<sid>', '<host>/<service name>', or '<host>:<port>/<service name>'.");
+					databaseUserField.setToolTipText("For Oracle servers this field contains the name of the user used to log in.");
+					databasePasswordField.setToolTipText("For Oracle servers this field contains the password corresponding to the user.");
+					databaseVocabSchemaField.setToolTipText("For Oracle servers this field contains the schema (i.e. 'user' in Oracle terms) containing the target tables. The user will be created with the same password.");
+				} else if (arg0.getItem().toString().equals(DATABASE_TYPE_POSTGRESQL)) {
+					databaseServerField.setToolTipText("For PostgreSQL servers this field contains the host name and database name (<host>/<database>).");
+					databaseUserField.setToolTipText("The user used to log in to the server.");
+					databasePasswordField.setToolTipText("The password used to log in to the server.");
+					databaseVocabSchemaField.setToolTipText("For PostgreSQL servers this field contains the schema containing the target tables.");
+				} else if (arg0.getItem().toString().equals(DATABASE_TYPE_SQLSERVER)) {
+					databaseServerField.setToolTipText("For Microsoft SQL Server this field contains the server address, the database and optionally the port: '<host>:<port>;database=<database>;', or  '<host>;database=<database>;'");
+					databaseUserField.setToolTipText("The user used to log in to the server. Optionally, the domain can be specified as <domain>/<user> (e.g. 'MyDomain/Joe').");
+					databasePasswordField.setToolTipText("The password used to log in to the server.");
+					databaseVocabSchemaField.setToolTipText("The name of the schema containing the target tables.");
 				} else {
-					databaseServerField.setToolTipText("This field contains the name or IP address of the database server");
-					if (arg0.getItem().toString().equals("SQL Server"))
-						databaseUserField.setToolTipText(
-								"The user used to log in to the server. Optionally, the domain can be specified as <domain>/<user> (e.g. 'MyDomain/Joe')");
-					else
-						databaseUserField.setToolTipText("The user used to log in to the server");
-					databasePasswordField.setToolTipText("The password used to log in to the server");
-					databaseVocabSchemaField.setToolTipText("The name of the database containing the target tables");
+					databaseServerField.setToolTipText("This field contains the name or IP-address or name of the database server.");
+					databaseUserField.setToolTipText("The user used to log in to the server.");
+					databasePasswordField.setToolTipText("The password used to log in to the server.");
+					databaseVocabSchemaField.setToolTipText("The name of the database containing the target tables.");
 				}
 			}
 		});
@@ -458,12 +465,7 @@ public class CDMDatabase extends JPanel {
 		
 		if (dbSettings != null) {
 			databaseNameField.setText(dbSettings.name);
-			for (int itemNr = 0; itemNr < databaseTypeField.getModel().getSize(); itemNr++) {
-				if (databaseTypeField.getItemAt(itemNr).toLowerCase().equals(dbSettings.dbType.toString())) {
-					databaseTypeField.setSelectedIndex(itemNr);
-					break;
-				}
-			}
+			databaseTypeField.setSelectedItem(dbSettings.dbType.toString());
 			databaseServerField.setText(dbSettings.server);
 			databaseUserField.setText(dbSettings.user);
 			databaseVocabSchemaField.setText(dbSettings.database);

@@ -16,34 +16,33 @@
 package org.ohdsi.databases;
 
 public class DbType {
-	public static DbType	MYSQL		= new DbType("mysql");
-	public static DbType	MSSQL		= new DbType("mssql");
-	public static DbType	MSAZURE    	= new DbType("msazure");
-	public static DbType	ORACLE		= new DbType("oracle");
-	public static DbType	POSTGRESQL	= new DbType("postgresql");
-
+	public static DbType	MYSQL		= new DbType("MySQL");
+	public static DbType	MSSQL		= new DbType("SQL Server");
+	public static DbType	MSAZURE    	= new DbType("Azure");
+	public static DbType	ORACLE		= new DbType("Oracle");
+	public static DbType	POSTGRESQL	= new DbType("PostgreSQL");
 	
+	private static DbType[] allDbTypes = new DbType[] { MYSQL, MSSQL, ORACLE, POSTGRESQL };
+	
+	public static DbType getDbType(String name) {
+		DbType dbType = null;
+		
+		for (DbType type : allDbTypes) {
+			if (type.name.equals(name)) {
+				dbType = type;
+				break;
+			}
+		}
+		return dbType;
+	}
 
-	private enum Type {
-		MYSQL, MSSQL, MSAZURE, ORACLE, POSTGRESQL
-	};
+	private String	name;
 
-	private Type	type;
-	private String  name;
-
-	public DbType(String type) {
-		this.type = Type.valueOf(type.toUpperCase());
-		this.name = type;
+	public DbType(String name) {
+		this.name = name;
 	}
 	
 	public String toString() {
 		return name;
-	}
-
-	public boolean equals(Object other) {
-		if (other instanceof DbType && ((DbType) other).type == type)
-			return true;
-		else
-			return false;
 	}
 }
