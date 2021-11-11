@@ -37,6 +37,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.utilities.SimpleCounter;
 import org.ohdsi.utilities.StringUtilities;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
@@ -783,6 +785,7 @@ public class RichConnection {
 		for (String line : new ReadTextFile(sqlStream)) {
 			line = line.replaceAll("--.*", ""); // Remove comments
 			line = line.replaceAll("#.*", ""); // Remove comments
+			
 			line = line.trim();
 			if (line.length() != 0) {
 				sql.append(line.trim());
