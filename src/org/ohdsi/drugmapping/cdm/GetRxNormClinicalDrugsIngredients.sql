@@ -1,114 +1,114 @@
-SELECT drug.concept_id AS drug_concept_id,
-       drug.concept_name AS drug_concept_name,
-       drug.domain_id AS drug_domain_id,
-       drug.vocabulary_id AS drug_vocabulary_id,
-       drug.concept_class_id AS drug_concept_class_id,
-       drug.standard_concept AS drug_standard_concept,
-       drug.concept_code AS drug_concept_code,
-       drug.valid_start_date AS drug_valid_start_date,
-       drug.valid_end_date AS drug_valid_end_date,
-       drug.invalid_reason AS drug_invalid_reason,
-       form.concept_id AS form_concept_id,
-       strength.amount_value,
-       strength.amount_unit_concept_id,
-       amount_unit.concept_name AS amount_unit_concept_name,
-       amount_unit.domain_id AS amount_unit_domain_id,
-       amount_unit.vocabulary_id AS amount_unit_vocabulary_id,
-       amount_unit.concept_class_id AS amount_unit_concept_class_id,
-       amount_unit.standard_concept AS amount_unit_standard_concept,
-       amount_unit.concept_code AS amount_unit_concept_code,
-       amount_unit.valid_start_date AS amount_unit_valid_start_date,
-       amount_unit.valid_end_date AS amount_unit_valid_end_date,
-       amount_unit.invalid_reason AS amount_unit_invalid_reason,
-       strength.numerator_value,
-       strength.numerator_unit_concept_id,
-       numerator_unit.concept_name AS numerator_unit_concept_name,
-       numerator_unit.domain_id AS numerator_unit_domain_id,
-       numerator_unit.vocabulary_id AS numerator_unit_vocabulary_id,
-       numerator_unit.concept_class_id AS numerator_unit_concept_class_id,
-       numerator_unit.standard_concept AS numerator_unit_standard_concept,
-       numerator_unit.concept_code AS numerator_unit_concept_code,
-       numerator_unit.valid_start_date AS numerator_unit_valid_start_date,
-       numerator_unit.valid_end_date AS numerator_unit_valid_end_date,
-       numerator_unit.invalid_reason AS numerator_unit_invalid_reason,
-       strength.denominator_value,
-       strength.denominator_unit_concept_id,
-       denominator_unit.concept_name AS denominator_unit_concept_name,
-       denominator_unit.domain_id AS denominator_unit_domain_id,
-       denominator_unit.vocabulary_id AS denominator_unit_vocabulary_id,
-       denominator_unit.concept_class_id AS denominator_unit_concept_class_id,
-       denominator_unit.standard_concept AS denominator_unit_standard_concept,
-       denominator_unit.concept_code AS denominator_unit_concept_code,
-       denominator_unit.valid_start_date AS denominator_unit_valid_start_date,
-       denominator_unit.valid_end_date AS denominator_unit_valid_end_date,
-       denominator_unit.invalid_reason AS denominator_unit_invalid_reason,
-       strength.box_size,
-       strength.ingredient_concept_id
-FROM @vocab.concept drug
-  INNER JOIN @vocab.drug_strength strength
-    ON strength.drug_concept_id = drug.concept_id
-  LEFT OUTER JOIN @vocab.concept_relationship has_form
-    ON drug.concept_id = has_form.concept_id_1
-  LEFT OUTER JOIN @vocab.concept form
-    ON has_form.concept_id_2 = form.concept_id
-  LEFT OUTER JOIN @vocab.concept amount_unit
-    ON strength.amount_unit_concept_id = amount_unit.concept_id
-  LEFT OUTER JOIN @vocab.concept numerator_unit
-    ON strength.numerator_unit_concept_id = numerator_unit.concept_id
-  LEFT OUTER JOIN @vocab.concept denominator_unit
-    ON strength.denominator_unit_concept_id = denominator_unit.concept_id
-WHERE drug.domain_id = 'Drug'
-AND   drug.vocabulary_id ILIKE 'RxNorm%'
-AND   drug.concept_class_id = 'Clinical Drug'
-AND   drug.standard_concept = 'S'
--- AND   drug.invalid_reason IS NULL
-AND   has_form.relationship_id = 'RxNorm has dose form'
-GROUP BY drug.concept_id,
-         drug.concept_name,
-         drug.domain_id,
-         drug.vocabulary_id,
-         drug.concept_class_id,
-         drug.standard_concept,
-         drug.concept_code,
-         drug.valid_start_date,
-         drug.valid_end_date,
-         drug.invalid_reason,
-         form.concept_id,
-         strength.amount_value,
-         strength.amount_unit_concept_id,
-         amount_unit.concept_name,
-         amount_unit.domain_id,
-         amount_unit.vocabulary_id,
-         amount_unit.concept_class_id,
-         amount_unit.standard_concept,
-         amount_unit.concept_code,
-         amount_unit.valid_start_date,
-         amount_unit.valid_end_date,
-         amount_unit.invalid_reason,
-         strength.numerator_value,
-         strength.numerator_unit_concept_id,
-         numerator_unit.concept_name,
-         numerator_unit.domain_id,
-         numerator_unit.vocabulary_id,
-         numerator_unit.concept_class_id,
-         numerator_unit.standard_concept,
-         numerator_unit.concept_code,
-         numerator_unit.valid_start_date,
-         numerator_unit.valid_end_date,
-         numerator_unit.invalid_reason,
-         strength.denominator_value,
-         strength.denominator_unit_concept_id,
-         denominator_unit.concept_name,
-         denominator_unit.domain_id,
-         denominator_unit.vocabulary_id,
-         denominator_unit.concept_class_id,
-         denominator_unit.standard_concept,
-         denominator_unit.concept_code,
-         denominator_unit.valid_start_date,
-         denominator_unit.valid_end_date,
-         denominator_unit.invalid_reason,
-         strength.box_size,
-         strength.ingredient_concept_id
-ORDER BY drug.concept_id,
-         form.concept_id,
-         strength.ingredient_concept_id
+SELECT DRUG.CONCEPT_ID AS DRUG_CONCEPT_ID,
+       DRUG.CONCEPT_NAME AS DRUG_CONCEPT_NAME,
+       DRUG.DOMAIN_ID AS DRUG_DOMAIN_ID,
+       DRUG.VOCABULARY_ID AS DRUG_VOCABULARY_ID,
+       DRUG.CONCEPT_CLASS_ID AS DRUG_CONCEPT_CLASS_ID,
+       DRUG.STANDARD_CONCEPT AS DRUG_STANDARD_CONCEPT,
+       DRUG.CONCEPT_CODE AS DRUG_CONCEPT_CODE,
+       DRUG.VALID_START_DATE AS DRUG_VALID_START_DATE,
+       DRUG.VALID_END_DATE AS DRUG_VALID_END_DATE,
+       DRUG.INVALID_REASON AS DRUG_INVALID_REASON,
+       FORM.CONCEPT_ID AS FORM_CONCEPT_ID,
+       STRENGTH.AMOUNT_VALUE,
+       STRENGTH.AMOUNT_UNIT_CONCEPT_ID,
+       AMOUNT_UNIT.CONCEPT_NAME AS AMOUNT_UNIT_CONCEPT_NAME,
+       AMOUNT_UNIT.DOMAIN_ID AS AMOUNT_UNIT_DOMAIN_ID,
+       AMOUNT_UNIT.VOCABULARY_ID AS AMOUNT_UNIT_VOCABULARY_ID,
+       AMOUNT_UNIT.CONCEPT_CLASS_ID AS AMOUNT_UNIT_CONCEPT_CLASS_ID,
+       AMOUNT_UNIT.STANDARD_CONCEPT AS AMOUNT_UNIT_STANDARD_CONCEPT,
+       AMOUNT_UNIT.CONCEPT_CODE AS AMOUNT_UNIT_CONCEPT_CODE,
+       AMOUNT_UNIT.VALID_START_DATE AS AMOUNT_UNIT_VALID_START_DATE,
+       AMOUNT_UNIT.VALID_END_DATE AS AMOUNT_UNIT_VALID_END_DATE,
+       AMOUNT_UNIT.INVALID_REASON AS AMOUNT_UNIT_INVALID_REASON,
+       STRENGTH.NUMERATOR_VALUE,
+       STRENGTH.NUMERATOR_UNIT_CONCEPT_ID,
+       NUMERATOR_UNIT.CONCEPT_NAME AS NUMERATOR_UNIT_CONCEPT_NAME,
+       NUMERATOR_UNIT.DOMAIN_ID AS NUMERATOR_UNIT_DOMAIN_ID,
+       NUMERATOR_UNIT.VOCABULARY_ID AS NUMERATOR_UNIT_VOCABULARY_ID,
+       NUMERATOR_UNIT.CONCEPT_CLASS_ID AS NUMERATOR_UNIT_CONCEPT_CLASS_ID,
+       NUMERATOR_UNIT.STANDARD_CONCEPT AS NUMERATOR_UNIT_STANDARD_CONCEPT,
+       NUMERATOR_UNIT.CONCEPT_CODE AS NUMERATOR_UNIT_CONCEPT_CODE,
+       NUMERATOR_UNIT.VALID_START_DATE AS NUMERATOR_UNIT_VALID_START_DATE,
+       NUMERATOR_UNIT.VALID_END_DATE AS NUMERATOR_UNIT_VALID_END_DATE,
+       NUMERATOR_UNIT.INVALID_REASON AS NUMERATOR_UNIT_INVALID_REASON,
+       STRENGTH.DENOMINATOR_VALUE,
+       STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID,
+       DENOMINATOR_UNIT.CONCEPT_NAME AS DENOMINATOR_UNIT_CONCEPT_NAME,
+       DENOMINATOR_UNIT.DOMAIN_ID AS DENOMINATOR_UNIT_DOMAIN_ID,
+       DENOMINATOR_UNIT.VOCABULARY_ID AS DENOMINATOR_UNIT_VOCABULARY_ID,
+       DENOMINATOR_UNIT.CONCEPT_CLASS_ID AS DENOMINATOR_UNIT_CONCEPT_CLASS_ID,
+       DENOMINATOR_UNIT.STANDARD_CONCEPT AS DENOMINATOR_UNIT_STANDARD_CONCEPT,
+       DENOMINATOR_UNIT.CONCEPT_CODE AS DENOMINATOR_UNIT_CONCEPT_CODE,
+       DENOMINATOR_UNIT.VALID_START_DATE AS DENOMINATOR_UNIT_VALID_START_DATE,
+       DENOMINATOR_UNIT.VALID_END_DATE AS DENOMINATOR_UNIT_VALID_END_DATE,
+       DENOMINATOR_UNIT.INVALID_REASON AS DENOMINATOR_UNIT_INVALID_REASON,
+       STRENGTH.BOX_SIZE,
+       STRENGTH.INGREDIENT_CONCEPT_ID
+FROM @vocab.CONCEPT DRUG
+  INNER JOIN @vocab.DRUG_STRENGTH STRENGTH
+    ON STRENGTH.DRUG_CONCEPT_ID = DRUG.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT_RELATIONSHIP HAS_FORM
+    ON DRUG.CONCEPT_ID = HAS_FORM.CONCEPT_ID_1
+  LEFT OUTER JOIN @vocab.CONCEPT FORM
+    ON HAS_FORM.CONCEPT_ID_2 = FORM.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT AMOUNT_UNIT
+    ON STRENGTH.AMOUNT_UNIT_CONCEPT_ID = AMOUNT_UNIT.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT NUMERATOR_UNIT
+    ON STRENGTH.NUMERATOR_UNIT_CONCEPT_ID = NUMERATOR_UNIT.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT DENOMINATOR_UNIT
+    ON STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID = DENOMINATOR_UNIT.CONCEPT_ID
+WHERE DRUG.DOMAIN_ID = 'Drug'
+AND   UPPER(DRUG.VOCABULARY_ID) LIKE 'RXNORM%'
+AND   DRUG.CONCEPT_CLASS_ID = 'Clinical Drug'
+AND   DRUG.STANDARD_CONCEPT = 'S'
+-- AND   DRUG.INVALID_REASON IS NULL
+AND   HAS_FORM.RELATIONSHIP_ID = 'RxNorm has dose form'
+GROUP BY DRUG.CONCEPT_ID,
+         DRUG.CONCEPT_NAME,
+         DRUG.DOMAIN_ID,
+         DRUG.VOCABULARY_ID,
+         DRUG.CONCEPT_CLASS_ID,
+         DRUG.STANDARD_CONCEPT,
+         DRUG.CONCEPT_CODE,
+         DRUG.VALID_START_DATE,
+         DRUG.VALID_END_DATE,
+         DRUG.INVALID_REASON,
+         FORM.CONCEPT_ID,
+         STRENGTH.AMOUNT_VALUE,
+         STRENGTH.AMOUNT_UNIT_CONCEPT_ID,
+         AMOUNT_UNIT.CONCEPT_NAME,
+         AMOUNT_UNIT.DOMAIN_ID,
+         AMOUNT_UNIT.VOCABULARY_ID,
+         AMOUNT_UNIT.CONCEPT_CLASS_ID,
+         AMOUNT_UNIT.STANDARD_CONCEPT,
+         AMOUNT_UNIT.CONCEPT_CODE,
+         AMOUNT_UNIT.VALID_START_DATE,
+         AMOUNT_UNIT.VALID_END_DATE,
+         AMOUNT_UNIT.INVALID_REASON,
+         STRENGTH.NUMERATOR_VALUE,
+         STRENGTH.NUMERATOR_UNIT_CONCEPT_ID,
+         NUMERATOR_UNIT.CONCEPT_NAME,
+         NUMERATOR_UNIT.DOMAIN_ID,
+         NUMERATOR_UNIT.VOCABULARY_ID,
+         NUMERATOR_UNIT.CONCEPT_CLASS_ID,
+         NUMERATOR_UNIT.STANDARD_CONCEPT,
+         NUMERATOR_UNIT.CONCEPT_CODE,
+         NUMERATOR_UNIT.VALID_START_DATE,
+         NUMERATOR_UNIT.VALID_END_DATE,
+         NUMERATOR_UNIT.INVALID_REASON,
+         STRENGTH.DENOMINATOR_VALUE,
+         STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID,
+         DENOMINATOR_UNIT.CONCEPT_NAME,
+         DENOMINATOR_UNIT.DOMAIN_ID,
+         DENOMINATOR_UNIT.VOCABULARY_ID,
+         DENOMINATOR_UNIT.CONCEPT_CLASS_ID,
+         DENOMINATOR_UNIT.STANDARD_CONCEPT,
+         DENOMINATOR_UNIT.CONCEPT_CODE,
+         DENOMINATOR_UNIT.VALID_START_DATE,
+         DENOMINATOR_UNIT.VALID_END_DATE,
+         DENOMINATOR_UNIT.INVALID_REASON,
+         STRENGTH.BOX_SIZE,
+         STRENGTH.INGREDIENT_CONCEPT_ID
+ORDER BY DRUG.CONCEPT_ID,
+         FORM.CONCEPT_ID,
+         STRENGTH.INGREDIENT_CONCEPT_ID

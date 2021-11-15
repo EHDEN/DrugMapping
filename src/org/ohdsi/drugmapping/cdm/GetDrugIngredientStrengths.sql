@@ -1,41 +1,41 @@
-SELECT drug.concept_id AS drug_concept_id,
-       drug.concept_name AS drug_concept_name,
-       drug.domain_id AS drug_domain_id,
-       drug.vocabulary_id AS drug_vocabulary_id,
-       drug.concept_class_id AS drug_concept_class_id,
-       drug.standard_concept AS drug_standard_concept,
-       drug.concept_code AS drug_concept_code,
-       drug.valid_start_date AS drug_valid_start_date,
-       drug.valid_end_date AS drug_valid_end_date, 
-       drug.invalid_reason AS drug_invalid_reason,
-       ingredient_concept_id,
-       amount_value,
-       amount_unit_concept_id,
-       numerator_value,
-       numerator_unit_concept_id,
-       denominator_value,
-       denominator_unit_concept_id,
-       form.concept_id AS form_concept_id
-FROM @vocab.drug_strength
-  INNER JOIN @vocab.concept drug
-    ON drug_strength.drug_concept_id = drug.concept_id
-  LEFT JOIN @vocab.concept_relationship
-    ON concept_relationship.concept_id_1 = drug.concept_id
-  LEFT JOIN @vocab.concept form
-    ON form.concept_id = concept_relationship.concept_id_2
-WHERE concept_relationship.relationship_id = 'RxNorm has dose form'
-AND   drug_strength.invalid_reason IS NULL
-AND   drug.concept_class_id = 'Clinical Drug'
-AND   drug.standard_concept = 'S'
-AND   drug.invalid_reason IS NULL
-GROUP BY drug.concept_id,
-         ingredient_concept_id,
-         amount_value,
-         amount_unit_concept_id,
-         numerator_value,
-         numerator_unit_concept_id,
-         denominator_value,
-         denominator_unit_concept_id,
-         form.concept_id
-ORDER BY drug.concept_id,
-         ingredient_concept_id
+SELECT DRUG.CONCEPT_ID AS DRUG_CONCEPT_ID,
+       DRUG.CONCEPT_NAME AS DRUG_CONCEPT_NAME,
+       DRUG.DOMAIN_ID AS DRUG_DOMAIN_ID,
+       DRUG.VOCABULARY_ID AS DRUG_VOCABULARY_ID,
+       DRUG.CONCEPT_CLASS_ID AS DRUG_CONCEPT_CLASS_ID,
+       DRUG.STANDARD_CONCEPT AS DRUG_STANDARD_CONCEPT,
+       DRUG.CONCEPT_CODE AS DRUG_CONCEPT_CODE,
+       DRUG.VALID_START_DATE AS DRUG_VALID_START_DATE,
+       DRUG.VALID_END_DATE AS DRUG_VALID_END_DATE, 
+       DRUG.INVALID_REASON AS DRUG_INVALID_REASON,
+       INGREDIENT_CONCEPT_ID,
+       AMOUNT_VALUE,
+       AMOUNT_UNIT_CONCEPT_ID,
+       NUMERATOR_VALUE,
+       NUMERATOR_UNIT_CONCEPT_ID,
+       DENOMINATOR_VALUE,
+       DENOMINATOR_UNIT_CONCEPT_ID,
+       FORM.CONCEPT_ID AS FORM_CONCEPT_ID
+FROM @vocab.DRUG_STRENGTH
+  INNER JOIN @vocab.CONCEPT DRUG
+    ON DRUG_STRENGTH.DRUG_CONCEPT_ID = DRUG.CONCEPT_ID
+  LEFT JOIN @vocab.CONCEPT_RELATIONSHIP
+    ON CONCEPT_RELATIONSHIP.CONCEPT_ID_1 = DRUG.CONCEPT_ID
+  LEFT JOIN @vocab.CONCEPT FORM
+    ON FORM.CONCEPT_ID = CONCEPT_RELATIONSHIP.CONCEPT_ID_2
+WHERE CONCEPT_RELATIONSHIP.RELATIONSHIP_ID = 'RxNorm has dose form'
+AND   DRUG_STRENGTH.INVALID_REASON IS NULL
+AND   DRUG.CONCEPT_CLASS_ID = 'Clinical Drug'
+AND   DRUG.STANDARD_CONCEPT = 'S'
+AND   DRUG.INVALID_REASON IS NULL
+GROUP BY DRUG.CONCEPT_ID,
+         INGREDIENT_CONCEPT_ID,
+         AMOUNT_VALUE,
+         AMOUNT_UNIT_CONCEPT_ID,
+         NUMERATOR_VALUE,
+         NUMERATOR_UNIT_CONCEPT_ID,
+         DENOMINATOR_VALUE,
+         DENOMINATOR_UNIT_CONCEPT_ID,
+         FORM.CONCEPT_ID
+ORDER BY DRUG.CONCEPT_ID,
+         INGREDIENT_CONCEPT_ID

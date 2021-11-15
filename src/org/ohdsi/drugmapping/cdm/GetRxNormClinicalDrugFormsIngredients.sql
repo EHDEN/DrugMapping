@@ -1,40 +1,40 @@
-SELECT drugform.concept_id AS drugform_concept_id,
-       drugform.concept_name AS drugform_concept_name,
-       drugform.domain_id AS drugform_domain_id,
-       drugform.vocabulary_id AS drugform_vocabulary_id,
-       drugform.concept_class_id AS drugform_concept_class_id,
-       drugform.standard_concept AS drugform_standard_concept,
-       drugform.concept_code AS drugform_concept_code,
-       drugform.valid_start_date AS drugform_valid_start_date,
-       drugform.valid_end_date AS drugform_valid_end_date,
-       drugform.invalid_reason AS drugform_invalid_reason,
-       form.concept_id AS form_concept_id,
-       strength.ingredient_concept_id
-FROM @vocab.concept drugform
-  INNER JOIN @vocab.drug_strength strength
-    ON strength.drug_concept_id = drugform.concept_id
-  LEFT OUTER JOIN @vocab.concept_relationship has_form
-    ON drugform.concept_id = has_form.concept_id_1
-  LEFT OUTER JOIN @vocab.concept form
-    ON has_form.concept_id_2 = form.concept_id
-WHERE drugform.domain_id = 'Drug'
-AND   drugform.vocabulary_id ILIKE 'RxNorm%'
-AND   drugform.concept_class_id = 'Clinical Drug Form'
-AND   drugform.standard_concept = 'S'
--- AND   drugform.invalid_reason IS NULL
-AND   has_form.relationship_id = 'RxNorm has dose form'
-GROUP BY drugform.concept_id,
-         drugform.concept_name,
-         drugform.domain_id,
-         drugform.vocabulary_id,
-         drugform.concept_class_id,
-         drugform.standard_concept,
-         drugform.concept_code,
-         drugform.valid_start_date,
-         drugform.valid_end_date,
-         drugform.invalid_reason,
-         form.concept_id,
-         strength.ingredient_concept_id
-ORDER BY drugform.concept_id,
-         form.concept_id,
-         strength.ingredient_concept_id
+SELECT DRUGFORM.CONCEPT_ID AS DRUGFORM_CONCEPT_ID,
+       DRUGFORM.CONCEPT_NAME AS DRUGFORM_CONCEPT_NAME,
+       DRUGFORM.DOMAIN_ID AS DRUGFORM_DOMAIN_ID,
+       DRUGFORM.VOCABULARY_ID AS DRUGFORM_VOCABULARY_ID,
+       DRUGFORM.CONCEPT_CLASS_ID AS DRUGFORM_CONCEPT_CLASS_ID,
+       DRUGFORM.STANDARD_CONCEPT AS DRUGFORM_STANDARD_CONCEPT,
+       DRUGFORM.CONCEPT_CODE AS DRUGFORM_CONCEPT_CODE,
+       DRUGFORM.VALID_START_DATE AS DRUGFORM_VALID_START_DATE,
+       DRUGFORM.VALID_END_DATE AS DRUGFORM_VALID_END_DATE,
+       DRUGFORM.INVALID_REASON AS DRUGFORM_INVALID_REASON,
+       FORM.CONCEPT_ID AS FORM_CONCEPT_ID,
+       STRENGTH.INGREDIENT_CONCEPT_ID
+FROM @vocab.CONCEPT DRUGFORM
+  INNER JOIN @vocab.DRUG_STRENGTH STRENGTH
+    ON STRENGTH.DRUG_CONCEPT_ID = DRUGFORM.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT_RELATIONSHIP HAS_FORM
+    ON DRUGFORM.CONCEPT_ID = HAS_FORM.CONCEPT_ID_1
+  LEFT OUTER JOIN @vocab.CONCEPT FORM
+    ON HAS_FORM.CONCEPT_ID_2 = FORM.CONCEPT_ID
+WHERE DRUGFORM.DOMAIN_ID = 'Drug'
+AND   UPPER(DRUGFORM.VOCABULARY_ID) LIKE 'RXNORM%'
+AND   DRUGFORM.CONCEPT_CLASS_ID = 'Clinical Drug Form'
+AND   DRUGFORM.STANDARD_CONCEPT = 'S'
+-- AND   DRUGFORM.INVALID_REASON IS NULL
+AND   HAS_FORM.RELATIONSHIP_ID = 'RxNorm has dose form'
+GROUP BY DRUGFORM.CONCEPT_ID,
+         DRUGFORM.CONCEPT_NAME,
+         DRUGFORM.DOMAIN_ID,
+         DRUGFORM.VOCABULARY_ID,
+         DRUGFORM.CONCEPT_CLASS_ID,
+         DRUGFORM.STANDARD_CONCEPT,
+         DRUGFORM.CONCEPT_CODE,
+         DRUGFORM.VALID_START_DATE,
+         DRUGFORM.VALID_END_DATE,
+         DRUGFORM.INVALID_REASON,
+         FORM.CONCEPT_ID,
+         STRENGTH.INGREDIENT_CONCEPT_ID
+ORDER BY DRUGFORM.CONCEPT_ID,
+         FORM.CONCEPT_ID,
+         STRENGTH.INGREDIENT_CONCEPT_ID

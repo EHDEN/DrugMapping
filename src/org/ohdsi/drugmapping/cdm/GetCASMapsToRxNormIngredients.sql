@@ -1,15 +1,15 @@
-SELECT ctd.concept_code AS casnr,
-       ingredient.concept_id
-FROM @vocab.concept ctd
-LEFT OUTER JOIN @vocab.concept_relationship mapsto
-    ON ctd.concept_id = mapsto.concept_id_1
-INNER JOIN @vocab.concept ingredient
-    ON mapsto.concept_id_2 = ingredient.concept_id
-WHERE ctd.vocabulary_id = 'CTD'
-AND   ctd.invalid_reason IS NULL
-AND   ingredient.domain_id = 'Drug'
-AND   ingredient.vocabulary_id LIKE 'RxNorm%'
-AND   ingredient.concept_class_id = 'Ingredient'
-AND   ingredient.standard_concept = 'S'
-AND   ingredient.invalid_reason IS NULL
-ORDER BY ingredient.concept_id ASC;
+SELECT CTD.CONCEPT_CODE AS CASNR,
+       INGREDIENT.CONCEPT_ID
+FROM @vocab.CONCEPT CTD
+LEFT OUTER JOIN @vocab.CONCEPT_RELATIONSHIP MAPSTO
+    ON CTD.CONCEPT_ID = MAPSTO.CONCEPT_ID_1
+INNER JOIN @vocab.CONCEPT INGREDIENT
+    ON MAPSTO.CONCEPT_ID_2 = INGREDIENT.CONCEPT_ID
+WHERE CTD.VOCABULARY_ID = 'CTD'
+AND   CTD.INVALID_REASON IS NULL
+AND   INGREDIENT.DOMAIN_ID = 'Drug'
+AND   UPPER(INGREDIENT.VOCABULARY_ID) LIKE 'RXNORM%'
+AND   INGREDIENT.CONCEPT_CLASS_ID = 'Ingredient'
+AND   INGREDIENT.STANDARD_CONCEPT = 'S'
+AND   INGREDIENT.INVALID_REASON IS NULL
+ORDER BY INGREDIENT.CONCEPT_ID ASC;

@@ -415,7 +415,7 @@ public class CDMDatabase extends JPanel {
 				String testResult = testConnection(testDBSettings, true); 
 				if (testResult.equals("OK")) {
 					testResult = "Succesfully connected to " + testDBSettings.database + " on server " + testDBSettings.server;
-					JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(testResult, 80), "Error connecting to server", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(testResult, 80), "Succesfully connected", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
 					JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(testResult, 80), "Error connecting to server", JOptionPane.ERROR_MESSAGE);

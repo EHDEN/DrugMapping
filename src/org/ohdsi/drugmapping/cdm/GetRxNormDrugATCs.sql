@@ -1,7 +1,7 @@
-SELECT DISTINCT strength.drug_concept_id as concept_id,
-                atc.concept_code AS atc
-FROM @vocab.drug_strength strength
-INNER JOIN @vocab.concept_ancestor ancestor
-    ON (ancestor.descendant_concept_id = strength.drug_concept_id)
-INNER JOIN @vocab.concept atc
-    ON (atc.concept_id = ancestor.ancestor_concept_id) AND (atc.vocabulary_id = 'ATC')
+SELECT DISTINCT STRENGTH.DRUG_CONCEPT_ID AS CONCEPT_ID,
+                ATC.CONCEPT_CODE AS ATC
+FROM @vocab.DRUG_STRENGTH STRENGTH
+INNER JOIN @vocab.CONCEPT_ANCESTOR ANCESTOR
+    ON (ANCESTOR.DESCENDANT_CONCEPT_ID = STRENGTH.DRUG_CONCEPT_ID)
+INNER JOIN @vocab.CONCEPT ATC
+    ON (ATC.CONCEPT_ID = ANCESTOR.ANCESTOR_CONCEPT_ID) AND (ATC.VOCABULARY_ID = 'ATC')

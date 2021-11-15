@@ -1,22 +1,22 @@
-WITH units AS (
-    SELECT DISTINCT amount_unit.*
-    FROM @vocab.drug_strength
-      LEFT OUTER JOIN @vocab.concept amount_unit
-        ON amount_unit_concept_id = concept_id
+WITH UNITS AS (
+    SELECT DISTINCT AMOUNT_UNIT.*
+    FROM @vocab.DRUG_STRENGTH
+      LEFT OUTER JOIN @vocab.CONCEPT AMOUNT_UNIT
+        ON AMOUNT_UNIT_CONCEPT_ID = CONCEPT_ID
   UNION ALL
-    SELECT DISTINCT numerator_unit.*
-    FROM @vocab.drug_strength
-      LEFT OUTER JOIN @vocab.concept numerator_unit
-        ON numerator_unit_concept_id = concept_id
+    SELECT DISTINCT NUMERATOR_UNIT.*
+    FROM @vocab.DRUG_STRENGTH
+      LEFT OUTER JOIN @vocab.CONCEPT NUMERATOR_UNIT
+        ON NUMERATOR_UNIT_CONCEPT_ID = CONCEPT_ID
   UNION ALL
-    SELECT DISTINCT denominator_unit.*
-    FROM @vocab.drug_strength
-      LEFT OUTER JOIN @vocab.concept denominator_unit
-        ON denominator_unit_concept_id = concept_id
+    SELECT DISTINCT DENOMINATOR_UNIT.*
+    FROM @vocab.DRUG_STRENGTH
+      LEFT OUTER JOIN @vocab.CONCEPT DENOMINATOR_UNIT
+        ON DENOMINATOR_UNIT_CONCEPT_ID = CONCEPT_ID
 )
 SELECT DISTINCT *
-FROM units
-WHERE domain_id = 'Unit'
-AND   concept_class_id = 'Unit'
-AND   standard_concept = 'S'
-ORDER BY concept_name
+FROM UNITS
+WHERE DOMAIN_ID = 'Unit'
+AND   CONCEPT_CLASS_ID = 'Unit'
+AND   STANDARD_CONCEPT = 'S'
+ORDER BY CONCEPT_NAME

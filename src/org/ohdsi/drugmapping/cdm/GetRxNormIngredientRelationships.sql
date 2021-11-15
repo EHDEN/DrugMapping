@@ -1,39 +1,39 @@
-SELECT relationship.relationship_id,
-       drug.concept_id AS drug_concept_id,
-       drug.concept_name AS drug_concept_name,
-       drug.vocabulary_id AS drug_vocabulary_id,
-       drug.concept_class_id AS drug_concept_class_id,
-       drug.concept_code AS drug_concept_code,
-       ingredient.concept_id AS ingredient_concept_id,
-       synonym.concept_synonym_name AS drug_synonym_name
-FROM @vocab.concept_relationship relationship
-  LEFT OUTER JOIN @vocab.concept drug
-    ON relationship.concept_id_1 = drug.concept_id
-  LEFT OUTER JOIN @vocab.concept ingredient
-    ON relationship.concept_id_2 = ingredient.concept_id
-  LEFT OUTER JOIN @vocab.concept_synonym synonym
-    ON drug.concept_id = synonym.concept_id
-WHERE drug.concept_id <> ingredient.concept_id
+SELECT RELATIONSHIP.RELATIONSHIP_ID,
+       DRUG.CONCEPT_ID AS DRUG_CONCEPT_ID,
+       DRUG.CONCEPT_NAME AS DRUG_CONCEPT_NAME,
+       DRUG.VOCABULARY_ID AS DRUG_VOCABULARY_ID,
+       DRUG.CONCEPT_CLASS_ID AS DRUG_CONCEPT_CLASS_ID,
+       DRUG.CONCEPT_CODE AS DRUG_CONCEPT_CODE,
+       INGREDIENT.CONCEPT_ID AS INGREDIENT_CONCEPT_ID,
+       CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME AS DRUG_SYNONYM_NAME
+FROM @vocab.CONCEPT_RELATIONSHIP RELATIONSHIP
+  LEFT OUTER JOIN @vocab.CONCEPT DRUG
+    ON RELATIONSHIP.CONCEPT_ID_1 = DRUG.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT INGREDIENT
+    ON RELATIONSHIP.CONCEPT_ID_2 = INGREDIENT.CONCEPT_ID
+  LEFT OUTER JOIN @vocab.CONCEPT_SYNONYM
+    ON DRUG.CONCEPT_ID = CONCEPT_SYNONYM.CONCEPT_ID
+WHERE DRUG.CONCEPT_ID <> INGREDIENT.CONCEPT_ID
 AND   (
-		(relationship.relationship_id = 'Maps to') OR
-		(relationship.relationship_id = 'Form of') OR
-		(relationship.relationship_id = 'ATC - RxNorm') OR
-		(relationship.relationship_id = 'Concept replaced by') OR
-		(relationship.relationship_id ILIKE '%RxNorm eq')
+		(RELATIONSHIP.RELATIONSHIP_ID = 'Maps to') OR
+		(RELATIONSHIP.RELATIONSHIP_ID = 'Form of') OR
+		(RELATIONSHIP.RELATIONSHIP_ID = 'ATC - RxNorm') OR
+		(RELATIONSHIP.RELATIONSHIP_ID = 'Concept replaced by') OR
+		(UPPER(RELATIONSHIP.RELATIONSHIP_ID) LIKE '%RXNORM EQ')
 	  )
 AND   (
-		(drug.concept_class_id = 'Ingredient') OR
-		(drug.concept_class_id = 'Precise Ingredient') OR
-		(drug.concept_class_id = 'Substance') OR
-		(drug.concept_class_id = 'ATC 5th') OR
-		(drug.concept_class_id = 'ATC 4th') OR
-		(drug.concept_class_id = 'Pharma/Biol Product') OR
-		(drug.concept_class_id = '11-digit NDC') OR
-		(drug.concept_class_id = '9-digit NDC')
+		(DRUG.CONCEPT_CLASS_ID = 'Ingredient') OR
+		(DRUG.CONCEPT_CLASS_ID = 'Precise Ingredient') OR
+		(DRUG.CONCEPT_CLASS_ID = 'Substance') OR
+		(DRUG.CONCEPT_CLASS_ID = 'ATC 5th') OR
+		(DRUG.CONCEPT_CLASS_ID = 'ATC 4th') OR
+		(DRUG.CONCEPT_CLASS_ID = 'Pharma/Biol Product') OR
+		(DRUG.CONCEPT_CLASS_ID = '11-digit NDC') OR
+		(DRUG.CONCEPT_CLASS_ID = '9-digit NDC')
       )
-AND   ingredient.concept_class_id ILIKE '%ingredient'
-AND   ingredient.standard_concept = 'S'
-ORDER BY relationship.relationship_id,
-         drug.concept_id,
-         synonym.concept_synonym_name,
-         ingredient.concept_id
+AND   UPPER(INGREDIENT.CONCEPT_CLASS_ID) LIKE '%INGREDIENT'
+AND   INGREDIENT.STANDARD_CONCEPT = 'S'
+ORDER BY RELATIONSHIP.RELATIONSHIP_ID,
+         DRUG.CONCEPT_ID,
+         CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME,
+         INGREDIENT.CONCEPT_ID

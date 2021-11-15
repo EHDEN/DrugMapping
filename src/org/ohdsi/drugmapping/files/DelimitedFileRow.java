@@ -45,6 +45,10 @@ public class DelimitedFileRow {
 		Integer index;
 		try {
 			index = fieldName2ColumnIndex.get(fieldName);
+			if (index == null) {
+				// Try uppercase fieldName
+				index = fieldName2ColumnIndex.get(fieldName.toUpperCase());
+			}
 		} catch (NullPointerException e) {
 			index = null;
 			if (required) {

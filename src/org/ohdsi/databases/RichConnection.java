@@ -801,10 +801,6 @@ public class RichConnection {
 			line = line.replaceAll("--.*", ""); // Remove comments
 			line = line.replaceAll("#.*", ""); // Remove comments
 			
-			if (this.dbType == DbType.MSSQL) {
-				line = line.replaceAll("ILIKE", "LIKE"); // Replace ILIKE with LIKE. Database definition should be case insensitive
-			}
-			
 			line = line.trim();
 			if (line.length() != 0) {
 				sql.append(line.trim());
