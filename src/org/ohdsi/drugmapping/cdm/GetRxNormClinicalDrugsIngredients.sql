@@ -58,7 +58,7 @@ FROM @vocab.concept drug
   LEFT OUTER JOIN @vocab.concept denominator_unit
     ON strength.denominator_unit_concept_id = denominator_unit.concept_id
 WHERE drug.domain_id = 'Drug'
-AND   drug.vocabulary_id LIKE 'RxNorm%'
+AND   drug.vocabulary_id ILIKE 'RxNorm%'
 AND   drug.concept_class_id = 'Clinical Drug'
 AND   drug.standard_concept = 'S'
 -- AND   drug.invalid_reason IS NULL

@@ -14,7 +14,7 @@ FROM @vocab.concept ingredient
     ON ingredient.concept_id = synonym.concept_id
 WHERE ingredient.concept_id = 0
 OR (ingredient.domain_id = 'Drug'
-    AND   ingredient.vocabulary_id LIKE 'RxNorm%'
+    AND   ingredient.vocabulary_id ILIKE 'RxNorm%'
     AND   ingredient.concept_class_id = 'Ingredient'
     AND   ingredient.standard_concept = 'S'
 --    AND   ingredient.invalid_reason IS NULL
@@ -27,12 +27,12 @@ OR (ingredient.domain_id = 'Drug'
 --            LEFT OUTER JOIN @vocab.concept ingredient
 --                ON strength.ingredient_concept_id = ingredient.concept_id
 --            WHERE drug.domain_id = 'Drug'
---            AND   drug.vocabulary_id LIKE 'RxNorm%'
+--            AND   drug.vocabulary_id ILIKE 'RxNorm%'
 --            AND   drug.concept_class_id IN ('Clinical Drug', 'Clinical Drug Comp', 'Clinical Drug Form')
 --            AND   drug.standard_concept = 'S'
 --            AND   drug.invalid_reason IS NULL
 --            AND   ingredient.domain_id = 'Drug'
---            AND   ingredient.vocabulary_id LIKE 'RxNorm%'
+--            AND   ingredient.vocabulary_id ILIKE 'RxNorm%'
 --            AND   ingredient.concept_class_id = 'Ingredient'
 --            AND   ingredient.standard_concept = 'S'
 --            AND   ingredient.invalid_reason IS NULL

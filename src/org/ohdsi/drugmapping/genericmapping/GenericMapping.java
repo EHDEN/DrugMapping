@@ -2831,6 +2831,7 @@ public class GenericMapping extends Mapping {
 				if (warningTypeWarnings != null) {
 					System.out.println();
 					System.out.println(warningTypeDescriptions.get(warningType));
+					Collections.sort(warningTypeWarnings);
 					for (String warning : warningTypeWarnings) {
 						System.out.println("  " + warning);
 					}

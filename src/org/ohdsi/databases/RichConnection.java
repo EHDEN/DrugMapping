@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.ohdsi.drugmapping.DrugMapping;
 import org.ohdsi.utilities.SimpleCounter;
 import org.ohdsi.utilities.StringUtilities;
 import org.ohdsi.utilities.files.ReadCSVFileWithHeader;
@@ -61,6 +60,22 @@ public class RichConnection {
 		this.password = password;
 		this.connection = DBConnector.connect(server, domain, user, password, dbType);
 		this.dbType = dbType;
+		
+		// In case of SQL Server make sure the database is the default database for the user.
+		if (this.dbType == DbType.MSSQL) {
+			String database = null;
+			String[] serverSplit = server.split(";");
+			for (String option : serverSplit) {
+				option = option.trim();
+				if (option.startsWith("database") && option.contains("=")) {
+					database = option.split("=")[1].trim();
+					break;
+				}
+			}
+			if ((database != null) && (!database.equals(""))) {
+				execute("ALTER LOGIN " + user + " WITH DEFAULT_DATABASE = [" + database + "];");
+			}
+		}
 	}
 
 	/**
@@ -785,6 +800,10 @@ public class RichConnection {
 		for (String line : new ReadTextFile(sqlStream)) {
 			line = line.replaceAll("--.*", ""); // Remove comments
 			line = line.replaceAll("#.*", ""); // Remove comments
+			
+			if (this.dbType == DbType.MSSQL) {
+				line = line.replaceAll("ILIKE", "LIKE"); // Replace ILIKE with LIKE. Database definition should be case insensitive
+			}
 			
 			line = line.trim();
 			if (line.length() != 0) {

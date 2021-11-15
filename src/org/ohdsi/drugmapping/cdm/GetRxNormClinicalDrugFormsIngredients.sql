@@ -18,7 +18,7 @@ FROM @vocab.concept drugform
   LEFT OUTER JOIN @vocab.concept form
     ON has_form.concept_id_2 = form.concept_id
 WHERE drugform.domain_id = 'Drug'
-AND   drugform.vocabulary_id LIKE 'RxNorm%'
+AND   drugform.vocabulary_id ILIKE 'RxNorm%'
 AND   drugform.concept_class_id = 'Clinical Drug Form'
 AND   drugform.standard_concept = 'S'
 -- AND   drugform.invalid_reason IS NULL

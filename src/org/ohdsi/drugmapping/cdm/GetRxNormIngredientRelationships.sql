@@ -19,7 +19,7 @@ AND   (
 		(relationship.relationship_id = 'Form of') OR
 		(relationship.relationship_id = 'ATC - RxNorm') OR
 		(relationship.relationship_id = 'Concept replaced by') OR
-		(relationship.relationship_id LIKE '%RxNorm eq')
+		(relationship.relationship_id ILIKE '%RxNorm eq')
 	  )
 AND   (
 		(drug.concept_class_id = 'Ingredient') OR
@@ -31,7 +31,7 @@ AND   (
 		(drug.concept_class_id = '11-digit NDC') OR
 		(drug.concept_class_id = '9-digit NDC')
       )
-AND   ingredient.concept_class_id LIKE '%ingredient'
+AND   ingredient.concept_class_id ILIKE '%ingredient'
 AND   ingredient.standard_concept = 'S'
 ORDER BY relationship.relationship_id,
          drug.concept_id,
