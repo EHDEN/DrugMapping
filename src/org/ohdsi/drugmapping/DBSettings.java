@@ -13,7 +13,7 @@ public class DBSettings {
 	public DbType		dbType   = null;
 	public String		user     = null;
 	public String		password = null;
-	public String		database = null;
+	public String		schema   = null;
 	public String		server   = null;
 	public String		domain   = null;
 	
@@ -27,7 +27,7 @@ public class DBSettings {
 		if (dbType   != null) description += "\n    " + "Type=" + dbType.toString();
 		if (server   != null) description += "\n    " + "Server=" + server;
 		if (user     != null) description += "\n    " + "User=" + user;
-		if (database != null) description += "\n    " + "Vocab Schema=" + database;
+		if (schema   != null) description += "\n    " + "Vocab Schema=" + schema;
 		if (domain   != null) description += "\n    " + "Domain=" + domain;
 		description += "\n]";
 		return description;

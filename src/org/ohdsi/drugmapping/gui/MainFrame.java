@@ -26,6 +26,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import org.ohdsi.drugmapping.DrugMapping;
+import org.ohdsi.drugmapping.Version;
 import org.ohdsi.drugmapping.cdm.CDM;
 import org.ohdsi.drugmapping.cdm.CDMConcept;
 import org.ohdsi.drugmapping.cdm.CDMIngredient;
@@ -140,7 +141,7 @@ public class MainFrame {
 		
 		frame.setSize(1000, 800);
 		frame.setMinimumSize(new Dimension(800, 600));
-		frame.setTitle("OHDSI Drug Mapping Tool " + DrugMapping.version);
+		frame.setTitle("OHDSI Drug Mapping Tool v" + Version.version);
 		MainFrame.setIcon(frame);
 		frame.setLocationRelativeTo(null);
 		frame.setLayout(new BorderLayout());

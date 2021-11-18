@@ -21,7 +21,6 @@ import org.ohdsi.drugmapping.gui.files.InputFileGUI;
 import org.ohdsi.drugmapping.utilities.DrugMappingDateUtilities;
 
 public class DrugMapping { 
-	public static String version = "v0.0.3";
 	
 	public static GeneralSettings settings = null;
 	public static String outputVersion = "";
@@ -217,7 +216,7 @@ public class DrugMapping {
 		System.out.println("Database Connection: " + database.getDBServerName());
 		System.out.println("  Database Type: " + databaseSettings.dbType);
 		System.out.println("  Database: " + databaseSettings.server);
-		System.out.println("  Schema: " + databaseSettings.database);
+		System.out.println("  Schema: " + databaseSettings.schema);
 		System.out.println("  User: " + databaseSettings.user);
 		System.out.println();
 	}

@@ -153,7 +153,7 @@ public class CDMDatabase extends JPanel {
 	
 	
 	public String getVocabSchema() {
-		return getDBSettings().database;
+		return getDBSettings().schema;
 	}
 	
 	
@@ -169,7 +169,7 @@ public class CDMDatabase extends JPanel {
 			settings.add("dbtype=" + dbSettings.dbType.toString());
 			settings.add("server=" + dbSettings.server);
 			settings.add("user=" + dbSettings.user);
-			settings.add("vocabSchema=" + dbSettings.database);
+			settings.add("vocabSchema=" + dbSettings.schema);
 		}
 		return settings;
 	}
@@ -187,7 +187,7 @@ public class CDMDatabase extends JPanel {
 				if (settingVariable.equals("server")) dbSettings.server = value;
 				if (settingVariable.equals("user")) dbSettings.user = value;
 				if (settingVariable.equals("password")) dbSettings.password = value;
-				if (settingVariable.equals("vocabSchema")) dbSettings.database = value;
+				if (settingVariable.equals("vocabSchema")) dbSettings.schema = value;
 			}
 		}
 		if (dbSettings.password == null) {
@@ -299,7 +299,11 @@ public class CDMDatabase extends JPanel {
 					delimitedFileRow = new DelimitedFileRow(row.getCells(), row.getfieldName2ColumnIndex());
 					if (cache != null) {
 						if (!headerWritten) {
-							cache.setHeader(delimitedFileRow.getFieldNames());
+							List<String> header = delimitedFileRow.getFieldNames();
+							for (int columnNr = 0; columnNr < header.size(); columnNr++) {
+								header.set(columnNr, header.get(columnNr).toLowerCase());
+							}
+							cache.setHeader(header);
 							headerWritten = true;
 						}
 						cache.writeRow(delimitedFileRow);
@@ -414,7 +418,7 @@ public class CDMDatabase extends JPanel {
 				DBSettings testDBSettings = getDBSettingsFromInput();
 				String testResult = testConnection(testDBSettings, true); 
 				if (testResult.equals("OK")) {
-					testResult = "Succesfully connected to " + testDBSettings.database + " on server " + testDBSettings.server;
+					testResult = "Succesfully connected to " + testDBSettings.schema + " on server " + testDBSettings.server;
 					JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(testResult, 80), "Succesfully connected", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else {
@@ -468,7 +472,7 @@ public class CDMDatabase extends JPanel {
 			databaseTypeField.setSelectedItem(dbSettings.dbType.toString());
 			databaseServerField.setText(dbSettings.server);
 			databaseUserField.setText(dbSettings.user);
-			databaseVocabSchemaField.setText(dbSettings.database);
+			databaseVocabSchemaField.setText(dbSettings.schema);
 		}
 
 		databaseDialog.setVisible(true);
@@ -516,7 +520,7 @@ public class CDMDatabase extends JPanel {
 			
 			if (testConnectionToDb) {
 				try {
-					connection.getTableNames(dbSettings.database);
+					connection.getTableNames(dbSettings.schema);
 					
 					connection.close();
 				} catch (Exception e) {
@@ -539,7 +543,7 @@ public class CDMDatabase extends JPanel {
 		dbSettings.user = databaseUserField.getText();
 		dbSettings.password = databasePasswordField.getText();
 		dbSettings.server = databaseServerField.getText();
-		dbSettings.database = databaseVocabSchemaField.getText();
+		dbSettings.schema = databaseVocabSchemaField.getText();
 		if (databaseTypeField.getSelectedItem().toString().equals("MySQL"))
 			dbSettings.dbType = DbType.MYSQL;
 		else if (databaseTypeField.getSelectedItem().toString().equals("Oracle"))
@@ -560,7 +564,7 @@ public class CDMDatabase extends JPanel {
 			}
 		}
 		
-		if (dbSettings.database.trim().length() == 0) {
+		if (dbSettings.schema.trim().length() == 0) {
 			String message = "Please specify a name for the database database";
 			JOptionPane.showMessageDialog(null, StringUtilities.wordWrap(message, 80), "Database error", JOptionPane.ERROR_MESSAGE);
 			return null;

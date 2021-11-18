@@ -6,7 +6,7 @@ import java.util.List;
 import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
-public class CDMConcept {
+public class CDMConcept implements Comparable<CDMConcept> {
 	protected CDM cdm = null;
 	
 	protected String concept_id       = null;
@@ -222,5 +222,26 @@ public class CDMConcept {
 		}
 		
 		return description;
+	}
+	
+
+	@Override
+	public int compareTo(CDMConcept otherConcept) {
+		if (concept_id == null) {
+			if ((otherConcept == null) || (otherConcept.concept_id == null)) {
+				return 0;
+			}
+			else {
+				return -1;
+			}
+		}
+		else {
+			if ((otherConcept == null) || (otherConcept.concept_id == null)) {
+				return 1;
+			}
+			else {
+				return Long.compare(Long.parseLong(concept_id), Long.parseLong(otherConcept.getConceptId()));
+			}
+		}
 	}
 }

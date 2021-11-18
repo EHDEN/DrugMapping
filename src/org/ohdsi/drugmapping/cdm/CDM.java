@@ -142,7 +142,7 @@ public class CDM {
 				ok = true;
 			}
 			else {
-				System.out.println("ERROR: Counld not connect to the database.");
+				System.out.println("ERROR: Could not connect to the database.");
 				ok = false;
 			}
 			
@@ -153,6 +153,9 @@ public class CDM {
 		}
 		
 		report.add("");
+		
+		// For debugging only.
+		//dump("D:\\Temp\\DrugMapping\\Dump " + database.getDBSettings().name);
 		
 		return ok;
 	}
@@ -471,17 +474,17 @@ public class CDM {
 			String cdmIngredientConceptId = queryRow.get("ingredient_concept_id", true);
 			
 			if ((cdmDrugConceptId != null) && (!cdmDrugConceptId.equals(""))) {
-				CDMDrug cdmDrugForm = cdmDrugForms.get(cdmDrugConceptId);
-				if (cdmDrugForm == null) {
-					cdmDrugForm = new CDMDrug(this, queryRow, "drug_");
-					cdmDrugForms.put(cdmDrugForm.getConceptId(), cdmDrugForm);
-					drugs.add(cdmDrugForm);
+				CDMDrug cdmDrug = cdmDrugForms.get(cdmDrugConceptId);
+				if (cdmDrug == null) {
+					cdmDrug = new CDMDrug(this, queryRow, "drug_");
+					cdmDrugForms.put(cdmDrug.getConceptId(), cdmDrug);
+					drugs.add(cdmDrug);
 					lastCDMFormConceptId = "xxxxxxxx";
 					formCount = 0;
 				}
 				if (!cdmFormConceptId.equals(lastCDMFormConceptId)) {
 					if ((cdmFormConceptId != null) && (!cdmFormConceptId.equals(""))) {
-						cdmDrugForm.addForm(cdmFormConceptId);
+						cdmDrug.addForm(cdmFormConceptId);
 					}
 					formCount++;
 				}
@@ -490,7 +493,7 @@ public class CDM {
 						CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 						//if (cdmIngredient != null) {
 							CDMIngredientStrength cdmIngredientStrength = new CDMIngredientStrength(this, queryRow, "", cdmIngredient);
-							cdmDrugForm.addIngredientStrength(cdmIngredientStrength);
+							cdmDrug.addIngredientStrength(cdmIngredientStrength);
 						//}
 					}
 				}
@@ -1238,5 +1241,276 @@ public class CDM {
 
 			hitScrore += isSnonym() ? 10 : 20;
 		}
+	}
+	
+	
+	
+	
+	/***********************************************************/
+	/* Functions for dumping internal structure for debugging. */                                                   
+	/***********************************************************/
+	
+	@SuppressWarnings("unused")
+	private void dump(String path) {
+		// Map<String, CDMDrug> cdmDrugs
+		dumpMapStringToCDMDrug(path, "cdmDrugs", cdmDrugs);
+		// Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugsContainingIngredient
+		dumpMapIntegerToMapCDMIngredientToListCDMDrug(path, "cdmDrugsContainingIngredient", cdmDrugsContainingIngredient);
+
+		// Map<String, CDMDrug> cdmDrugComps
+		dumpMapStringToCDMDrug(path, "cdmDrugComps", cdmDrugComps);
+		// Map<CDMIngredient, List<CDMDrug>> cdmDrugCompsContainingIngredient
+		dumpMapCDMIngredientToListCDMDrug(path, "cdmDrugCompsContainingIngredient", cdmDrugCompsContainingIngredient);
+
+		// Map<String, CDMDrug> cdmDrugForms
+		dumpMapStringToCDMDrug(path, "cdmDrugForms", cdmDrugForms);
+		// Map<Integer, Map<CDMIngredient, List<CDMDrug>>> cdmDrugFormsContainingIngredient
+		dumpMapIntegerToMapCDMIngredientToListCDMDrug(path, "cdmDrugFormsContainingIngredient", cdmDrugFormsContainingIngredient);
+		
+		// Map<String, CDMConcept> cdmForms
+		dumpMapStringToCDMConcept(path, "cdmForms", cdmForms);
+
+		// Map<String, Set<CDMIngredient>> cdmATCIngredientMap
+		dumpMapStringToSetCDMIngredient(path, "cdmATCIngredientMap", cdmATCIngredientMap);
+
+		// Map<String, CDMIngredient> cdmCASIngredientMap
+		dumpMapStringToCDMIngredient(path, "cdmCASIngredientMap", cdmCASIngredientMap);
+		
+		// Map<String, String> cdmUnitNameToConceptIdMap
+		dumpMapStringToString(path, "cdmUnitNameToConceptIdMap", cdmUnitNameToConceptIdMap);
+		// Map<String, String> cdmUnitConceptIdToNameMap
+		dumpMapStringToString(path, "cdmUnitConceptIdToNameMap", cdmUnitConceptIdToNameMap);
+		// List<String> cdmUnitConceptNames
+		dumpListString(path, "cdmUnitConceptNames", cdmUnitConceptNames);
+
+		// Map<String, String> cdmFormNameToConceptIdMap
+		dumpMapStringToString(path, "cdmFormNameToConceptIdMap", cdmFormNameToConceptIdMap);
+		// Map<String, String> cdmFormConceptIdToNameMap
+		dumpMapStringToString(path, "cdmFormConceptIdToNameMap", cdmFormConceptIdToNameMap);
+		// List<String> cdmFormConceptNames
+		dumpListString(path, "cdmFormConceptNames", cdmFormConceptNames);
+		
+		// Map<String, CDMDrug> cdmCVXVaccines
+		dumpMapStringToCDMDrug(path, "cdmCVXVaccines", cdmCVXVaccines);
+	}
+	
+	
+	private void dumpListString(String path, String name, List<String> list) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> sortedList = new ArrayList<String>();
+			sortedList.addAll(list);
+			Collections.sort(sortedList);
+			for (String element : sortedList) {
+				file.println(element == null ? "NULL" : element);
+			}
+			file.close();
+		}
+		System.out.println("done");
+	}
+	
+	
+	private void dumpMapStringToString(String path, String name, Map<String, String> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> keys = new ArrayList<String>();
+			keys.addAll(map.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				file.println(key + " -> " + (map.get(key) == null ? "NULL" : map.get(key)));
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void dumpMapStringToCDMConcept(String path, String name, Map<String, CDMConcept> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> keys = new ArrayList<String>();
+			keys.addAll(map.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				file.println(key + " -> " + (map.get(key) == null ? "NULL" : map.get(key).toString()));
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void dumpMapStringToCDMIngredient(String path, String name, Map<String, CDMIngredient> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> keys = new ArrayList<String>();
+			keys.addAll(map.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				file.println(key + " -> " + (map.get(key) == null ? "NULL" : map.get(key).toString()));
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void dumpMapStringToCDMDrug(String path, String name, Map<String, CDMDrug> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> keys = new ArrayList<String>();
+			keys.addAll(map.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				file.println(key + " -> " + (map.get(key) == null ? "NULL" : (map.get(key).toString() + "|" + map.get(key).getStrengthDescription())));
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void dumpMapStringToSetCDMIngredient(String path, String name, Map<String, Set<CDMIngredient>> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> keys = new ArrayList<String>();
+			keys.addAll(map.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				List<String> setList = new ArrayList<String>();
+				if (map.get(key) != null) {
+					for (CDMIngredient ingredient : map.get(key)) {
+						setList.add(ingredient.toString());
+					}
+					Collections.sort(setList);
+					String setString = "";
+					for (String ingredientName : setList) {
+						setString += (setString.equals("") ? "" : ", ") + ingredientName;
+					}
+					file.println(key + " -> [ " + setString + " ]");
+				}
+				else {
+					file.println(key + " -> " + "NULL");
+				}
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void dumpMapCDMIngredientToListCDMDrug(String path, String name, Map<CDMIngredient, List<CDMDrug>> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<String> keys = new ArrayList<String>();
+			Map<String, CDMIngredient> keyMap = new HashMap<String, CDMIngredient>();
+			for (CDMIngredient cdmIngredient : map.keySet()) {
+				String cdmIngredientName = cdmIngredient == null ? "NULL" : cdmIngredient.toString();
+				keys.add(cdmIngredientName);
+				keyMap.put(cdmIngredientName, cdmIngredient);
+			}
+			Collections.sort(keys);
+			for (String key : keys) {
+				if (map.get(keyMap.get(key)) != null) {
+					List<String> cdmDrugDescriptions = new ArrayList<String>();
+					for (CDMDrug cdmDrug : map.get(keyMap.get(key))) {
+						if (cdmDrug != null) {
+							cdmDrugDescriptions.add(cdmDrug.toString() + "|" + cdmDrug.getStrengthDescription());
+						}
+						else {
+							cdmDrugDescriptions.add("NULL");
+						}
+					}
+					Collections.sort(cdmDrugDescriptions);
+					String listString = "";
+					for (String cdmDrugDescription : cdmDrugDescriptions) {
+						listString += (listString.equals("") ? "" : ", ") + cdmDrugDescription;
+					}
+					file.println(key + " -> [ " + listString + " ]");
+				}
+				else {
+					file.println(key + " -> " + "NULL");
+				}
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private void dumpMapIntegerToMapCDMIngredientToListCDMDrug(String path, String name, Map<Integer, Map<CDMIngredient, List<CDMDrug>>> map) {
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Dumping " + name + " ... ");
+		System.out.print("Dumping " + name + " ... ");
+		PrintWriter file = openDumpFile(path, name);
+		if (file != null) {
+			List<Integer> keys = new ArrayList<Integer>();
+			keys.addAll(map.keySet());
+			Collections.sort(keys);
+			for (Integer key : keys) {
+				Map<CDMIngredient, List<CDMDrug>> map2 = map.get(key);
+				if (map2 != null) {
+					String map2String = "";
+					List<String> cdmIngredientNames = new ArrayList<String>();
+					Map<String, CDMIngredient> ingredientsMap = new HashMap<String, CDMIngredient>();
+					for (CDMIngredient cdmIngredient : map2.keySet()) {
+						String cdmIngredientName = cdmIngredient == null ? "NULL" : cdmIngredient.toString();
+						cdmIngredientNames.add(cdmIngredientName);
+						ingredientsMap.put(cdmIngredientName, cdmIngredient);
+					}
+					Collections.sort(cdmIngredientNames);
+					for (String cdmIngredientName : cdmIngredientNames) {
+						CDMIngredient cdmIngredient = ingredientsMap.get(cdmIngredientName);
+						if (map2.get(cdmIngredient) != null) {
+							List<String> cdmDrugDescriptions = new ArrayList<String>();
+							for (CDMDrug cdmDrug : map2.get(cdmIngredient)) {
+								if (cdmDrug != null) {
+									cdmDrugDescriptions.add(cdmDrug.toString() + "|" + cdmDrug.getStrengthDescription());
+								}
+								else {
+									cdmDrugDescriptions.add("NULL");
+								}
+							}
+							Collections.sort(cdmDrugDescriptions);
+							String listString = "";
+							for (String cdmDrugDescription : cdmDrugDescriptions) {
+								listString += (listString.equals("") ? "" : ", ") + cdmDrugDescription;
+							}
+							map2String += (map2String.equals("") ? "" : ", ") + cdmIngredientName + " -> [ " + listString + " ]";
+						}
+						else {
+							map2String += (map2String.equals("") ? "" : ", ") + cdmIngredientName + " -> " + "NULL";
+						}
+					}
+					file.println(key + " -> { " + map2String + " }");
+				}
+				else {
+					file.println(key + " -> " + "NULL");
+				}
+			}
+			file.close();
+		}
+		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
+	}
+	
+	
+	private PrintWriter openDumpFile(String path, String name) {
+		PrintWriter file = null;
+		File folder = new File(path);
+		folder.mkdirs();
+		String fileName = path + "\\" + name + ".txt";
+		try {
+			file = new PrintWriter(new File(fileName));
+		} catch (FileNotFoundException e) {
+			System.out.println();
+			System.out.println("ERROR: Could not open file '" + fileName + "'.");
+		}
+		return file;
 	}
 }

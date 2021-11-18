@@ -2246,7 +2246,10 @@ public class GenericMapping extends Mapping {
 			}
 		}
 		
-		for (SourceIngredient sourceIngredient : Source.getAllIngredients()) {
+		List<SourceIngredient> sourceIngredientList = new ArrayList<SourceIngredient>();
+		sourceIngredientList.addAll(Source.getAllIngredients());
+		Collections.sort(sourceIngredientList);
+		for (SourceIngredient sourceIngredient : sourceIngredientList) {
 			String sourceToConceptRecord = "";
 			CDMIngredient target = sourceIngredient.getMatchingIngredient();
 

@@ -1,7 +1,5 @@
 package org.ohdsi.drugmapping.cdm;
 
-import java.util.List;
-
 import org.ohdsi.drugmapping.files.DelimitedFileRow;
 import org.ohdsi.drugmapping.utilities.DrugMappingStringUtilities;
 
@@ -44,14 +42,13 @@ public class CDMIngredientStrength {
 	
 	
 	public CDMIngredientStrength(CDM cdm, DelimitedFileRow queryRow, String prefix, CDMIngredient ingredient) {
-		List<String> fieldNames = queryRow.getFieldNames();
-		if (fieldNames.contains(prefix + "amount_value"))                amount_value_string      = queryRow.get(prefix + "amount_value", true);
-		if (fieldNames.contains(prefix + "amount_unit_concept_id"))      amount_unit              = new CDMConcept(cdm, queryRow, prefix + "amount_unit_");
-		if (fieldNames.contains(prefix + "numerator_value"))             numerator_value_string   = queryRow.get(prefix + "numerator_value", true);
-		if (fieldNames.contains(prefix + "numerator_unit_concept_id"))   numerator_unit           = new CDMConcept(cdm, queryRow, prefix + "numerator_unit_");
-		if (fieldNames.contains(prefix + "denominator_value"))           denominator_value_string = queryRow.get(prefix + "denominator_value", true);
-		if (fieldNames.contains(prefix + "denominator_unit_concept_id")) denominator_unit         = new CDMConcept(cdm, queryRow, prefix + "denominator_unit_");
-		if (fieldNames.contains(prefix + "box_size"))                    box_size                 = queryRow.get(prefix + "box_size", true);
+		if (queryRow.get(prefix + "amount_value", true) != null)                amount_value_string      = queryRow.get(prefix + "amount_value", true);
+		if (queryRow.get(prefix + "amount_unit_concept_id", true) != null)      amount_unit              = new CDMConcept(cdm, queryRow, prefix + "amount_unit_");
+		if (queryRow.get(prefix + "numerator_value", true) != null)             numerator_value_string   = queryRow.get(prefix + "numerator_value", true);
+		if (queryRow.get(prefix + "numerator_unit_concept_id", true) != null)   numerator_unit           = new CDMConcept(cdm, queryRow, prefix + "numerator_unit_");
+		if (queryRow.get(prefix + "denominator_value", true) != null)           denominator_value_string = queryRow.get(prefix + "denominator_value", true);
+		if (queryRow.get(prefix + "denominator_unit_concept_id", true) != null) denominator_unit         = new CDMConcept(cdm, queryRow, prefix + "denominator_unit_");
+		if (queryRow.get(prefix + "box_size", true) != null)                    box_size                 = queryRow.get(prefix + "box_size", true);
 		
 		if ((amount_value_string != null) && (!amount_value_string.equals(""))) {
 			try {
@@ -154,10 +151,10 @@ public class CDMIngredientStrength {
 	public String getNumeratorDosageUnit() {
 		String numeratorDosageUnit = null;
 		if (getAmountValue() == null) {
-			numeratorDosageUnit = getNumeratorUnit().getConceptId();
+			numeratorDosageUnit = getNumeratorUnit() == null ? null : getNumeratorUnit().getConceptId();
 		}
 		else {
-			numeratorDosageUnit = getAmountUnit().getConceptId();
+			numeratorDosageUnit = getAmountUnit() == null ? null : getAmountUnit().getConceptId();
 		}
 		return numeratorDosageUnit;
 	}
@@ -166,10 +163,10 @@ public class CDMIngredientStrength {
 	public String getNumeratorDosageUnitName() {
 		String numeratorDosageUnitName = null;
 		if (getAmountValue() == null) {
-			numeratorDosageUnitName = getNumeratorUnit().getConceptName();
+			numeratorDosageUnitName = getNumeratorUnit() == null ? "NULL" : getNumeratorUnit().getConceptName();
 		}
 		else {
-			numeratorDosageUnitName = getAmountUnit().getConceptName();
+			numeratorDosageUnitName = getAmountUnit() == null ? "NULL" : getAmountUnit().getConceptName();
 		}
 		return numeratorDosageUnitName;
 	}
@@ -187,7 +184,7 @@ public class CDMIngredientStrength {
 	public String getDenominatorDosageUnit() {
 		String denominatorDosageUnit = null;
 		if (getAmountValue() == null) {
-			denominatorDosageUnit = getDenominatorUnit().getConceptId();
+			denominatorDosageUnit = getDenominatorUnit() == null ? null : getDenominatorUnit().getConceptId();
 		}
 		return denominatorDosageUnit;
 	}
@@ -197,7 +194,7 @@ public class CDMIngredientStrength {
 	public String getDenominatorDosageUnitName() {
 		String denominatorDosageUnit = null;
 		if (getAmountValue() == null) {
-			denominatorDosageUnit = getDenominatorUnit().getConceptName();
+			denominatorDosageUnit = getDenominatorUnit() == null ? "NULL" : getDenominatorUnit().getConceptName();
 		}
 		return denominatorDosageUnit;
 	}
@@ -245,11 +242,18 @@ public class CDMIngredientStrength {
 	public String getDescription() {
 		String description = "";
 		
-		description = ingredient.getConceptName();
-		description += " (" + ingredient.getConceptId() + ")";
-		description += (getNumeratorDosage() == null ? "" : " " + getNumeratorDosage()) + ((getNumeratorDosageUnit() == null) ? "" : " " + getNumeratorDosageUnitName() + " (" + getNumeratorDosageUnit() + ")");
+		if (ingredient != null) {
+			description = ingredient.getConceptName();
+			description += " (" + ingredient.getConceptId() + ")";
+		}
+		else {
+			description = "NULL";
+		}
+		description += (getNumeratorDosage() == null ? "" : " " + getNumeratorDosage());
+		description += ((getNumeratorDosageUnit() == null) ? "" : " " + getNumeratorDosageUnitName() + " (" + getNumeratorDosageUnit() + ")");
 		description += " / ";
-		description += (getDenominatorDosage() == null ? "" : " " +  getDenominatorDosage()) + ((getDenominatorDosageUnit() == null) ? "" : " " + getDenominatorDosageUnitName() + " (" + getDenominatorDosageUnit() + ")");
+		description += (getDenominatorDosage() == null ? "" : " " +  getDenominatorDosage());
+		description += ((getDenominatorDosageUnit() == null) ? "" : " " + getDenominatorDosageUnitName() + " (" + getDenominatorDosageUnit() + ")");
 		
 		return description;
 	}
