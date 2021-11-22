@@ -1849,53 +1849,55 @@ public class GenericMapping extends Mapping {
 
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Done");
 		
-		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Saving Ingredient Mapping Review ...");
-		
-		header =        "SourceIngredientCode";
-		header += "," + "SourceIngredientName";
-		header += "," + "SourceIngredientEnglishName";
-		header += "," + "SourceRecordCount";
-		header += "," + "concept_id";
-		header += "," + "concept_name";
-		header += "," + "concept_class_id";
-		header += "," + "vocabulary_id";
-		header += "," + "MatchLog";
-		PrintWriter ingredientMappingReviewFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Review.csv", header);
-		
-		if (ingredientMappingReviewFile != null) {
+		if (DrugMapping.debug) {
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Saving Ingredient Mapping Review ...");
 			
-			for (SourceIngredient sourceIngredient : sourceIngredients) {
-				CDMIngredient cdmIngredient = sourceIngredient.getMatchingIngredient();
+			header =        "SourceIngredientCode";
+			header += "," + "SourceIngredientName";
+			header += "," + "SourceIngredientEnglishName";
+			header += "," + "SourceRecordCount";
+			header += "," + "concept_id";
+			header += "," + "concept_name";
+			header += "," + "concept_class_id";
+			header += "," + "vocabulary_id";
+			header += "," + "MatchLog";
+			PrintWriter ingredientMappingReviewFile = DrugMappingFileUtilities.openOutputFile("IngredientMapping Review.csv", header);
+			
+			if (ingredientMappingReviewFile != null) {
 				
-				String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
-				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
-				record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientNameEnglish());
-				record += "," + (sourceIngredient.getCount() < 0 ? "?" : sourceIngredient.getCount());
-				if (cdmIngredient != null) {
-					record += "," + cdmIngredient.getConceptId();
-					record += "," + DrugMappingStringUtilities.escapeFieldValue(cdmIngredient.getConceptName());
-					record += "," + cdmIngredient.getConceptClassId();
-					record += "," + cdmIngredient.getVocabularyId();
-					record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getMatchString());
-				}
-				else {
-					String matchString = DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getMatchString());
-					if (matchString.equals("")) {
-						matchString = "No mapping found";
+				for (SourceIngredient sourceIngredient : sourceIngredients) {
+					CDMIngredient cdmIngredient = sourceIngredient.getMatchingIngredient();
+					
+					String record = DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientCode());
+					record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientName());
+					record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getIngredientNameEnglish());
+					record += "," + (sourceIngredient.getCount() < 0 ? "?" : sourceIngredient.getCount());
+					if (cdmIngredient != null) {
+						record += "," + cdmIngredient.getConceptId();
+						record += "," + DrugMappingStringUtilities.escapeFieldValue(cdmIngredient.getConceptName());
+						record += "," + cdmIngredient.getConceptClassId();
+						record += "," + cdmIngredient.getVocabularyId();
+						record += "," + DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getMatchString());
 					}
-					record += ",";
-					record += ",";
-					record += ",";
-					record += ",";
-					record += "," + matchString;
+					else {
+						String matchString = DrugMappingStringUtilities.escapeFieldValue(sourceIngredient.getMatchString());
+						if (matchString.equals("")) {
+							matchString = "No mapping found";
+						}
+						record += ",";
+						record += ",";
+						record += ",";
+						record += ",";
+						record += "," + matchString;
+					}
+					ingredientMappingReviewFile.println(record);
 				}
-				ingredientMappingReviewFile.println(record);
+				
+				ingredientMappingReviewFile.close();
 			}
-			
-			ingredientMappingReviewFile.close();
-		}
 
-		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Done");
+			System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Done");
+		}
 	}
 	
 	
@@ -1919,7 +1921,7 @@ public class GenericMapping extends Mapping {
 		header += "," + "concept_code";
 		header += "," + "valid_start_date";
 		header += "," + "valid_end_date";
-		header += "," + "invalid_reason	atc";
+		header += "," + "invalid_reason";
 		
 		PrintWriter drugMappingFile = DrugMappingFileUtilities.openOutputFile("DrugMapping.csv", header);
 		
@@ -1935,21 +1937,24 @@ public class GenericMapping extends Mapping {
 		
 		PrintWriter sourceToConceptMapFile = DrugMappingFileUtilities.openOutputFile("SourceToConceptMap.csv", header);
 		
-		header = "SourceCode";
-		header += "," + "SourceName";
-		header += "," + "SourceCount";
-		header += "," + "SourceDoseForm";
-		header += "," + "SourceIngredientCode";
-		header += "," + "SourceIngredientName";
-		header += "," + "SourceIngredientAmount";
-		header += "," + "SourceIngredentUnit";
-		header += "," + "concept_id";
-		header += "," + "concept_name";
-		header += "," + "concept_class";
-		header += "," + "vocabulary_id";
-		header += "," + "MappingLog";
-		
-		PrintWriter drugMappingReviewFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
+		PrintWriter drugMappingReviewFile = null;
+		if (DrugMapping.debug) {
+			header = "SourceCode";
+			header += "," + "SourceName";
+			header += "," + "SourceCount";
+			header += "," + "SourceDoseForm";
+			header += "," + "SourceIngredientCode";
+			header += "," + "SourceIngredientName";
+			header += "," + "SourceIngredientAmount";
+			header += "," + "SourceIngredentUnit";
+			header += "," + "concept_id";
+			header += "," + "concept_name";
+			header += "," + "concept_class";
+			header += "," + "vocabulary_id";
+			header += "," + "MappingLog";
+			
+			drugMappingReviewFile = DrugMappingFileUtilities.openOutputFile("DrugMapping Review.csv", header);
+		}
 
 		for (SourceDrug sourceDrug : source.getSourceDrugs()) {
 			String mappingStatus = getMappingStatus(sourceDrug);
@@ -2090,7 +2095,9 @@ public class GenericMapping extends Mapping {
 							drugMappingReviewIngredientRecord += ",";
 						}
 						
-						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+						if (DrugMapping.debug && (drugMappingReviewFile != null)) {
+							drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+						}
 					}
 				}
 				else {
@@ -2157,7 +2164,9 @@ public class GenericMapping extends Mapping {
 						drugMappingReviewRecord += ",";
 					}
 					
-					drugMappingReviewFile.println(drugMappingReviewRecord);
+					if (DrugMapping.debug && (drugMappingReviewFile != null)) {
+						drugMappingReviewFile.println(drugMappingReviewRecord);
+					}
 				}
 			}
 			else {
@@ -2226,7 +2235,9 @@ public class GenericMapping extends Mapping {
 						drugMappingReviewIngredientRecord += ",";
 						drugMappingReviewIngredientRecord += ",";
 						
-						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+						if (DrugMapping.debug && (drugMappingReviewFile != null)) {
+							drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+						}
 					}
 				}
 				else {
@@ -2241,7 +2252,9 @@ public class GenericMapping extends Mapping {
 					drugMappingReviewIngredientRecord += ",";
 					drugMappingReviewIngredientRecord += ",";
 					
-					drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+					if (DrugMapping.debug && (drugMappingReviewFile != null)) {
+						drugMappingReviewFile.println(drugMappingReviewIngredientRecord);
+					}
 				}
 			}
 		}
@@ -2283,7 +2296,9 @@ public class GenericMapping extends Mapping {
 
 		DrugMappingFileUtilities.closeOutputFile(drugMappingFile);
 		DrugMappingFileUtilities.closeOutputFile(sourceToConceptMapFile);
-		DrugMappingFileUtilities.closeOutputFile(drugMappingReviewFile);
+		if (DrugMapping.debug && (drugMappingReviewFile != null)) {
+			DrugMappingFileUtilities.closeOutputFile(drugMappingReviewFile);
+		}
 		
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "       Done");
 	}

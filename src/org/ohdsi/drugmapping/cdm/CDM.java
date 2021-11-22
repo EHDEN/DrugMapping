@@ -354,18 +354,6 @@ public class CDM {
 	private void getRxNormIngredients(CDMDatabase database, List<String> report) {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Get CDM RxNorm Ingredients ...");
 		
-		PrintWriter rxNormIngredientsFile = null;
-		String fileName = DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "DrugMapping RxNorm Ingredients.csv";
-		try {
-			// Create output file
-			rxNormIngredientsFile = new PrintWriter(new File(fileName));
-			rxNormIngredientsFile.println(CDMIngredient.getHeaderWithSynonyms());
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("      ERROR: Cannot create output file '" + fileName + "'");
-			rxNormIngredientsFile = null;
-		}
-		
 		// Get RxNorm ingredients
 		CDMIngredient lastCdmIngredient = null;
 		database.excuteQueryResource("GetRxNormIngredients.sql");
@@ -373,9 +361,6 @@ public class CDM {
 			DelimitedFileRow queryRow = database.next();
 			String cdmIngredientConceptId = queryRow.get("concept_id", true).trim();
 			if ((lastCdmIngredient == null) || (!lastCdmIngredient.getConceptId().equals(cdmIngredientConceptId))) {
-				if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
-					rxNormIngredientsFile.println(lastCdmIngredient.toStringWithSynonyms());
-				}
 				CDMIngredient cdmIngredient = cdmIngredients.get(cdmIngredientConceptId);
 				if (cdmIngredient == null) {
 					cdmIngredient = new CDMIngredient(this, queryRow, "");
@@ -389,13 +374,6 @@ public class CDM {
 			
 			ingredientNames.addNames(lastCdmIngredient.getConceptName(), lastCdmIngredient.getVocabularyId(), lastCdmIngredient.getConceptClassId(), "", false, lastCdmIngredient);
 			ingredientNameSynonyms.addNames(cdmIngredientSynonym, lastCdmIngredient.getVocabularyId(), lastCdmIngredient.getConceptClassId(), "", true, lastCdmIngredient);
-		}
-		if ((rxNormIngredientsFile != null) && (lastCdmIngredient != null)) {
-			rxNormIngredientsFile.println(lastCdmIngredient.toStringWithSynonyms());
-		}
-		
-		if (rxNormIngredientsFile != null) {
-			rxNormIngredientsFile.close();
 		}
 		
 		report.add("Used RxNorm Ingredients found: " + Integer.toString(cdmIngredients.size()));
