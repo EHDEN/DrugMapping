@@ -212,7 +212,7 @@ public class Source {
 								
 								//System.out.println("    " + sourceDrug);
 								
-								if ((sourceDrug.getATCCodes() == null) && (sourceDrug.getATCCodes().size() == 0)) {
+								if ((sourceDrug.getATCCodes() == null) || (sourceDrug.getATCCodes().size() == 0)) {
 									missingATC.add(sourceDrug);
 								}
 							}

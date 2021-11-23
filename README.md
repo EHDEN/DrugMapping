@@ -320,17 +320,17 @@ This file contains the source to concept map. It contains the following columns:
 | valid_end_date | The valid\_end\_date of RxNorm (Extension) drug or ingredient. |
 | invalid_reason | The invalid\_reason of RxNorm (Extension) drug or ingredient. |
 
-_SourceToConceptMap.csv_
+_DrugMapping Missing ATC.csv_
 
-This file contains the source to concept map. It contains the following columns:
+This file contains the source that don't have an ATC code. It contains the following columns:
 
 | **Column** | **Content** |
 | --- | --- |
-| SourceCode |  |
-| SourceName |  |
+| SourceCode | The code of the source drug. |
+| SourceName | The original name of the source drug. |
 | SourceATCCode |  |
-| SourceFormulation |  |
-| SourceCount |  |
+| SourceFormulation | The formulation of the source drug. |
+| SourceCount | The number of records in the database containing the source drug. |
 
 
 **Command Line Options**
