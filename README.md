@@ -10,53 +10,47 @@ Features
 * Allows you to overrule the automatic mappings.
 * Allows you to specify mappings for drugs that are not mapped.
 
-Screenshots
-===========
+Technology
+============
+DrugMapping is a pure Java application that uses JDBC to connect to the respective databases containing the standardized vocabulary.
+
+
+Prerequisites
+=============
+Make sure you have a database containing the CDM vocabularies. The DrugMapping tool supports Oracle, PostgreSQL, and SQL Server.
+
+
+Getting Started
+===============
+The DrugMapping tool consists of two files released in a .zip file:
+
+DrugMapping-vx.x.x.dat<br>
+DrugMapping-vx.x.x.jar
+
+where x.x.x is the version number. Extract the zip file.
+
+Start the the DrugMapping tool by double clicking the .jar file.
+The interface of the DrugMapping tool consists of three tabs:
+
+Execute<br>
+Ingredient Mapping Log<br>
+Drug Mapping Log
+
+It opens with the Execute tab shown here:
 
 <img src="man/Screenshot_v1.0.0_Execute_Tab.png" alt="Execute Tab" title="Execute Tab" />
 
 _The Execute tab._
 <br><br>
 
-<img src="man/Screenshot_v1.0.0_Ingredient_Mapping_Log_Tab.png" alt="Ingredient Mapping Log Tab" title="Ingredient Mapping Log Tab" />
-
-_The Ingredient Mapping Log tab._
-<br><br>
-
-<img src="man/Screenshot_v1.0.0_Drug_Mapping_Log_Tab.png" alt="Drug Mapping Log Tab" title="Drug Mapping Log Tab" />
-
-_The Drug Mapping Log tab._
-<br><br>
+First you have to define the CDM database connection. To do this click on the &quot;Select&quot; button in the &quot;CDM Database&quot; box. This opens the Database Definition screen show here:
 
 <img src="man/Screenshot_v1.0.0_CDM_Database_Definition_Screen.png" alt="CDM Database Definition Screen" title="CDM Database Definition Screen" />
 
-_The CDM Database Definition Screen._
+_The CDM Database Definition screen._
 <br><br>
 
-<img src="man/Screenshot_v1.0.0_Input_File_Definition_Screen.png" alt="Input File Definition Screen Tab" title="Input File Definition Screen" />
-
-_The Input File Definition Screen._
-<br><br>
-
-Technology
-============
-DrugMapping is a pure Java application that uses JDBC to connect to the respective databases containing the standardized vocabulary
-
-Getting Started
-===============
-
-Make sure you have a database containing the CDM vocabularies. The DrugMapping tool supports Oracle, PostgreSQL, and SQL Server.
-
-The DrugMapping tool consists of two files released in a .zip file:
-
-DrugMapping-vx.x.x.dat
-DrugMapping-vx.x.x.jar
-
-where x.x.x is the version number. Extract the zip file.
-
-Start the the DrugMapping tool by double clicking the .jar file.
-
-First you have to define the CDM database connection. To do this click on the &quot;Select&quot; button in the &quot;CDM Database&quot; box. This opens the Database Definition screen show above. The specification of the fields for the different databases are:
+The specification of the fields for the different databases are:
 
 Oracle:
 
@@ -91,11 +85,73 @@ SQL Server:
 | Password | The password of the user. |
 | Vocabulary Schema | The name of the schema/user that will holds the CDM vocabulary tables. |
 
+You can test the database connection with the Test connection" button.
+Once defined, you can save this definition to a file using the menu option File-Save Database Settings. In another run you can load these settings again with the menu option File-Load Database Settings.<br>
+At the first use of a database the DrugMapping tool will build a cache with all the information retrieved from the database in the subfolder "CDM Cache". At the following runs with the same "Database name" it will read the information from the files in the cache folder instead of from the database. In case the contents of the vocabularies in the database has changed you can select the check box left of the label "CDM Database" to force the tool to refresh the cache.<br>
+When you load the database settings saved earlier the "CDM Database Definition" screen will open to allow you to enter the password for the database and test the connection. The password is not saved with the database settings
 
-Once defined, you can save this definition to a file using the menu option File-Save Database Settings. In another run you can load these settings again with the menu option File-Load Database Settings.
-At the first run the tool will build a cache with all the information retrieved from the database in the subfolder "CDM Cache". At the following runs with the same "Database name" it will read the information from the files in the cache folder instead of from the database. In case the contents of the vocabularies in the database has changed you can select the check box left of the label "CDM Database" to force the tool to refresh the cache.
+The next thing to do is specify the input files:
 
-Second you have to specify the input files:
+Generic Drugs File<br>
+Ingredient Name Translation File
+Unit Mapping File
+Dose Form Mapping File
+Manual CAS Mappings File
+Manual Ingredient Overrule Mappings File
+Manual Ingredient Fallback Mappings File
+Manual Drug Mappings File
+
+In the section "The input Files" below you will find a description of each of these input files. All these files are delimited files.<br>
+At the first run you only have to specify the "Generic Drugs File". With this first run it will create empty versions of the "Ingredient Name Translation File", "Unit Mapping File" and the "Dose Form Mapping File" in the output folder specified also in this tab. After the first run you have to complete these files first and use them in the following runs.
+You can specify a file by clicking on the Select button behind it. This will open the "Input File Definition Screen" shown here:
+
+<img src="man/Screenshot_v1.0.0_Input_File_Definition_Screen.png" alt="Input File Definition Screen Tab" title="Input File Definition Screen" />
+
+_The Input File Definition screen._
+<br><br>
+
+In this screen you first select the file with the Browse button. As soon as you have specified the right delimiter and text qualifier the columns of the file will be shown in the drop-down boxes at the right side of the "Column Mapping" box in this screen. At the left side of this box you see all the required columns for the input file which you can map to the columns of the actual input file by selecting the right column in the drop-down box behind it. When done click OK.<br>
+Before you start the run make sure the check boxes left of the files you want to use are checked.<br>
+Once all input files are specified you can save the settings with the "Save File Settings" option from the "File" menu for future runs where you can load them again with the "Load File Settings" option from the "File" menu. The setting of the check boxes are also saved with the file settings.
+
+Next you have to specify an output folder where all the output files should be written.
+The setting of the output folder is saved together with the other file settings using the "Save File Settings" from the "File" menu.
+
+Finally you have to specify the Vocabulary ID of your source vocabulary that can be used in the source_to_concept_map table of the OMOP CDM and a setting if you want to see warnings or not.
+These settings can also be saved using the "Save General Settings" option from the "File" menu and loaded in another run with "Load General Settings" option from the "File" menu.
+
+There is also a console box in the tab where you can follow the progress of the mapping.<br>
+Once all settings are done you can start the mapping with the Start button at the left bottom.
+
+When the mapping is done the tool automatically switches to the "Drug Mapping Log" tab while it is still saving the mapping and the log file to the output folder.<br>
+The "Drug Mapping Log" tab shows the steps for the mapping for each source drug. It is shown here:
+
+<img src="man/Screenshot_v1.0.0_Drug_Mapping_Log_Tab.png" alt="Drug Mapping Log Tab" title="Drug Mapping Log Tab" />
+
+_The Drug Mapping Log tab._
+<br><br>
+
+This tab consists of four sections.<br>
+At the top is the Search section with a field where you can enter a search term. While typing in this field it will select the lines in the Drugs section that contain the search term.<br>
+The Drugs section contains all source drugs. By clicking on one of the column headers you can sort the drugs. When you select one it will show the different steps in in the mapping for this drug are shown in the "Drug Mapping Log" section. The right most column "Mapping Result" shows the step in the mapping process chronologically show from top to bottom.<br>
+When you select a line in the "Drug Mapping Log" section the CDM concepts involved are shown in the bottom section.
+
+The "Ingredient Mapping Log" tab shows the results of mapping the ingredients of the source drug to CDM Ingredient concepts. It is show here:
+
+<img src="man/Screenshot_v1.0.0_Ingredient_Mapping_Log_Tab.png" alt="Ingredient Mapping Log Tab" title="Ingredient Mapping Log Tab" />
+
+_The Ingredient Mapping Log tab._
+<br><br>
+
+At the top is the Search section with a field where you can enter a search term. While typing in this field it will select the lines in the Ingredients section that contain the search term.<br>
+The Ingredients section contains all ingredients of the source drugs. By clicking on one of the column headers you can sort the ingredients. When you select one it will show how it is mapped to a CDM Ingredient and in the bottom section it will show the Ingredient concept it is mapped to.
+
+When you have the results of a run you can reload them in the tool with the option "load Mapping Results" from the "File" menu. With option you will get a window to select the "DrugMapping Log.txt" file of the result you want to load. After loading you can view them again in the "Ingredient Mapping Log" tab and the "Drug Mapping Log" tab.
+
+
+The Input Files
+===============
+Below you will find a description of each of the input files.
 
 _Generic Drugs File_
 
@@ -198,20 +254,11 @@ This file is optional.
 | SourceId | This is the code of the source drug. |
 | concept\_id | This is the CDM concept id of the clinical drug, clinical drug comp, or clinical drug form the source drug should be mapped to. |
 
-Finally you can specify an output folder where all the output files should be written.
-As with the database settings you can save the file settings using the File-Save File Settings for later use. In another run you can load these settings again with the menu option File-Load File Settings.
-
-The next section in the Execute tab is the "General Settings" section. It contains a field to enter the Vocabulary ID of the source vocabulary and a drop down box where you can specify if you to suppress warnings.
-These settings can also be saved using the File-Save General Settings and loaded in another run with File-Load General Settings.
-
-For the first run only the Generic Drugs File is required. Leave all check boxes of the manual mapping files unchecked. In this first run it will collect ingredient names, units and formulations from the source drug file and then it stops after creating a translation file for the ingredient names and empty mapping files for the units and formulations.
-
-After you have specified the initial ingredient name translations and unit and formulation mappings you are ready to perform the first real mapping. For later runs you can adjust the mapping with the manual mapping files.
 
 
-**The Result Files**
-
-The tool creates several output files
+The Result Files
+================
+The tool creates several output files. They are described here.
 
 _DrugMapping Log.txt_
 
@@ -320,31 +367,21 @@ This file contains the source to concept map. It contains the following columns:
 | valid_end_date | The valid\_end\_date of RxNorm (Extension) drug or ingredient. |
 | invalid_reason | The invalid\_reason of RxNorm (Extension) drug or ingredient. |
 
-_DrugMapping Missing ATC.csv_
 
-This file contains the source that don't have an ATC code. It contains the following columns:
-
-| **Column** | **Content** |
-| --- | --- |
-| SourceCode | The code of the source drug. |
-| SourceName | The original name of the source drug. |
-| SourceATCCode |  |
-| SourceFormulation | The formulation of the source drug. |
-| SourceCount | The number of records in the database containing the source drug. |
-
-
-**Command Line Options**
-
+Command Line Options
+====================
 The DrugMapping tool can also be started from the command line with the command:
 
-java -jar &lt;DrugMapping-vx.x.x.jar file&gt; &#91;databasesettings=&lt;database settings file&gt; password=&lt;database password&gt;&#93; &#91;filesettings=&lt;file settings file&gt;&#93; &#91;generalsettings=&lt;general settings file&gt;&#93; &#91;path=&lt;path where result files are written&gt;&#93; &#91;autostart=yes&#93;
+java -jar &lt;DrugMapping-vx.x.x.jar file&gt; &#91;databasesettings=&lt;path of database settings file&gt; password=&lt;database password&gt;&#93; &#91;filesettings=&lt;path of file settings file&gt;&#93; &#91;generalsettings=&lt;path of general settings file&gt;&#93; &#91;autostart=yes&#93;
 
 [...] means the option is optional. The square brackets should not be written in the command.
 
+
 Getting Involved
-=============
+================
 * We use the [GitHub issue tracker](../../issues) for all bugs/issues/enhancements/questions
 * Historically, all files have CRLF line endings. Please configure your IDE and local git to keep line endings as is. This avoids merge conflicts.
+
 
 License
 =======

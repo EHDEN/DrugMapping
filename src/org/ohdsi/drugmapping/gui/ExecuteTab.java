@@ -263,9 +263,10 @@ public class ExecuteTab extends MainFrameTab {
 	
 	
 	public List<String> readSettingsFromFile(String settingsFileName, boolean mandatory) {
-		List<String> settings = new ArrayList<String>();
+		List<String> settings = null;
 		if (settingsFileName != null) {
 			try {
+				settings = new ArrayList<String>();
 				BufferedReader settingsFileBufferedReader = new BufferedReader(new FileReader(settingsFileName));
 				String line = settingsFileBufferedReader.readLine();
 				while (line != null) {

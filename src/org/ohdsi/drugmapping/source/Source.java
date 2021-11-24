@@ -137,7 +137,7 @@ public class Source {
 	
 	private List<SourceDrug> sourceDrugs;
 	private Map<String, SourceDrug> sourceDrugMap;
-	private List<SourceDrug> missingATC;
+	private List<SourceDrug> missingATC = new ArrayList<SourceDrug>();
 	
 	
 	public boolean loadSourceDrugs(DelimitedInputFileGUI sourceDrugsFile, List<String> report) {
@@ -146,8 +146,6 @@ public class Source {
 		ingredientSourceCodeIndex = new HashMap<String, SourceIngredient>();
 		
 		casNumbersSet = 0;
-		
-		missingATC = new ArrayList<SourceDrug>();
 		
 		return load(sourceDrugsFile, DrugMapping.settings.getLongSetting(MainFrame.MINIMUM_USE_COUNT), report);
 	}
@@ -172,6 +170,8 @@ public class Source {
 		
 		sourceDrugs = new ArrayList<SourceDrug>();
 		sourceDrugMap = new HashMap<String, SourceDrug>();
+		
+		missingATC.clear();
 		
 		Integer sourceDrugCount = 0;
 		Set<String> ignoredSourceCodes = new HashSet<String>();
@@ -309,34 +309,6 @@ public class Source {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 		
 		return (!sourceDrugError);
-	}
-	
-	
-	public void saveMissingATCToFile() {
-		String fileName = "";
-
-		PrintWriter missingATCFile = null;
-		try {
-			// Create output file
-			fileName = DrugMapping.getBasePath() + "/" + DrugMapping.outputVersion + "DrugMapping Missing ATC.csv";
-			missingATCFile = new PrintWriter(new File(fileName));
-			SourceDrug.writeHeaderToFile(missingATCFile);
-		} 
-		catch (FileNotFoundException e) {
-			System.out.println("       ERROR: Cannot create output file '" + fileName + "'");
-			missingATCFile = null;
-		}
-		
-		for (SourceDrug sourceDrug : missingATC) {
-			if (missingATCFile != null) {
-				sourceDrug.writeDescriptionToFile("", missingATCFile);
-			}
-		}
-		
-		if (missingATCFile != null) {
-			missingATCFile.close();
-		}
-		
 	}
 	
 	

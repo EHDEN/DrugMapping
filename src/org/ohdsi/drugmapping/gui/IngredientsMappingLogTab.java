@@ -103,9 +103,7 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 		JPanel drugsResultsPanel = new JPanel(new BorderLayout());
 		
 		ingredientsPanel = new JPanel(new BorderLayout());
-		ingredientsPanel.setBorder(BorderFactory.createTitledBorder("Drugs"));
-		ingredientsPanel.setMinimumSize(new Dimension(100, 500));
-		ingredientsPanel.setPreferredSize(new Dimension(100, 500));
+		ingredientsPanel.setBorder(BorderFactory.createTitledBorder("Ingredients"));
 		
 		JPanel drugMappingLogResultsPanel = new JPanel(new BorderLayout());
 		
@@ -116,17 +114,17 @@ public class IngredientsMappingLogTab extends MainFrameTab {
 		ingredientMappingLogPanel.setPreferredSize(new Dimension(100, 50));
 		
 		ingredientMappingResultPanel = new JPanel(new BorderLayout());
-		ingredientMappingResultPanel.setMinimumSize(new Dimension(100, 60));
-		ingredientMappingResultPanel.setMaximumSize(new Dimension(100, 60));
-		ingredientMappingResultPanel.setPreferredSize(new Dimension(100, 60));
+		ingredientMappingResultPanel.setMinimumSize(new Dimension(100, 62));
+		ingredientMappingResultPanel.setMaximumSize(new Dimension(100, 62));
+		ingredientMappingResultPanel.setPreferredSize(new Dimension(100, 62));
 		ingredientMappingResultPanel.setBorder(BorderFactory.createTitledBorder("Mapped to CDM Ingredient"));
 						
 		this.add(searchPanel, BorderLayout.NORTH);
 		this.add(drugsResultsPanel, BorderLayout.CENTER);
-		drugsResultsPanel.add(ingredientsPanel, BorderLayout.NORTH);
-		drugsResultsPanel.add(drugMappingLogResultsPanel, BorderLayout.CENTER);
+		drugsResultsPanel.add(ingredientsPanel, BorderLayout.CENTER);
+		drugsResultsPanel.add(drugMappingLogResultsPanel, BorderLayout.SOUTH);
 		drugMappingLogResultsPanel.add(ingredientMappingLogPanel, BorderLayout.NORTH);
-		drugMappingLogResultsPanel.add(ingredientMappingResultPanel, BorderLayout.CENTER);
+		drugMappingLogResultsPanel.add(ingredientMappingResultPanel, BorderLayout.SOUTH);
 	}
 	
 	

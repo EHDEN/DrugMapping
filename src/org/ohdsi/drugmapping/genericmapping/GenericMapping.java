@@ -1810,7 +1810,6 @@ public class GenericMapping extends Mapping {
 			}
 		});
 		
-		source.saveMissingATCToFile();
 		saveIngredientMapping(sourceIngredients);
 		saveDrugMapping();
 		isSavingDrugMapping = false;
