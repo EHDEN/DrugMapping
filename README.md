@@ -38,14 +38,14 @@ Drug Mapping Log
 
 It opens with the Execute tab shown here:
 
-<img src="man/Screenshot_v1.0.0_Execute_Tab.png" alt="Execute Tab" title="Execute Tab" />
+<img src="man/Screenshot_v1.0.0_Execute_Tab.png" alt="Execute tab" title="Execute tab" />
 
 _The Execute tab._
 <br><br>
 
-First you have to define the CDM database connection. To do this click on the &quot;Select&quot; button in the &quot;CDM Database&quot; box. This opens the Database Definition screen show here:
+First you have to define the CDM database connection. To do this click on the &quot;Select&quot; button in the &quot;CDM Vocabulary&quot; box. This opens the Database Definition screen shown here:
 
-<img src="man/Screenshot_v1.0.0_CDM_Database_Definition_Screen.png" alt="CDM Database Definition Screen" title="CDM Database Definition Screen" />
+<img src="man/Screenshot_v1.0.0_CDM_Database_Definition_Screen.png" alt="CDM Database Definition screen" title="CDM Database Definition screen" />
 
 _The CDM Database Definition screen._
 <br><br>
@@ -86,7 +86,7 @@ SQL Server:
 | Vocabulary Schema | The name of the schema/user that will holds the CDM vocabulary tables. |
 
 You can test the database connection with the Test connection" button.
-Once defined, you can save this definition to a file using the menu option File-Save Database Settings. In another run you can load these settings again with the menu option File-Load Database Settings.<br>
+Once defined, you can save this definition to a file using the menu option "Save Database Settings" from the "File menu. In another run you can load these settings again with the option "Load Database Settings" from the "File menu.<br>
 At the first use of a database the DrugMapping tool will build a cache with all the information retrieved from the database in the subfolder "CDM Cache". At the following runs with the same "Database name" it will read the information from the files in the cache folder instead of from the database. In case the contents of the vocabularies in the database has changed you can select the check box left of the label "CDM Database" to force the tool to refresh the cache.<br>
 When you load the database settings saved earlier the "CDM Database Definition" screen will open to allow you to enter the password for the database and test the connection. The password is not saved with the database settings
 
@@ -105,12 +105,12 @@ In the section "The input Files" below you will find a description of each of th
 At the first run you only have to specify the "Generic Drugs File". With this first run it will create empty versions of the "Ingredient Name Translation File", "Unit Mapping File" and the "Dose Form Mapping File" in the output folder specified also in this tab. After the first run you have to complete these files first and use them in the following runs.
 You can specify a file by clicking on the Select button behind it. This will open the "Input File Definition Screen" shown here:
 
-<img src="man/Screenshot_v1.0.0_Input_File_Definition_Screen.png" alt="Input File Definition Screen Tab" title="Input File Definition Screen" />
+<img src="man/Screenshot_v1.0.0_Input_File_Definition_Screen.png" alt="Input File Definition screen" title="Input File Definition screen" />
 
 _The Input File Definition screen._
 <br><br>
 
-In this screen you first select the file with the Browse button. As soon as you have specified the right delimiter and text qualifier the columns of the file will be shown in the drop-down boxes at the right side of the "Column Mapping" box in this screen. At the left side of this box you see all the required columns for the input file which you can map to the columns of the actual input file by selecting the right column in the drop-down box behind it. When done click OK.<br>
+In this screen you first select the file with the "Browse" button. As soon as you have specified the right delimiter and text qualifier the columns of the file will be shown in the drop-down boxes at the right side of the "Column Mapping" box in this screen. At the left side of this box you see all the required columns for the input file which you can map to the columns of the actual input file by selecting the right column in the drop-down box behind it. When done click OK.<br>
 Before you start the run make sure the check boxes left of the files you want to use are checked.<br>
 Once all input files are specified you can save the settings with the "Save File Settings" option from the "File" menu for future runs where you can load them again with the "Load File Settings" option from the "File" menu. The setting of the check boxes are also saved with the file settings.
 
@@ -126,7 +126,7 @@ Once all settings are done you can start the mapping with the Start button at th
 When the mapping is done the tool automatically switches to the "Drug Mapping Log" tab while it is still saving the mapping and the log file to the output folder.<br>
 The "Drug Mapping Log" tab shows the steps for the mapping for each source drug. It is shown here:
 
-<img src="man/Screenshot_v1.0.0_Drug_Mapping_Log_Tab.png" alt="Drug Mapping Log Tab" title="Drug Mapping Log Tab" />
+<img src="man/Screenshot_v1.0.0_Drug_Mapping_Log_Tab.png" alt="Drug Mapping Log tab" title="Drug Mapping Log tab" />
 
 _The Drug Mapping Log tab._
 <br><br>
@@ -138,7 +138,7 @@ When you select a line in the "Drug Mapping Log" section the CDM concepts involv
 
 The "Ingredient Mapping Log" tab shows the results of mapping the ingredients of the source drug to CDM Ingredient concepts. It is show here:
 
-<img src="man/Screenshot_v1.0.0_Ingredient_Mapping_Log_Tab.png" alt="Ingredient Mapping Log Tab" title="Ingredient Mapping Log Tab" />
+<img src="man/Screenshot_v1.0.0_Ingredient_Mapping_Log_Tab.png" alt="Ingredient Mapping Log tab" title="Ingredient Mapping Log tab" />
 
 _The Ingredient Mapping Log tab._
 <br><br>
@@ -209,7 +209,7 @@ This file should contain mappings of CAS numbers to CDM Ingredient concepts that
 
 This file is optional.
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | CASNumber | This is the CAS number of the substance. |
 | concept\_id | This is the CDM concept id of the ingredient the CAS number should be mapped to. |
@@ -221,7 +221,7 @@ This file should contain manual mappings of source ingredients to CDM Ingredient
 
 This file is optional.
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | SourceId | This is the id of the source ingredient. When empty ingredients starting with the SourceName are mapped. |
 | SourceName | This is the name of the ingredient in the native language. |
@@ -235,7 +235,7 @@ This file should contain manual mappings of source ingredients to CDM Ingredient
 
 This file is optional.
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | SourceId | This is the id of the source ingredient. When empty ingredients starting with the SourceName are mapped. |
 | SourceName | This is the name of the ingredient in the native language. |
@@ -249,7 +249,7 @@ This file should contain manual mappings from source drugs to clinical drugs, cl
 
 This file is optional.
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | SourceId | This is the code of the source drug. |
 | concept\_id | This is the CDM concept id of the clinical drug, clinical drug comp, or clinical drug form the source drug should be mapped to. |
@@ -268,7 +268,7 @@ _IngredientMapping Mapping Log.csv_
 
 This file contains information on how source ingredients are mapped to RxNorm (Extension) ingredients. It contains the following columns:
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | IngredientCode | The code of the source ingredient. |
 | IngredientName | The original name of the source ingredient. |
@@ -294,7 +294,7 @@ _DrugMapping Mapping Log.csv_
 
 This file contains information on how the source drugs are mapped to the RxNorm (Extension) drugs. It contains the following columns:
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | MappingStatus | ClinicalDrug Mapping = The drug is mapped to a Clinical Drug.<br>ClinicalDrugForm Mapping = The drug is mapped to a Clinical Drug Form.<br>ClinicalDrugComp Mapping = The drug is mapped to a Clinical Drug Comp.<br>Ingredient Mapping = All ingredients of the drug are mapped to an Ingredient.<br>Incomplete Mapping = Not all ingredients of the drug are mapped to an Ingredient.<br>Splitted = Ingredients are mapped to either Clinical Drug Comp or Ingredient.<br>Unmapped = No mapping could be made. |
 | SourceCode | The code of the source drug. |
@@ -302,13 +302,12 @@ This file contains information on how the source drugs are mapped to the RxNorm 
 | SourceATCCode | The ATC code if available. |
 | SourceFormulation | The formulation of the source drug. |
 | SourceCount | The number of records in the database containing the source drug. |
-| _The following columns are filled with a \* when the source drug is mapped or with the specified content when the source drug could not be mapped but its ingredients could be mapped. In that case the file contains a line for each of the ingredients._ |
-| IngredientCode | The code of the source ingredient |
-| IngredientName | The original name of an active ingredient of the source drug. |
-| IngredientNameEnglish | The English name of the ingredient. |
-| CASNumber | The CAS-number of the ingredient. |
-| SourceIngredientAmount | The source amount of the source ingredient. |
-| SourceIngredientUnit | The source unit of the source ingredient. |
+| IngredientCode | The code of the source ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| IngredientName | The original name of an active ingredient of the source drug or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| IngredientNameEnglish | The English name of the ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| CASNumber | The CAS-number of the ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| SourceIngredientAmount | The source amount of the source ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| SourceIngredientUnit | The source unit of the source ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
 | StrengthMarginPercentage | The percentage the source strength deviates from the matched strength. |
 | The following two columns contain information about the mapping steps. |
 | MappingType | The mapping that is attempted. |
@@ -323,7 +322,7 @@ _DrugMapping.csv_
 
 This file contains drug mapping. It contains the following columns:
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | MappingStatus | ClinicalDrug Mapping = The drug is mapped to a Clinical Drug.<br>ClinicalDrugForm Mapping = The drug is mapped to a Clinical Drug Form.<br>ClinicalDrugComp Mapping = The drug is mapped to a Clinical Drug Comp.<br>Ingredient Mapping = All ingredients of the drug are mapped to an Ingredient.<br>Incomplete Mapping = Not all ingredients of the drug are mapped to an Ingredient.<br>Splitted = Ingredients are mapped to either Clinical Drug Comp or Ingredient.<br>Unmapped = No mapping could be made. |
 | SourceCode | The code of the source drug. |
@@ -331,13 +330,12 @@ This file contains drug mapping. It contains the following columns:
 | SourceATCCode | The ATC code if available. |
 | SourceFormulation | The formulation of the source drug. |
 | SourceCount | The number of records in the database containing the source drug. |
-| _The following columns are filled with a \* when the source drug is mapped or with the specified content when the source drug could not be mapped but its ingredients could be mapped. In that case the file contains a line for each of the ingredients._ |
-| IngredientCode | The code of the source ingredient |
-| IngredientName | The original name of an active ingredient of the source drug. |
-| IngredientNameEnglish | The English name of the ingredient. |
-| CASNumber | The CAS-number of the ingredient. |
-| SourceIngredientAmount | The source amount of the source ingredient. |
-| SourceIngredientUnit | The source unit of the source ingredient. |
+| IngredientCode | The code of the source ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| IngredientName | The original name of an active ingredient of the source drug or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| IngredientNameEnglish | The English name of the ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| CASNumber | The CAS-number of the ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| SourceIngredientAmount | The source amount of the source ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
+| SourceIngredientUnit | The source unit of the source ingredient or * when the source drug is mapped to a Clinical Drug, Clinical Drug Form or Clinical Drug Comp. |
 | StrengthMarginPercentage | The percentage the source strength deviates from the matched strength. |
 | MappingType | ClinicalDrug Mapping = The drug is mapped to a Clinical Drug.<br>ClinicalDrugForm Mapping = The drug is mapped to a Clinical Drug Form.<br>ClinicalDrugComp Mapping = The drug is mapped to a Clinical Drug Comp.<br>Ingredient Mapping = All ingredients of the drug are mapped to an Ingredient.<br>Splitted = Ingredients are mapped to either Clinical Drug Comp or Ingredient.<br>&lt;Blank&gt; = No mapping could be made. |
 | concept\_id | The concept\_id of the RxNorm (Extension) drug or ingredient. |
@@ -355,7 +353,7 @@ _SourceToConceptMap.csv_
 
 This file contains the source to concept map. It contains the following columns:
 
-| **Column** | **Content** |
+| **Column** | **Contents** |
 | --- | --- |
 | source_code | "Drug " followed by the source drug code or "Ingredient " followed by the source ingredient code. |
 | source_concept_id | This value is set to 0 but should be replaced by a valid concept_id. |
