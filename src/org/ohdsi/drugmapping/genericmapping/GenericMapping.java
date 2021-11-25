@@ -82,9 +82,10 @@ public class GenericMapping extends Mapping {
 	public static int SELECTED_BY_FIRST_PREFERENCE                            = 25; // The CDM drugs are rejected because the first one found is taken.
 	public static int SELECTED_BY_LAST_PREFERENCE                             = 26; // The CDM drugs are rejected because the last one found is taken.
 	public static int OVERRULED_MAPPING                                       = 27; // A mapping to a single CDM drug or a failing mapping is overruled by a manual mapping.
-	public static int MAPPED                                                  = 28; // The final mapping of the source drug to a CDM drug.
-	public static int INCOMPLETE                                              = 29; // Incomplete splitted mapping.
-	public static int NO_MAPPING                                              = 30; // No mapping found.
+	public static int MANUAL_MAPPING                                          = 28; // A manual mapping.
+	public static int MAPPED                                                  = 29; // The final mapping of the source drug to a CDM drug.
+	public static int INCOMPLETE                                              = 30; // Incomplete splitted mapping.
+	public static int NO_MAPPING                                              = 31; // No mapping found.
 
 	public static Map<Integer, String> mappingResultDescriptions;
 	static {
@@ -117,6 +118,7 @@ public class GenericMapping extends Mapping {
 		mappingResultDescriptions.put(SELECTED_BY_FIRST_PREFERENCE                           , "Rejected because first is used");
 		mappingResultDescriptions.put(SELECTED_BY_LAST_PREFERENCE                            , "Rejected because last is used");
 		mappingResultDescriptions.put(OVERRULED_MAPPING                                      , "Overruled mapping");
+		mappingResultDescriptions.put(MANUAL_MAPPING                                         , "Manual mapping");
 		mappingResultDescriptions.put(MAPPED                                                 , "Mapped");
 		mappingResultDescriptions.put(INCOMPLETE                                             , "Incomplete mapping");
 		mappingResultDescriptions.put(NO_MAPPING                                             , "No mapping found");
@@ -642,7 +644,7 @@ public class GenericMapping extends Mapping {
 						if (cdmDrug == null) {
 							cdmDrug = cdm.getCDMCVXVaccines().get(cdmConceptId);
 						}
-						System.out.println("Mapping " + (sourceDrug == null ? sourceCode : sourceDrug) + " -> " + (cdmDrug == null ? cdmConceptId : cdmDrug));
+						//System.out.println("Mapping " + (sourceDrug == null ? sourceCode : sourceDrug) + " -> " + (cdmDrug == null ? cdmConceptId : cdmDrug));
 						if (sourceDrug == null) {
 							System.out.println("    ERROR: SourceId " + sourceCode + " does not exist!");
 							ok = false;
@@ -1186,23 +1188,28 @@ public class GenericMapping extends Mapping {
 			CDMDrug overruledMapping = null;
 			CDMDrug finalMapping = automaticMapping;
 			CDMDrug manualMapping = manualDrugMappings.get(sourceDrug);
-			if (manualMapping != null) {
+			if ((manualMapping != null) && manualMapping.getConceptClassId().equals("Clinical Drug")) {
 				// There is a manual mapping.
 				overruledMapping = finalMapping;
 				finalMapping = manualMapping;
+				logMappingResult(sourceDrug, mapping, MANUAL_MAPPING, finalMapping);
+				removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_MAPPING);
+				mappedSourceDrugs.add(sourceDrug);
 			}
 			
 			if (finalMapping != null) {
 				// Set mapping if it has the current mapping type.
 				// The mapping type can be different in case of a manual mapping.
-				if (finalMapping.getConceptClassId().equals("Clinical Drug")) {
+				if ((manualMapping == null) && finalMapping.getConceptClassId().equals("Clinical Drug")) {
 					logMappingResult(sourceDrug, mapping, MAPPED, finalMapping);
+					removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_MAPPING);
 					mappedSourceDrugs.add(sourceDrug);
 					usedStrengthDeviationPercentageMap.put("Drug " + sourceDrug.getCode(), usedStrengthDeviationPercentage);
 				}
 				
 				if (overruledMapping != null) {
 					logMappingResult(sourceDrug, mapping, OVERRULED_MAPPING, overruledMapping);
+					removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_MAPPING);
 					mappedSourceDrugs.add(sourceDrug);
 				}
 			}
@@ -1230,16 +1237,16 @@ public class GenericMapping extends Mapping {
 		for (SourceDrug sourceDrug : source.getSourceDrugs()) {
 			CDMDrug automaticMapping = null;
 			usedStrengthDeviationPercentage = null;
-			
-			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
-				boolean earlierNotUniqueMapping = false;
-				for (int mappingType : notUniqueMapping.keySet()) {
-					if (notUniqueMapping.get(mappingType).contains(sourceDrug)) {
-						earlierNotUniqueMapping = true;
-						break;
-					}
+
+			boolean earlierNotUniqueMapping = false;
+			for (int mappingType : notUniqueMapping.keySet()) {
+				if (notUniqueMapping.get(mappingType).contains(sourceDrug)) {
+					earlierNotUniqueMapping = true;
+					break;
 				}
-				if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
+			}
+			if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
+				if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 					preferencesUsed = "";
 					if (sourceDrug.getIngredients().size() == 1) { // Clinical Drug Comp is always single ingredient
 						
@@ -1294,23 +1301,28 @@ public class GenericMapping extends Mapping {
 					CDMDrug overruledMapping = null;
 					CDMDrug finalMapping = automaticMapping;
 					CDMDrug manualMapping = manualDrugMappings.get(sourceDrug);
-					if (manualMapping != null) {
+					if ((manualMapping != null) && manualMapping.getConceptClassId().equals("Clinical Drug Comp")) {
 						// There is a manual mapping.
 						overruledMapping = finalMapping;
 						finalMapping = manualMapping;
+						logMappingResult(sourceDrug, mapping, MANUAL_MAPPING, finalMapping);
+						removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_COMP_MAPPING);
+						mappedSourceDrugs.add(sourceDrug);
 					}
 					
 					if (finalMapping != null) {
 						// Set mapping if it has the current mapping type.
 						// The mapping type can be different in case of a manual mapping.
-						if (finalMapping.getConceptClassId().equals("Clinical Drug Comp")) {
+						if ((manualMapping == null) && finalMapping.getConceptClassId().equals("Clinical Drug Comp")) {
 							logMappingResult(sourceDrug, mapping, MAPPED, finalMapping);
+							removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_COMP_MAPPING);
 							mappedSourceDrugs.add(sourceDrug);
 							usedStrengthDeviationPercentageMap.put("Drug " + sourceDrug.getCode(), usedStrengthDeviationPercentage);
 						}
 						
 						if (overruledMapping != null) {
 							logMappingResult(sourceDrug, mapping, MAPPED, overruledMapping);
+							removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_COMP_MAPPING);
 							mappedSourceDrugs.add(sourceDrug);
 						}
 					}
@@ -1318,9 +1330,9 @@ public class GenericMapping extends Mapping {
 						logMappingResult(sourceDrug, mapping, NO_MAPPING);
 					}
 				}
-			}
-			else {
-				logMappingResult(sourceDrug, mapping, NO_MAPPING);
+				else {
+					logMappingResult(sourceDrug, mapping, NO_MAPPING);
+				}
 			}
 		}
 
@@ -1342,16 +1354,16 @@ public class GenericMapping extends Mapping {
 		
 		for (SourceDrug sourceDrug : source.getSourceDrugs()) {
 			CDMDrug automaticMapping = null;
-			
-			if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
-				boolean earlierNotUniqueMapping = false;
-				for (int mappingType : notUniqueMapping.keySet()) {
-					if (notUniqueMapping.get(mappingType).contains(sourceDrug)) {
-						earlierNotUniqueMapping = true;
-						break;
-					}
+
+			boolean earlierNotUniqueMapping = false;
+			for (int mappingType : notUniqueMapping.keySet()) {
+				if (notUniqueMapping.get(mappingType).contains(sourceDrug)) {
+					earlierNotUniqueMapping = true;
+					break;
 				}
-				if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
+			}
+			if ((!mappedSourceDrugs.contains(sourceDrug)) && (!earlierNotUniqueMapping)) {
+				if (sourceDrugsAllIngredientsMapped.contains(sourceDrug)) {
 					if (sourceDrug.getFormulations().size() > 0) {
 						preferencesUsed = "";
 
@@ -1418,22 +1430,27 @@ public class GenericMapping extends Mapping {
 						CDMDrug overruledMapping = null;
 						CDMDrug finalMapping = automaticMapping;
 						CDMDrug manualMapping = manualDrugMappings.get(sourceDrug);
-						if (manualMapping != null) {
+						if ((manualMapping != null) && manualMapping.getConceptClassId().equals("Clinical Drug Form")) {
 							// There is a manual mapping.
 							overruledMapping = finalMapping;
 							finalMapping = manualMapping;
+							logMappingResult(sourceDrug, mapping, MANUAL_MAPPING, finalMapping);
+							removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_FORM_MAPPING);
+							mappedSourceDrugs.add(sourceDrug);
 						}
 						
 						if (finalMapping != null) {
 							// Set mapping if it has the current mapping type.
 							// The mapping type can be different in case of a manual mapping.
-							if (finalMapping.getConceptClassId().equals("Clinical Drug Form")) {
+							if ((manualMapping == null) && finalMapping.getConceptClassId().equals("Clinical Drug Form")) {
 								logMappingResult(sourceDrug, mapping, MAPPED, finalMapping);
+								removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_FORM_MAPPING);
 								mappedSourceDrugs.add(sourceDrug);
 							}
 							
 							if (overruledMapping != null) {
 								logMappingResult(sourceDrug, mapping, OVERRULED_MAPPING, overruledMapping);
+								removeFollowingMappingResults(sourceDrug, CLINICAL_DRUG_FORM_MAPPING);
 								mappedSourceDrugs.add(sourceDrug);
 							}
 						}
@@ -1446,9 +1463,9 @@ public class GenericMapping extends Mapping {
 						logMappingResult(sourceDrug, mapping, NO_MAPPING);
 					}
 				}
-			}
-			else {
-				logMappingResult(sourceDrug, mapping, NO_MAPPING);
+				else {
+					logMappingResult(sourceDrug, mapping, NO_MAPPING);
+				}
 			}
 		}
 
@@ -1642,6 +1659,16 @@ public class GenericMapping extends Mapping {
 		System.out.println(DrugMappingDateUtilities.getCurrentTime() + "     Done");
 		
 		return ok;
+	}
+	
+	
+	private void removeFollowingMappingResults(SourceDrug sourceDrug, int currentMappingType) {
+		Map<Integer, List<Map<Integer, List<CDMConcept>>>> mappingResults = sourceDrugMappingResults.get(sourceDrug);
+		Integer mappingType = currentMappingType + 1;
+		while (mappingType < mappingTypeDescriptions.keySet().size()) {
+			mappingResults.remove(mappingType);
+			mappingType++;
+		}
 	}
 	
 	
@@ -2373,7 +2400,9 @@ public class GenericMapping extends Mapping {
 				String mappingStatus = null;
 				Map<Integer, List<Map<Integer, List<CDMConcept>>>> drugMappingLog = sourceDrugMappingLog.get(sourceDrug);
 				if (drugMappingLog != null) { 
-					for (Integer mappingType : drugMappingLog.keySet()) {
+					List<Integer> sortedMappingTypes = new ArrayList<Integer>();
+					sortedMappingTypes.addAll(drugMappingLog.keySet());
+					for (Integer mappingType : sortedMappingTypes) {
 						List<Map<Integer, List<CDMConcept>>> sourceDrugMappingTypeLog = drugMappingLog.get(mappingType);
 						if (sourceDrugMappingTypeLog != null) {
 							for (Map<Integer, List<CDMConcept>> sourceDrugComponentMappingLog : sourceDrugMappingTypeLog) {
@@ -2383,6 +2412,10 @@ public class GenericMapping extends Mapping {
 								}
 								else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Incomplete mapping"))) {
 									mappingStatus = "Incomplete Mapping";
+									break;
+								}
+								else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Manual mapping"))) {
+									mappingStatus = getMappingStatus(sourceDrug);
 									break;
 								}
 								else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Mapped"))) {

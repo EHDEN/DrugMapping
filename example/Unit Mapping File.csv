@@ -1,0 +1,6 @@
+SourceUnit,DrugCount,RecordCount,Factor,TargetUnit,Comment
+Internat.eenh.,1,17536,1,[U],
+Internat.eenh./Milliliter,1,5056,1,[U]/mL,
+Milligram,7,17225,1,mg,
+Milligram/Gram,1200,26634403,0.001,mg/mg,
+Milligram/Milliliter,2,322,1,mg/mL,

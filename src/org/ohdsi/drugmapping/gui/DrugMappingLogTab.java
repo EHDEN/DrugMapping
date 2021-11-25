@@ -201,16 +201,22 @@ public class DrugMappingLogTab extends MainFrameTab {
 			String mappingStatus = null;
 			Map<Integer, List<Map<Integer, List<CDMConcept>>>> sourceDrugMappingLog = drugMappingLog.get(sourceDrug);
 			if (sourceDrugMappingLog != null) { 
-				for (Integer mappingType : sourceDrugMappingLog.keySet()) {
+				List<Integer> sortedMappingTypes = new ArrayList<Integer>();
+				sortedMappingTypes.addAll(sourceDrugMappingLog.keySet());
+				for (Integer mappingType : sortedMappingTypes) {
 					List<Map<Integer, List<CDMConcept>>> sourceDrugMappingTypeLog = sourceDrugMappingLog.get(mappingType);
 					if (sourceDrugMappingTypeLog != null) {
 						for (Map<Integer, List<CDMConcept>> sourceDrugComponentMappingLog : sourceDrugMappingTypeLog) {
 							if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Overruled mapping"))) {
-								mappingStatus = "Manual Mapping";
+								mappingStatus = "Overruled Mapping";
 								break;
 							}
 							else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Incomplete mapping"))) {
 								mappingStatus = "Incomplete Mapping";
+								break;
+							}
+							else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Manual mapping"))) {
+								mappingStatus = GenericMapping.mappingTypeDescriptions.get(mappingType);
 								break;
 							}
 							else if (sourceDrugComponentMappingLog.keySet().contains(GenericMapping.getMappingResultValue("Mapped"))) {

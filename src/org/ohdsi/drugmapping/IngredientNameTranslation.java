@@ -24,7 +24,7 @@ public class IngredientNameTranslation {
 	public static int STATE_OK        = 3;
 	public static int STATE_ERROR     = 4;
 	
-	private static String DEFAULT_FILENAME = "DrugMapping - IngredientNameTranslationMap.csv";
+	private static String DEFAULT_FILENAME = "Ingredient Name Translation File.csv";
 	
 	
 	private int status = STATE_OK;

@@ -38,14 +38,14 @@ Drug Mapping Log
 
 It opens with the Execute tab shown here:
 
-<img src="man/Screenshot_v1.0.0_Execute_Tab.png" alt="Execute tab" title="Execute tab" />
+<img src="man/Screenshot_v1.0.1_Execute_Tab.png" alt="Execute tab" title="Execute tab" />
 
 _The Execute tab._
 <br><br>
 
 First you have to define the CDM database connection. To do this click on the &quot;Select&quot; button in the &quot;CDM Vocabulary&quot; box. This opens the Database Definition screen shown here:
 
-<img src="man/Screenshot_v1.0.0_CDM_Database_Definition_Screen.png" alt="CDM Database Definition screen" title="CDM Database Definition screen" />
+<img src="man/Screenshot_v1.0.1_CDM_Database_Definition_Screen.png" alt="CDM Database Definition screen" title="CDM Database Definition screen" />
 
 _The CDM Database Definition screen._
 <br><br>
@@ -105,7 +105,7 @@ In the section "The input Files" below you will find a description of each of th
 At the first run you only have to specify the "Generic Drugs File". With this first run it will create empty versions of the "Ingredient Name Translation File", "Unit Mapping File" and the "Dose Form Mapping File" in the output folder specified also in this tab. After the first run you have to complete these files first and use them in the following runs.
 You can specify a file by clicking on the Select button behind it. This will open the "Input File Definition Screen" shown here:
 
-<img src="man/Screenshot_v1.0.0_Input_File_Definition_Screen.png" alt="Input File Definition screen" title="Input File Definition screen" />
+<img src="man/Screenshot_v1.0.1_Input_File_Definition_Screen.png" alt="Input File Definition screen" title="Input File Definition screen" />
 
 _The Input File Definition screen._
 <br><br>
@@ -126,7 +126,7 @@ Once all settings are done you can start the mapping with the Start button at th
 When the mapping is done the tool automatically switches to the "Drug Mapping Log" tab while it is still saving the mapping and the log file to the output folder.<br>
 The "Drug Mapping Log" tab shows the steps for the mapping for each source drug. It is shown here:
 
-<img src="man/Screenshot_v1.0.0_Drug_Mapping_Log_Tab.png" alt="Drug Mapping Log tab" title="Drug Mapping Log tab" />
+<img src="man/Screenshot_v1.0.1_Drug_Mapping_Log_Tab.png" alt="Drug Mapping Log tab" title="Drug Mapping Log tab" />
 
 _The Drug Mapping Log tab._
 <br><br>
@@ -138,7 +138,7 @@ When you select a line in the "Drug Mapping Log" section the CDM concepts involv
 
 The "Ingredient Mapping Log" tab shows the results of mapping the ingredients of the source drug to CDM Ingredient concepts. It is show here:
 
-<img src="man/Screenshot_v1.0.0_Ingredient_Mapping_Log_Tab.png" alt="Ingredient Mapping Log tab" title="Ingredient Mapping Log tab" />
+<img src="man/Screenshot_v1.0.1_Ingredient_Mapping_Log_Tab.png" alt="Ingredient Mapping Log tab" title="Ingredient Mapping Log tab" />
 
 _The Ingredient Mapping Log tab._
 <br><br>
@@ -254,6 +254,16 @@ This file is optional.
 | SourceId | This is the code of the source drug. |
 | concept\_id | This is the CDM concept id of the clinical drug, clinical drug comp, or clinical drug form the source drug should be mapped to. |
 
+Examples of the input files can be found here:
+
+<a href="example/Generic Drugs File.csv" target="_blank">Generic Drugs File.csv</a>
+<a href="example/Ingredient Name Translation File.csv" target="_blank">Ingredient Name Translation File.csv</a>
+<a href="example/Form Mapping File.csv" target="_blank">Form Mapping File.csv</a>
+<a href="example/Unit Mapping File.csv" target="_blank">Unit Mapping File.csv</a>
+<a href="example/Manual CAS Mappings File.csv" target="_blank">Manual CAS Mappings File.csv</a>
+<a href="example/Manual Ingredient Fallback Mappings File.csv" target="_blank">Manual Ingredient Fallback Mappings File.csv</a>
+<a href="example/Manual Ingredient Overrule Mappings File.csv" target="_blank">Manual Ingredient Overrule Mappings File.csv</a>
+<a href="example/Manual Drug Mappings File.csv" target="_blank">Manual Drug Mappings File.csv</a>
 
 
 The Result Files

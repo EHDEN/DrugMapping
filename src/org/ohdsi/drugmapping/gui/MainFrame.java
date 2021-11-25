@@ -501,7 +501,7 @@ public class MainFrame {
 				component.setEnabled(false);
 			
 			source = new Source();
-			if (source.loadSourceDrugs(genericDrugsFile, minimumUseCount)) {
+			if (source.loadSourceDrugs(genericDrugsFile, (minimumUseCount == null ? -1L : minimumUseCount))) {
 				loadIngredientMappingLog(ingredientMappingLogFile);
 				loadDrugMappingLog(drugMappingLogFile);
 				showDrugMappingLog(source, null, drugMappingLog, usedStrengthDeviationPercentageMap, baseName, true);

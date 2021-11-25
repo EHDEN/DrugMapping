@@ -23,7 +23,7 @@ public class UnitConversion {
 	public static int STATE_OK        = 3;
 	public static int STATE_ERROR     = 4;
 	
-	private static String DEFAULT_FILENAME = "DrugMapping - UnitConversionMap.csv";
+	private static String DEFAULT_FILENAME = "Unit Mapping File.csv";
 	
 	
 	private int status = STATE_OK;
