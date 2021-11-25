@@ -254,16 +254,7 @@ This file is optional.
 | SourceId | This is the code of the source drug. |
 | concept\_id | This is the CDM concept id of the clinical drug, clinical drug comp, or clinical drug form the source drug should be mapped to. |
 
-Examples of the input files can be found here:
-
-<a href="example/Generic Drugs File.csv" target="_blank">Generic Drugs File.csv</a>
-<a href="example/Ingredient Name Translation File.csv" target="_blank">Ingredient Name Translation File.csv</a>
-<a href="example/Form Mapping File.csv" target="_blank">Form Mapping File.csv</a>
-<a href="example/Unit Mapping File.csv" target="_blank">Unit Mapping File.csv</a>
-<a href="example/Manual CAS Mappings File.csv" target="_blank">Manual CAS Mappings File.csv</a>
-<a href="example/Manual Ingredient Fallback Mappings File.csv" target="_blank">Manual Ingredient Fallback Mappings File.csv</a>
-<a href="example/Manual Ingredient Overrule Mappings File.csv" target="_blank">Manual Ingredient Overrule Mappings File.csv</a>
-<a href="example/Manual Drug Mappings File.csv" target="_blank">Manual Drug Mappings File.csv</a>
+Examples of the input files can be found <a href="example" target="_blank">here</a>.
 
 
 The Result Files
