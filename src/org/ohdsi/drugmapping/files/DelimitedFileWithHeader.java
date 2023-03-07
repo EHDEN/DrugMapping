@@ -106,7 +106,8 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 	
 	@Override
 	public Iterator<DelimitedFileRow> iterator() {
-		return new RowIterator();
+		rowIterator = new RowIterator();
+		return rowIterator;
 	}
 
 	
