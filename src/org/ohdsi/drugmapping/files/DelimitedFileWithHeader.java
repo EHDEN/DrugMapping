@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 	private static char DEFAULT_DELIMITER      = ',';
@@ -95,8 +94,8 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 	}
 	
 	
-	public Set<String> getColumns() {
-		Set<String> columns = null;
+	public List<String> getColumns() {
+		List<String> columns = null;
 		if (rowIterator != null) {
 			columns = rowIterator.getColumns();
 		}
@@ -145,8 +144,15 @@ public class DelimitedFileWithHeader implements Iterable<DelimitedFileRow> {
 		}
 		
 		
-		public Set<String> getColumns() {
-			return fieldName2ColumnIndex.keySet();
+		public List<String> getColumns() {
+			List<String> columns = new ArrayList<String>();
+			for (int columnNr = 0; columnNr < fieldName2ColumnIndex.keySet().size(); columnNr++) {
+				columns.add(null);
+			}
+			for (String column : fieldName2ColumnIndex.keySet()) {
+				columns.set(fieldName2ColumnIndex.get(column), column);
+			}
+			return columns;
 		}
 	}
 	
