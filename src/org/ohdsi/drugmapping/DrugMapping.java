@@ -240,7 +240,6 @@ public class DrugMapping {
 	
 	
 	public static void main(String[] args) {
-		/* */
 		Map<String, String> parameters = new HashMap<String, String>();
 
 		for (int i = 0; i < args.length; i++) {
@@ -256,7 +255,6 @@ public class DrugMapping {
 		
 		DrugMapping drugMapping = new DrugMapping(parameters);
 		drugMapping.Show();
-		/* */
 	}
 
 }

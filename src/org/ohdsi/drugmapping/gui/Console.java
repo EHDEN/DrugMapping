@@ -82,8 +82,13 @@ public class Console extends OutputStream {
 			}
 			if (debug != null) {
 				String line = buffer.toString();
-				while ((line.length() > 0) && ((line.substring(line.length() - 1).equals("\r")) || (line.substring(line.length() - 1).equals("\n")))) {
-					line = line.substring(0, line.length() - 2);
+				while ((line.length() > 0) && (line.substring(line.length() - 1).equals("\n"))) {
+					if ((line.length() > 1) && (line.substring(line.length() - 2, line.length() - 1).equals("\r"))) {
+						line = line.substring(0, line.length() - 2);
+					}
+					else {
+						line = line.substring(0, line.length() - 1);
+					}
 				}
 				debug.writeln(line);
 				debug.flush();
